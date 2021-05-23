@@ -2,7 +2,6 @@
 /*Navbar*/
 .nav-link {
     font-family: 'Teko', sans-serif;
-    color: skyblue;
     text-align: center;
     padding-left: 20px;
   }
@@ -20,6 +19,7 @@
   }
   a.nav-link
   {
+    transition-delay: 10s;
     padding-bottom: 30px;
     border-bottom: 3px solid transparent;
   }
