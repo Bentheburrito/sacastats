@@ -41,6 +41,7 @@
       <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
       <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
       <h1><%= @character["name"] %><h1>
+      <%= render PageController, @showed_stat, assigns %>
     </main>
     <footer>
       <nav class="navbar navbar-expand-md navbar-light bg-light d-md-none fixed-bottom">
