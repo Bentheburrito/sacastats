@@ -7,8 +7,6 @@
 # General application configuration
 use Mix.Config
 
-config :planetside_api, service_id: System.get_env("SERVICE_ID")
-
 config :sacastats,
   namespace: SacaStats,
   ecto_repos: [SacaStats.Repo]
