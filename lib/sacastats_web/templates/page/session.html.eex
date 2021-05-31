@@ -1,0 +1,4 @@
+<h2><%= @session.name %></h2>
+<h4>Kills: <%= @session.kills %></h4>
+<h4>Deaths: <%= @session.deaths %></h4>
+<h4>KDR: <%= @session.kills / (@session.deaths == 0 && 1 || @session.deaths) %></h4>
