@@ -42,9 +42,9 @@ defmodule SacaStats.MixProject do
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
-			{:plug_cowboy, "~> 2.0"},
-			{:planetside_api, "~> 0.1.4"},
-			{:dotenv_parser, "~> 1.2"}
+      {:plug_cowboy, "~> 2.0"},
+      {:planetside_api, "~> 0.2.0"},
+      {:dotenv_parser, "~> 1.2"}
     ]
   end
 

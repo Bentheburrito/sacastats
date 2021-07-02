@@ -22,8 +22,9 @@ defmodule SacaStatsWeb.Router do
   scope "/character", SacaStatsWeb do
     pipe_through :browser
 
-    get "/", PageController, :characterhome
-    get "/:character_name/:stat_type", PageController, :character
+    get "/", CharacterController, :character_search
+    get "/:character_name", CharacterController, :character_general
+    get "/:character_name/:stat_type", CharacterController, :character
   end
 
   # Other scopes may use custom stacks.
