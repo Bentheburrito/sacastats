@@ -44,7 +44,8 @@ defmodule SacaStats.MixProject do
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       {:planetside_api, "~> 0.2.0"},
-      {:dotenv_parser, "~> 1.2"}
+      {:dotenv_parser, "~> 1.2"},
+      {:caidata_api, github: "Bentheburrito/caidata_api"}
     ]
   end
 
