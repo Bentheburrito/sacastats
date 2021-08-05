@@ -2,12 +2,11 @@ defmodule SacaStatsWeb.CharacterController do
   use SacaStatsWeb, :controller
   alias SacaStatsWeb.CharacterView
 
+  def character(conn, %{"character_name" => name, "stat_type" => "lookup"}) do
+    redirect(conn, to: Routes.character_path(conn, :character, name, "general"))
+  end
+  
   def character(conn, %{"character_name" => name, "stat_type" => stat_template_name}) do
-    # Fetch character info from API and DB,
-
-    if String.downcase(stat_template_name) == "lookup" do
-      redirect(conn, to: Routes.character_path(conn, :character, name, "general"))
-    end
 
     q =
       PS2.API.Query.new(collection: "character")
