@@ -1,3 +1,5 @@
+require Logger
+
 defmodule SacaStatsWeb.CharacterController do
   use SacaStatsWeb, :controller
   alias SacaStatsWeb.CharacterView
@@ -5,9 +7,8 @@ defmodule SacaStatsWeb.CharacterController do
   def character(conn, %{"character_name" => name, "stat_type" => "lookup"}) do
     redirect(conn, to: Routes.character_path(conn, :character, name, "general"))
   end
-  
-  def character(conn, %{"character_name" => name, "stat_type" => stat_template_name}) do
 
+  def character(conn, %{"character_name" => name, "stat_type" => stat_template_name}) do
     q =
       PS2.API.Query.new(collection: "character")
       |> PS2.API.QueryBuilder.term("name.first_lower", String.downcase(name))
@@ -17,8 +18,8 @@ defmodule SacaStatsWeb.CharacterController do
         conn
         |> put_flash(:error, "The character '" <> name <> "' doesn't appear to exist.")
         |> redirect(to: Routes.character_path(conn, :character_search))
-      {:ok, %PS2.API.QueryResult{data: body}} ->
 
+      {:ok, %PS2.API.QueryResult{data: body}} ->
         character_stuff = %{
           "name" => name,
           "stat_page" => String.downcase(stat_template_name) <> ".html",
@@ -26,9 +27,11 @@ defmodule SacaStatsWeb.CharacterController do
         }
 
         render(conn, "template.html", character: character_stuff)
+
       {:error, e} ->
-        Logger.error("Error fetching character: #{inspect e}")
+        Logger.error("Error fetching character: #{inspect(e)}")
     end
+  end
 
   def character_session(conn, %{"character_name" => name, "stat_type" => "session"}) do
     case CAIData.API.get_session_by_name(name) do
