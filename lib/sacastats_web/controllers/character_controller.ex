@@ -12,23 +12,23 @@ defmodule SacaStatsWeb.CharacterController do
       PS2.API.Query.new(collection: "character")
       |> PS2.API.QueryBuilder.term("name.first_lower", String.downcase(name))
 
-    {:ok, %PS2.API.QueryResult{data: body}} = PS2.API.query_one(q)
-    {:ok, %PS2.API.QueryResult{returned: returned}} = PS2.API.query_one(q)
+    case PS2.API.query_one(q) do
+      {:ok, %PS2.API.QueryResult{returned: 0}} ->
+        conn
+        |> put_flash(:error, "The character '" <> name <> "' doesn't appear to exist.")
+        |> redirect(to: Routes.character_path(conn, :character_search))
+      {:ok, %PS2.API.QueryResult{data: body}} ->
 
-    if returned == 0 do
-      conn
-      |> put_flash(:error, "The character '" <> name <> "' doesn't appear to exist.")
-      |> redirect(to: Routes.character_path(conn, :character_search))
+        character_stuff = %{
+          "name" => name,
+          "stat_page" => String.downcase(stat_template_name) <> ".html",
+          "response" => Map.get(body, "character_id")
+        }
+
+        render(conn, "template.html", character: character_stuff)
+      {:error, e} ->
+        Logger.error("Error fetching character: #{inspect e}")
     end
-
-    character_stuff = %{
-      "name" => name,
-      "stat_page" => String.downcase(stat_template_name) <> ".html",
-      "response" => Map.get(body, "character_id")
-    }
-
-    render(conn, "template.html", character: character_stuff)
-  end
 
   def character_session(conn, %{"character_name" => name, "stat_type" => "session"}) do
     case CAIData.API.get_session_by_name(name) do
