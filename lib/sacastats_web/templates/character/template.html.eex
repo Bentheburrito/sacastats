@@ -4,7 +4,7 @@
   <div class="collapse navbar-collapse d-flex" id="collapse_bottom_target">
     <ul class="navbar-nav character-nav mx-auto justify-content-center">
       <li class="nav-item h-100 my-auto">
-        <a class="nav-link h-100 my-auto" href="/character/<%= @character["name"] %>/general">General</a>
+        <a class="nav-link" href="/character/<%= @character["name"] %>/general">General</a>
       </li>
       <li class="nav-item h-100 my-auto">
         <a class="nav-link" href="/character/<%= @character["name"] %>/stats">Stats</a>

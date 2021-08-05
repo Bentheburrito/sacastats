@@ -15,12 +15,29 @@ nav{
   flex-direction: column;
   align-items: flex-end;
 }
-a.nav-link{
-  transition-delay: 10s;
-  padding-bottom: 30px;
+/*individual hover colors*/
+ul li{
+  box-sizing:border-box;
   border-bottom: 3px solid transparent;
+  transition: .5s;
 }
-a.nav-link:hover{
-  border-bottom: 3px solid skyblue;
-  color: skyblue;
+ul li:hover, ul li:hover > a.nav-link {  
+  margin-top:-10px;
+  transition: .2s;
+}
+ul li:hover:nth-child(4n+1) {  
+  border-bottom: 3px solid #9370DB;
+  color: #9370DB;
+}
+ul li:hover:nth-child(4n+2) {  
+  border-bottom: 3px solid #1E90FF;
+  color: #1E90FF;
+}
+ul li:hover:nth-child(4n+3) {  
+  border-bottom: 3px solid #CD5C5C;
+  color: #CD5C5C;
+}
+ul li:hover:nth-child(4n+4) {  
+  border-bottom: 3px solid #716857;
+  color: #716857;
 }
