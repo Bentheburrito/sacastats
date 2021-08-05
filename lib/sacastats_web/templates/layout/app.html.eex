@@ -37,13 +37,11 @@
         </div>
       </nav>
     </header>
-    <main role="main" class="container">
-      <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
-      <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
-      <%= render @view_module, @view_template, assigns %>
-    </main>
+    <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
+    <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
+    <%= render @view_module, @view_template, assigns %>
     <footer>
-      <nav class="navbar navbar-expand-md navbar-light bg-light d-md-none fixed-bottom">
+      <nav class="navbar navbar-expand-md navbar-light main-nav d-md-none fixed-bottom">
 
         <div class="collapse navbar-collapse" id="collapse_bottom_target">
           <ul class="navbar-nav">
