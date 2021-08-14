@@ -4,6 +4,7 @@ defmodule SacaStatsWeb.PageController do
   def index(conn, _params) do
     render(conn, "index.html")
   end
+
   def character(conn, %{"character_name" => name, "stat_type" => "session"}) do
     case CAIData.API.get_session_by_name(name) do
       {:ok, session} ->
@@ -24,6 +25,6 @@ defmodule SacaStatsWeb.PageController do
 
   def character(conn, _params) do
     # Fetch character info from API and DB,
-    render(conn, "character.html")
+    render(conn, "characterLookup.html")
   end
 end

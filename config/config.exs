@@ -14,9 +14,10 @@ config :sacastats,
 # Configures the endpoint
 config :sacastats, SacaStatsWeb.Endpoint,
   url: [host: "localhost"],
-  secret_key_base: "bfZqAptRN1BzITOLDo0BsZpgVc6GVrjsJvAW9sn/YmOgkobM9Lx6D/EA9nAv0bUR",
-  render_errors: [view: SacaStatsWeb.ErrorView, accepts: ~w(html json)],
-  pubsub: [name: SacaStats.PubSub, adapter: Phoenix.PubSub.PG2]
+  secret_key_base: "RXaV6C6W9mFyY5gijphdcw2Mrn+0CoFF7ytapN3bAqG3iZyaCMP7WvOftTAxlwIQ",
+  render_errors: [view: SacaStatsWeb.ErrorView, accepts: ~w(html json), layout: false],
+  pubsub_server: SacaStats.PubSub,
+  live_view: [signing_salt: "cUBGyO85"]
 
 # Configures Elixir's Logger
 config :logger, :console,
