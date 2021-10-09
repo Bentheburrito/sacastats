@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 # For production, don't forget to configure the url host
 # to something meaningful, Phoenix uses this information
@@ -22,9 +22,10 @@ config :logger, level: :info
 # to the previous section and set your `:url` port to 443:
 #
 #     config :sacastats, SacaStatsWeb.Endpoint,
-#       ...
+#       ...,
 #       url: [host: "example.com", port: 443],
 #       https: [
+#         ...,
 #         port: 443,
 #         cipher_suite: :strong,
 #         keyfile: System.get_env("SOME_APP_SSL_KEY_PATH"),
@@ -49,7 +50,10 @@ config :logger, level: :info
 #       force_ssl: [hsts: true]
 #
 # Check `Plug.SSL` for all available options in `force_ssl`.
+<<<<<<< HEAD
 
 # Finally import the config/prod.secret.exs which loads secrets
 # and configuration from environment variables.
 import_config "prod.secret.exs"
+=======
+>>>>>>> elixir-phx-1.6
