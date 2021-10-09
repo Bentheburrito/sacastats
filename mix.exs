@@ -5,11 +5,7 @@ defmodule SacaStats.MixProject do
     [
       app: :sacastats,
       version: "0.1.0",
-<<<<<<< HEAD
-      elixir: "~> 1.7",
-=======
       elixir: "~> 1.12",
->>>>>>> elixir-phx-1.6
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,

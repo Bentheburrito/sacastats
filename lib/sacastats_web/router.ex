@@ -48,8 +48,6 @@ defmodule SacaStatsWeb.Router do
       live_dashboard "/dashboard", metrics: SacaStatsWeb.Telemetry
     end
   end
-<<<<<<< HEAD
-=======
 
   # Enables the Swoosh mailbox preview in development.
   #
@@ -62,5 +60,4 @@ defmodule SacaStatsWeb.Router do
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end
->>>>>>> elixir-phx-1.6
 end
