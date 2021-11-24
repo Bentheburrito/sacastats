@@ -1,0 +1,495 @@
+{
+  "1": {
+    "zone_id": "2",
+    "name": "Feeling the Heat",
+    "description": "Capture Indar within the time limit",
+    "type": "1"
+  },
+  "2": {
+    "zone_id": "8",
+    "name": "Cold War",
+    "description": "Capture Esamir within the time limit",
+    "type": "1"
+  },
+  "3": {
+    "zone_id": "6",
+    "name": "Seeing Green",
+    "description": "Capture Amerish within the time limit",
+    "type": "1"
+  },
+  "4": {
+    "zone_id": "4",
+    "name": "Marsh Madness",
+    "description": "Capture Hossin within the time limit",
+    "type": "1"
+  },
+  "7": {
+    "zone_id": "6",
+    "name": "Dome Domination",
+    "description": "Capture and hold all 3 Biolabs on Amerish",
+    "type": "2"
+  },
+  "8": {
+    "zone_id": "6",
+    "name": "Technological Advancement",
+    "description": "Capture and hold all 3 Tech Plants on Amerish",
+    "type": "2"
+  },
+  "9": {
+    "zone_id": "6",
+    "name": "Power Rush",
+    "description": "Capture and hold all 3 Amp Stations on Amerish",
+    "type": "2"
+  },
+  "10": {
+    "zone_id": "2",
+    "name": "Dome Domination",
+    "description": "Capture and hold all 3 Biolabs on Indar",
+    "type": "2"
+  },
+  "11": {
+    "zone_id": "2",
+    "name": "Technological Advancement",
+    "description": "Capture and hold all 3 Tech Plants on Indar",
+    "type": "2"
+  },
+  "12": {
+    "zone_id": "2",
+    "name": "Power Rush",
+    "description": "Capture and hold all 3 Amp Stations on Indar",
+    "type": "2"
+  },
+  "13": {
+    "zone_id": "8",
+    "name": "Dome Domination",
+    "description": "Capture and hold all 3 Biolabs on Esamir",
+    "type": "2"
+  },
+  "14": {
+    "zone_id": "8",
+    "name": "Power Rush",
+    "description": "Capture and hold all 3 Amp Stations on Esamir",
+    "type": "2"
+  },
+  "16": {
+    "zone_id": "4",
+    "name": "Dome Domination",
+    "description": "Capture and hold all 3 Biolabs on Hossin",
+    "type": "2"
+  },
+  "17": {
+    "zone_id": "4",
+    "name": "Technological Advancement",
+    "description": "Capture and hold all 3 Tech Plants on Hossin",
+    "type": "2"
+  },
+  "18": {
+    "zone_id": "4",
+    "name": "Power Rush",
+    "description": "Capture and hold all 3 Amp Stations on Hossin",
+    "type": "2"
+  },
+  "106": {
+    "name": "Conquest",
+    "description": "Capture bases and kill enemies to earn points.",
+    "type": "6"
+  },
+  "123": {
+    "zone_id": "2",
+    "name": "Indar Superiority",
+    "description": "Control territory to lock Indar",
+    "type": "8"
+  },
+  "124": {
+    "zone_id": "2",
+    "name": "Indar Enlightenment",
+    "description": "Control territory to lock Indar",
+    "type": "8"
+  },
+  "125": {
+    "zone_id": "2",
+    "name": "Indar Liberation",
+    "description": "Control territory to lock Indar",
+    "type": "8"
+  },
+  "126": {
+    "zone_id": "8",
+    "name": "Esamir Superiority",
+    "description": "Control territory to lock Esamir",
+    "type": "8"
+  },
+  "127": {
+    "zone_id": "8",
+    "name": "Esamir Enlightenment",
+    "description": "Control territory to lock Esamir",
+    "type": "8"
+  },
+  "128": {
+    "zone_id": "8",
+    "name": "Esamir Liberation",
+    "description": "Control territory to lock Esamir",
+    "type": "8"
+  },
+  "129": {
+    "zone_id": "4",
+    "name": "Hossin Superiority",
+    "description": "Control territory to lock Hossin",
+    "type": "8"
+  },
+  "130": {
+    "zone_id": "4",
+    "name": "Hossin Enlightenment",
+    "description": "Control territory to lock Hossin",
+    "type": "8"
+  },
+  "131": {
+    "zone_id": "4",
+    "name": "Hossin Liberation",
+    "description": "Control territory to lock Hossin",
+    "type": "8"
+  },
+  "132": {
+    "zone_id": "6",
+    "name": "Amerish Superiority",
+    "description": "Control territory to lock Amerish",
+    "type": "8"
+  },
+  "133": {
+    "zone_id": "6",
+    "name": "Amerish Enlightenment",
+    "description": "Control territory to lock Amerish",
+    "type": "8"
+  },
+  "134": {
+    "zone_id": "6",
+    "name": "Amerish Liberation",
+    "description": "Control territory to lock Amerish",
+    "type": "8"
+  },
+  "147": {
+    "zone_id": "2",
+    "name": "Indar Superiority",
+    "description": "Control territory to lock Indar",
+    "type": "9"
+  },
+  "148": {
+    "zone_id": "2",
+    "name": "Indar Enlightenment",
+    "description": "Control territory to lock Indar",
+    "type": "9"
+  },
+  "149": {
+    "zone_id": "2",
+    "name": "Indar Liberation",
+    "description": "Control territory to lock Indar",
+    "type": "9"
+  },
+  "150": {
+    "zone_id": "8",
+    "name": "Esamir Superiority",
+    "description": "Control territory to lock Esamir",
+    "type": "9"
+  },
+  "151": {
+    "zone_id": "8",
+    "name": "Esamir Enlightenment",
+    "description": "Control territory to lock Esamir",
+    "type": "9"
+  },
+  "152": {
+    "zone_id": "8",
+    "name": "Esamir Liberation",
+    "description": "Control territory to lock Esamir",
+    "type": "9"
+  },
+  "153": {
+    "zone_id": "4",
+    "name": "Hossin Superiority",
+    "description": "Control territory to lock Hossin",
+    "type": "9"
+  },
+  "154": {
+    "zone_id": "4",
+    "name": "Hossin Enlightenment",
+    "description": "Control territory to lock Hossin",
+    "type": "9"
+  },
+  "155": {
+    "zone_id": "4",
+    "name": "Hossin Liberation",
+    "description": "Control territory to lock Hossin",
+    "type": "9"
+  },
+  "156": {
+    "zone_id": "6",
+    "name": "Amerish Superiority",
+    "description": "Control territory to lock Amerish",
+    "type": "9"
+  },
+  "157": {
+    "zone_id": "6",
+    "name": "Amerish Enlightenment",
+    "description": "Control territory to lock Amerish",
+    "type": "9"
+  },
+  "158": {
+    "zone_id": "6",
+    "name": "Amerish Liberation",
+    "description": "Control territory to lock Amerish",
+    "type": "9"
+  },
+  "159": {
+    "zone_id": "6",
+    "name": "Amerish Warpgates Stabilizing",
+    "description": "Additional territories are coming back online.",
+    "type": "5"
+  },
+  "160": {
+    "zone_id": "8",
+    "name": "Esamir Warpgates Stabilizing",
+    "description": "Additional territories are coming back online.",
+    "type": "5"
+  },
+  "161": {
+    "zone_id": "2",
+    "name": "Indar Warpgates Stabilizing",
+    "description": "Additional territories are coming back online.",
+    "type": "5"
+  },
+  "162": {
+    "zone_id": "4",
+    "name": "Hossin Warpgates Stabilizing",
+    "description": "Additional territories are coming back online.",
+    "type": "5"
+  },
+  "164": {
+    "zone_id": "8",
+    "name": "Technological Advancement",
+    "description": "Capture and hold all 3 Tech Plants on Esamir",
+    "type": "2"
+  },
+  "167": {
+    "zone_id": "2",
+    "name": "Aerial Anomalies",
+    "description": "Take readings of aerial anomalies",
+    "type": "10"
+  },
+  "168": {
+    "name": "Eye of the Storm",
+    "description": "Gather Tempest from the meteor site and return it to your Warpgate.",
+    "type": "10"
+  },
+  "170": {
+    "name": "The Bending",
+    "description": "A deadly meteor shower is wreaking havoc across the continent.",
+    "type": "5"
+  },
+  "172": {
+    "zone_id": "6",
+    "name": "Aerial Anomalies",
+    "description": "Take readings of aerial anomalies",
+    "type": "10"
+  },
+  "173": {
+    "zone_id": "8",
+    "name": "Aerial Anomalies",
+    "description": "Take readings of aerial anomalies",
+    "type": "10"
+  },
+  "174": {
+    "zone_id": "4",
+    "name": "Aerial Anomalies",
+    "description": "Take readings of aerial anomalies",
+    "type": "10"
+  },
+  "175": {
+    "name": "Race for Readings",
+    "description": "Take readings of aerial anomalies",
+    "type": "10"
+  },
+  "176": {
+    "zone_id": "8",
+    "name": "Esamir Unstable Meltdown",
+    "description": "Control territory to lock Esamir",
+    "type": "9"
+  },
+  "177": {
+    "zone_id": "4",
+    "name": "Hossin Unstable Meltdown",
+    "description": "Control territory to lock Hossin",
+    "type": "9"
+  },
+  "178": {
+    "zone_id": "6",
+    "name": "Amerish Unstable Meltdown",
+    "description": "Control territory to lock Amerish",
+    "type": "9"
+  },
+  "179": {
+    "zone_id": "2",
+    "name": "Indar Unstable Meltdown",
+    "description": "Control territory to lock Indar",
+    "type": "9"
+  },
+  "180": {
+    "zone_id": "2",
+    "name": "Gaining Ground",
+    "description": "Capture and hold the most Large Outposts",
+    "type": "2"
+  },
+  "181": {
+    "zone_id": "8",
+    "name": "Gaining Ground",
+    "description": "Capture and hold the most Large Outposts",
+    "type": "2"
+  },
+  "182": {
+    "zone_id": "6",
+    "name": "Gaining Ground",
+    "description": "Capture and hold the most Large Outposts",
+    "type": "2"
+  },
+  "183": {
+    "zone_id": "4",
+    "name": "Gaining Ground",
+    "description": "Capture and hold the most Large Outposts",
+    "type": "2"
+  },
+  "186": {
+    "zone_id": "8",
+    "name": "Esamir Unstable Meltdown",
+    "description": "Control territory to lock Esamir",
+    "type": "9"
+  },
+  "187": {
+    "zone_id": "4",
+    "name": "Hossin Unstable Meltdown",
+    "description": "Control territory to lock Hossin",
+    "type": "9"
+  },
+  "188": {
+    "zone_id": "6",
+    "name": "Amerish Unstable Meltdown",
+    "description": "Control territory to lock Amerish",
+    "type": "9"
+  },
+  "189": {
+    "zone_id": "2",
+    "name": "Indar Unstable Meltdown",
+    "description": "Control territory to lock Indar",
+    "type": "9"
+  },
+  "190": {
+    "zone_id": "8",
+    "name": "Esamir Unstable Meltdown",
+    "description": "Control territory to lock Esamir",
+    "type": "9"
+  },
+  "191": {
+    "zone_id": "4",
+    "name": "Hossin Unstable Meltdown",
+    "description": "Control territory to lock Hossin",
+    "type": "9"
+  },
+  "192": {
+    "zone_id": "6",
+    "name": "Amerish Unstable Meltdown",
+    "description": "Control territory to lock Amerish",
+    "type": "9"
+  },
+  "193": {
+    "zone_id": "2",
+    "name": "Indar Unstable Meltdown",
+    "description": "Control territory to lock Indar",
+    "type": "9"
+  },
+  "194": {
+    "zone_id": "8",
+    "name": "Refine and Refuel",
+    "description": "Deposit Cortium into the refinery",
+    "type": "10"
+  },
+  "195": {
+    "name": "Refine and Refuel",
+    "description": "Deposit Cortium into the refinery",
+    "type": "10"
+  },
+  "196": {
+    "zone_id": "4",
+    "name": "Refine and Refuel",
+    "description": "Deposit Cortium into the refinery",
+    "type": "10"
+  },
+  "197": {
+    "zone_id": "2",
+    "name": "Refine and Refuel",
+    "description": "Deposit Cortium into the refinery",
+    "type": "10"
+  },
+  "198": {
+    "zone_id": "2",
+    "name": "Maximum Pressure",
+    "description": "Kill as many enemies as possible",
+    "type": "6"
+  },
+  "199": {
+    "zone_id": "8",
+    "name": "Maximum Pressure",
+    "description": "Kill as many enemies as possible",
+    "type": "6"
+  },
+  "200": {
+    "zone_id": "6",
+    "name": "Maximum Pressure",
+    "description": "Kill as many enemies as possible",
+    "type": "6"
+  },
+  "201": {
+    "zone_id": "4",
+    "name": "Maximum Pressure",
+    "description": "Kill as many enemies as possible",
+    "type": "6"
+  },
+  "204": {
+    "zone_id": "361",
+    "name": "OUTFIT WARS",
+    "description": "Capture Active Vanu Relics",
+    "type": "10"
+  },
+  "205": {
+    "zone_id": "361",
+    "name": "OUTFIT WARS (pre-match)",
+    "description": "Prepare for the Outfit War",
+    "type": "4"
+  },
+  "206": {
+    "zone_id": "361",
+    "name": "OUTFIT WARS",
+    "description": "Active Relics Changing",
+    "type": "10"
+  },
+  "207": {
+    "zone_id": "361",
+    "name": "OUTFIT WARS",
+    "description": "Get 500 points or have the most when time expires.",
+    "type": "10"
+  },
+  "208": {
+    "zone_id": "14",
+    "name": "Koltyr Liberation",
+    "description": "Control territory to lock Koltyr",
+    "type": "9"
+  },
+  "209": {
+    "zone_id": "14",
+    "name": "Koltyr Superiority",
+    "description": "Control territory to lock Koltyr",
+    "type": "9"
+  },
+  "210": {
+    "zone_id": "14",
+    "name": "Koltyr Enlightenment",
+    "description": "Control territory to lock Koltyr",
+    "type": "9"
+  }
+}
