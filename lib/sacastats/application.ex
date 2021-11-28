@@ -15,9 +15,11 @@ defmodule SacaStats.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: SacaStats.PubSub},
       # Start the Endpoint (http/https)
-      SacaStatsWeb.Endpoint
-      # Start a worker by calling: SacaStats.Worker.start_link(arg)
-      # {SacaStats.Worker, arg}
+      SacaStatsWeb.Endpoint,
+      # Start the session tracker
+      {SacaStats.SessionTracker, {%{}, []}},
+      # Start the ESS Socket
+      {SacaStats.EventHandler, SacaStats.ess_subscriptions()},
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

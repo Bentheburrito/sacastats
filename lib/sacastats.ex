@@ -6,6 +6,7 @@ defmodule SacaStats do
   import Ecto.Query
 
   alias SacaStats.CharacterSession
+  alias SacaStats.SessionTracker
   alias SacaStats.Utils.StaticData
 
   @zone_instance_bitmask 0x0000FFFF
@@ -13,13 +14,30 @@ defmodule SacaStats do
 
   @type session_status :: :active | :closed | :both
 
-  @spec get_sessions(session_status(), limit :: integer(), field :: atom(), field_value :: any()) :: [CharacterSession]
+  @spec get_sessions(session_status(), limit :: integer(), field :: atom(), field_value :: any()) :: [CharacterSession.t()]
   def get_sessions(session_status \\ :both, limit \\ 1, field \\ :character_id, field_value)
 
   def get_sessions(:closed, limit, field, field_value) do
     SacaStats.Repo.all(
       from(s in CharacterSession, select: s, where: field(s, ^field) == ^field_value, limit: ^limit)
     )
+  end
+
+  def get_sessions(:active, _limit, :character_id, character_id) do
+    case SessionTracker.get(character_id) do
+      {:ok, session} -> [session]
+      :error -> []
+    end
+  end
+
+  def get_sessions(:active, limit, field, field_value) when is_map_key(%CharacterSession{}, field) do
+    SessionTracker.find(limit, fn %CharacterSession{} = session ->
+      Map.get(session, field) == field_value
+    end)
+  end
+
+  def get_sessions(:both, limit, field, field_value) do
+    get_sessions(:active, limit, field, field_value) ++ get_sessions(:closed, limit, field, field_value)
   end
 
   @doc """
@@ -75,4 +93,24 @@ defmodule SacaStats do
     3 => {"Terran Republic", 0xE52D2D, "https://bit.ly/2Mm6wij"},
     4 => {"Nanite Systems", 0xE5E5E5, "https://i.imgur.com/9nHbnUh.jpg"}
   }
+
+  def ess_subscriptions() do
+    [
+      events: [
+        "GainExperience",
+        "Death",
+        "VehicleDestroy",
+        "PlayerLogin",
+        "PlayerLogout",
+        "PlayerFacilityCapture",
+        "PlayerFacilityDefend",
+        "BattleRankUp",
+        "MetagameEvent",
+        "ContinentUnlock",
+        "ContinentLock"
+      ],
+      worlds: ["all"],
+      characters: ["all"]
+    ]
+  end
 end
