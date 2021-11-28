@@ -4,5 +4,6 @@ defmodule SacaStats.Utils.StaticData do
     |> File.read!()
     |> Jason.decode!()
     |> Enum.map(fn {key_str, val} -> {String.to_integer(key_str), val} end)
+    |> Enum.into(%{})
   end
 end
