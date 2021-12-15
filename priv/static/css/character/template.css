@@ -1,0 +1,13 @@
+/*Navbar*/
+.navbar-nav.character-nav {
+    padding: 0px;
+}
+.character-nav > li.nav-item > a.nav-link{
+    padding-bottom: 0px;
+}
+.character-nav{
+    padding-bottom: 0px;
+}
+.pb-10 {
+    padding-bottom: 10rem !important;
+}
