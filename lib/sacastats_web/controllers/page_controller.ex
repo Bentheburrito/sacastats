@@ -6,11 +6,11 @@ defmodule SacaStatsWeb.PageController do
   end
 
   def character(conn, %{"character_name" => name, "stat_type" => "session"}) do
-    case CAIData.API.get_session_by_name(name) do
+    case SacaStats.get_sessions(:both, 10, :name, name) do
       {:ok, session} ->
         character_stuff = %{"name" => name, "stat_page" => "session.html"}
         render(conn, "characterTemplate.html", character: character_stuff, session: session)
-      :none ->
+      :error ->
         conn
         |> put_flash(:error, "No session under a character with that name.")
         |> render("index.html")
