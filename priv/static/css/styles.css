@@ -29,8 +29,16 @@ nav{
 .sticky-top{
   margin-bottom: 0px;
 }
+.active-page{
+  border-bottom: 3px solid gold;
+  transition: .5s;
+}
+.active-subpage{
+  border-bottom: 3px solid gold;
+  transition: .5s;
+}
 /*individual hover colors*/
-ul.navbar-nav li{
+ul.navbar-nav li:not(.active-page):not(.active-subpage){
   box-sizing:border-box;
   border-bottom: 3px solid transparent;
   transition: .5s;

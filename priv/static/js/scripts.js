@@ -22,6 +22,8 @@ function addEventListeners() {
     handleCollapsableNavbarEvents();
 
     handlePageClickEvents();
+
+    handleNavLinkEvents();
 }
 
 function handleCollapsableNavbarEvents() {
@@ -30,6 +32,65 @@ function handleCollapsableNavbarEvents() {
     handleNavbarShownEvents();
 
     handleNavbarHideEvents();
+}
+
+function handleNavLinkEvents() {
+    handlePageNavLinkEvents();
+    handleSubPageNavLinkEvents();
+}
+
+function handlePageNavLinkEvents() {
+    var links = document.querySelectorAll(".page-nav");
+    links.forEach(link => {
+        link.addEventListener('click', function () {
+            addOrRemoveActivePage(link);
+        });
+        if (window.location.pathname != "/") {
+            addOrRemoveActivePage(link);
+        } else {
+            if (link.firstElementChild.innerHTML == "Home") {
+                link.classList.add("active-page");
+            } else {
+                link.classList.remove("active-page");
+            }
+        }
+    });
+}
+
+function handleSubPageNavLinkEvents() {
+    var links = document.querySelectorAll(".subpage-nav");
+    links.forEach(link => {
+        link.addEventListener('click', function () {
+            addOrRemoveActiveSubpage(link);
+        });
+        if (window.location.pathname != "/") {
+            addOrRemoveActiveSubpage(link);
+        }
+    });
+}
+
+function addOrRemoveActivePage(link) {
+    let url = window.location.pathname.split("/")[1].toLowerCase();
+    let inner = link.firstElementChild.innerHTML;
+    let lowerLink = inner.toLowerCase();
+    if (lowerLink.includes(url) || lowerLink == url || url.includes(lowerLink)) {
+        link.classList.add("active-page");
+    } else {
+        link.classList.remove("active-page");
+    }
+}
+
+function addOrRemoveActiveSubpage(link) {
+    let primaryPage = window.location.pathname.split("/")[1].toLowerCase();
+    let index = (primaryPage == "charcter") ? 2 : 3;
+    let url = window.location.pathname.split("/")[index].toLowerCase();
+    let inner = link.firstElementChild.innerHTML;
+    let lowerLink = inner.toLowerCase();
+    if (lowerLink.includes(url) || lowerLink == url || url.includes(lowerLink)) {
+        link.classList.add("active-subpage");
+    } else {
+        link.classList.remove("active-subpage");
+    }
 }
 
 function handleNavbarShowEvents() {
