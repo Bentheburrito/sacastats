@@ -1,5 +1,6 @@
 defmodule SacaStatsWeb.Router do
   use SacaStatsWeb, :router
+  import SacaStatsWeb.Plugs.AssignCurrentUser
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -8,6 +9,7 @@ defmodule SacaStatsWeb.Router do
     plug :put_root_layout, {SacaStatsWeb.LayoutView, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :assign_current_user
   end
 
   pipeline :api do
@@ -18,6 +20,10 @@ defmodule SacaStatsWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+    get "/login", PageController, :login
+    get "/login/new", PageController, :login_discord
+    get "/login/redir", PageController, :login_discord_callback
+    get "/logout", PageController, :logout_discord
   end
 
   scope "/character", SacaStatsWeb do

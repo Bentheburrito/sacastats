@@ -36,6 +36,16 @@
             </li>
           </ul>
         </div>
+
+				<%= if @user do %>
+					<img src="<%= @user["avatar_url"]%>" alt="no profile picture found">
+					<h5>
+						<%= "#{@user["username"]}##{@user["discriminator"]}" %>
+					</h5>
+					<%= link "Logout", to: "/logout?redirect_to=#{@conn.request_path}", class: "btn btn-primary" %>
+				<% else %>
+					<%= link "Login", to: "/login", class: "btn btn-primary" %>
+				<% end %>
       </nav>
     </header>
     <main role="main" class="container">
