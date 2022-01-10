@@ -8,7 +8,7 @@ defmodule SacaStatsWeb.DiscordAuth do
       strategy: __MODULE__,
       client_id: System.get_env("DISCORD_CLIENT_ID"),
       client_secret: System.get_env("DISCORD_CLIENT_SECRET"),
-      redirect_uri: "http://lvh.me:4000/login/redir",
+      redirect_uri: System.get_env("OAUTH_REDIRECT_URI"),
       site: "https://discord.com/api",
       authorize_url: "https://discord.com/api/oauth2/authorize",
       token_url: "https://discord.com/api/oauth2/token",
