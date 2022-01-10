@@ -39,10 +39,10 @@
         </div>
 
 				<%= if @user do %>
-					<img src={@user["avatar_url"]} alt="no profile picture found">
-					<h5>
+					<img src={@user["avatar_url"]} alt="no profile picture found" style="border-radius: 50%; margin-right: 10px;" size>
+					<h4 style="margin-right: 10px;">
 						<%= "#{@user["username"]}##{@user["discriminator"]}" %>
-					</h5>
+					</h4>
 					<%= link "Logout", to: "/logout?redirect_to=#{@conn.request_path}", class: "btn btn-primary" %>
 				<% else %>
 					<%= link "Login", to: "/login", class: "btn btn-primary" %>

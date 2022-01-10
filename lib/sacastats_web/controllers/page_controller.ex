@@ -23,33 +23,31 @@ defmodule SacaStatsWeb.PageController do
   end
 
   def login_discord_callback(conn, %{"code" => auth_code, "state" => state}) do
-    IO.inspect get_session(conn, :client), label: "This should be the client from the session"
-    case get_session(conn, :client) do
-      %OAuth2.Client{params: %{state: ^state}} = client ->
-        IO.inspect "state is correct!"
-        client = DiscordAuth.get_token!(client, code: auth_code)
+    with %OAuth2.Client{params: %{state: ^state}} = client <- get_session(conn, :client),
+         client = DiscordAuth.get_token!(client, code: auth_code),
+         {:ok, user} <- DiscordAuth.get_user(client) do
+      conn
+      |> put_session(:user, user)
+      |> put_session(:client, client)
+      |> put_flash(
+        :info,
+        "Successfully logged in - welcome #{user["username"]}##{user["discriminator"]}"
+      )
+      |> redirect(to: "/")
+    else
+      {:error, error} ->
+        Logger.error(
+          "Error occurred fetching Discord user after seemingly successful token fetch: #{inspect(error)}"
+        )
 
-        case DiscordAuth.get_user(client) do
-          {:ok, user} ->
-            IO.inspect client.token, label: "token"
-
-            conn
-            |> put_session(:user, user)
-            |> put_session(:client, client)
-            |> put_flash(:info, "Successfully logged in - welcome #{user["username"]}##{user["discriminator"]}")
-            |> redirect(to: "/")
-
-          {:error, error} ->
-            Logger.error("Error occurred fetching Discord user after seemingly successful token fetch: #{inspect error}")
-
-            conn
-            |> put_session(:client, client)
-            |> put_flash(:error, "failed to fetch user info. Please try again soon.")
-            |> redirect(to: "/login")
-        end
+        conn
+        |> put_flash(:error, "failed to fetch user info. Please try again soon.")
+        |> redirect(to: "/login")
 
       real_state ->
-        Logger.warn("Login with Discord attempt failed.\nDiscord gave state #{state}, client had #{real_state}")
+        Logger.warn(
+          "Login with Discord attempt failed.\nDiscord gave state #{state}, client had #{real_state}"
+        )
 
         conn
         |> put_flash(:error, "Something went wrong while authenticating - please try again soon.")
@@ -74,6 +72,7 @@ defmodule SacaStatsWeb.PageController do
       {:ok, session} ->
         character_stuff = %{"name" => name, "stat_page" => "session.html"}
         render(conn, "characterTemplate.html", character: character_stuff, session: session)
+
       :error ->
         conn
         |> put_flash(:error, "No session under a character with that name.")

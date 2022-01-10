@@ -4,7 +4,7 @@ defmodule SacaStatsWeb.DiscordAuth do
   alias OAuth2.Client
 
   def new() do
-    Client.new([
+    Client.new(
       strategy: __MODULE__,
       client_id: System.get_env("DISCORD_CLIENT_ID"),
       client_secret: System.get_env("DISCORD_CLIENT_SECRET"),
@@ -13,7 +13,7 @@ defmodule SacaStatsWeb.DiscordAuth do
       authorize_url: "https://discord.com/api/oauth2/authorize",
       token_url: "https://discord.com/api/oauth2/token",
       params: %{state: gen_state()}
-    ])
+    )
     |> Client.put_serializer("application/json", Jason)
   end
 
@@ -45,10 +45,29 @@ defmodule SacaStatsWeb.DiscordAuth do
     |> elem(0)
   end
 
+  @doc """
+  Fetch user attributes exposed by the `identify` scope.
+
+  Will automatically try to refresh the token if a 401 status code is returned, and retry the API request.
+  """
+  def get_user(%Client{token: nil}), do: {:error, %OAuth2.Error{reason: "No token on the provided client."}}
+
   def get_user(client) do
     with {:ok, res} <- Client.get(client, "/users/@me"),
          url <- get_avatar_url(res.body["id"], res.body["avatar"]) do
       {:ok, Map.put(res.body, "avatar_url", url)}
+    else
+      {:error, %OAuth2.Response{status_code: 401} = res} ->
+        case Client.refresh_token(client) do
+          {:ok, client} -> get_user(client)
+          {:error, _} -> {:error, res.body}
+        end
+
+      {:error, %OAuth2.Response{} = res} ->
+        {:error, res.body}
+
+      error ->
+        error
     end
   end
 
