@@ -3,11 +3,22 @@ var oldPadding;
 var newPadding;
 var isBottomTopNavbarShown;
 var isBottomBottomNavbarShown;
+var isLoadingScreenUp = true;
+var isLoadingScreenLocked = false;
+const preferedLanguage = navigator.language;
 
 window.addEventListener('load', (event) => {
     initializeVariables();
 
     addEventListeners();
+
+    addFormatsToPage();
+
+    addEventHandlersToAnchorLinks();
+
+    removeLoadingScreen();
+
+    waitForLoadingScreenToCloseThenRunFunction(addAnimationToProgressBars);
 });
 
 function initializeVariables() {
@@ -40,14 +51,14 @@ function handleNavLinkEvents() {
 }
 
 function handlePageNavLinkEvents() {
+    //for each header nav
     var links = document.querySelectorAll(".page-nav");
     links.forEach(link => {
-        link.addEventListener('click', function () {
-            addOrRemoveActivePage(link);
-        });
+        //if it's not the home page, activate the current page
         if (window.location.pathname != "/") {
             addOrRemoveActivePage(link);
         } else {
+            //activate the home page only
             if (link.firstElementChild.innerHTML == "Home") {
                 link.classList.add("active-page");
             } else {
@@ -58,11 +69,10 @@ function handlePageNavLinkEvents() {
 }
 
 function handleSubPageNavLinkEvents() {
+    //for each sub header nav
     var links = document.querySelectorAll(".subpage-nav");
     links.forEach(link => {
-        link.addEventListener('click', function () {
-            addOrRemoveActiveSubpage(link);
-        });
+        //if there is a possible subpage, activate the current
         if (window.location.pathname != "/") {
             addOrRemoveActiveSubpage(link);
         }
@@ -70,24 +80,34 @@ function handleSubPageNavLinkEvents() {
 }
 
 function addOrRemoveActivePage(link) {
+    //initialize variables
     let url = window.location.pathname.split("/")[1].toLowerCase();
     let inner = link.firstElementChild.innerHTML;
     let lowerLink = inner.toLowerCase();
+
+    //if it's the current page add the active-page class
     if (lowerLink.includes(url) || lowerLink == url || url.includes(lowerLink)) {
         link.classList.add("active-page");
+
+        //otherwise remove the active-page class
     } else {
         link.classList.remove("active-page");
     }
 }
 
 function addOrRemoveActiveSubpage(link) {
+    //initialize variables
     let primaryPage = window.location.pathname.split("/")[1].toLowerCase();
     let index = (primaryPage == "charcter") ? 2 : 3;
     let url = window.location.pathname.split("/")[index].toLowerCase();
     let inner = link.firstElementChild.innerHTML;
     let lowerLink = inner.toLowerCase();
+
+    //if it's the current subpage add the active-subpage class
     if (lowerLink.includes(url) || lowerLink == url || url.includes(lowerLink)) {
         link.classList.add("active-subpage");
+
+        //otherwise remove the active-subpage class
     } else {
         link.classList.remove("active-subpage");
     }
@@ -281,4 +301,105 @@ function clickIsInFooter(e) {
     });
 
     return found;
+}
+
+function addEventHandlersToAnchorLinks() {
+    $('a').on('click', function (e) {
+        e.preventDefault();
+        let url = this.href;
+        showLoadingScreen();
+        window.location.href = url;
+    })
+}
+
+function addFormatsToPage() {
+    addCommasToNumbers();
+    formatDateTimes();
+}
+
+function addCommasToNumbers() {
+    //get every element with the number class and add proper commas
+    let numbers = document.querySelectorAll(".number");
+    numbers.forEach(number => {
+        number.innerHTML = number.innerHTML.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    });
+}
+
+function formatDateTimes() {
+    let dateTimes = document.querySelectorAll(".date-time");
+    dateTimes.forEach(dateTime => {
+        let dateTimeString = dateTime.innerHTML;
+        let date = dateTimeString.split(" ")[0];
+        let time = dateTimeString.split(" ")[1];
+        let dateTimeObject = new Date(getLocalDateStringWithTimeFromStrings(date, time));
+        const longFormatter = new Intl.DateTimeFormat(preferedLanguage, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+        });
+
+        dateTime.innerHTML = longFormatter.format(dateTimeObject) + " @ " + dateTimeObject.toLocaleTimeString();
+    });
+}
+
+function getLocalDateStringWithTimeFromStrings(date, time) {
+    let dateArr = date.split("-");
+    let timeArr = time.split(":");
+    return new Date(Date.UTC(dateArr[0], dateArr[1] - 1, dateArr[2], timeArr[0], timeArr[1], timeArr[2].split(".")[0])).toLocaleString(preferedLanguage, { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone });
+}
+
+function removeLoadingScreen() {
+    if (!isLoadingScreenLocked) {
+        let loadingScreen = document.getElementById("loading-screen");
+        //fade the loading screen out
+        loadingScreen.classList.remove("show-loading-screen");
+        loadingScreen.classList.add("hide-loading-screen");
+        setTimeout(function () {
+            isLoadingScreenUp = false;
+        }, 200);
+    }
+}
+
+function showLoadingScreen() {
+    let loadingScreen = document.getElementById("loading-screen");
+    //fade in the loading screen
+    loadingScreen.classList.remove("hide-loading-screen");
+    loadingScreen.classList.add("show-loading-screen");
+    setTimeout(function () {
+        isLoadingScreenUp = true;
+    }, 400);
+}
+
+function addAnimationToProgressBars() {
+    let progressBars = document.querySelectorAll(".progress-bar");
+    progressBars.forEach(async progressBar => {
+        var finishedWidth = progressBar.getAttribute("aria-valuenow");
+        var i = 0;
+        var id = setInterval(frame, 10);
+        async function frame() {
+            if (i > finishedWidth) {
+                clearInterval(id);
+                i = 0;
+            } else {
+                progressBar.style.width = i + "%";
+            }
+            i++;
+        }
+    });
+}
+
+function waitForLoadingScreenToCloseThenRunFunction(functionToRun) {
+    if (isLoadingScreenUp === true) {
+        window.setTimeout(() => waitForLoadingScreenToCloseThenRunFunction(functionToRun), 10);
+    } else {
+        functionToRun();
+    }
+}
+
+function waitForLoadingScreenToOpenThenRunFunction(functionToRun) {
+    if (isLoadingScreenUp === true) {
+        window.setTimeout(() => waitForLoadingScreenToOpenThenRunFunction(functionToRun), 10);
+    } else {
+        functionToRun();
+    }
 }

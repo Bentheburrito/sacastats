@@ -5,6 +5,17 @@ footer{
 .smooth-transition-three{
   transition: .3s;
 }
+figure{
+  margin-bottom: 0!important;
+}
+@media (min-width: 2100px){
+  .container {
+      max-width: 1920px;
+  }
+  .progress, .progress > div {
+    height: 30px;
+  }
+}
 
 /*Navbar*/
 .nav-link {
@@ -16,8 +27,14 @@ footer{
   padding: 20px;
   padding-bottom: 0px;
 }
+.second-nav{
+  position: -webkit-sticky;
+  position: sticky;
+  top:167px;
+  z-index: 1020;
+}
 nav{
-  opacity: 0.93;
+  opacity: 0.94;
 }
 .navbar-expand-md .navbar-collapse {
   flex-direction: column;
@@ -47,6 +64,9 @@ ul.navbar-nav li:hover, ul.navbar-nav li:hover > a.moving-nav-link {
   margin-top:-10px;
   transition: .2s;
 }
+ul.navbar-nav li:hover, ul.navbar-nav li{  
+  height: 100%;
+}
 ul.navbar-nav li:hover, ul.navbar-nav li:hover > a.static-nav-link {  
   margin-top: 0px;
   transition: 0s;
@@ -71,4 +91,48 @@ ul.navbar-nav li:hover:nth-child(4n+4) {
 /*Padding*/
 .pb-26 {
   padding-bottom: 26rem !important;
+}
+@media only screen and (max-width: 767px) { /*for boostrap xs*/
+  .main-content{
+    padding-bottom: 10rem !important;
+  }
+}
+
+/*Loading Screen*/
+#loading-screen {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #15181d;
+  display:flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+#loading-screen-text{
+  color: #aebfdb;
+}
+.rotate {
+  animation: rotation 1.2s infinite linear;
+}
+.hide-loading-screen {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s .2s, opacity .2s linear;
+}
+.show-loading-screen {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 2s linear;
+}
+
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
 }

@@ -14,6 +14,7 @@ function searchCharacter() {
 }
 
 function swapURL(event) {
+    showLoadingScreen();
     event.preventDefault();
     let character = document.getElementById("character").value;
     location.href = document.URL + "/" + character;
