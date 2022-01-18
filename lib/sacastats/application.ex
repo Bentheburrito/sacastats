@@ -7,6 +7,10 @@ defmodule SacaStats.Application do
 
   @impl true
   def start(_type, _args) do
+
+    # Start session ETS table.
+    :ets.new(:session, [:named_table, :public, read_concurrency: true])
+
     children = [
       # Start the Ecto repository
       SacaStats.Repo,

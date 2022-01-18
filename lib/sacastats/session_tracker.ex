@@ -223,7 +223,7 @@ defmodule SacaStats.SessionTracker do
   # Still need to check if some characters are missing (in the case of new characters)
   defp fetch_char_list([]), do: {[], []}
   defp fetch_char_list(character_ids) do
-    IO.inspect(character_ids |> length)
+
     char_query =
       Query.new(collection: "character")
       |> term("character_id", Enum.join(character_ids, ","))
