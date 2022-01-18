@@ -11,3 +11,8 @@
 .pb-10 {
     padding-bottom: 10rem !important;
 }
+@media only screen and (max-width: 767px) { /*for boostrap xs*/
+    .main-content{
+      padding-bottom: 18rem !important;
+    }
+}
