@@ -26,8 +26,8 @@
     <header class="sticky-top">
       <nav class="navbar navbar-expand-md navbar-light bg-light d-none d-md-flex">
         <a class="navbar-brand" href="/">
-					<img src={Routes.static_path(@conn, "/images/logo_icon.ico")} alt="Sacagawea Icon" width="150">
-				</a>
+          <img src={Routes.static_path(@conn, "/images/logo_icon.ico")} alt="Sacagawea Icon" width="150">
+        </a>
         <h1>Saca Stats</h1>
 
         <div class="collapse navbar-collapse" id="collapse_bottom_target">
@@ -46,6 +46,16 @@
             </li>
           </ul>
         </div>
+
+        <%= if @user do %>
+          <img src={@user["avatar_url"]} alt="no profile picture found" style="border-radius: 50%; margin-right: 10px;" size>
+          <h4 style="margin-right: 10px;">
+            <%= "#{@user["username"]}##{@user["discriminator"]}" %>
+          </h4>
+          <%= link "Logout", to: "/logout?redirect_to=#{@conn.request_path}", class: "btn btn-primary" %>
+        <% else %>
+          <%= link "Login", to: "/login", class: "btn btn-primary" %>
+        <% end %>
       </nav>
     </header>
     <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>

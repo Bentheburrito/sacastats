@@ -20,7 +20,7 @@ defmodule SacaStats.MixProject do
   def application do
     [
       mod: {SacaStats.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :oauth2]
     ]
   end
 
@@ -51,6 +51,7 @@ defmodule SacaStats.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:planetside_api, "~> 0.2.0"},
       {:dotenv_parser, "~> 1.2"},
+      {:oauth2, "~> 2.0"},
     ]
   end
 
