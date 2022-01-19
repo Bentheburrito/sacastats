@@ -25,7 +25,7 @@ defmodule SacaStatsWeb.CharacterController do
         {next_rank, ""} = Integer.parse(Map.get(next_rank, "value"))
         next_rank = next_rank + 1
 
-        character_stuff = %{
+        character = %{
           "stat_page" => String.downcase(stat_template_name) <> ".html",
           "response" => body,
           "next_rank" => next_rank
