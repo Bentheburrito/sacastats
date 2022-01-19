@@ -21,9 +21,11 @@ defmodule SacaStatsWeb.CharacterController do
         |> redirect(to: Routes.character_path(conn, :character_search))
 
       {:ok, %PS2.API.QueryResult{data: body}} ->
-        next_rank = Map.get(body, "battle_rank")
-        {next_rank, ""} = Integer.parse(Map.get(next_rank, "value"))
-        next_rank = next_rank + 1
+        next_rank = 
+          body
+          |> get_in(["battle_rank", "value"])
+          |> String.to_integer()
+          |> Kernel.+(1)
 
         character = %{
           "stat_page" => String.downcase(stat_template_name) <> ".html",
