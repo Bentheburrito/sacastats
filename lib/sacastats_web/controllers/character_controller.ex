@@ -31,7 +31,7 @@ defmodule SacaStatsWeb.CharacterController do
           "next_rank" => next_rank
         }
 
-        render(conn, "template.html", character: character_stuff)
+        render(conn, "template.html", character: character)
 
       {:error, e} ->
         Logger.error("Error fetching character: #{inspect(e)}")
