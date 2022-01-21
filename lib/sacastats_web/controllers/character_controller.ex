@@ -21,16 +21,20 @@ defmodule SacaStatsWeb.CharacterController do
         |> redirect(to: Routes.character_path(conn, :character_search))
 
       {:ok, %PS2.API.QueryResult{data: body}} ->
-        next_rank = 
+        next_rank =
           body
           |> get_in(["battle_rank", "value"])
           |> String.to_integer()
           |> Kernel.+(1)
 
+        status =
+          if body["online_status"] |> String.to_integer() > 0, do: "online", else: "offline"
+
         character = %{
           "stat_page" => String.downcase(stat_template_name) <> ".html",
           "response" => body,
-          "next_rank" => next_rank
+          "next_rank" => next_rank,
+          "status" => status
         }
 
         render(conn, "template.html", character: character)

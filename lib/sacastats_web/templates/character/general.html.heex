@@ -9,23 +9,13 @@
         <div class="stat-section">
             <h1 id="characterName"><%= @character["response"]["name"]["first"] %></h1>
             <div class="d-none d-sm-flex float-sm-right">
-                <%= if Integer.parse(@character["response"]["online_status"]) > {0,""} do %>
-                    <img src={Routes.static_path(@conn, "/images/character/online.ico")} alt="online" width="30">
-                    <p class="d-inline my-auto">Online</p>
-                <% else %>
-                    <img src={Routes.static_path(@conn, "/images/character/offline.ico")} alt="offline" width="30">
-                    <p class="d-inline my-auto">Offline</p>
-                <% end %>
+                <img src={Routes.static_path(@conn, "/images/character/" <> @character["status"] <> ".ico")} alt={@character["status"]} width="30">
+                <p class="d-inline my-auto"><%=String.capitalize(@character["status"]) %></p>
             </div>
             <p id="characterId"><%= @character["response"]["character_id"] %></p>
             <div class="d-sm-none d-flex justify-content-center pb-3">
-                <%= if Integer.parse(@character["response"]["online_status"]) > {0,""} do %>
-                    <img src={Routes.static_path(@conn, "/images/character/online.ico")} alt="online" width="30">
-                    <p class="d-inline my-auto">Online</p>
-                <% else %>
-                    <img src={Routes.static_path(@conn, "/images/character/offline.ico")} alt="offline" width="30">
-                    <p class="d-inline my-auto">Offline</p>
-                <% end %>
+                <img src={Routes.static_path(@conn, "/images/character/" <> @character["status"] <> ".ico")} alt={@character["status"]} width="30">
+                <p class="d-inline my-auto"><%=String.capitalize(@character["status"]) %></p>
             </div>
         </div>
         
