@@ -12,6 +12,7 @@ defmodule SacaStatsWeb.CharacterController do
     q =
       PS2.API.Query.new(collection: "character")
       |> PS2.API.QueryBuilder.term("name.first_lower", String.downcase(name))
+      |> PS2.API.QueryBuilder.resolve("online_status")
 
     case PS2.API.query_one(q) do
       {:ok, %PS2.API.QueryResult{returned: 0}} ->
@@ -20,13 +21,23 @@ defmodule SacaStatsWeb.CharacterController do
         |> redirect(to: Routes.character_path(conn, :character_search))
 
       {:ok, %PS2.API.QueryResult{data: body}} ->
-        character_stuff = %{
-          "name" => name,
+        next_rank =
+          body
+          |> get_in(["battle_rank", "value"])
+          |> String.to_integer()
+          |> Kernel.+(1)
+
+        status =
+          if body["online_status"] |> String.to_integer() > 0, do: "online", else: "offline"
+
+        character = %{
           "stat_page" => String.downcase(stat_template_name) <> ".html",
-          "response" => Map.get(body, "character_id")
+          "response" => body,
+          "next_rank" => next_rank,
+          "status" => status
         }
 
-        render(conn, "template.html", character: character_stuff)
+        render(conn, "template.html", character: character)
 
       {:error, e} ->
         Logger.error("Error fetching character: #{inspect(e)}")

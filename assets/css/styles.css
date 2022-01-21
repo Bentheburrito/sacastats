@@ -26,6 +26,9 @@ nav{
 .top-bottom-nav{
   transition: .3s;
 }
+.sticky-top{
+  margin-bottom: 0px;
+}
 /*individual hover colors*/
 ul.navbar-nav li{
   box-sizing:border-box;
