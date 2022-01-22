@@ -7,7 +7,7 @@
     </div>
     <div class="col-md-8 col-12">
         <div class="stat-section">
-            <h1 id="characterName"><%= @character["response"]["name"]["first"] %></h1>
+            <h1 class="text-center text-sm-left" id="characterName"><%= @character["response"]["name"]["first"] %></h1>
             <div class="d-none d-sm-flex float-sm-right">
                 <img src={Routes.static_path(@conn, "/images/character/" <> @character["status"] <> ".ico")} alt={@character["status"]} width="30">
                 <p class="d-inline my-auto"><%=String.capitalize(@character["status"]) %></p>
