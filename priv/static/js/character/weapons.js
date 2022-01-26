@@ -19,6 +19,4 @@ function initializeWeaponTableData() {
         cell2.appendChild(cell2Text);
         cell3.appendChild(cell3Text);
     }
-
-    //setMobileHeaderTexts(table);
 }
