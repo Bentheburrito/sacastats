@@ -16,6 +16,8 @@ window.addEventListener('load', (event) => {
 
     addEventHandlersToAnchorLinks();
 
+    setupFlexTables();
+
     removeLoadingScreen();
 
     waitForLoadingScreenToCloseThenRunFunction(addAnimationToProgressBars);
@@ -35,6 +37,14 @@ function addEventListeners() {
     handlePageClickEvents();
 
     handleNavLinkEvents();
+
+    setWindowResizeEvents();
+}
+
+function setWindowResizeEvents() {
+    window.onresize = function (event) {
+        setFlexTableVisibilities();
+    };
 }
 
 function handleCollapsableNavbarEvents() {
@@ -402,4 +412,50 @@ function waitForLoadingScreenToOpenThenRunFunction(functionToRun) {
     } else {
         functionToRun();
     }
+}
+
+function setupFlexTables() {
+    initializeFlexTables();
+
+    setFlexTableVisibilities();
+}
+
+function initializeFlexTables() {
+    document.querySelectorAll('.table-responsive-stack').forEach(table => {
+        setMobileHeaderTexts(table);
+    });
+}
+
+function setMobileHeaderTexts(table) {
+    var id = table.id;
+    //append each header text to the front of the corresponding data element and hide it
+    $(table).find("th").each(function (i) {
+        $('#' + id + ' td:nth-child(' + (i + 1) + ')').prepend('<span class="table-responsive-stack-thead">' + $(this).text() + ':</span> ');
+        $('.table-responsive-stack-thead').hide();
+    });
+}
+
+function setFlexTableVisibilities() {
+    let screenWidth = window.innerWidth <= 767;
+    document.querySelectorAll('.table-responsive-stack').forEach(table => {
+        showHideMobileAndRegularTables(table, screenWidth);
+    });
+}
+
+function showHideMobileAndRegularTables(table, showMobile) {
+    if (showMobile) {
+        showMobileTableAndHideRegularTable(table);
+    } else {
+        hideMobileTableAndShowRegularTable(table);
+    }
+}
+
+function showMobileTableAndHideRegularTable(table) {
+    $(table).find(".table-responsive-stack-thead").show();
+    $(table).find('thead').hide();
+}
+
+function hideMobileTableAndShowRegularTable(table) {
+    $(table).find(".table-responsive-stack-thead").hide();
+    $(table).find('thead').show();
 }
