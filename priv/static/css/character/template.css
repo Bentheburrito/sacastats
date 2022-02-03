@@ -16,3 +16,12 @@
       padding-bottom: 18rem !important;
     }
 }
+
+/*Character Header*/
+#characterName{
+    margin-bottom: 0;
+}
+
+#characterId{
+    padding-left: 15px;
+}

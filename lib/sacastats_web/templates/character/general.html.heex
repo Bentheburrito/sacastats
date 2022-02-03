@@ -7,19 +7,6 @@
     </div>
     <div class="col-md-8 col-12">
         <div class="stat-section">
-            <h1 id="characterName"><%= @character["response"]["name"]["first"] %></h1>
-            <div class="d-none d-sm-flex float-sm-right">
-                <img src={Routes.static_path(@conn, "/images/character/" <> @character["status"] <> ".ico")} alt={@character["status"]} width="30">
-                <p class="d-inline my-auto"><%=String.capitalize(@character["status"]) %></p>
-            </div>
-            <p id="characterId"><%= @character["response"]["character_id"] %></p>
-            <div class="d-sm-none d-flex justify-content-center pb-3">
-                <img src={Routes.static_path(@conn, "/images/character/" <> @character["status"] <> ".ico")} alt={@character["status"]} width="30">
-                <p class="d-inline my-auto"><%=String.capitalize(@character["status"]) %></p>
-            </div>
-        </div>
-        
-        <div class="stat-section">
             <h3 class="text-center">Battle Rank</h3>
             <div class="progress">
                 <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow={"#{@character["response"]["battle_rank"]["percent_to_next"]}"} aria-valuemin="0" aria-valuemax="100"  style="width: 0;"}>
