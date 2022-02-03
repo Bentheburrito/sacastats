@@ -19,9 +19,17 @@
   </div>
 </nav>
 <main role="main" class="container">
+  <h1 class="text-center text-sm-left" id="characterName"><%= @character["response"]["name"]["first"] %></h1>
+  <div class="d-none d-sm-flex float-sm-right">
+    <img src={Routes.static_path(@conn, "/images/character/" <> @character["status"] <> ".ico")} alt={@character["status"]} width="30">
+    <p class="d-inline my-auto"><%=String.capitalize(@character["status"]) %></p>
+  </div>
+  <p id="characterId"><%= @character["response"]["character_id"] %></p>
+  <div class="d-sm-none d-flex justify-content-center pb-3">
+    <img src={Routes.static_path(@conn, "/images/character/" <> @character["status"] <> ".ico")} alt={@character["status"]} width="30">
+    <p class="d-inline my-auto"><%=String.capitalize(@character["status"]) %></p>
+  </div>
   <%= render SacaStatsWeb.CharacterView, @character["stat_page"], assigns %>
-  <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
-  <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
 </main>
 <footer>
   <nav class="navbar navbar-expand-md navbar-light bg-light d-md-none fixed-bottom top-bottom-nav pb-10">

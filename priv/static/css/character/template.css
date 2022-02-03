@@ -16,3 +16,18 @@
       padding-bottom: 18rem !important;
     }
 }
+
+/*Character Header*/
+#characterName{
+    margin-bottom: 0;
+}
+
+#characterId{
+    padding-left: 15px;
+}
+@media only screen and (max-width: 767px) { /*for boostrap xs*/
+    #characterId{
+        padding-left: 0px;
+        text-align: center;
+    }
+}

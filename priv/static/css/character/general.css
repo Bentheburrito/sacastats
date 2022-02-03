@@ -2,18 +2,6 @@
     padding-top: 3vh
 }
 
-#characterName{
-    margin-bottom: 0;
-}
-
-#characterId{
-    padding-left: 15px;
-}
-
-.stat-section{
-    
-}
-
 p{
     margin-bottom:1rem !important;
 }
@@ -34,9 +22,5 @@ h4{
     .move-up-4{
         position: relative;
         top: -2rem !important;
-    }
-    #characterId{
-        padding-left: 0px;
-        text-align: center;
     }
 }
