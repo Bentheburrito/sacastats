@@ -1,0 +1,15 @@
+<link rel="stylesheet" href={Routes.static_path(@conn, "/css/character/weapons.css")}/>
+
+<h2><%= @character["response"]["name"]["first"] %></h2>
+<table class="table table-bordered table-striped table-responsive-stack" id="weaponTable">
+    <thead class="thead-dark">
+        <tr>
+        <th>Name</th>
+        <th>Kills</th>
+        <th>Shots</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script type="text/javascript" src={Routes.static_path(@conn, "/js/character/weapons.js")}></script>
