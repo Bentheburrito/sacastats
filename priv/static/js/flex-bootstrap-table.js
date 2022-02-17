@@ -192,7 +192,7 @@ export function setupFlexTables() {
         return text.trim() != "" && text.trim() != "Weapon";
     }
     function hasMobileHeader(text) {
-        return text.includes("table-responsive-stack-thead") || text.trim() == "Weapon";
+        return text != undefined && (text.includes("table-responsive-stack-thead") || text.trim() == "Weapon");
     }
 }
 
