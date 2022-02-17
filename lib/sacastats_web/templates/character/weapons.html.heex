@@ -1,15 +1,87 @@
 <link rel="stylesheet" href={Routes.static_path(@conn, "/css/character/weapons.css")}/>
 
-<h2><%= @character["response"]["name"]["first"] %></h2>
-<table class="table table-bordered table-striped table-responsive-stack" id="weaponTable">
-    <thead class="thead-dark">
+<div id="toolbar">
+</div>
+<button id="nextAurax" class="btn btn-secondary p-0 m-0 mt-3 float-right"  data-toggle="tooltip" data-placement="top" title="Scroll to closest weapon to auraxium">
+    <img src={Routes.static_path(@conn, "/images/character/alphaAurax.png")} class="m-auto" width="30px" alt="To Next Auraxium Weapon"/>
+</button>
+<table class="table table-bordered table-striped table-responsive-stack" id="weaponTable"
+    data-toolbar="#toolbar"
+    data-show-columns="true"
+    data-reorderable-columns="true"
+    data-sort-name="kills"
+    data-sort-order="desc"
+    data-sticky-header="true"
+    data-sticky-header-offset-y="210"
+    data-search="true"
+    data-search-on-enter-key="true"
+    data-pagination="true"
+    data-page-size="5"
+    data-page-list="[5, 10, 25, 50, 100, 200, All]">
+    <thead class="">
         <tr>
-        <th>Name</th>
-        <th>Kills</th>
-        <th>Shots</th>
+            <th data-field="weapon">Weapon</th>
+            <th data-field="kills" data-sortable="true" data-sort-order="desc">Kills</th>
+            <th data-field="ikills" data-sortable="true" data-sort-order="desc">I.Kills</th>
+            <th data-field="vkills" data-sortable="true" data-sort-order="desc">V.Kills</th>
+            <th data-field="hs" data-sortable="true" data-sort-order="desc">HS</th>
+            <th data-field="shots" data-sortable="true" data-sort-order="desc">Shots</th>
+            <th data-field="faction" data-sortable="true" data-sort-order="asc">Faction</th>
+            <th data-field="Type" data-sortable="true" data-sort-order="asc">Type</th>
+            <th data-field="category" data-sortable="true" data-sort-order="asc">Category</th>
+            <th data-field="id" data-sortable="true" data-sort-order="desc">ID</th>
         </tr>
     </thead>
-    <tbody></tbody>
+    <tbody>
+        <%= for {weapon_id, weapon} <- @character["weapons"] do %>
+            <tr id={"weapon" <> (weapon_id |> Integer.to_string()) <> "Row"} class="">
+                <td class="weapon p-0">
+                    <%= if SacaStatsWeb.CharacterController.get_medal_code(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills")), 
+                            SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"))) > 0 do%>
+                        <img src={"https://census.daybreakgames.com/files/ps2/images/static/" <> (SacaStatsWeb.CharacterController.get_medal_code(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills")), 
+                            SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills")))|> Integer.to_string()) <>".png"} alt="medal" class="medal float-left" width="30px"/>
+                    <% end %>
+                    <img src="https://census.daybreakgames.com/files/ps2/images/static/2021.png" alt={Map.get(weapon, "name", "N/A")} class="weapon mx-auto d-block" width="150px"/>
+                    <h5 class="weaponName align-text-bottom text-center mb-0"><%=Map.get(weapon, "name", "N/A")%></h5>
+                    <div id={"weapon" <> (weapon_id |> Integer.to_string()) <> "ProgressBar"} class="progress-bar progress-bar-striped progress-bar-animated aurax-progress" role="progressbar" 
+                        aria-valuenow={"#{SacaStatsWeb.CharacterController.get_aurax_percent(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills")), 
+                            SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills")))}"} 
+                        aria-valuemin="0" aria-valuemax="100" style="width: 0;">
+                        <%= SacaStatsWeb.CharacterController.get_aurax_percent(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills")), 
+                            SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills")))%>%
+                    </div>
+                </td>
+                <td id={"weapon" <> (weapon_id |> Integer.to_string()) <> "Kills"} class="number text-center total-kills">
+                    <%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills")) + SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"))%>
+                </td>
+                <td class="number text-center"><%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"))%></td>
+                <td class="number text-center"><%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"))%></td>
+                <td class="text-center"><%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_headshots"))%></td>
+                <td class="text-center"><%=weapon["weapon_fire_count"]%></td>
+                <td class="text-center"><%=SacaStatsWeb.CharacterController.get_faction_alias(weapon["faction_id"])%></td>
+                <td class="text-center"><%=weapon["sanction"]%></td>
+                <td class="text-center"><%=weapon["category"]%></td>
+                <td class="text-center"><%=weapon_id%></td>
+            </tr>
+        <% end %>
+    </tbody>
 </table>
 
-<script type="text/javascript" src={Routes.static_path(@conn, "/js/character/weapons.js")}></script>
+<script type="module">
+    //initialize weapon table
+    import init from "<%= Routes.static_path(@conn, "/js/character/weaponsTable.js") %>";
+    init();
+</script>
+
+<script type="module">
+    //initialize weapon id and kill count map
+    import init from "<%= Routes.static_path(@conn, "/js/character/weapons.js") %>";
+    let kills = new Map();
+    "<%= for {weapon_id, weapon} <- @character["weapons"] do %>"
+        kills.set("<%= "weapon" <> (weapon_id |> Integer.to_string()) <> "Row" %>", "<%= SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills")) + SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills")) %>")
+    "<% end %>"
+    init(kills);
+</script>
+
+<script type="module" src={Routes.static_path(@conn, "/js/character/weapons.js")}></script>
+<script type="module" src={Routes.static_path(@conn, "/js/character/weaponsTable.js")}></script>
