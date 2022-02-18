@@ -72,7 +72,7 @@ export function setupFlexTables() {
                     //TODO Remove URI query string 
                     updateSortTable();
                 }, 500);
-            }
+            } //TODO Add else and highlight text on desktop to easily remove later
         }
     }
     function tableSearchEnterDownEventHandler(e) {
