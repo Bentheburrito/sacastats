@@ -3,6 +3,8 @@ const preferedLanguage = navigator.language;
 export function addFormatsToPage() {
     addCommasToNumbers();
     formatDateTimes();
+    secondsToHHMMSS();
+    addPercents();
 
     function addCommasToNumbers() {
         //get every element with the number class and add proper commas
@@ -33,6 +35,70 @@ export function addFormatsToPage() {
         let dateArr = date.split("-");
         let timeArr = time.split(":");
         return new Date(Date.UTC(dateArr[0], dateArr[1] - 1, dateArr[2], timeArr[0], timeArr[1], timeArr[2].split(".")[0])).toLocaleString(preferedLanguage, { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone });
+    }
+
+    function addPercents() {
+        //get every element with the percentage class and adds a '%' at the end
+        let percents = document.querySelectorAll(".percentage");
+        percents.forEach(percent => {
+            //if there is no percent sign add one
+            if (percent.innerHTML.slice(-1) != "%") {
+                percent.innerHTML += "%";
+            }
+        });
+    }
+
+    function secondsToHHMMSS() {
+        //get every element with the seconds-to-readable class and convert the string
+        let seconds = document.querySelectorAll(".seconds-to-readable");
+        const YEAR_SECOND = 31556952;
+        const DAY_SECOND = 86400;
+        const HOUR_SECOND = 3600;
+        const MINUTE_SECOND = 60;
+
+        seconds.forEach(second => {
+            let secondCount = +second.innerHTML;
+            //if it's a number
+            if (!isNaN(secondCount)) {
+                let time = "";
+                let year;
+                let day;
+                let hour;
+                let min;
+                let sec;
+
+                //add y d h m s values
+                switch (true) {
+                    case (secondCount >= YEAR_SECOND):
+                        year = Math.floor(secondCount / YEAR_SECOND);
+                        secondCount %= YEAR_SECOND;
+                        day = Math.floor(secondCount / DAY_SECOND);
+                        secondCount %= DAY_SECOND;
+                        hour = Math.floor(secondCount / HOUR_SECOND);
+                        time = year + "y " + ((day > 0) ? (day + "d ") : "") + ((hour > 0) ? (hour + "h") : "");
+                        break;
+                    case (secondCount >= DAY_SECOND):
+                        day = Math.floor(secondCount / DAY_SECOND);
+                        secondCount %= DAY_SECOND;
+                        hour = Math.floor(secondCount / HOUR_SECOND);
+                        time = day + "d " + ((hour > 0) ? (hour + "h") : "");
+                        break;
+                    case (secondCount >= HOUR_SECOND):
+                        hour = Math.floor(secondCount / HOUR_SECOND);
+                        secondCount %= HOUR_SECOND;
+                        min = Math.floor(secondCount / MINUTE_SECOND);
+                        time = hour + "h " + ((min > 0) ? (min + "m") : "");
+                        break;
+                    case (secondCount >= MINUTE_SECOND):
+                        min = Math.floor(secondCount / MINUTE_SECOND);
+                        sec = secondCount %= MINUTE_SECOND;
+                        time = min + "m " + ((second > 0) ? (second + "s") : "");
+                        break;
+                    default: time = secondCount + "s";
+                }
+                second.innerHTML = time;
+            }
+        });
     }
 }
 
