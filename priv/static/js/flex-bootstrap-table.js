@@ -13,24 +13,37 @@ export function setupFlexTables() {
     }
 
     function updateSortTable() {
-        let toSortDesc = table.querySelector(".desc");
-        let toSortAsc = table.querySelector(".asc");
+        if (!didTableRecieveStyleUpdate()) {
+            let toSortDesc = table.querySelector(".desc");
+            let toSortAsc = table.querySelector(".asc");
 
-        if (toSortDesc != undefined) {
-            toSortDesc.click();
-            toSortDesc.click();
-            toSortDesc.classList.remove("desc");
-            toSortDesc.classList.add("desc");
-        } else if (toSortAsc != undefined) {
-            toSortDesc.click();
-            toSortDesc.click();
-            toSortAsc.classList.remove("asc");
-            toSortAsc.classList.add("asc");
+            if (toSortDesc != undefined) {
+                toSortDesc.click();
+                toSortDesc.click();
+            } else if (toSortAsc != undefined) {
+                toSortAsc.click();
+                toSortAsc.click();
+            }
+        }
+    }
+
+    function updateStickySortTable() {
+        if (!didTableRecieveStyleUpdate()) {
+            let toSortDesc = document.querySelector(".sticky-header").querySelector(".desc");
+            let toSortAsc = document.querySelector(".sticky-header").querySelector(".asc");
+
+            if (toSortDesc != undefined) {
+                toSortDesc.click();
+                toSortDesc.click();
+            } else if (toSortAsc != undefined) {
+                toSortAsc.click();
+                toSortAsc.click();
+            }
         }
     }
     function initializeFlexTables() {
         document.querySelectorAll('.table-responsive-stack').forEach(responseTable => {
-            table = responseTable
+            table = responseTable;
             setMobileHeaderTexts(table.id);
             addOnTHeadClick();
             addToolBarClick();
@@ -77,14 +90,20 @@ export function setupFlexTables() {
 
     function tableToolBarClickEventHandler() {
         setTimeout(function () {
-            updateTableFormats(table.id);
-        }, 10);
+            updateSortTable();
+            $(".dropdown-toggle:first").click();
+        }, 100);
     }
     function addToolBarClick() {
         document.querySelectorAll('.dropdown-item-marker').forEach(itemDropDown => {
             itemDropDown.removeEventListener('mouseup', tableToolBarClickEventHandler);
             itemDropDown.addEventListener('mouseup', tableToolBarClickEventHandler);
         });
+    }
+
+    function refreshByScroll() {
+        window.scrollBy(0, -1);
+        window.scrollBy(0, 1);
     }
 
     let tableMouseMoveClick = false;
@@ -94,6 +113,12 @@ export function setupFlexTables() {
         } else {
             if (tableMouseMoveClick) {
                 setTimeout(function () {
+                    if (e.target.parentElement.parentElement.parentElement.classList.contains("sticky-header")) {
+                        refreshByScroll();
+                        setTimeout(function () {
+                            updateStickySortTable();
+                        }, 500);
+                    }
                     updateTableFormats(table.id);
                 }, 10);
                 tableMouseMoveClick = false;
@@ -103,6 +128,7 @@ export function setupFlexTables() {
     function tableMouseClickEventHandler() {
         setTimeout(function () {
             updateTableFormats(table.id);
+            refreshByScroll();
         }, 1);
     }
     function addOnTHeadClick() {
@@ -110,6 +136,10 @@ export function setupFlexTables() {
         table.firstElementChild.removeEventListener('click', tableMouseClickEventHandler);
         table.firstElementChild.addEventListener('mousemove', tableMouseMoveEventHandler);
         table.firstElementChild.addEventListener('click', tableMouseClickEventHandler);
+        document.querySelector(".sticky-header-container").removeEventListener('mousemove', tableMouseMoveEventHandler);
+        document.querySelector(".sticky-header-container").removeEventListener('click', tableMouseClickEventHandler);
+        document.querySelector(".sticky-header-container").addEventListener('mousemove', tableMouseMoveEventHandler);
+        document.querySelector(".sticky-header-container").addEventListener('click', tableMouseClickEventHandler);
     }
 
     function updateTableFormats(tableID) {
@@ -126,29 +156,34 @@ export function setupFlexTables() {
             //if the table is didn't get destroyed
             let table = document.getElementById(tableID);
             if (table != undefined) {
-                //loop through the rows
-                for (let tableRow of table.querySelector("tbody").querySelectorAll("tr")) {
-                    let td = tableRow.querySelector(".weapon");
-                    if (td != undefined) {
-                        //make sure if it is over 0% that the width of the progress bar is too
-                        let progress = td.querySelector(".progress-bar");
-                        if (parseInt(progress.innerHTML.replace("%", "")) > 0) {
-                            if (progress.style.width = 0) {
-                                updateTableFormats(tableID);
-                                break;
-                            }
-                        }
-                        //if it doesn't have a .weapon column just ignore progress bar formats
-                    } else {
-                        updateTableFormats(tableID);
-                        break;
-                    }
+                if (!didTableRecieveStyleUpdate()) {
+                    updateTableFormats(tableID);
                 }
             } else {
                 //otherwise reinitialize the table
                 init();
             }
         }, 500);
+    }
+
+    function didTableRecieveStyleUpdate() {
+        //loop through the rows
+        for (let tableRow of table.querySelector("tbody").querySelectorAll("tr")) {
+            let td = tableRow.querySelector(".weapon");
+            if (td != undefined) {
+                //make sure if it is over 0% that the width of the progress bar is too
+                let progress = td.querySelector(".progress-bar");
+                if (parseInt(progress.innerHTML.replace("%", "")) > 0) {
+                    if (progress.style.width.replace("px", "") == "0") {
+                        return false;
+                    }
+                }
+                //if it doesn't have a .weapon column just ignore progress bar formats
+            } else {
+                return true;
+            }
+        }
+        return true;
     }
 
     function tablePaginationClickEventHandler(e) {
