@@ -345,7 +345,40 @@ defmodule SacaStatsWeb.CharacterController do
       get_string_value_as_integer(tr)
   end
 
+  def get_string_value_as_integer(nil), do: 0
+
   def get_string_value_as_integer(value) do
     if value != "", do: String.to_integer(value), else: 0
+  end
+
+  def get_cert_count(score) do
+    if(score < 250) do
+      0
+    else
+      Decimal.round(
+        Decimal.div(
+          score,
+          Decimal.new(250)
+        ),
+        0
+      )
+    end
+  end
+
+  def get_percent_ratio(value, total_value) do
+    if(total_value > 0) do
+      Decimal.round(
+        Decimal.mult(
+          Decimal.div(
+            Decimal.new(value),
+            Decimal.new(total_value)
+          ),
+          Decimal.new(100)
+        ),
+        2
+      )
+    else
+      value
+    end
   end
 end

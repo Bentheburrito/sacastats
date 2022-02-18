@@ -20,16 +20,45 @@
     data-page-list="[5, 10, 25, 50, 100, 200, All]">
     <thead class="">
         <tr>
-            <th data-field="weapon">Weapon</th>
-            <th data-field="kills" data-sortable="true" data-sort-order="desc">Kills</th>
-            <th data-field="ikills" data-sortable="true" data-sort-order="desc">I.Kills</th>
-            <th data-field="vkills" data-sortable="true" data-sort-order="desc">V.Kills</th>
-            <th data-field="hs" data-sortable="true" data-sort-order="desc">HS</th>
-            <th data-field="shots" data-sortable="true" data-sort-order="desc">Shots</th>
-            <th data-field="faction" data-sortable="true" data-sort-order="asc">Faction</th>
-            <th data-field="Type" data-sortable="true" data-sort-order="asc">Type</th>
-            <th data-field="category" data-sortable="true" data-sort-order="asc">Category</th>
-            <th data-field="id" data-sortable="true" data-sort-order="desc">ID</th>
+            <th data-field="weapon" data-toggle="tooltip" title="Weapons">Weapon</th>
+            <th data-field="kills" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Total number of kills">Kills</th>
+            <th data-field="vskills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Total number of VS kills">VS-Kills</th>
+            <th data-field="nckills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Total number of NC kills">NC-Kills</th>
+            <th data-field="trkills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Total number of TR kills">TR-Kills</th>
+            <th data-field="ikills" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Infantry kills">I.Kills</th>
+            <th data-field="vsikills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="VS infantry kills">VS-I.Kills</th>
+            <th data-field="ncikills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="NC infantry kills">NC-I.Kills</th>
+            <th data-field="trikills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="TR infantry kills">TR-I.Kills</th>
+            <th data-field="vkills" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Vehicle kills">V.Kills</th>
+            <th data-field="vsvkills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="VS vehicle kills">VS-V.Kills</th>
+            <th data-field="ncvkills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="NC vehicle kills">NC-V.Kills</th>
+            <th data-field="trvkills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="TR vehicle kills">TR-V.Kills</th>
+            <th data-field="kdr" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Kills per death">KD</th>
+            <th data-field="acc" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Accuracy">Acc</th>
+            <th data-field="hits" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Number of hits">Hits</th>
+            <th data-field="shots" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Shots fired">Shots</th>
+            <th data-field="hs" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Head shots">HS</th>
+            <th data-field="vshs" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="VS head shots">VS-HS</th>
+            <th data-field="nchs" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="NC head shots">NC-HS</th>
+            <th data-field="trhs" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="TR head shots">TR-HS</th>
+            <th data-field="hsr" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Head shots per kill">HSR</th>
+            <th data-field="damage" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Damage given">Damage</th>
+            <th data-field="vsdamage" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="VS damage given">VS-Damage</th>
+            <th data-field="ncdamage" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="NC damage given">NC-Damage</th>
+            <th data-field="trdamage" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="TR damage given">TR-Damage</th>
+            <th data-field="time" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Time used with">Time</th>
+            <th data-field="certs" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Certs earned with weapon">Certs</th>
+            <th data-field="score" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Score earned with weapon">Score</th>
+            <th data-field="killedby" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Number of times killed by weapon">Killed By</th>
+            <th data-field="vskilledby" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Killed by VS">VS-Killed By</th>
+            <th data-field="nckilledby" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Killed by NC">NC-Killed By</th>
+            <th data-field="trkilledby" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Killed by TR">TR-Killed By</th>
+            <th data-field="deaths" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Died with weapon">Deaths</th>
+            <th data-field="vw" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Is it a vehicle weapon?">VW</th>
+            <th data-field="faction" data-visible="false" data-sortable="true" data-sort-order="asc" data-toggle="tooltip" title="Faction weapon is from">Faction</th>
+            <th data-field="category" data-visible="false" data-sortable="true" data-sort-order="asc" data-toggle="tooltip" title="Weapon category">Category</th>
+            <th data-field="type" data-sortable="true" data-sort-order="asc" data-toggle="tooltip" title="Type of weapon">Type</th>
+            <th data-field="id" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Weapon ID number">ID</th>
         </tr>
     </thead>
     <tbody>
@@ -54,10 +83,87 @@
                 <td id={"weapon" <> (weapon_id |> Integer.to_string()) <> "Kills"} class="number text-center total-kills">
                     <%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills")) + SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"))%>
                 </td>
+                <td class="number text-center">
+                    <%=SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_kills"]["value_vs"]) + SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_vehicle_kills"]["value_vs"])%>
+                </td>
+                <td class="number text-center">
+                    <%=SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_kills"]["value_nc"]) + SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_vehicle_kills"]["value_nc"])%>
+                </td>
+                <td class="number text-center">
+                    <%=SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_kills"]["value_tr"]) + SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_vehicle_kills"]["value_tr"])%>
+                </td>
                 <td class="number text-center"><%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"))%></td>
+                <td class="number text-center">
+                    <%=SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_kills"]["value_vs"])%>
+                </td>
+                <td class="number text-center">
+                    <%=SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_kills"]["value_nc"])%>
+                </td>
+                <td class="number text-center">
+                    <%=SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_kills"]["value_tr"])%>
+                </td>
                 <td class="number text-center"><%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"))%></td>
-                <td class="text-center"><%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_headshots"))%></td>
-                <td class="text-center"><%=weapon["weapon_fire_count"]%></td>
+                <td class="number text-center">
+                    <%=SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_vehicle_kills"]["value_vs"])%>
+                </td>
+                <td class="number text-center">
+                    <%=SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_vehicle_kills"]["value_nc"])%>
+                </td>
+                <td class="number text-center">
+                    <%=SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_vehicle_kills"]["value_tr"])%>
+                </td>
+                <td class="text-center">
+                    <%=SacaStatsWeb.CharacterController.get_percent_ratio(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills")) + SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills")),
+                        SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_deaths"]))%>
+                </td>
+                <td class="text-center percentage">
+                    <%=SacaStatsWeb.CharacterController.get_percent_ratio(weapon["weapon_hit_count"], weapon["weapon_fire_count"])%>
+                </td>
+                <td class="number text-center">
+                    <%=SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_hit_count"])%>
+                </td>
+                <td class="number text-center">
+                    <%=SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_fire_count"])%>
+                </td>
+                <td class="number text-center"><%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_headshots"))%></td>
+                <td class="number text-center">
+                    <%=SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_headshots"]["value_vs"])%>
+                </td>
+                <td class="number text-center">
+                    <%=SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_headshots"]["value_nc"])%>
+                </td>
+                <td class="number text-center">
+                    <%=SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_headshots"]["value_tr"])%>
+                </td>
+                <td class="text-center percentage">
+                    <%=SacaStatsWeb.CharacterController.get_percent_ratio(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_headshots")), 
+                        (SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills")) + SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"))))%>
+                </td>
+                <td class="number text-center"><%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_damage_given"))%></td>
+                <td class="number text-center">
+                    <%=SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_damage_given"]["value_vs"])%>
+                </td>
+                <td class="number text-center">
+                    <%=SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_damage_given"]["value_nc"])%>
+                </td>
+                <td class="number text-center">
+                    <%=SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_damage_given"]["value_tr"])%>
+                </td>
+                <td class="text-center seconds-to-readable"><%=SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_play_time"])%></td>
+                <td class="number text-center"><%=SacaStatsWeb.CharacterController.get_cert_count(weapon["weapon_score"])%></td>
+                <td class="number text-center"><%=weapon["weapon_score"]%></td>
+                <td class="number text-center"><%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_killed_by"))%></td>
+                <td class="number text-center">
+                    <%=SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_killed_by"]["value_vs"])%>
+                </td>
+                <td class="number text-center">
+                    <%=SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_killed_by"]["value_nc"])%>
+                </td>
+                <td class="number text-center">
+                    <%=SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_killed_by"]["value_tr"])%>
+                </td>
+                <td class="number text-center"><%=SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_deaths"])%></td>
+                <td class="text-center"><%=if weapon["vehicle_weapon?"], do: "Yes", else: "No"%></td>
                 <td class="text-center"><%=SacaStatsWeb.CharacterController.get_faction_alias(weapon["faction_id"])%></td>
                 <td class="text-center"><%=weapon["sanction"]%></td>
                 <td class="text-center"><%=weapon["category"]%></td>
