@@ -1,5 +1,5 @@
 defmodule SacaStats.EventHandler do
-  use PS2.SocketClient
+  @behaviour PS2.SocketClient
   require Logger
 
   import Ecto.Query
@@ -9,13 +9,11 @@ defmodule SacaStats.EventHandler do
   alias SacaStats.SessionTracker
   alias Phoenix.PubSub
 
-  def start_link(subscriptions) do
-    PS2.SocketClient.start_link(__MODULE__, subscriptions)
-  end
-
   # ESS events
+  @impl PS2.SocketClient
   def handle_event({_event, %{"character_id" => "0"}}), do: nil
 
+  @impl PS2.SocketClient
   def handle_event(
         {"GainExperience",
          %{"character_id" => character_id, "amount" => xp_amount, "experience_id" => xp_id_str}}
@@ -33,6 +31,7 @@ defmodule SacaStats.EventHandler do
     end
   end
 
+  @impl PS2.SocketClient
   def handle_event(
         {"Death",
          %{
@@ -74,18 +73,21 @@ defmodule SacaStats.EventHandler do
     end
   end
 
+  @impl PS2.SocketClient
   def handle_event(
         {"PlayerLogin", %{"character_id" => character_id, "timestamp" => timestamp}}
       ) do
     SessionTracker.put(character_id, timestamp)
   end
 
+  @impl PS2.SocketClient
   def handle_event(
         {"PlayerLogout", %{"character_id" => character_id, "timestamp" => timestamp}}
       ) do
     SessionTracker.close(character_id, timestamp)
   end
 
+  @impl PS2.SocketClient
   def handle_event(
         {"VehicleDestroy",
          %{
@@ -119,6 +121,7 @@ defmodule SacaStats.EventHandler do
     end
   end
 
+  @impl PS2.SocketClient
   def handle_event({"PlayerFacilityCapture", %{"character_id" => character_id}}) do
     with {:ok, %CharacterSession{} = session} <- SessionTracker.get(character_id) do
       CharacterSession.changeset(session, %{base_captures: session.base_captures + 1})
@@ -126,6 +129,7 @@ defmodule SacaStats.EventHandler do
     end
   end
 
+  @impl PS2.SocketClient
   def handle_event({"PlayerFacilityDefend", %{"character_id" => character_id}}) do
     with {:ok, %CharacterSession{} = session} <- SessionTracker.get(character_id) do
       CharacterSession.changeset(session, %{base_defends: session.base_defends + 1})
@@ -133,6 +137,7 @@ defmodule SacaStats.EventHandler do
     end
   end
 
+  @impl PS2.SocketClient
   def handle_event({"BattleRankUp", %{"character_id" => character_id, "battle_rank" => br}}) do
     with {:ok, %CharacterSession{} = session} <- SessionTracker.get(character_id) do
       CharacterSession.changeset(session, %{br_ups: [br | session.br_ups]})
@@ -141,6 +146,7 @@ defmodule SacaStats.EventHandler do
   end
 
   # Metagame end
+  @impl PS2.SocketClient
   def handle_event(
         {"MetagameEvent", %{"metagame_event_id" => event_id_str, "metagame_event_state" => "138"}}
       ) do
@@ -151,6 +157,7 @@ defmodule SacaStats.EventHandler do
   end
 
   # Metagame start
+  @impl PS2.SocketClient
   def handle_event(
         {"MetagameEvent", %{"metagame_event_id" => event_id_str, "metagame_event_state" => "135"}}
       ) do
@@ -167,6 +174,7 @@ defmodule SacaStats.EventHandler do
     PubSub.broadcast(SacaStats.PubSub, "game_status", event)
   end
 
+  @impl PS2.SocketClient
   def handle_event({"ContinentLock", %{"world_id" => world_id_str, "zone_id" => zone_id_str}}) do
     world_id = String.to_integer(world_id_str)
     zone_id = String.to_integer(zone_id_str)
@@ -177,6 +185,7 @@ defmodule SacaStats.EventHandler do
     PubSub.broadcast(SacaStats.PubSub, "game_status", event)
   end
 
+  @impl PS2.SocketClient
   def handle_event({"ContinentUnlock", %{"world_id" => world_id_str, "zone_id" => zone_id_str}}) do
     world_id = String.to_integer(world_id_str)
     zone_id = String.to_integer(zone_id_str)
@@ -197,5 +206,6 @@ defmodule SacaStats.EventHandler do
   end
 
   # Catch-all callback.
+  @impl PS2.SocketClient
   def handle_event(_event), do: nil
 end

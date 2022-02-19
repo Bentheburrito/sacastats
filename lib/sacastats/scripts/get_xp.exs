@@ -9,7 +9,7 @@ to_int_or_float = fn string ->
 	end
 end
 
-{:ok, %PS2.API.QueryResult{data: xp_list}} = PS2.API.query(Query.new(collection: "experience") |> limit(5000))
+{:ok, %PS2.API.QueryResult{data: xp_list}} = PS2.API.query(Query.new(collection: "experience") |> limit(5000), "example")
 
 new_xp_map = for xp_map <- xp_list, into: %{} do
 	xp_map

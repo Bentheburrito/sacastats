@@ -250,7 +250,7 @@ defmodule SacaStats.SessionTracker do
         )
       )
 
-    case PS2.API.query(char_query) do
+    case PS2.API.query(char_query, SacaStats.sid()) do
       {:ok, %QueryResult{data: char_list}} ->
         {char_list, []}
 
