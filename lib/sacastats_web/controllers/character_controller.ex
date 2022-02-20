@@ -253,20 +253,9 @@ defmodule SacaStatsWeb.CharacterController do
     do: Map.take(w_stat, ["value_nc", "value_vs", "value_tr"])
 
   def get_aurax_percent(infantry_kills, vehicle_kills) do
-    if(infantry_kills + vehicle_kills >= 1160) do
-      100
-    else
-      Decimal.round(
-        Decimal.mult(
-          Decimal.div(
-            Decimal.add(Decimal.new(infantry_kills), Decimal.new(vehicle_kills)),
-            Decimal.new(1160)
-          ),
-          Decimal.new(100)
-        ),
-        0
-      )
-    end
+    (100 * (infantry_kills + vehicle_kills) / 1160)
+    |> Float.round(2)
+    |> min(100) # max out at 100%
   end
 
   def get_medal_code(infantry_kills, vehicle_kills) do
