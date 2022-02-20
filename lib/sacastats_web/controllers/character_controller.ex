@@ -354,17 +354,10 @@ defmodule SacaStatsWeb.CharacterController do
   end
 
   def get_cert_count(score) do
-    if(score < 250) do
-      0
-    else
-      Decimal.round(
-        Decimal.div(
-          score,
-          Decimal.new(250)
-        ),
-        0
-      )
-    end
+    score
+    |> Integer.parse()
+    |> elem(0)
+    |> div(250)
   end
 
   def get_percent_ratio(value, total_value) do
