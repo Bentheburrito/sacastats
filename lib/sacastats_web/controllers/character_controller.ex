@@ -77,7 +77,7 @@ defmodule SacaStatsWeb.CharacterController do
       )
       |> lang("en")
 
-    body = handle_query_return(conn, query, name)
+    body = query_or_redirect(conn, query, name)
 
     next_rank =
       body
