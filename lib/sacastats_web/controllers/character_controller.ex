@@ -84,7 +84,6 @@ defmodule SacaStatsWeb.CharacterController do
       "response" => body,
       "next_rank" => next_rank,
       "status" => status,
-      "dataJSON" => dataJSON,
       "weapons" => SacaStats.weapons(),
       "vehicles" => vehicles
     }
