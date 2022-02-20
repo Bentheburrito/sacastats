@@ -182,7 +182,6 @@ defmodule SacaStatsWeb.CharacterController do
       "response" => body,
       "weapons" => complete_weapons,
       "status" => status,
-      "dataJSON" => dataJSON
     }
 
     render(conn, "template.html", character: character)
