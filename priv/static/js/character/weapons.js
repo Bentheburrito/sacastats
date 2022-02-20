@@ -1,22 +1,46 @@
-$(document).ready(function () {
-    initializeWeaponTableData();
-});
+let sortedKills;
+let unsortedKills;
+export let nextAuraxElementID
 
-function initializeWeaponTableData() {
-    let weapon = { name: "orion", kills: 20, shots: 1000 };
-    let table = document.getElementById("weaponTable");
-    let tableBody = table.getElementsByTagName("tbody")[0];
+function initializeSortedWeaponKillCount(kills) {
+    kills = getTrimmedKillNumbers(kills);
+    sortedKills = new Map([...kills.entries()].sort((a, b) => b[1] - a[1]));
+    nextAuraxElementID = [...sortedKills.keys()][0];
+}
 
-    for (let i = 0; i < 5; i++) {
-        let row = tableBody.insertRow(i);
-        let cell1 = row.insertCell(0);
-        let cell2 = row.insertCell(1);
-        let cell3 = row.insertCell(2);
-        let cell1Text = document.createTextNode(weapon.name);
-        let cell2Text = document.createTextNode(weapon.kills);
-        let cell3Text = document.createTextNode(weapon.shots);
-        cell1.appendChild(cell1Text);
-        cell2.appendChild(cell2Text);
-        cell3.appendChild(cell3Text);
+function initializeButtonEvent() {
+    document.getElementById("nextAurax").addEventListener('click', function () {
+        $('html, body').animate({
+            scrollTop: $("#" + nextAuraxElementID).offset().top - 300 //- 254 to be at top
+        }, 500);
+        setTimeout(function () {
+            flashElement(nextAuraxElementID);
+        }, 500);
+    });
+}
+
+function getTrimmedKillNumbers(kills) {
+    let killNumbers = new Map();
+    for (const [key, value] of kills.entries()) {
+        if (value < 1160) {
+            killNumbers.set(key, value);
+        }
     }
+    return killNumbers;
+}
+
+function flashElement(elementId) {
+    let flashInterval = setInterval(function () {
+        $("#" + elementId).toggleClass("flash-border");
+    }, 250);
+    setTimeout(function () {
+        window.clearInterval(flashInterval);
+        $("#" + elementId).removeClass("flash-border");
+    }, 1000);
+}
+
+export default function init(kills) {
+    unsortedKills = kills;
+    initializeSortedWeaponKillCount(kills);
+    initializeButtonEvent();
 }

@@ -9,7 +9,7 @@
         <div class="stat-section">
             <h3 class="text-center">Battle Rank</h3>
             <div class="progress">
-                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow={"#{@character["response"]["battle_rank"]["percent_to_next"]}"} aria-valuemin="0" aria-valuemax="100"  style="width: 0;"}>
+                <div id="brProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow={"#{@character["response"]["battle_rank"]["percent_to_next"]}"} aria-valuemin="0" aria-valuemax="100"  style="width: 0;"}>
                     <%= @character["response"]["battle_rank"]["percent_to_next"] %>%
                 </div>
             </div>
@@ -21,7 +21,7 @@
         <div class="stat-section">
             <h3 class="text-center">Current Certification Points</h3>
             <div class="progress">
-                <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" aria-valuenow={"#{Decimal.round(Decimal.mult(elem(Decimal.parse(@character["response"]["certs"]["percent_to_next"]), 0), Decimal.new(100)), 0)}"} aria-valuemin="0" aria-valuemax="100" style="width: 0;">
+                <div id="certProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" aria-valuenow={"#{Decimal.round(Decimal.mult(elem(Decimal.parse(@character["response"]["certs"]["percent_to_next"]), 0), Decimal.new(100)), 0)}"} aria-valuemin="0" aria-valuemax="100" style="width: 0;">
                     <%= Decimal.round(Decimal.mult(elem(Decimal.parse(@character["response"]["certs"]["percent_to_next"]), 0), Decimal.new(100)), 0)%>%
                 </div>
             </div>

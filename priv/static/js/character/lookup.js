@@ -1,3 +1,5 @@
+import { show as showLoadingScreen } from "/js/loading-screen.js";
+
 window.addEventListener('load', (event) => {
     searchCharacter();
 });
