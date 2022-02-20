@@ -78,17 +78,6 @@ defmodule SacaStatsWeb.CharacterController do
 
     body = body |> Map.put("weapons", SacaStats.weapons())
 
-    dataJSON =
-      body
-      |> Jason.encode!()
-
-    weapons =
-      SacaStats.weapons()
-      |> Jason.encode!()
-
-    vehicles =
-      SacaStats.vehicles()
-      |> Jason.encode!()
 
     character = %{
       "stat_page" => "stats.html",
