@@ -84,7 +84,7 @@
                     <%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills")) + SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"))%>
                 </td>
                 <td class="number text-center">
-                    <%=SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_kills"]["value_vs"]) + SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_vehicle_kills"]["value_vs"])%>
+                    <%=SacaStatsWeb.CharacterController.maybe_to_int(weapon["weapon_kills"]["value_vs"]) + SacaStatsWeb.CharacterController.maybe_to_int(weapon["weapon_vehicle_kills"]["value_vs"])%>
                 </td>
                 <td class="number text-center">
                     <%=SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_kills"]["value_nc"]) + SacaStatsWeb.CharacterController.get_string_value_as_integer(weapon["weapon_vehicle_kills"]["value_nc"])%>
