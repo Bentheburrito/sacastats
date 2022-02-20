@@ -31,17 +31,11 @@ defmodule SacaStatsWeb.CharacterController do
 
     status = if body["online_status"] |> String.to_integer() > 0, do: "online", else: "offline"
 
-    body = body |> Map.put("weapons", SacaStats.weapons())
-
-
-
     character = %{
       "stat_page" => "general.html",
       "response" => body,
       "next_rank" => next_rank,
-      "status" => status,
-      "weapons" => SacaStats.weapons(),
-      "vehicles" => vehicles
+      "status" => status
     }
 
     render(conn, "template.html", character: character)
@@ -76,16 +70,11 @@ defmodule SacaStatsWeb.CharacterController do
 
     status = if body["online_status"] |> String.to_integer() > 0, do: "online", else: "offline"
 
-    body = body |> Map.put("weapons", SacaStats.weapons())
-
-
     character = %{
       "stat_page" => "stats.html",
       "response" => body,
       "next_rank" => next_rank,
-      "status" => status,
-      "weapons" => SacaStats.weapons(),
-      "vehicles" => vehicles
+      "status" => status
     }
 
     render(conn, "template.html", character: character)
@@ -120,16 +109,11 @@ defmodule SacaStatsWeb.CharacterController do
 
     status = if body["online_status"] |> String.to_integer() > 0, do: "online", else: "offline"
 
-    body = body |> Map.put("weapons", SacaStats.weapons())
-
-
     character = %{
       "stat_page" => "directives.html",
       "response" => body,
       "next_rank" => next_rank,
-      "status" => status,
-      "weapons" => SacaStats.weapons(),
-      "vehicles" => vehicles
+      "status" => status
     }
 
     render(conn, "template.html", character: character)
@@ -147,7 +131,7 @@ defmodule SacaStatsWeb.CharacterController do
       ])
       |> lang("en")
 
-    body = handle_query_return(conn, query, name)
+    body = query_or_redirect(conn, query, name)
 
     weapon_general_stats = Enum.reduce(body["stats"]["weapon_stat"], %{}, &put_weapon_stat/2)
 
@@ -162,8 +146,8 @@ defmodule SacaStatsWeb.CharacterController do
     complete_weapons =
       for {weapon_id, weapon} <- SacaStats.weapons(),
           is_map_key(complete_weapon_stats, Integer.to_string(weapon_id)),
-          is_map_key(complete_weapon_stats[Integer.to_string(weapon_id)], "weapon_play_time") and
-            is_map_key(complete_weapon_stats[Integer.to_string(weapon_id)], "weapon_kills"),
+          is_map_key(complete_weapon_stats[Integer.to_string(weapon_id)], "weapon_play_time") or
+            is_map_key(complete_weapon_stats[Integer.to_string(weapon_id)], "weapon_killed_by"),
           weapon["category"] not in [
             "Infantry Abilities",
             "Vehicle Abilities",
@@ -176,12 +160,11 @@ defmodule SacaStatsWeb.CharacterController do
 
     status = if body["online_status"] |> String.to_integer() > 0, do: "online", else: "offline"
 
-
     character = %{
       "stat_page" => "weapons.html",
       "response" => body,
       "weapons" => complete_weapons,
-      "status" => status,
+      "status" => status
     }
 
     render(conn, "template.html", character: character)
@@ -232,6 +215,7 @@ defmodule SacaStatsWeb.CharacterController do
 
       {:error, e} ->
         Logger.error("Error fetching character: #{inspect(e)}")
+
         conn
         |> put_flash(:error, "Couldn't get that character right now. Please try again soon.")
         |> redirect(to: Routes.character_path(conn, :character_search))
@@ -255,7 +239,8 @@ defmodule SacaStatsWeb.CharacterController do
   def get_aurax_percent(infantry_kills, vehicle_kills) do
     (100 * (infantry_kills + vehicle_kills) / 1160)
     |> Float.round(2)
-    |> min(100) # max out at 100%
+    # max out at 100%
+    |> min(100)
   end
 
   def get_medal_code(infantry_kills, vehicle_kills) do
@@ -279,10 +264,9 @@ defmodule SacaStatsWeb.CharacterController do
     end
   end
 
-  def get_faction_alias(nil), do: "All"
-
   def get_faction_alias(faction_id) do
     case faction_id do
+      nil -> "All"
       0 -> "All"
       1 -> "VS"
       2 -> "NC"
@@ -291,11 +275,19 @@ defmodule SacaStatsWeb.CharacterController do
     end
   end
 
-  def get_total_values(nil), do: 0
+  def get_total_values(nil, _faction_id), do: 0
 
-  def get_total_values(%{"value_nc" => nc, "value_vs" => vs, "value_tr" => tr}) do
-    maybe_to_int(nc) + maybe_to_int(vs) + maybe_to_int(tr)
+  def get_total_values(%{"value_nc" => nc, "value_vs" => vs, "value_tr" => tr}, faction_id) do
+    case maybe_to_int(faction_id) do
+      0 -> maybe_to_int(nc) + maybe_to_int(vs) + maybe_to_int(tr)
+      1 -> maybe_to_int(nc) + maybe_to_int(tr)
+      2 -> maybe_to_int(vs) + maybe_to_int(tr)
+      3 -> maybe_to_int(nc) + maybe_to_int(vs)
+      4 -> maybe_to_int(nc) + maybe_to_int(vs) + maybe_to_int(tr)
+    end
   end
+
+  def maybe_to_int(value) when is_integer(value), do: value
 
   def maybe_to_int(value) when value in [nil, ""], do: 0
 
@@ -306,6 +298,8 @@ defmodule SacaStatsWeb.CharacterController do
     end
   end
 
+  def get_cert_count(nil), do: 0
+
   def get_cert_count(score) do
     score
     |> Integer.parse()
@@ -313,12 +307,13 @@ defmodule SacaStatsWeb.CharacterController do
     |> div(250)
   end
 
-  def get_percent_ratio(value, total_value) when total_value <= 0, do: value
-  
+  def get_percent_ratio(value, total_value) when total_value <= 0 or is_nil(total_value),
+    do: value
+
   def get_percent_ratio(value, total_value) do
-    {value, _rest} = Integer.parse(value)
-    {total, _rest} = Integer.parse(total_value)
-    
+    value = maybe_to_int(value)
+    total = maybe_to_int(total_value)
+
     Float.round(100 * (value / total), 2)
   end
 end
