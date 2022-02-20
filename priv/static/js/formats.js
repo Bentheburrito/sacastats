@@ -42,7 +42,9 @@ export function addFormatsToPage() {
         let percents = document.querySelectorAll(".percentage");
         percents.forEach(percent => {
             //if there is no percent sign add one
-            if (percent.innerHTML.slice(-1) != "%") {
+            if (percent.innerHTML == "") {
+                percent.innerHTML = "N/A";
+            } else if (percent.innerHTML.slice(-1) != "%" && percent.innerHTML.slice(-1) != "A") {
                 percent.innerHTML += "%";
             }
         });
