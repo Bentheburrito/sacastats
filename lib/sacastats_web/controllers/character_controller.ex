@@ -232,6 +232,9 @@ defmodule SacaStatsWeb.CharacterController do
 
       {:error, e} ->
         Logger.error("Error fetching character: #{inspect(e)}")
+        conn
+        |> put_flash(:error, "Couldn't get that character right now. Please try again soon.")
+        |> redirect(to: Routes.character_path(conn, :character_search))
     end
   end
 
