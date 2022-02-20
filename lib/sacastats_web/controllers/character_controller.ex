@@ -341,14 +341,16 @@ defmodule SacaStatsWeb.CharacterController do
   def get_total_values(nil), do: 0
 
   def get_total_values(%{"value_nc" => nc, "value_vs" => vs, "value_tr" => tr}) do
-    get_string_value_as_integer(nc) + get_string_value_as_integer(vs) +
-      get_string_value_as_integer(tr)
+    maybe_to_int(nc) + maybe_to_int(vs) + maybe_to_int(tr)
   end
 
-  def get_string_value_as_integer(nil), do: 0
+  def maybe_to_int(value) when value in [nil, ""], do: 0
 
-  def get_string_value_as_integer(value) do
-    if value != "", do: String.to_integer(value), else: 0
+  def maybe_to_int(value) when is_binary(value) do
+    case Integer.parse(value) do
+      {parsed_int, _rest} -> parsed_int
+      :error -> 0
+    end
   end
 
   def get_cert_count(score) do
