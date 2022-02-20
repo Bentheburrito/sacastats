@@ -220,7 +220,7 @@ defmodule SacaStatsWeb.CharacterController do
     Plug.Parsers.call(conn, Plug.Parsers.init(opts))
   end
 
-  def handle_query_return(conn, query, name) do
+  def query_or_redirect(conn, query, name) do
     case PS2.API.query(query) do
       {:ok, %PS2.API.QueryResult{returned: 0}} ->
         conn
