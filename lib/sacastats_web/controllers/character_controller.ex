@@ -33,9 +33,6 @@ defmodule SacaStatsWeb.CharacterController do
 
     body = body |> Map.put("weapons", SacaStats.weapons())
 
-    dataJSON =
-      body
-      |> Jason.encode!()
 
     weapons =
       SacaStats.weapons()
