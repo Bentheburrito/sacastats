@@ -360,20 +360,12 @@ defmodule SacaStatsWeb.CharacterController do
     |> div(250)
   end
 
+  def get_percent_ratio(value, total_value) when total_value <= 0, do: value
+  
   def get_percent_ratio(value, total_value) do
-    if(total_value > 0) do
-      Decimal.round(
-        Decimal.mult(
-          Decimal.div(
-            Decimal.new(value),
-            Decimal.new(total_value)
-          ),
-          Decimal.new(100)
-        ),
-        2
-      )
-    else
-      value
-    end
+    {value, _rest} = Integer.parse(value)
+    {total, _rest} = Integer.parse(total_value)
+    
+    Float.round(100 * (value / total), 2)
   end
 end
