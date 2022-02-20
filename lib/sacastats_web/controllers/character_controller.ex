@@ -176,9 +176,6 @@ defmodule SacaStatsWeb.CharacterController do
 
     status = if body["online_status"] |> String.to_integer() > 0, do: "online", else: "offline"
 
-    dataJSON =
-      body
-      |> Jason.encode!()
 
     character = %{
       "stat_page" => "weapons.html",
