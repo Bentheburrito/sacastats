@@ -184,7 +184,7 @@
     import init from "<%= Routes.static_path(@conn, "/js/character/weapons.js") %>";
     let kills = new Map();
     "<%= for {weapon_id, weapon} <- @character["weapons"] do %>"
-        kills.set("<%= "weapon" <> (weapon_id |> Integer.to_string()) <> "Row" %>", "<%= SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills")) + SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills")) %>")
+        kills.set("<%= "weapon" <> (Integer.to_string(weapon_id)) <> "Row" %>", "<%= SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills")) + SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills")) %>")
     "<% end %>"
     init(kills);
 </script>
