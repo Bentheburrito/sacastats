@@ -64,13 +64,13 @@ export function setupFlexTables() {
             //TODO INIT URI query string
             setTimeout(function () {
                 //TODO Add URI query string update
+                updateSortTable();
                 updateTableFormats(table.id);
             }, 500);
 
             if (document.querySelector("input.search-input").value == "") {
                 setTimeout(function () {
                     //TODO Remove URI query string 
-                    updateSortTable();
                 }, 500);
             } //TODO Add else and highlight text on desktop to easily remove later
         }
