@@ -1,9 +1,11 @@
 defmodule SacaStatsWeb.DiscordAuth do
+  @moduledoc false
   use OAuth2.Strategy
 
   alias OAuth2.Client
+  alias OAuth2.Strategy.AuthCode
 
-  def new() do
+  def new do
     Client.new(
       strategy: __MODULE__,
       client_id: System.get_env("DISCORD_CLIENT_ID"),
@@ -28,11 +30,11 @@ defmodule SacaStatsWeb.DiscordAuth do
   end
 
   def authorize_url(client, params) do
-    OAuth2.Strategy.AuthCode.authorize_url(client, params)
+    AuthCode.authorize_url(client, params)
   end
 
   def get_token(client, params, headers) do
-    OAuth2.Strategy.AuthCode.get_token(client, params, headers)
+    AuthCode.get_token(client, params, headers)
   end
 
   @spec revoke_token(OAuth2.Client.t(), :access | :refresh) :: :ok | :error
@@ -79,7 +81,7 @@ defmodule SacaStatsWeb.DiscordAuth do
     "https://cdn.discordapp.com/avatars/#{user_id}/#{avatar_hash}.png"
   end
 
-  defp gen_state() do
+  defp gen_state do
     32
     |> :crypto.strong_rand_bytes()
     |> Base.encode64()

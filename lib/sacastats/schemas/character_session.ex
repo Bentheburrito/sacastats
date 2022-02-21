@@ -1,4 +1,8 @@
 defmodule SacaStats.CharacterSession do
+  @moduledoc """
+  Ecto schema for character sessions.
+  """
+
   use Ecto.Schema
   import Ecto.Changeset
 

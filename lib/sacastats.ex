@@ -14,9 +14,9 @@ defmodule SacaStats do
 
   @type session_status :: :active | :closed | :both
 
-  def sid(), do: System.get_env("SERVICE_ID")
+  def sid, do: System.get_env("SERVICE_ID")
 
-  @spec get_sessions(session_status(), limit :: integer(), field :: atom(), field_value :: any()) :: [CharacterSession.t()]
+  @spec get_sessions(session_status, limit :: integer, field :: atom, field_value :: any) :: [CharacterSession.t()]
   def get_sessions(session_status \\ :both, limit \\ 1, field \\ :character_id, field_value)
 
   def get_sessions(:closed, limit, field, field_value) do
@@ -96,7 +96,7 @@ defmodule SacaStats do
     4 => {"Nanite Systems", 0xE5E5E5, "https://i.imgur.com/9nHbnUh.jpg"}
   }
 
-  def ess_subscriptions() do
+  def ess_subscriptions do
     [
       events: [
         PS2.gain_experience,
