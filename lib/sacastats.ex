@@ -14,6 +14,8 @@ defmodule SacaStats do
 
   @type session_status :: :active | :closed | :both
 
+  def sid(), do: System.get_env("SERVICE_ID")
+
   @spec get_sessions(session_status(), limit :: integer(), field :: atom(), field_value :: any()) :: [CharacterSession.t()]
   def get_sessions(session_status \\ :both, limit \\ 1, field \\ :character_id, field_value)
 
@@ -97,17 +99,17 @@ defmodule SacaStats do
   def ess_subscriptions() do
     [
       events: [
-        "GainExperience",
-        "Death",
-        "VehicleDestroy",
-        "PlayerLogin",
-        "PlayerLogout",
-        "PlayerFacilityCapture",
-        "PlayerFacilityDefend",
-        "BattleRankUp",
-        "MetagameEvent",
-        "ContinentUnlock",
-        "ContinentLock"
+        PS2.gain_experience,
+        PS2.death,
+        PS2.vehicle_destroy,
+        PS2.player_login,
+        PS2.player_logout,
+        PS2.player_facility_capture,
+        PS2.player_facility_defend,
+        PS2.battle_rank_up,
+        PS2.metagame_event,
+        PS2.continent_unlock,
+        PS2.continent_lock()
       ],
       worlds: ["all"],
       characters: ["all"]

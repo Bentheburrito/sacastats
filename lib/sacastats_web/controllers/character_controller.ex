@@ -204,7 +204,7 @@ defmodule SacaStatsWeb.CharacterController do
   end
 
   def query_or_redirect(conn, query, name) do
-    case PS2.API.query(query) do
+    case PS2.API.query(query, SacaStats.sid()) do
       {:ok, %PS2.API.QueryResult{returned: 0}} ->
         conn
         |> put_flash(:error, "The character '#{name}' doesn't appear to exist.")

@@ -1,10 +1,8 @@
 import Config
 
-if Config.config_env() == :dev do
+if Config.config_env() in [:dev, :test] do
   DotenvParser.load_file(".env")
 end
-
-config :planetside_api, service_id: System.get_env("SERVICE_ID")
 
 # config/runtime.exs is executed for all environments, including
 # during releases. It is executed after compilation and before the
