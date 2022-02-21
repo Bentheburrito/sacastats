@@ -52,7 +52,8 @@ defmodule SacaStatsWeb.DiscordAuth do
 
   Will automatically try to refresh the token if a 401 status code is returned, and retry the API request.
   """
-  def get_user(%Client{token: nil}), do: {:error, %OAuth2.Error{reason: "No token on the provided client."}}
+  def get_user(%Client{token: nil}),
+    do: {:error, %OAuth2.Error{reason: "No token on the provided client."}}
 
   def get_user(client) do
     with {:ok, res} <- Client.get(client, "/users/@me"),

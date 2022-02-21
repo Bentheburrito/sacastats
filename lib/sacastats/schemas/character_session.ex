@@ -43,7 +43,7 @@ defmodule SacaStats.CharacterSession do
     session
     |> cast(params, field_list)
     |> validate_required(
-      Enum.reject(field_list, & &1 in [:logout_timestamp, :name, :faction_id])
+      Enum.reject(field_list, &(&1 in [:logout_timestamp, :name, :faction_id]))
     )
   end
 end
