@@ -4,6 +4,8 @@ on: [push, pull_request]
 jobs:
   test_and_lint:
     runs-on: ubuntu-latest
+    env:
+      MIX_ENV: github
     strategy:
       matrix:
         elixir-version: ['1.12']
