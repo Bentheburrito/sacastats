@@ -31,7 +31,7 @@ jobs:
           restore-keys: ${{ matrix.otp-version }}-${{ matrix.elixir-version }}-mix
       - run: mix deps.get
         name: Fetch Dependencies
-      - run: mix test --no-start
+      - run: mix test
         name: Run Tests
         env:
           MIX_ENV: test
