@@ -26,6 +26,8 @@ jobs:
         name: Fetch Dependencies
       - run: mix test
         name: Run Tests
+        env:
+          MIX_ENV: test
       - run: mix credo --strict
         name: Strict Credo Checks
       - run: mix format --check-formatted
