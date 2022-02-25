@@ -7,11 +7,10 @@ defmodule SacaStats.Application do
 
   @impl true
   def start(_type, _args) do
-
     ess_opts = [
       subscriptions: SacaStats.ess_subscriptions(),
       clients: [SacaStats.EventHandler],
-      service_id: SacaStats.sid(),
+      service_id: SacaStats.sid()
     ]
 
     # Start session ETS table.
@@ -29,7 +28,7 @@ defmodule SacaStats.Application do
       # Start the session tracker
       {SacaStats.SessionTracker, {%{}, []}},
       # Start the ESS Websocket
-      {PS2.Socket, ess_opts},
+      {PS2.Socket, ess_opts}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

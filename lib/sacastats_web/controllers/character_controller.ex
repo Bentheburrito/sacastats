@@ -4,7 +4,7 @@ defmodule SacaStatsWeb.CharacterController do
   use SacaStatsWeb, :controller
   alias SacaStatsWeb.CharacterView
   import PS2.API.QueryBuilder
-  alias PS2.API.{Query, Join}
+  alias PS2.API.{Join, Query}
 
   def character(conn, %{"character_name" => name, "stat_type" => "lookup"}) do
     redirect(conn, to: Routes.character_path(conn, :character, name, "general"))

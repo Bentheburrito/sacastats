@@ -1,4 +1,8 @@
 defmodule SacaStats.CharacterSession do
+  @moduledoc """
+  Ecto schema for character sessions.
+  """
+
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -39,7 +43,7 @@ defmodule SacaStats.CharacterSession do
     session
     |> cast(params, field_list)
     |> validate_required(
-      Enum.reject(field_list, & &1 in [:logout_timestamp, :name, :faction_id])
+      Enum.reject(field_list, &(&1 in [:logout_timestamp, :name, :faction_id]))
     )
   end
 end

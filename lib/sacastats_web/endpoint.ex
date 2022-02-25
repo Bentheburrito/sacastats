@@ -5,7 +5,7 @@ defmodule SacaStatsWeb.Endpoint do
   @session_options [
     store: :ets,
     key: "sid",
-    table: :session,
+    table: :session
   ]
 
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]

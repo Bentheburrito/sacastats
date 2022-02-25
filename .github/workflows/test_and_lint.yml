@@ -1,0 +1,44 @@
+# Based on https://github.com/jchristgit/nosedrum/blob/master/.github/workflows/test_and_lint.yml
+name: Test & Lint
+on: [push, pull_request]
+jobs:
+  test_and_lint:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:latest
+        ports: ['5432:5432']
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      MIX_ENV: github
+    strategy:
+      matrix:
+        elixir-version: ['1.12']
+        otp-version: ['24']
+    steps:
+      - uses: actions/checkout@v2
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ matrix.otp-version }}
+          elixir-version: ${{ matrix.elixir-version }}
+      - uses: actions/cache@v2
+        with:
+          path: |
+            deps
+            _build
+          # Generate a hash of the OTP version and Elixir version
+          key: ${{ matrix.otp-version }}-${{ matrix.elixir-version }}-mix-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+          restore-keys: ${{ matrix.otp-version }}-${{ matrix.elixir-version }}-mix
+      - run: mix deps.get
+        name: Fetch Dependencies
+      - run: mix test
+        name: Run Tests
+        env:
+          MIX_ENV: test
+      - run: mix credo --strict
+        name: Strict Credo Checks
+      - run: mix format --check-formatted
+        name: Check Formatting
+      

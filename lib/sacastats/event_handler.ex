@@ -1,13 +1,15 @@
 defmodule SacaStats.EventHandler do
+  @moduledoc false
+
   @behaviour PS2.SocketClient
   require Logger
 
   import Ecto.Query
 
-  alias SacaStats.Repo
-  alias SacaStats.CharacterSession
-  alias SacaStats.SessionTracker
   alias Phoenix.PubSub
+  alias SacaStats.CharacterSession
+  alias SacaStats.Repo
+  alias SacaStats.SessionTracker
 
   # ESS events
   @impl PS2.SocketClient
@@ -74,16 +76,12 @@ defmodule SacaStats.EventHandler do
   end
 
   @impl PS2.SocketClient
-  def handle_event(
-        {"PlayerLogin", %{"character_id" => character_id, "timestamp" => timestamp}}
-      ) do
+  def handle_event({"PlayerLogin", %{"character_id" => character_id, "timestamp" => timestamp}}) do
     SessionTracker.put(character_id, timestamp)
   end
 
   @impl PS2.SocketClient
-  def handle_event(
-        {"PlayerLogout", %{"character_id" => character_id, "timestamp" => timestamp}}
-      ) do
+  def handle_event({"PlayerLogout", %{"character_id" => character_id, "timestamp" => timestamp}}) do
     SessionTracker.close(character_id, timestamp)
   end
 
