@@ -1,5 +1,4 @@
 defmodule SacaStats.SessionTracker do
-
   @max_seconds_unarchived 1.5 * 60 * 60
   @max_ids_to_fetch 200
   @logout_diff_margin_seconds 3
@@ -34,8 +33,8 @@ defmodule SacaStats.SessionTracker do
   import Ecto.Query
   import PS2.API.QueryBuilder
 
-  alias PS2.API.{Query, Join, QueryResult}
   alias Ecto.Changeset
+  alias PS2.API.{Join, Query, QueryResult}
   alias SacaStats.CharacterSession
   alias SacaStats.Repo
 
@@ -112,11 +111,14 @@ defmodule SacaStats.SessionTracker do
       session_map
       |> Enum.map(fn {_char_id, session} -> session end)
       |> Enum.filter(fun)
-      |> then(& if is_integer(limit) do
-        Enum.take(&1, limit)
-      else
-        &1
-      end)
+      |> then(
+        &if is_integer(limit) do
+          Enum.take(&1, limit)
+        else
+          &1
+        end
+      )
+
     {:reply, sessions, {session_map, pending_ids}}
   end
 
@@ -202,18 +204,8 @@ defmodule SacaStats.SessionTracker do
         {:archive_sessions, :finish, {char_list, unarchived_sessions}},
         state
       ) do
+    num_archived = archive_sessions(unarchived_sessions, char_list)
 
-    num_archived = Enum.reduce(unarchived_sessions, 0, fn session, num_archived ->
-      case Enum.find(char_list, &(String.to_integer(&1["character_id"]) == session.character_id)) do
-        character when not is_nil(character) ->
-          if maybe_archive_session(character, session) == true do
-            num_archived + 1
-          else
-            num_archived
-          end
-        _ -> num_archived
-      end
-    end)
     Logger.debug("Archived #{num_archived} sessions.")
 
     schedule_work(:archive_sessions)
@@ -222,8 +214,8 @@ defmodule SacaStats.SessionTracker do
 
   # Still need to check if some characters are missing (in the case of new characters)
   defp fetch_char_list([]), do: {[], []}
-  defp fetch_char_list(character_ids) do
 
+  defp fetch_char_list(character_ids) do
     char_query =
       Query.new(collection: "character")
       |> term("character_id", Enum.join(character_ids, ","))
@@ -255,7 +247,10 @@ defmodule SacaStats.SessionTracker do
         {char_list, []}
 
       {:error, %HTTPoison.Error{reason: reason}} when reason in [:timeout, :closed] ->
-        Logger.warn("SessionTracker.fetch_char_list/1 query failed with reason #{reason}, retrying...")
+        Logger.warn(
+          "SessionTracker.fetch_char_list/1 query failed with reason #{reason}, retrying..."
+        )
+
         fetch_char_list(character_ids)
 
       # Likely a timeout or other random error from the API.
@@ -271,6 +266,7 @@ defmodule SacaStats.SessionTracker do
   end
 
   defp char_list_to_sessions([], session_map), do: session_map
+
   defp char_list_to_sessions(char_list, session_map) do
     Enum.reduce(char_list, session_map, fn
       %{
@@ -303,6 +299,7 @@ defmodule SacaStats.SessionTracker do
         else
           :error -> sessions
         end
+
       _, sessions ->
         sessions
     end)
@@ -323,13 +320,18 @@ defmodule SacaStats.SessionTracker do
     end)
   end
 
-  defp schedule_work(:new_sessions),
-    do: Process.send_after(self(), {:fetch_new_sessions, :start}, @new_sessions_interval_seconds * 1000)
+  defp schedule_work(:new_sessions) do
+    Process.send_after(
+      self(),
+      {:fetch_new_sessions, :start},
+      @new_sessions_interval_seconds * 1000
+    )
+  end
 
   defp schedule_work(:archive_sessions),
     do: Process.send_after(self(), {:archive_sessions, :start}, @archive_interval_seconds * 1000)
 
-  defp schedule_work() do
+  defp schedule_work do
     schedule_work(:new_sessions)
     schedule_work(:archive_sessions)
   end
@@ -342,42 +344,78 @@ defmodule SacaStats.SessionTracker do
     (ts_diff - -@logout_diff_margin_seconds) * (ts_diff - @logout_diff_margin_seconds) <= 0
   end
 
+  defp archive_sessions(unarchived, char_list) do
+    Enum.reduce(unarchived, 0, fn session, num_archived ->
+      with {:ok, character} <- get_character_from_list(char_list, session.character_id),
+           true <- maybe_archive_session(character, session) do
+        num_archived + 1
+      else
+        _ -> num_archived
+      end
+    end)
+  end
+
+  defp get_character_from_list(char_list, character_id) do
+    case Enum.find(char_list, &(String.to_integer(&1["character_id"]) == character_id)) do
+      nil -> :none
+      session -> {:ok, session}
+    end
+  end
+
   defp maybe_archive_session(character, %CharacterSession{} = session) do
     census_logout_ts = String.to_integer(character["times"]["last_save"])
-    params = cond do
-      # If the logout_timestamp the Census returns matches the logout time given by ESS, set the difference
-      # of shot stats and archive the session.
-      timestamps_match?(census_logout_ts, session.logout_timestamp) ->
-        {end_fire_count, end_hit_count} = count_weapon_stats(Map.get(character, "weapon_shot_stats", %{}))
-        Logger.debug("Census updated session (id: #{session.id}). fired: #{end_fire_count}, #{session.shots_fired}, " <>
-          "hit: #{end_hit_count}, #{session.shots_hit}")
-        %{
-          "shots_fired" => end_fire_count - session.shots_fired,
-          "shots_hit" => end_hit_count - session.shots_hit,
-          "archived" => true
-        }
-      # If the Census gives us a later logout timestamp, we've missed the update, zero out shot stats and archive.
-      census_logout_ts > session.logout_timestamp ->
-        Logger.debug("Census logout ts > session logout ts by #{census_logout_ts - session.logout_timestamp} " <>
-          "seconds, archiving session (id: #{session.id}) with zero'd shot stats")
-        %{
-          "shots_fired" => 0,
-          "shots_hit" => 0,
-          "archived" => true
-        }
-      # If the session has been unarchived for too long, assume the Census update isn't happening, so
-      # zero out shot stats and archive.
-      System.os_time(:second) > session.logout_timestamp + @max_seconds_unarchived ->
-        Logger.debug("Session (id: #{session.id}) has been unarchived for more than " <>
-          "#{@max_seconds_unarchived} seconds, archiving with zero'd shot stats")
-        %{
-          "shots_fired" => 0,
-          "shots_hit" => 0,
-          "archived" => true
-        }
-      # else, update nothing
-      true -> %{}
-    end
+
+    params =
+      cond do
+        # If the logout_timestamp the Census returns matches the logout time given by ESS, set the difference
+        # of shot stats and archive the session.
+        timestamps_match?(census_logout_ts, session.logout_timestamp) ->
+          {end_fire_count, end_hit_count} =
+            count_weapon_stats(Map.get(character, "weapon_shot_stats", %{}))
+
+          Logger.debug(
+            "Census updated session (id: #{session.id}). fired: #{end_fire_count}, #{session.shots_fired}, " <>
+              "hit: #{end_hit_count}, #{session.shots_hit}"
+          )
+
+          %{
+            "shots_fired" => end_fire_count - session.shots_fired,
+            "shots_hit" => end_hit_count - session.shots_hit,
+            "archived" => true
+          }
+
+        # If the Census gives us a later logout timestamp, we've missed the update, zero out shot stats and archive.
+        census_logout_ts > session.logout_timestamp ->
+          Logger.debug(
+            "Census logout ts > session logout ts by #{census_logout_ts - session.logout_timestamp} " <>
+              "seconds, archiving session (id: #{session.id}) with zero'd shot stats"
+          )
+
+          %{
+            "shots_fired" => 0,
+            "shots_hit" => 0,
+            "archived" => true
+          }
+
+        # If the session has been unarchived for too long, assume the Census update isn't happening, so
+        # zero out shot stats and archive.
+        System.os_time(:second) > session.logout_timestamp + @max_seconds_unarchived ->
+          Logger.debug(
+            "Session (id: #{session.id}) has been unarchived for more than " <>
+              "#{@max_seconds_unarchived} seconds, archiving with zero'd shot stats"
+          )
+
+          %{
+            "shots_fired" => 0,
+            "shots_hit" => 0,
+            "archived" => true
+          }
+
+        # else, update nothing
+        true ->
+          %{}
+      end
+
     # Update the session, and return its new archive status
     session |> CharacterSession.changeset(params) |> SacaStats.Repo.update()
     Map.get(params, "archived", false)

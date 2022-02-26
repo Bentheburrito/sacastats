@@ -1,4 +1,8 @@
 defmodule SacaStats.Utils.StaticData do
+  @moduledoc """
+  Utility/helper functions for static data transformation.
+  """
+
   def load_static_file(path) do
     path
     |> File.read!()
