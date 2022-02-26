@@ -72,9 +72,9 @@
                     <%= if SacaStatsWeb.CharacterController.get_medal_code(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character["response"]["faction_id"]), 
                             SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character["response"]["faction_id"])) > 0 do%>
                         <img src={"https://census.daybreakgames.com/files/ps2/images/static/" <> (SacaStatsWeb.CharacterController.get_medal_code(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character["response"]["faction_id"]), 
-                            SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character["response"]["faction_id"]))|> Integer.to_string()) <>".png"} alt="medal" class="medal float-left" width="30px"/>
+                            SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character["response"]["faction_id"]))|> Integer.to_string()) <>".png"} alt="medal" class="medal float-left position-absolute top-0" width="30px"/>
                     <% end %>
-                    <img src={"https://census.daybreakgames.com" <> Map.get(weapon, "image_path", "/files/ps2/images/static/3.png")} alt={Map.get(weapon, "name", "N/A")} class="weapon mx-auto d-block" width="150px"/>
+                    <img src={"https://census.daybreakgames.com" <> Map.get(weapon, "image_path", "/files/ps2/images/static/3.png")} alt={Map.get(weapon, "name", "N/A")} class="weapon mx-auto d-block" height="75vh"/>
                     <h5 class="weaponName align-text-bottom text-center mb-0"><%=Map.get(weapon, "name", "N/A")%></h5>
                     <div id={"weapon" <> (weapon_id |> Integer.to_string()) <> "ProgressBar"} class="progress-bar progress-bar-striped progress-bar-animated aurax-progress" role="progressbar" 
                         aria-valuenow={"#{SacaStatsWeb.CharacterController.get_aurax_percent(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character["response"]["faction_id"]), 

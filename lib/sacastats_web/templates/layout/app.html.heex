@@ -24,7 +24,6 @@
     <script src="https://unpkg.com/bootstrap-table@1.19.1/dist/extensions/sticky-header/bootstrap-table-sticky-header.min.js"></script>
 
     <script type="text/javascript" src={Routes.static_path(@conn, "/js/app.js")}></script>
-    <script type="module" src={Routes.static_path(@conn, "/js/scripts.js")}></script>
     <link rel="stylesheet" href={Routes.static_path(@conn, "/css/app.css")} />
     <link rel="stylesheet" href={Routes.static_path(@conn, "/css/styles.css")} />
   </head>
@@ -108,5 +107,10 @@
         </button>
       </nav>
     </footer>
+    <script type="module">
+      //initialize page
+      import init from "<%= Routes.static_path(@conn, "/js/scripts.js") %>";
+      init();
+    </script>
   </body>
 </html>
