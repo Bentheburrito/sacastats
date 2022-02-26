@@ -30,7 +30,6 @@ weapon_image_infos =
   |> Enum.reduce(&Map.merge(&1, &2))
   |> Stream.filter(fn {_key, value} -> value != "-" end)
   |> Stream.map(fn {item_id, images} ->
-    IO.inspect(images)
     {item_id, Map.update!(images, "image_id", &SacaStats.Utils.StaticData.maybe_to_int(&1))}
   end)
   |> Enum.into(%{})
