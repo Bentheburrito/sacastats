@@ -133,3 +133,9 @@ header nav a {
   display: block;
   margin: -1rem 0 2rem; }
 
+.poll-item {
+	margin: 2%;
+	padding: 2%;
+	border: 1px solid lightgray;
+	border-radius: 12px;
+}

@@ -14,9 +14,9 @@ defmodule SacaStats.PollItem.MultiChoice do
     belongs_to :poll, SacaStats.Poll
   end
 
-  def changeset(poll, params \\ %{}) do
-    poll
-    |> cast(params, [:type, :description, :votes, :position])
-    |> validate_required([:poll_id, :description, :position])
+  def changeset(multi_choice_item, params \\ %{}) do
+    multi_choice_item
+    |> cast(params, [:description, :position])
+    |> validate_required([:description, :position])
   end
 end

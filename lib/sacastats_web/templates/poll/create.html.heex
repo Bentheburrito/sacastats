@@ -1,0 +1,17 @@
+<section class="m-4 text-center">
+  <h2>Create a new poll</h2>
+
+  <.form let={form} for={@changeset} phx-change="field_change">
+    <div id="poll-item-list" class="container text-left">
+      <div class="poll-item" phx-change="field_change:0">
+        <label>Poll Title: <%= text_input form, :title %></label>
+      </div>
+      
+      <%= SacaStatsWeb.PollLive.Create.encode_poll_items(form, @socket.assigns) %>
+    </div>
+
+    <%= submit "Create Poll", class: "btn btn-primary" %>
+  </.form>
+  <button phx-click="add_text">Add Text Response</button>
+  <button phx-click="add_multi">Add Multiple Choice Response</button>
+</section>

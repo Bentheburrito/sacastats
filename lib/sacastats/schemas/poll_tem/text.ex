@@ -13,9 +13,9 @@ defmodule SacaStats.PollItem.Text do
     belongs_to :poll, SacaStats.Poll
   end
 
-  def changeset(poll, params \\ %{}) do
-    poll
-    |> cast(params, [:type, :description, :votes, :position])
-    |> validate_required([:poll_id, :description, :position])
+  def changeset(text_item, params \\ %{}) do
+    text_item
+    |> cast(params, [:description, :position])
+    |> validate_required([:description, :position])
   end
 end

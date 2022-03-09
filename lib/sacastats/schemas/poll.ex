@@ -16,6 +16,8 @@ defmodule SacaStats.Poll do
 
   def changeset(poll, params \\ %{}) do
     poll
-    |> cast(params, [:discord_id, ])
+    |> cast(params, [:owner_discord_id, :title])
+    |> cast_assoc(:text_items)
+    |> cast_assoc(:multi_choice_items)
   end
 end
