@@ -19,7 +19,7 @@ defmodule SacaStats.Repo.Migrations.AddPollSchema do
       add :choices, {:array, :string}
       add :votes, {:map, :string} # Mapped by voter's discord_id => their selected choice
       add :position, :integer
-      add :poll, references("polls")
+      add :poll_id, references("polls")
     end
   end
 end

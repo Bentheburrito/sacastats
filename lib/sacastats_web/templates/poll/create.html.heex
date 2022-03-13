@@ -1,7 +1,7 @@
 <section class="m-4 text-center">
   <h2>Create a new poll</h2>
 
-  <.form let={form} for={@changeset} phx-change="field_change">
+  <.form let={form} for={@changeset} phx-change="field_change" phx-submit="form_submit">
     <div id="poll-item-list" class="container text-left">
       <div class="poll-item" phx-change="field_change:0">
         <label>Poll Title: <%= text_input form, :title %></label>
@@ -9,9 +9,10 @@
       
       <%= SacaStatsWeb.PollLive.Create.encode_poll_items(form, @socket.assigns) %>
     </div>
+    <button type="button" phx-click="add_text" class="btn-info">Add Text Response</button>
+    <button type="button" phx-click="add_multi" class="btn-info">Add Multiple-Choice Response</button>
+    <br>
 
-    <%= submit "Create Poll", class: "btn btn-primary" %>
+    <%= submit "Create Poll" %>
   </.form>
-  <button phx-click="add_text">Add Text Response</button>
-  <button phx-click="add_multi">Add Multiple Choice Response</button>
 </section>

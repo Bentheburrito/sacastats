@@ -37,10 +37,8 @@ defmodule SacaStatsWeb.Router do
   scope "/outfit", SacaStatsWeb do
     pipe_through :browser
 
-    live "poll/create", PollLive.Create
-    # get "/poll/create", PollController, :create
-    # post "/poll/create", PollController, :create_post
-    # get "/poll/:id", PollController, :view
+    live "/poll/create", PollLive.Create
+    live "/poll/:id", PollLive.View
   end
 
   # Other scopes may use custom stacks.

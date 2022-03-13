@@ -7,6 +7,8 @@ defmodule SacaStats.Poll do
   import Ecto.Changeset
   @primary_key {:id, :id, autogenerate: true}
 
+  alias SacaStats.PollItem.{MultiChoice, Text}
+
   schema "polls" do
     field :owner_discord_id, :integer
     field :title, :string
@@ -17,7 +19,7 @@ defmodule SacaStats.Poll do
   def changeset(poll, params \\ %{}) do
     poll
     |> cast(params, [:owner_discord_id, :title])
-    |> cast_assoc(:text_items)
-    |> cast_assoc(:multi_choice_items)
+    |> cast_assoc(:text_items, with: &Text.changeset/2)
+    |> cast_assoc(:multi_choice_items, with: &MultiChoice.changeset/2)
   end
 end
