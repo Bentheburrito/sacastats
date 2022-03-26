@@ -139,3 +139,8 @@ header nav a {
 	border: 1px solid lightgray;
 	border-radius: 12px;
 }
+
+.radio-label {
+	display: inline;
+	padding-right: 12px;
+}

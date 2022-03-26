@@ -41,6 +41,7 @@ defmodule SacaStatsWeb do
       unquote(view_helpers())
 
       import Phoenix.LiveView.Helpers
+      import SacaStatsWeb.InputHelpers
     end
   end
 

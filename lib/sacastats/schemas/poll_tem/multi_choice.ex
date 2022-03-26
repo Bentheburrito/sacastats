@@ -9,14 +9,35 @@ defmodule SacaStats.PollItem.MultiChoice do
   schema "poll_items_multi_choice" do
     field :description, :string
     field :choices, {:array, :string}
-    field :votes, {:map, :string} # Mapped by voter's discord_id => their selected choice
+    field :votes, {:map, :string}, default: %{} # Mapped by voter's discord_id => their selected choice
     field :position, :integer
     belongs_to :poll, SacaStats.Poll
   end
 
   def changeset(multi_choice_item, params \\ %{}) do
+    # Parse possible string `choices` into a list, like
+    # "red, green, blue" => ["red", "green", "blue"]
+    params =
+      if is_map_key(params, "choices") do
+        Map.update!(params, "choices", fn
+          str_choices when is_binary(str_choices) ->
+            str_choices
+            |> String.split(",")
+            |> Enum.map(&String.trim/1)
+          choices when is_list(choices) ->
+            choices
+        end)
+      else
+        params
+      end
+
     multi_choice_item
-    |> cast(params, [:description, :position])
-    |> validate_required([:description, :position])
+    |> cast(params, [:description, :position, :choices])
+    |> validate_required([:description, :position, :choices])
+  end
+
+  def new_vote_changeset(multi_choice_item, params) do
+    multi_choice_item
+    |> cast(params, [:votes])
   end
 end

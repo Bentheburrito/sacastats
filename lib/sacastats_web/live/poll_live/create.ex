@@ -10,16 +10,25 @@ defmodule SacaStatsWeb.PollLive.Create do
     Phoenix.View.render(SacaStatsWeb.PollView, "create.html", assigns)
   end
 
-  def mount(_params, _session, socket) do
-    changeset = Poll.changeset(%Poll{})
+  def mount(_params, session, socket) do
+
+    user = session["user"]
+    init_changes = %{"owner_discord_id" => user["id"]}
+
+    if not is_nil(user) do
+      changeset = Poll.changeset(%Poll{}, init_changes)
 
     {:ok, socket
       |> assign(:changeset, changeset)
-      |> assign(:prev_params, %{})}
+      |> assign(:prev_params, init_changes)}
+    else
+      {:ok, socket
+        |> put_flash(:error, "You need to be logged in to create polls.")
+        |> redirect(to: "/")}
+    end
   end
 
   def handle_event("field_change", %{"poll" => params}, socket) do
-    IO.inspect params, label: "PARAMS"
     changeset =
       %Poll{}
       |> Poll.changeset(params)
@@ -59,12 +68,11 @@ defmodule SacaStatsWeb.PollLive.Create do
     {:noreply, assign(socket, :changeset, changeset)}
   end
 
-  def handle_event("form_submit", _params, socket) do
+  def handle_event("form_submit", params, socket) do
     case Repo.insert(socket.assigns.changeset) do
       {:ok, %Poll{id: id}} ->
-        {:noreply, redirect(socket, to: "/outfit/poll/view/#{id}")}
+        {:noreply, redirect(socket, to: "/outfit/poll/#{id}")}
       {:error, changeset} ->
-        IO.inspect changeset, label: "POST-ERROR CHANGESET"
         {:noreply,
           socket
           |> put_flash(:error, "There are problems with the poll. See the fields below.")
