@@ -37,7 +37,23 @@ defmodule SacaStatsWeb.PollLive.View do
   end
 
   def handle_event("form_submit", _params, socket) do
-    case Repo.insert(socket.assigns.changeset) do
+    new_changes =
+      socket.assigns.changeset.changes
+      |> Map.update(:text_items, [], &Enum.zip_with(&1, socket.assigns.poll.text_items, fn new, cur ->
+        %{new | changes: %{votes: Map.merge(cur.votes, new.changes.votes)}}
+      end))
+      |> Map.update(:multi_choice_items, [], &Enum.zip_with(&1, socket.assigns.poll.multi_choice_items, fn new, cur ->
+        %{new | changes: %{votes: Map.merge(cur.votes, new.changes.votes)}}
+      end))
+
+    changeset =
+      socket.assigns.changeset
+      |> Map.put(:changes, new_changes)
+      |> Map.put(:action, :update)
+
+    IO.inspect Ecto.Changeset.apply_changes(changeset), label: "ON SUBMIT Changeset APPLIED"
+
+    case Repo.update(changeset) do
       {:ok, %Poll{id: id}} ->
         {:noreply, redirect(socket, to: "/outfit/poll/#{id}")}
 
@@ -67,6 +83,7 @@ defmodule SacaStatsWeb.PollLive.View do
   defp encode_poll_item(assigns, %Phoenix.HTML.Form{data: %Text{}} = text_item) do
     position = text_item.data.position
     voter_id = get_voter_id(assigns)
+    IO.inspect text_item, label: "TEXT ITEM"
 
     ~H"""
     <h4><%= position %>. Text Field</h4>

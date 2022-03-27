@@ -68,10 +68,11 @@ defmodule SacaStatsWeb.PollLive.Create do
     {:noreply, assign(socket, :changeset, changeset)}
   end
 
-  def handle_event("form_submit", params, socket) do
+  def handle_event("form_submit", _params, socket) do
     case Repo.insert(socket.assigns.changeset) do
       {:ok, %Poll{id: id}} ->
         {:noreply, redirect(socket, to: "/outfit/poll/#{id}")}
+
       {:error, changeset} ->
         {:noreply,
           socket
@@ -111,6 +112,13 @@ defmodule SacaStatsWeb.PollLive.Create do
 
   defp encode_poll_item(assigns, %Phoenix.HTML.Form{data: %MultiChoice{}} = multi_choice_item) do
     position = multi_choice_item.source.changes.position
+    choices_value =
+      if is_list(multi_choice_item.source.changes[:choices]) do
+        Enum.join(multi_choice_item.source.changes[:choices], ", ")
+      else
+        multi_choice_item.source.changes[:choices]
+      end
+    IO.inspect choices_value, label: "CHOICES VALUE"
 
     ~H"""
     <h4><%= position %>. Multiple-Choice Field</h4>
@@ -120,7 +128,7 @@ defmodule SacaStatsWeb.PollLive.Create do
     <%= error_tag multi_choice_item, :description %>
 
     <%= label multi_choice_item, :choices %>
-    <%= text_input multi_choice_item, :choices %>
+    <%= text_input multi_choice_item, :choices, value: choices_value %>
     <%= error_tag multi_choice_item, :choices %>
 
     <%= hidden_input multi_choice_item, :position, value: position %>
