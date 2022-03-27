@@ -118,7 +118,6 @@ defmodule SacaStatsWeb.PollLive.Create do
       else
         multi_choice_item.source.changes[:choices]
       end
-    IO.inspect choices_value, label: "CHOICES VALUE"
 
     ~H"""
     <h4><%= position %>. Multiple-Choice Field</h4>

@@ -20,7 +20,14 @@ defmodule SacaStats.PollItem.Text do
   end
 
   def new_vote_changeset(text_item, params) do
+    # Filter out votes with empty string or nil
+    params = Map.update(params, "votes", %{}, fn votes ->
+      votes
+      |> Stream.filter(fn {_voter_id, response} -> response not in ["", nil] end)
+      |> Enum.into(%{})
+    end)
+
     text_item
-    |> cast(params, [:votes]) # Need a way to update not overwrite...
+    |> cast(params, [:votes])
   end
 end

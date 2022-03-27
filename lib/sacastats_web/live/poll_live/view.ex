@@ -40,10 +40,14 @@ defmodule SacaStatsWeb.PollLive.View do
     new_changes =
       socket.assigns.changeset.changes
       |> Map.update(:text_items, [], &Enum.zip_with(&1, socket.assigns.poll.text_items, fn new, cur ->
-        %{new | changes: %{votes: Map.merge(cur.votes, new.changes.votes)}}
+        cur_votes = Map.get(cur, :votes, %{})
+        new_votes = Map.get(new.changes, :votes, %{})
+        %{new | changes: %{votes: Map.merge(cur_votes, new_votes)}}
       end))
       |> Map.update(:multi_choice_items, [], &Enum.zip_with(&1, socket.assigns.poll.multi_choice_items, fn new, cur ->
-        %{new | changes: %{votes: Map.merge(cur.votes, new.changes.votes)}}
+        cur_votes = Map.get(cur, :votes, %{})
+        new_votes = Map.get(new.changes, :votes, %{})
+        %{new | changes: %{votes: Map.merge(cur_votes, new_votes)}}
       end))
 
     changeset =
@@ -83,7 +87,6 @@ defmodule SacaStatsWeb.PollLive.View do
   defp encode_poll_item(assigns, %Phoenix.HTML.Form{data: %Text{}} = text_item) do
     position = text_item.data.position
     voter_id = get_voter_id(assigns)
-    IO.inspect text_item, label: "TEXT ITEM"
 
     ~H"""
     <h4><%= position %>. Text Field</h4>
