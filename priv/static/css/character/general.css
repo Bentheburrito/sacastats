@@ -32,3 +32,6 @@ h4{
     width: 100%;
     height: 65vh;
 }
+#characterModel:hover{
+    cursor: grab;
+}
