@@ -8,7 +8,7 @@ import {
     MeshBasicMaterial,
     Scene,
     Vector3,
-    CameraHelper,
+    //CameraHelper, //only used for debugging
     PCFSoftShadowMap,
     LoadingManager,
     WebGLRenderer,
@@ -30,6 +30,7 @@ const mixers = [];
 const clock = new Clock();
 
 function createCamera() {
+    //initialize camera
     camera = new PerspectiveCamera(
         20,
         container.clientWidth / container.clientHeight + .3,
@@ -40,12 +41,16 @@ function createCamera() {
 }
 
 function createControls() {
+    //initialize controls
     controls = new OrbitControls(camera, container);
     controls.enableZoom = false;
     controls.enablePan = false;
     controls.target.y = .9;
+
+    //make sure the camera can only move left and right
     controls.minPolarAngle = Math.PI / 2;
     controls.maxPolarAngle = Math.PI / 2;
+
     if (highQuality) {
         controls.enableDamping = true; //Goes with higher quality animation loop (continues the move action)
     } else {
@@ -54,8 +59,8 @@ function createControls() {
 }
 
 function createLights() {
+    //initialize a light for the camera
     directionalLight = new DirectionalLight(0xffffff, 1);
-    updateLightPosition();
 
     directionalLight.castShadow = true;
     directionalLight.intensity = 5;
@@ -67,44 +72,53 @@ function createLights() {
     directionalLight.shadow.camera.far = 1000;
     directionalLight.shadow.camera.fov = 30;
 
+    //add the camera light to the scene
     scene.add(directionalLight);
 }
 
 function loadModels() {
+    //initialize variables
     const manager = new LoadingManager();
+    const loader = new GLTFLoader(manager);
+    const modelPosition = new Vector3(0, 0, 0);
 
+    //handle loading gltf models
     const onLoad = (gltf, position, reflective) => {
         const model = gltf.scene;
         model.traverse(n => {
+            //make sure to only edit the mesh material of the model
             if (n.isMesh) {
-                var prevMaterial = n.material;
                 if (n.material) {
-                    n.material.metalness = 0;
+                    //create a copy of the material
+                    var prevMaterial = n.material;
+
+                    //if the model should be reflective
                     if (!reflective) {
-                        n.material.roughness = 1;
+                        //have the model recieve shadows and change the material to a non reflective one
                         n.receiveShadow = true;
                         n.material = new MeshLambertMaterial();
                     } else {
+                        //have the model cast a shadow and change the material to a reflective one
                         n.castShadow = true;
                         n.material = new MeshPhongMaterial();
                     }
-                }
 
-                MeshBasicMaterial.prototype.copy.call(n.material, prevMaterial);
+                    //update the material to use the new less resource intensive material
+                    MeshBasicMaterial.prototype.copy.call(n.material, prevMaterial);
+                }
             }
 
             n.frustumCulled = false; //fixes random disapearing objects
         });
 
+        //keep the model at the model position
         model.position.copy(position);
 
+        //add the model to the scene
         scene.add(model);
     };
 
-    const loader = new GLTFLoader(manager);
-
-    const modelPosition = new Vector3(0, 0, 0);
-
+    //add model pieces
     loader.load(
         MODEL_PATH + "VS_Sniper.glb",
         (gltf) => onLoad(gltf, modelPosition, true),
@@ -133,10 +147,12 @@ function loadModels() {
         null
     );
 
+    //when all the pieces are loaded, update and render the canvas
     manager.onLoad = function () {
         update();
         render();
     };
+
     //scene.add(new CameraHelper(camera)); //shows light patterns
 }
 
@@ -146,7 +162,7 @@ function createRenderer() {
         antialias: true,
         alpha: true //transparent background
     });
-    renderer.setSize(container.clientWidth + 230, container.clientHeight + 30, false);
+    renderer.setSize(container.clientWidth + 230, container.clientHeight + 30, false); //give a bit more room on the height and width to allow for larger guns
 
     renderer.physicallyCorrectLights = true;
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -173,6 +189,7 @@ function render() {
 }
 
 function updateLightPosition() {
+    //make sure the light stays near the camera
     let position = JSON.parse(JSON.stringify(camera.position));
     position.x += 2;
     position.y += 2;
@@ -180,27 +197,34 @@ function updateLightPosition() {
 }
 
 function onWindowResize() {
+    //maintain aspect ratio
     camera.aspect = container.clientWidth / container.clientHeight + .3;
 
     // update the camera's frustum
     camera.updateProjectionMatrix();
 
+    //resize the canvas
     renderer.setSize(container.clientWidth + 230, container.clientHeight + 30);
 
+    //re-render
     render();
 }
 
 export default function init(containerID) {
+    //get the container div
     container = document.querySelector(containerID);
 
+    //create a new scene
     scene = new Scene();
 
+    //add needed objects to scene
     createCamera();
     createControls();
     createLights();
     loadModels();
     createRenderer();
 
+    //if it's high quality, create an animation loop
     if (highQuality) {
         //higher quality, but really CPU expensive
         renderer.setAnimationLoop(() => {
@@ -209,5 +233,6 @@ export default function init(containerID) {
         });
     }
 
+    //handle when the window size changes
     window.addEventListener("resize", onWindowResize);
 }
