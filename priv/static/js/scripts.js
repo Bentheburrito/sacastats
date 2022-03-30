@@ -4,7 +4,7 @@ import * as loadingScreen from "/js/loading-screen.js";
 import { addScrollToTop } from "/js/scroll-to-top.js";
 import { addNavbarEventListeners } from "/js/navbar-events.js";
 
-window.addEventListener('load', (event) => {
+export default function init() {
     addEventListeners();
 
     addNavbarEventListeners();
@@ -20,7 +20,7 @@ window.addEventListener('load', (event) => {
     loadingScreen.remove();
 
     loadingScreen.waitForCloseThenRunFunction(addAnimationToProgressBars);
-});
+}
 
 function addEventListeners() {
     setWindowResizeEvents();
