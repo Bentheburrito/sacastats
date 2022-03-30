@@ -4,6 +4,7 @@ defmodule SacaStatsWeb.CharacterController do
   use SacaStatsWeb, :controller
   alias SacaStatsWeb.CharacterView
   import PS2.API.QueryBuilder
+  import SacaStats.Utils
   alias PS2.API.{Join, Query}
 
   def character(conn, %{"character_name" => name, "stat_type" => "lookup"}) do
@@ -284,17 +285,6 @@ defmodule SacaStatsWeb.CharacterController do
       2 -> maybe_to_int(vs) + maybe_to_int(tr)
       3 -> maybe_to_int(nc) + maybe_to_int(vs)
       4 -> maybe_to_int(nc) + maybe_to_int(vs) + maybe_to_int(tr)
-    end
-  end
-
-  def maybe_to_int(value) when is_integer(value), do: value
-
-  def maybe_to_int(value) when value in [nil, ""], do: 0
-
-  def maybe_to_int(value) when is_binary(value) do
-    case Integer.parse(value) do
-      {parsed_int, _rest} -> parsed_int
-      :error -> 0
     end
   end
 
