@@ -111,8 +111,12 @@ defmodule SacaStatsWeb.PollLive.Create do
 
     ~H"""
     <%= for item <- poll_items do %>
-      <div class="poll-item" phx-change={"field_change:#{item.source.changes.position}"}>
-        <button type="button" phx-click={"remove_item:#{item.source.changes.position}"} class="btn-danger btn-sm remove-item-button">Remove Field</button>
+      <div class="poll-item">
+        <button type="button"
+          phx-click={"remove_item:#{item.source.changes.position}"}
+          class="btn-danger btn-sm remove-item-button">
+          Remove Field
+        </button>
         <%= encode_poll_item(assigns, item) %>
       </div>
     <% end %>

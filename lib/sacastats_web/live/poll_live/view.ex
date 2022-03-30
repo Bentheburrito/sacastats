@@ -20,7 +20,7 @@ defmodule SacaStatsWeb.PollLive.View do
       |> assign(:changeset, changeset)
       |> assign(:user, session["user"])
       |> assign(:_csrf_token, session["_csrf_token"])}
-    end
+  end
 
   # for when owner is viewing and wants to see votes come in live
   def handle_info({:poll_vote, user_id}, socket) do
@@ -36,18 +36,8 @@ defmodule SacaStatsWeb.PollLive.View do
   def handle_event("form_submit", %{"poll" => params}, socket) do
     new_params =
       params
-      |> Map.update("text_items", %{}, fn items ->
-        Enum.zip_with(items, socket.assigns.poll.text_items, fn {_index, new}, cur ->
-          cur_votes = Map.get(cur, :votes, %{})
-          Map.update(new, "votes", cur_votes, &Map.merge(cur_votes, &1))
-        end)
-      end)
-      |> Map.update("multi_choice_items", %{}, fn items ->
-        Enum.zip_with(items, socket.assigns.poll.multi_choice_items, fn {_index, new}, cur ->
-          cur_votes = Map.get(cur, :votes, %{})
-          Map.update(new, "votes", cur_votes, &Map.merge(cur_votes, &1))
-        end)
-      end)
+      |> Map.update("text_items", %{}, &combine_votes(&1, socket.assigns.poll.text_items))
+      |> Map.update("multi_choice_items", %{}, &combine_votes(&1, socket.assigns.poll.multi_choice_items))
 
     changeset =
       Repo.get!(Poll, socket.assigns.poll.id)
@@ -85,12 +75,14 @@ defmodule SacaStatsWeb.PollLive.View do
   defp encode_poll_item(assigns, %Phoenix.HTML.Form{data: %Text{}} = text_item) do
     position = text_item.data.position
     voter_id = get_voter_id(assigns)
+    text_name = "poll[text_items][#{text_item.index}][votes][#{voter_id}]"
+    text_value = text_item.source.changes[:votes][voter_id]
 
     ~H"""
     <h4><%= position %>. Text Field</h4>
 
     <%= label text_item, :votes, text_item.data.description %>
-    <%= text_input text_item, :votes_voter, name: "poll[text_items][#{text_item.index}][votes][#{voter_id}]", value: text_item.source.changes[:votes][voter_id] %>
+    <%= text_input text_item, :votes_voter, name: text_name, value: text_value %>
     <%= error_tag text_item, :votes %>
 
     <%= hidden_input text_item, :position, value: position %>
@@ -108,13 +100,23 @@ defmodule SacaStatsWeb.PollLive.View do
 
     <%= label multi_choice_item, multi_choice_item.data.description %>
     <%= for choice <- multi_choice_item.data.choices do %>
-      <%= radio_button multi_choice_item, :votes_voter, choice, name: item_name, id: "multi_choice_#{position}_#{choice}", checked: multi_choice_item.source.changes[:votes][voter_id] == choice %>
+      <%= radio_button multi_choice_item, :votes_voter, choice,
+        name: item_name,
+        id: "multi_choice_#{position}_#{choice}",
+        checked: multi_choice_item.source.changes[:votes][voter_id] == choice %>
       <label class="radio-label" for={"multi_choice_#{position}_#{choice}"}><%= choice %></label>
     <% end %>
 
     <%= hidden_input multi_choice_item, :position, value: position %>
     <%= hidden_input multi_choice_item, :id, value: multi_choice_item.data.id %>
     """
+  end
+
+  defp combine_votes(new_items, items) do
+    Enum.zip_with(new_items, items, fn {_index, new}, cur ->
+      cur_votes = Map.get(cur, :votes, %{})
+      Map.update(new, "votes", cur_votes, &Map.merge(cur_votes, &1))
+    end)
   end
 
   defp get_voter_id(%{user: %{"id" => user_id}}), do: user_id
