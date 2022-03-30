@@ -1,4 +1,8 @@
 defmodule SacaStats.Utils do
+  @moduledoc """
+  Generic utility functions
+  """
+
   def maybe_to_int(value, default \\ 0)
 
   def maybe_to_int(value, _default) when is_integer(value), do: value

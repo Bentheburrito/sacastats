@@ -1,4 +1,7 @@
 defmodule SacaStatsWeb.PollLive.View do
+  @moduledoc """
+  LiveView for viewing polls, either as voters, or the owner monitoring results as they come in.
+  """
   use SacaStatsWeb, :live_view
   use Phoenix.HTML
 
@@ -15,16 +18,16 @@ defmodule SacaStatsWeb.PollLive.View do
 
     changeset = Poll.new_vote_changeset(poll, %{})
 
-    {:ok, socket
-      |> assign(:poll, poll)
-      |> assign(:changeset, changeset)
-      |> assign(:user, session["user"])
-      |> assign(:_csrf_token, session["_csrf_token"])}
+    {:ok,
+     socket
+     |> assign(:poll, poll)
+     |> assign(:changeset, changeset)
+     |> assign(:user, session["user"])
+     |> assign(:_csrf_token, session["_csrf_token"])}
   end
 
   # for when owner is viewing and wants to see votes come in live
   def handle_info({:poll_vote, user_id}, socket) do
-
     {:noreply, socket}
   end
 
@@ -37,7 +40,11 @@ defmodule SacaStatsWeb.PollLive.View do
     new_params =
       params
       |> Map.update("text_items", %{}, &combine_votes(&1, socket.assigns.poll.text_items))
-      |> Map.update("multi_choice_items", %{}, &combine_votes(&1, socket.assigns.poll.multi_choice_items))
+      |> Map.update(
+        "multi_choice_items",
+        %{},
+        &combine_votes(&1, socket.assigns.poll.multi_choice_items)
+      )
 
     changeset =
       Repo.get!(Poll, socket.assigns.poll.id)
@@ -51,9 +58,9 @@ defmodule SacaStatsWeb.PollLive.View do
 
       {:error, changeset} ->
         {:noreply,
-          socket
-          |> put_flash(:error, "There are problems with the poll. See the fields below.")
-          |> assign(:changeset, changeset)}
+         socket
+         |> put_flash(:error, "There are problems with the poll. See the fields below.")
+         |> assign(:changeset, changeset)}
     end
   end
 

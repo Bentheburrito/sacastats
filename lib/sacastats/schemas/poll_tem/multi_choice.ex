@@ -9,7 +9,8 @@ defmodule SacaStats.PollItem.MultiChoice do
   schema "poll_items_multi_choice" do
     field :description, :string
     field :choices, {:array, :string}
-    field :votes, {:map, :string}, default: %{} # Mapped by voter's discord_id => their selected choice
+    # Mapped by voter's discord_id => their selected choice
+    field :votes, {:map, :string}, default: %{}
     field :position, :integer
     belongs_to :poll, SacaStats.Poll
   end
@@ -24,6 +25,7 @@ defmodule SacaStats.PollItem.MultiChoice do
             str_choices
             |> String.split(",")
             |> Enum.map(&String.trim/1)
+
           choices when is_list(choices) ->
             choices
         end)

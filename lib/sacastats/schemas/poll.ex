@@ -34,7 +34,10 @@ defmodule SacaStats.Poll do
   end
 
   defp validate_items(%Ecto.Changeset{changes: changes} = changeset) do
-    total_len = Enum.count(Map.get(changes, :text_items, %{})) + Enum.count(Map.get(changes, :multi_choice_items, %{}))
+    total_len =
+      Enum.count(Map.get(changes, :text_items, %{})) +
+        Enum.count(Map.get(changes, :multi_choice_items, %{}))
+
     if total_len >= 1 do
       changeset
     else

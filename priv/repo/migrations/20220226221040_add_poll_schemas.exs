@@ -9,7 +9,8 @@ defmodule SacaStats.Repo.Migrations.AddPollSchema do
 
     create table(:poll_items_text) do
       add :description, :string
-      add :votes, {:map, :string} # Mapped by voter's discord_id => their text response
+      # Mapped by voter's discord_id => their text response
+      add :votes, {:map, :string}
       add :position, :integer
       add :poll_id, references("polls")
     end
@@ -17,7 +18,8 @@ defmodule SacaStats.Repo.Migrations.AddPollSchema do
     create table(:poll_items_multi_choice) do
       add :description, :string
       add :choices, {:array, :string}
-      add :votes, {:map, :string} # Mapped by voter's discord_id => their selected choice
+      # Mapped by voter's discord_id => their selected choice
+      add :votes, {:map, :string}
       add :position, :integer
       add :poll_id, references("polls")
     end
