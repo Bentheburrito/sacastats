@@ -34,6 +34,13 @@ defmodule SacaStatsWeb.Router do
     get "/:character_name/:stat_type", CharacterController, :character
   end
 
+  scope "/outfit", SacaStatsWeb do
+    pipe_through :browser
+
+    live "/poll/create", PollLive.Create
+    live "/poll/:id", PollLive.View
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", SacaStatsWeb do
   #   pipe_through :api

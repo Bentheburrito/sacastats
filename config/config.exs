@@ -16,7 +16,7 @@ config :sacastats, SacaStatsWeb.Endpoint,
   url: [host: "localhost"],
   render_errors: [view: SacaStatsWeb.ErrorView, accepts: ~w(html json), layout: false],
   pubsub_server: SacaStats.PubSub,
-  live_view: [signing_salt: "6zvfh7ud"]
+  live_view: [signing_salt: "wRZ5qD1zyjqA+CyhwE26gYUMaRIg4NAs"]
 
 # Configures the mailer
 #
