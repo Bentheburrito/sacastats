@@ -19,8 +19,10 @@ defmodule SacaStats.Poll do
   def changeset(poll, params \\ %{}) do
     poll
     |> cast(params, [:owner_discord_id, :title])
+    |> validate_required([:owner_discord_id, :title])
     |> cast_assoc(:text_items, with: &Text.changeset/2)
     |> cast_assoc(:multi_choice_items, with: &MultiChoice.changeset/2)
+    |> validate_items()
   end
 
   def new_vote_changeset(poll, params) do
@@ -28,5 +30,15 @@ defmodule SacaStats.Poll do
     |> cast(params, [:owner_discord_id, :title])
     |> cast_assoc(:text_items, with: &Text.new_vote_changeset/2)
     |> cast_assoc(:multi_choice_items, with: &MultiChoice.new_vote_changeset/2)
+    |> validate_items()
+  end
+
+  defp validate_items(%Ecto.Changeset{changes: changes} = changeset) do
+    total_len = Enum.count(Map.get(changes, :text_items, %{})) + Enum.count(Map.get(changes, :multi_choice_items, %{}))
+    if total_len >= 1 do
+      changeset
+    else
+      Ecto.Changeset.add_error(changeset, :items, "a poll must have at least one item to vote on")
+    end
   end
 end

@@ -34,6 +34,13 @@ defmodule SacaStats.PollItem.MultiChoice do
     multi_choice_item
     |> cast(params, [:description, :position, :choices])
     |> validate_required([:description, :position, :choices])
+    |> validate_change(:choices, fn :choices, choices ->
+      if length(choices) >= 2 and nil not in choices and "" not in choices do
+        []
+      else
+        [choices: "must have at least two non-empty choices"]
+      end
+    end)
   end
 
   def new_vote_changeset(multi_choice_item, params) do

@@ -2,7 +2,7 @@
   <h2><%= @poll.title %></h2>
 
   <.form let={form} for={@changeset} phx-change="field_change" phx-submit="form_submit">
-
+    <%= error_tag form, :items %>
     <div id="poll-item-list" class="container text-left">
       <%= SacaStatsWeb.PollLive.View.encode_poll_items(form, assigns) %>
     </div>

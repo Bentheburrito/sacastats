@@ -19,7 +19,6 @@ defmodule SacaStatsWeb.PollLive.View do
       |> assign(:poll, poll)
       |> assign(:changeset, changeset)
       |> assign(:user, session["user"])
-      |> assign(:prev_params, %{})
       |> assign(:_csrf_token, session["_csrf_token"])}
     end
 
@@ -30,32 +29,31 @@ defmodule SacaStatsWeb.PollLive.View do
   end
 
   def handle_event("field_change", %{"poll" => params}, socket) do
-    changeset = Poll.new_vote_changeset(socket.assigns.changeset, params)
-    {:noreply, socket
-      |> assign(:changeset, changeset)
-      |> assign(:prev_params, params)}
+    changeset = Poll.new_vote_changeset(socket.assigns.poll, params)
+    {:noreply, assign(socket, :changeset, changeset)}
   end
 
-  def handle_event("form_submit", _params, socket) do
-    new_changes =
-      socket.assigns.changeset.changes
-      |> Map.update(:text_items, [], &Enum.zip_with(&1, socket.assigns.poll.text_items, fn new, cur ->
-        cur_votes = Map.get(cur, :votes, %{})
-        new_votes = Map.get(new.changes, :votes, %{})
-        %{new | changes: %{votes: Map.merge(cur_votes, new_votes)}}
-      end))
-      |> Map.update(:multi_choice_items, [], &Enum.zip_with(&1, socket.assigns.poll.multi_choice_items, fn new, cur ->
-        cur_votes = Map.get(cur, :votes, %{})
-        new_votes = Map.get(new.changes, :votes, %{})
-        %{new | changes: %{votes: Map.merge(cur_votes, new_votes)}}
-      end))
+  def handle_event("form_submit", %{"poll" => params}, socket) do
+    new_params =
+      params
+      |> Map.update("text_items", %{}, fn items ->
+        Enum.zip_with(items, socket.assigns.poll.text_items, fn {_index, new}, cur ->
+          cur_votes = Map.get(cur, :votes, %{})
+          Map.update(new, "votes", cur_votes, &Map.merge(cur_votes, &1))
+        end)
+      end)
+      |> Map.update("multi_choice_items", %{}, fn items ->
+        Enum.zip_with(items, socket.assigns.poll.multi_choice_items, fn {_index, new}, cur ->
+          cur_votes = Map.get(cur, :votes, %{})
+          Map.update(new, "votes", cur_votes, &Map.merge(cur_votes, &1))
+        end)
+      end)
 
     changeset =
-      socket.assigns.changeset
-      |> Map.put(:changes, new_changes)
+      Repo.get!(Poll, socket.assigns.poll.id)
+      |> Repo.preload([:text_items, :multi_choice_items])
+      |> Poll.new_vote_changeset(new_params)
       |> Map.put(:action, :update)
-
-    IO.inspect Ecto.Changeset.apply_changes(changeset), label: "ON SUBMIT Changeset APPLIED"
 
     case Repo.update(changeset) do
       {:ok, %Poll{id: id}} ->

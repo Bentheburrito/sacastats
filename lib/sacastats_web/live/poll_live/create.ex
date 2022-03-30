@@ -5,6 +5,7 @@ defmodule SacaStatsWeb.PollLive.Create do
   alias SacaStats.Poll
   alias SacaStats.PollItem.{MultiChoice, Text}
   alias SacaStats.Repo
+  alias SacaStats.Utils
 
   def render(assigns) do
     Phoenix.View.render(SacaStatsWeb.PollView, "create.html", assigns)
@@ -18,9 +19,9 @@ defmodule SacaStatsWeb.PollLive.Create do
     if not is_nil(user) do
       changeset = Poll.changeset(%Poll{}, init_changes)
 
-    {:ok, socket
-      |> assign(:changeset, changeset)
-      |> assign(:prev_params, init_changes)}
+      {:ok, socket
+        |> assign(:changeset, changeset)
+        |> assign(:prev_params, init_changes)}
     else
       {:ok, socket
         |> put_flash(:error, "You need to be logged in to create polls.")
@@ -39,33 +40,54 @@ defmodule SacaStatsWeb.PollLive.Create do
   end
 
   def handle_event("add_text", _params, socket) do
-    new_position = get_next_position(socket.assigns.changeset.changes)
+    next_position = get_next_position(socket.assigns.changeset.changes)
+    next_index = socket.assigns.prev_params |> Map.get("text_items", %{}) |> map_size() |> Integer.to_string()
 
     params = Map.update(
       socket.assigns.prev_params,
       "text_items",
-      %{"0" => %{"position" => new_position}},
-      &Map.put(&1, new_position, %{"position" => new_position})
+      %{"0" => %{"position" => next_position}},
+      &Map.put(&1, next_index, %{"position" => next_position})
     )
 
     changeset = Poll.changeset(%Poll{}, params)
 
-    {:noreply, assign(socket, :changeset, changeset)}
+    {:noreply, socket
+      |> assign(:changeset, changeset)
+      |> assign(:prev_params, params)}
   end
 
   def handle_event("add_multi", _params, socket) do
-    new_position = get_next_position(socket.assigns.changeset.changes)
+    next_position = get_next_position(socket.assigns.changeset.changes)
+    next_index = socket.assigns.prev_params |> Map.get("multi_choice_items", %{}) |> map_size() |> Integer.to_string()
 
     params = Map.update(
       socket.assigns.prev_params,
       "multi_choice_items",
-      %{"0" => %{"position" => new_position}},
-      &Map.put(&1, new_position, %{"position" => new_position})
+      %{"0" => %{"position" => next_position}},
+      &Map.put(&1, next_index, %{"position" => next_position})
     )
 
     changeset = Poll.changeset(%Poll{}, params)
 
-    {:noreply, assign(socket, :changeset, changeset)}
+    {:noreply, socket
+      |> assign(:changeset, changeset)
+      |> assign(:prev_params, params)}
+  end
+
+  def handle_event("remove_item:" <> to_remove_position, _params, socket) do
+    to_remove_position = String.to_integer(to_remove_position)
+    params =
+      socket.assigns.prev_params
+      |> Map.update("text_items", %{}, &remove_item(&1, to_remove_position))
+      |> Map.update("multi_choice_items", %{}, &remove_item(&1, to_remove_position))
+
+    changeset = Poll.changeset(%Poll{}, params)
+
+    {:noreply,
+      socket
+      |> assign(:changeset, changeset)
+      |> assign(:prev_params, params)}
   end
 
   def handle_event("form_submit", _params, socket) do
@@ -90,6 +112,7 @@ defmodule SacaStatsWeb.PollLive.Create do
     ~H"""
     <%= for item <- poll_items do %>
       <div class="poll-item" phx-change={"field_change:#{item.source.changes.position}"}>
+        <button type="button" phx-click={"remove_item:#{item.source.changes.position}"} class="btn-danger btn-sm remove-item-button">Remove Field</button>
         <%= encode_poll_item(assigns, item) %>
       </div>
     <% end %>
@@ -127,7 +150,7 @@ defmodule SacaStatsWeb.PollLive.Create do
     <%= error_tag multi_choice_item, :description %>
 
     <%= label multi_choice_item, :choices %>
-    <%= text_input multi_choice_item, :choices, value: choices_value %>
+    <%= text_input multi_choice_item, :choices, value: choices_value, placeholder: "Enter choices separated by commas. (e.g. \"option one, option two, option three\")" %>
     <%= error_tag multi_choice_item, :choices %>
 
     <%= hidden_input multi_choice_item, :position, value: position %>
@@ -138,5 +161,18 @@ defmodule SacaStatsWeb.PollLive.Create do
     text_items = Map.get(changes, :text_items, [])
     multi_choice_items = Map.get(changes, :multi_choice_items, [])
     length(text_items) + length(multi_choice_items) + 1
+  end
+
+  defp remove_item(items, position) when is_integer(position) do
+    for {index, %{"position" => item_pos} = item} <- items,
+      item_pos = Utils.maybe_to_int(item_pos),
+      position != item_pos,
+      into: %{} do
+        if item_pos > position do
+          {item_pos - 1, %{item | "position" => item_pos - 1}}
+        else
+          {index, item}
+        end
+    end
   end
 end
