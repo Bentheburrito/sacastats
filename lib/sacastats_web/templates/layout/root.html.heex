@@ -110,5 +110,10 @@
         </button>
       </nav>
     </footer>
+    <script type="module">
+      //initialize page
+      import init from "<%= Routes.static_path(@conn, "/js/scripts.js") %>";
+      init();
+    </script>
   </body>
 </html>
