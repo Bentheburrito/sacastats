@@ -12,7 +12,7 @@ window.addEventListener('load', (event) => {
 function initializeButtonEvent() {
     document.getElementById("nextAurax").addEventListener('click', function () {
         $('html, body').animate({
-            scrollTop: $("#" + nextAuraxElementID).offset().top - 300 //- 254 to be at top
+            scrollTop: $("#" + nextAuraxElementID).offset().top - ((window.innerWidth >= 768) ? 300 : 10) //- 254 to be at top
         }, 500);
         setTimeout(function () {
             flashElement(nextAuraxElementID);
