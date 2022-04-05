@@ -30,6 +30,16 @@ function flashElement(elementId) {
     }, 1000);
 }
 
+export function showHideNextAuraxButton() {
+    if (document.getElementById("nextAurax") != undefined) {
+        if (document.getElementById(nextAuraxElementID) != undefined) {
+            $("#nextAurax").show();
+        } else {
+            $("#nextAurax").hide();
+        }
+    }
+}
+
 export default function init() {
     $('#weaponTable').bootstrapTable({
         formatSearch: function () {

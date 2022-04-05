@@ -1,5 +1,5 @@
 import { addFormatsToPage, addAnimationToProgressBars } from "/js/formats.js";
-import { nextAuraxElementID } from "/js/character/weapons.js";
+import { showHideNextAuraxButton } from "/js/character/weapons-table.js";
 
 let table;
 
@@ -196,16 +196,6 @@ export function setupFlexTables() {
     function addPaginationClick() {
         $('a').off('click', tablePaginationClickEventHandler);
         $('a').on('click', tablePaginationClickEventHandler);
-    }
-
-    function showHideNextAuraxButton() {
-        if (document.getElementById("nextAurax") != undefined) {
-            if (document.getElementById(nextAuraxElementID) != undefined) {
-                $("#nextAurax").show();
-            } else {
-                $("#nextAurax").hide();
-            }
-        }
     }
 
     function setMobileHeaderTexts(tableID) {
