@@ -1,5 +1,4 @@
 import { addFormatsToPage, addAnimationToProgressBars } from "/js/formats.js";
-import { showHideNextAuraxButton } from "/js/character/weapons-table.js";
 
 let table;
 
