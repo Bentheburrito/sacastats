@@ -45,7 +45,8 @@ export default function init() {
         formatSearch: function () {
             return 'Search Weapon Name'
         },
-        customSearch: searchByWeaponName
+        customSearch: searchByWeaponName,
+        dragaccept: '.drag-accept'
     })
 
     function searchByWeaponName(data, text) {

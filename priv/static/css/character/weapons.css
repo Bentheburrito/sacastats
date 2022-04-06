@@ -15,8 +15,34 @@
     }
 }
 
+input[type=checkbox][disabled] + span {
+    color: #ccc;
+}
+
 .bootstrap-table{
     padding-bottom: 10px;
+}
+
+@media only screen and (min-width: 768px) { /*for boostrap > xs*/
+    .table th:first-child,
+    .table td:first-child{
+        position: sticky;
+        left: 0;
+    }
+    .table th:first-child{
+        background-color: #ffffff;
+    }
+    .table tr:nth-child(odd) td:first-child{
+        background-color: #eeeeee;
+    }
+    .table tr:nth-child(even) td:first-child{
+        background-color: #ffffff;
+    }
+    tbody tr:hover,
+    tbody tr:hover >
+    td:first-child {
+        background-color: #dddddd!important;
+    }
 }
 
 .flash-border{
