@@ -23,10 +23,80 @@ input[type=checkbox][disabled] + span {
     padding-bottom: 10px;
 }
 
+.dropdown-item:hover,
+input:hover{
+    cursor: pointer;
+}
+
+.dropdown-item{
+    margin-bottom: 0;
+}
+
+hr{
+    height: 1px;
+    width: 80%;
+    margin: 0 auto 12px auto;
+    background-color: rgb(110, 110, 110);
+    border: none;
+}
+
+#filterDropdownMenu{
+    max-height: 400px;
+    max-width: 550px;
+    overflow: auto;
+}
+
+.filterOptionContainer{
+  width: 96%;
+  margin: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.dropdown-menu{
+  background-color: #eeeeee;
+}
+.filterOption{
+    width: 100%;
+}
+.smallFilterOption{
+    width: 50%
+}
+#clearFilterButton{
+    position: absolute;
+    right: 0;
+}
+/*Contained <hr/> needs strange styling to flow properly*/
+.middleHR{
+    width: 85%;
+    margin-left: 10%;
+}
+@media only screen and (max-width: 660px) {
+    .middleHR{
+        width: 86%;
+    }
+}
+@media only screen and (max-width: 600px) {
+    .middleHR{
+        width: 87.5%;
+    }
+}
+@media only screen and (max-width: 575px) {
+    .middleHR{
+        width: 88.5%;
+    }
+}
+@media only screen and (max-width: 475px) {
+    .middleHR{
+        width: 90%;
+    }
+}
+
 @media only screen and (min-width: 768px) { /*for boostrap > xs*/
     .table th:first-child,
     .table td:first-child{
         position: sticky;
+        top: 0;
         left: 0;
     }
     .table th:first-child{
@@ -42,6 +112,17 @@ input[type=checkbox][disabled] + span {
     tbody tr:hover >
     td:first-child {
         background-color: #dddddd!important;
+    }
+
+    .filterOption{
+        width: 50%;
+    }
+    #auraxiumFilter{
+        border-right: 1px solid rgb(110, 110, 110);
+    }
+
+    .filterOption{
+        width: 50%;
     }
 }
 

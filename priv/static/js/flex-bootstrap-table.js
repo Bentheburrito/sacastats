@@ -13,17 +13,15 @@ export function setupFlexTables() {
     }
 
     function updateSortTable() {
-        if (!didTableRecieveStyleUpdate()) {
-            let toSortDesc = table.querySelector(".desc");
-            let toSortAsc = table.querySelector(".asc");
+        let toSortDesc = table.querySelector(".desc");
+        let toSortAsc = table.querySelector(".asc");
 
-            if (toSortDesc != undefined) {
-                toSortDesc.click();
-                toSortDesc.click();
-            } else if (toSortAsc != undefined) {
-                toSortAsc.click();
-                toSortAsc.click();
-            }
+        if (toSortDesc != undefined) {
+            toSortDesc.click();
+            toSortDesc.click();
+        } else if (toSortAsc != undefined) {
+            toSortAsc.click();
+            toSortAsc.click();
         }
     }
 
@@ -88,16 +86,27 @@ export function setupFlexTables() {
         });
     }
 
-    function tableToolBarClickEventHandler() {
+    function dropDownItemMouseUpEventHandler(e) {
+        var menuElement = e.target.closest('.dropdown-menu');
+
         setTimeout(function () {
             updateSortTable();
-            $(".dropdown-toggle:first").click();
-        }, 100);
+            if (!menuElement.classList.contains("show")) {
+                menuElement.parentElement.firstElementChild.click();
+            }
+        }, 10);
+    }
+    function dropDownMenuClickEventHandler(e) {
+        e.stopPropagation();
     }
     function addToolBarClick() {
-        document.querySelectorAll('.dropdown-item-marker').forEach(itemDropDown => {
-            itemDropDown.removeEventListener('mouseup', tableToolBarClickEventHandler);
-            itemDropDown.addEventListener('mouseup', tableToolBarClickEventHandler);
+        document.querySelectorAll(".dropdown-item").forEach(itemDropDown => {
+            itemDropDown.removeEventListener('mouseup', dropDownItemMouseUpEventHandler);
+            itemDropDown.addEventListener('mouseup', dropDownItemMouseUpEventHandler);
+        });
+        document.querySelectorAll(".dropdown-menu").forEach(menu => {
+            menu.removeEventListener('click', dropDownMenuClickEventHandler);
+            menu.addEventListener('click', dropDownMenuClickEventHandler);
         });
     }
 

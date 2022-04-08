@@ -5,6 +5,144 @@
 <button id="nextAurax" class="btn btn-secondary p-0 m-0 mt-3 float-right"  data-toggle="tooltip" data-placement="top" title="Scroll to closest weapon to auraxium">
     <img src={Routes.static_path(@conn, "/images/character/alphaAurax.png")} class="m-auto" width="30px" alt="To Next Auraxium Weapon"/>
 </button>
+<div id="tableFilterDropdown" class="dropdown">
+    <button id="weaponTableFilterButton" class="btn btn-secondary mt-3 float-right dropdown-toggle" data-toggle="dropdown" title="Filter" data-placement="top">
+        <i class="fas fa-filter"></i>
+    </button>
+    <div id="filterDropdownMenu" class="dropdown-menu dropdown-menu-right">
+        <div class="pl-3">
+            <button id="clearFilterButton" class="btn btn-danger" data-toggle="dropdown" title="Clear Filter" data-placement="top">
+                Clear
+            </button>
+            <h5 class="text-center pb-3">Filter Options</h5>
+            <div class="pb-0 pb-md-3">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-6">
+                        <div id="auraxiumFilter">
+                            <h5>Auraxium</h5>
+                            <label class="dropdown-item">
+                                <input class="form-check-input" type="radio" name="auraxium" id="showAllAruaxed" checked>
+                                <span class="pl-2">
+                                    Show All
+                                </span>
+                            </label>
+                            <label class="dropdown-item">
+                                <input class="form-check-input" type="radio" name="auraxium" id="showAruaxed">
+                                <span class="pl-2">
+                                    Only Auraxed Weapons
+                                </span>
+                            </label>
+                            <label class="dropdown-item">
+                                <input class="form-check-input" type="radio" name="auraxium" id="showNonAruaxed">
+                                <span class="pl-2">
+                                    Only Non-Auraxed Weapons
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-12 d-block d-md-none ">
+                        <hr class="middleHR"/>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div id="vehicleFilterOptionHolder">
+                            <h5>Vehicle/Infantry</h5>
+                            <label class="dropdown-item">
+                                <input class="form-check-input" type="radio" name="vehicle" id="showAllAruaxed" checked>
+                                <span class="pl-2">
+                                    Show All
+                                </span>
+                            </label>
+                            <label class="dropdown-item">
+                                <input class="form-check-input" type="radio" name="vehicle" id="showAruaxed">
+                                <span class="pl-2">
+                                    Only Infantry Weapons
+                                </span>
+                            </label>
+                            <label class="dropdown-item">
+                                <input class="form-check-input" type="radio" name="vehicle" id="showNonAruaxed">
+                                <span class="pl-2">
+                                    Only Vehicle Weapons
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr/>
+            <div id="factionFilter">
+                <h5>Faction</h5>
+                <div class="filterOptionContainer">
+                    <div class="filterOption smallFilterOption">
+                        <label class="dropdown-item">
+                            <input class="form-check-input" type="checkbox" name="faction" id="showall-faction-filter-option" checked>
+                            <span class="pl-2">
+                                Show All
+                            </span>
+                        </label>
+                    </div>
+                    <%= for faction <- @character["factions"] do %>
+                        <div class="filterOption smallFilterOption">
+                            <label class="dropdown-item">
+                                <input class="form-check-input" type="checkbox" name="faction" id={faction <> "-faction-filter-option"}>
+                                <span class="pl-2">
+                                    <%= faction %>
+                                </span>
+                            </label>
+                        </div>
+                    <% end %>
+                </div>
+            </div>
+            <hr/>
+            <div id="categoryFilter">
+                <h5>Category</h5>
+                <div class="filterOptionContainer">
+                    <div class="filterOption smallFilterOption">
+                        <label class="dropdown-item">
+                            <input class="form-check-input" type="checkbox" name="category" id="showall-category-filter-option" checked>
+                            <span class="pl-2">
+                                Show All
+                            </span>
+                        </label>
+                    </div>
+                    <%= for category <- @character["categories"] do %>
+                        <div class="filterOption smallFilterOption">
+                            <label class="dropdown-item">
+                                <input class="form-check-input" type="checkbox" name="category" id={category <> "-category-filter-option"}>
+                                <span class="pl-2">
+                                    <%= category %>
+                                </span>
+                            </label>
+                        </div>
+                    <% end %>
+                </div>
+            </div>
+            <hr/>
+            <div id="typeFilter">
+                <h5>Type</h5>
+                <div class="filterOptionContainer">
+                    <div class="filterOption">
+                        <label class="dropdown-item">
+                            <input class="form-check-input" type="checkbox" name="type" id="showall-type-filter-option" checked>
+                            <span class="pl-2">
+                                Show All
+                            </span>
+                        </label>
+                    </div>
+                    <%= for type <- @character["types"] do %>
+                        <div class="filterOption">
+                            <label class="dropdown-item">
+                                <input class="form-check-input" type="checkbox" name="type" id={type <> "-type-filter-option"}>
+                                <span class="pl-2">
+                                    <%= type %>
+                                </span>
+                            </label>
+                        </div>
+                    <% end %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <table class="table table-bordered table-striped table-responsive-stack" id="weaponTable"
     data-toolbar="#toolbar"
     data-show-columns="true"

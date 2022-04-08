@@ -159,13 +159,26 @@ defmodule SacaStatsWeb.CharacterController do
         {weapon_id, Map.merge(weapon, weapon_stats)}
       end
 
+    faction_set =
+      for id <- get_sorted_set_of_items("faction_id", complete_weapons) do
+        id |> get_faction_alias()
+      end
+      |> MapSet.new()
+      |> Enum.sort()
+
+    type_set = get_sorted_set_of_items("category", complete_weapons)
+    category_set = get_sorted_set_of_items("sanction", complete_weapons)
+
     status = if body["online_status"] |> String.to_integer() > 0, do: "online", else: "offline"
 
     character = %{
       "stat_page" => "weapons.html",
       "response" => body,
       "weapons" => complete_weapons,
-      "status" => status
+      "status" => status,
+      "factions" => faction_set,
+      "types" => type_set,
+      "categories" => category_set
     }
 
     render(conn, "template.html", character: character)
@@ -267,12 +280,12 @@ defmodule SacaStatsWeb.CharacterController do
 
   def get_faction_alias(faction_id) do
     case faction_id do
-      nil -> "All"
-      0 -> "All"
+      nil -> "NS"
+      0 -> "NS"
       1 -> "VS"
       2 -> "NC"
       3 -> "TR"
-      4 -> "NS"
+      4 -> "NSO"
     end
   end
 
@@ -305,5 +318,14 @@ defmodule SacaStatsWeb.CharacterController do
     total = maybe_to_int(total_value)
 
     Float.round(100 * (value / total), 2)
+  end
+
+  def get_sorted_set_of_items(set_value, map) do
+    MapSet.new(
+      for {_id, item} <- map do
+        item[set_value]
+      end
+    )
+    |> Enum.sort()
   end
 end
