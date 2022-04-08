@@ -26,17 +26,15 @@ export function setupFlexTables() {
     }
 
     function updateStickySortTable() {
-        if (!didTableRecieveStyleUpdate()) {
-            let toSortDesc = document.querySelector(".sticky-header").querySelector(".desc");
-            let toSortAsc = document.querySelector(".sticky-header").querySelector(".asc");
+        let toSortDesc = document.querySelector(".sticky-header").querySelector(".desc");
+        let toSortAsc = document.querySelector(".sticky-header").querySelector(".asc");
 
-            if (toSortDesc != undefined) {
-                toSortDesc.click();
-                toSortDesc.click();
-            } else if (toSortAsc != undefined) {
-                toSortAsc.click();
-                toSortAsc.click();
-            }
+        if (toSortDesc != undefined) {
+            toSortDesc.click();
+            toSortDesc.click();
+        } else if (toSortAsc != undefined) {
+            toSortAsc.click();
+            toSortAsc.click();
         }
     }
     function initializeFlexTables() {
@@ -125,7 +123,9 @@ export function setupFlexTables() {
                     if (e.target.parentElement.parentElement.parentElement.classList.contains("sticky-header")) {
                         refreshByScroll();
                         setTimeout(function () {
-                            updateStickySortTable();
+                            if (!didTableRecieveStyleUpdate()) {
+                                updateStickySortTable();
+                            }
                         }, 500);
                     }
                     updateTableFormats(table.id);
