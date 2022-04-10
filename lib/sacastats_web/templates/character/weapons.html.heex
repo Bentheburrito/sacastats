@@ -6,12 +6,12 @@
     <img src={Routes.static_path(@conn, "/images/character/alphaAurax.png")} class="m-auto" width="30px" alt="To Next Auraxium Weapon"/>
 </button>
 <div id="tableFilterDropdown" class="dropdown">
-    <button id="weaponTableFilterButton" class="btn btn-secondary mt-3 float-right dropdown-toggle" data-toggle="dropdown" title="Filter" data-placement="top">
+    <button id="weaponTable-filter-button" class="btn btn-secondary mt-3 float-right dropdown-toggle" data-toggle="dropdown" title="Filter" data-placement="top">
         <i class="fas fa-filter"></i>
     </button>
     <div id="filterDropdownMenu" class="dropdown-menu dropdown-menu-right">
         <div class="pl-3">
-            <button id="weaponTableClearFilterButton" class="btn btn-danger" title="Clear Filter">
+            <button id="weaponTable-clear-filter-button" class="btn btn-danger" title="Clear Filter">
                 Clear
             </button>
             <h5 class="text-center pb-3">Filter Options</h5>
@@ -19,29 +19,32 @@
                 <div class="row justify-content-center">
                     <div class="col-12 col-md-6" id="auraxiumFilterContainer">
                         <div id="auraxiumFilter">
-                            <h5 class="filterOptionName">Auraxium</h5>
-                            <div class="filterOptionsContainer">
-                                <div class="filterOption largeFilterOption">
+                            <h5 class="filter-option-name">Auraxium</h5>
+                            <div class="filter-options-container">
+                                <div class="filter-option large-filter-option">
                                     <label class="dropdown-item">
                                         <input class="form-check-input filter-input" type="radio" name="auraxium" id="showall-auraxium-filter-option" checked>
                                         <span class="pl-2">
                                             Show All
+                                            <p class="d-inline filter-option-contains"></p>
                                         </span>
                                     </label>
                                 </div>
-                                <div class="filterOption largeFilterOption">
+                                <div class="filter-option large-filter-option">
                                     <label class="dropdown-item">
                                         <input class="form-check-input filter-input" type="radio" name="auraxium" id="auraxed-auraxium-filter-option">
                                         <span class="pl-2">
                                             Only Auraxed Weapons
+                                            <p class="d-inline filter-option-contains"></p>
                                         </span>
                                     </label>
                                 </div>
-                                <div class="filterOption largeFilterOption">
+                                <div class="filter-option large-filter-option">
                                     <label class="dropdown-item">
                                         <input class="form-check-input filter-input" type="radio" name="auraxium" id="nonauraxed-auraxium-filter-option">
                                         <span class="pl-2">
                                             Only Non-Auraxed Weapons
+                                            <p class="d-inline filter-option-contains"></p>
                                         </span>
                                     </label>
                                 </div>
@@ -49,33 +52,36 @@
                         </div>
                     </div>
                     <div class="col-12 d-block d-md-none ">
-                        <hr class="middleHR"/>
+                        <hr class="middle-hr"/>
                     </div>
                     <div class="col-12 col-md-6">
-                        <div id="vehicleFilterOptionHolder">
-                            <h5 class="filterOptionName">Vehicle/Infantry</h5>
-                            <div class="filterOptionsContainer">
-                                <div class="filterOption largeFilterOption">
+                        <div id="vehicle-filter-option-holder">
+                            <h5 class="filter-option-name">Vehicle/Infantry</h5>
+                            <div class="filter-options-container">
+                                <div class="filter-option large-filter-option">
                                     <label class="dropdown-item">
                                         <input class="form-check-input filter-input" type="radio" name="vehicleinfantry" id="showall-vehicleinfantry-filter-option" checked>
                                         <span class="pl-2">
                                             Show All
+                                            <p class="d-inline filter-option-contains"></p>
                                         </span>
                                     </label>
                                 </div>
-                                <div class="filterOption largeFilterOption">
+                                <div class="filter-option large-filter-option">
                                     <label class="dropdown-item">
                                         <input class="form-check-input filter-input" type="radio" name="vehicleinfantry" id="infantry-vehicleinfantry-filter-option">
                                         <span class="pl-2">
                                             Only Infantry Weapons
+                                            <p class="d-inline filter-option-contains"></p>
                                         </span>
                                     </label>
                                 </div>
-                                <div class="filterOption largeFilterOption">
+                                <div class="filter-option large-filter-option">
                                     <label class="dropdown-item">
                                         <input class="form-check-input filter-input" type="radio" name="vehicleinfantry" id="vehicle-vehicleinfantry-filter-option">
                                         <span class="pl-2">
                                             Only Vehicle Weapons
+                                            <p class="d-inline filter-option-contains"></p>
                                         </span>
                                     </label>
                                 </div>
@@ -86,22 +92,24 @@
             </div>
             <hr/>
             <div id="factionFilter">
-                <h5 class="filterOptionName">Faction</h5>
-                <div class="filterOptionsContainer flexedFilterOptionsContainer">
-                    <div class="filterOption smallFilterOption">
+                <h5 class="filter-option-name">Faction</h5>
+                <div class="filter-options-container flexed-filter-options-container">
+                    <div class="filter-option small-filter-option">
                         <label class="dropdown-item">
                             <input class="form-check-input filter-input" type="checkbox" name="faction" id="showall-faction-filter-option" checked>
                             <span class="pl-2">
                                 Show All
+                                <p class="d-inline filter-option-contains"></p>
                             </span>
                         </label>
                     </div>
                     <%= for faction <- @character["factions"] do %>
-                        <div class="filterOption smallFilterOption">
+                        <div class="filter-option small-filter-option">
                             <label class="dropdown-item">
                                 <input class="form-check-input filter-input" type="checkbox" name="faction" id={faction <> "-faction-filter-option"}>
                                 <span class="pl-2">
                                     <%= faction %>
+                                    <p class="d-inline filter-option-contains"></p>
                                 </span>
                             </label>
                         </div>
@@ -110,22 +118,24 @@
             </div>
             <hr/>
             <div id="categoryFilter">
-                <h5 class="filterOptionName">Category</h5>
-                <div class="filterOptionsContainer flexedFilterOptionsContainer">
-                    <div class="filterOption smallFilterOption">
+                <h5 class="filter-option-name">Category</h5>
+                <div class="filter-options-container flexed-filter-options-container">
+                    <div class="filter-option small-filter-option">
                         <label class="dropdown-item">
                             <input class="form-check-input filter-input" type="checkbox" name="category" id="showall-category-filter-option" checked>
                             <span class="pl-2">
                                 Show All
+                                <p class="d-inline filter-option-contains"></p>
                             </span>
                         </label>
                     </div>
                     <%= for category <- @character["categories"] do %>
-                        <div class="filterOption smallFilterOption">
+                        <div class="filter-option small-filter-option">
                             <label class="dropdown-item">
                                 <input class="form-check-input filter-input" type="checkbox" name="category" id={category <> "-category-filter-option"}>
                                 <span class="pl-2">
                                     <%= category %>
+                                    <p class="d-inline filter-option-contains"></p>
                                 </span>
                             </label>
                         </div>
@@ -134,22 +144,24 @@
             </div>
             <hr/>
             <div id="typeFilter">
-                <h5 class="filterOptionName">Type</h5>
-                <div class="filterOptionsContainer flexedFilterOptionsContainer">
-                    <div class="filterOption">
+                <h5 class="filter-option-name">Type</h5>
+                <div class="filter-options-container flexed-filter-options-container">
+                    <div class="filter-option">
                         <label class="dropdown-item">
                             <input class="form-check-input filter-input" type="checkbox" name="type" id="showall-type-filter-option" checked>
                             <span class="pl-2">
                                 Show All
+                                <p class="d-inline filter-option-contains"></p>
                             </span>
                         </label>
                     </div>
                     <%= for type <- @character["types"] do %>
-                        <div class="filterOption">
+                        <div class="filter-option">
                             <label class="dropdown-item">
                                 <input class="form-check-input filter-input" type="checkbox" name="type" id={type <> "-type-filter-option"}>
                                 <span class="pl-2">
                                     <%= type %>
+                                    <p class="d-inline filter-option-contains"></p>
                                 </span>
                             </label>
                         </div>

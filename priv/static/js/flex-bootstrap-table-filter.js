@@ -8,8 +8,8 @@ var filters = new Map();
 function updateFilterVariables() {
     filters = new Map();
 
-    $(".filterOptionName").each(function () {
-        $(this.parentElement).find(".filterOptionsContainer").first().find(".filterOption").each(function () {
+    $(".filter-option-name").each(function () {
+        $(this.parentElement).find(".filter-options-container").first().find(".filter-option").each(function () {
             let input = $(this).find("input").first()[0];
             let name = input.getAttribute("name");
             let checked = input.checked;
@@ -267,7 +267,7 @@ export function getFirstShowAllButtonID() {
 
 export function init(id) {
     tableID = '#' + id;
-    clearFilterButtonID = '#' + id + "ClearFilterButton";
+    clearFilterButtonID = '#' + id + "-clear-filter-button";
     // $('#weaponTable').filter(function () {
     //     $(this).toggle($(this).text().toLowerCase().indexOf("air") > -1)
     // });

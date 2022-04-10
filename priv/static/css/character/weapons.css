@@ -46,7 +46,7 @@ hr{
     overflow: auto;
 }
 
-.flexedFilterOptionsContainer{
+.flexed-filter-options-container{
   width: 96%;
   margin: auto;
   display: flex;
@@ -56,38 +56,41 @@ hr{
 .dropdown-menu{
   background-color: #eeeeee;
 }
-.filterOption{
+.filter-option{
     width: 100%;
 }
-.smallFilterOption{
+.small-filter-option{
     width: 50%;
 }
-#weaponTableClearFilterButton{
+#weaponTable-clear-filter-button{
     position: absolute;
     right: 0;
 }
+.filter-option-contains{
+
+}
 /*Contained <hr/> needs strange styling to flow properly*/
-.middleHR{
+.middle-hr{
     width: 85%;
     margin-left: 10%;
 }
 @media only screen and (max-width: 660px) {
-    .middleHR{
+    .middle-hr{
         width: 86%;
     }
 }
 @media only screen and (max-width: 600px) {
-    .middleHR{
+    .middle-hr{
         width: 87.5%;
     }
 }
 @media only screen and (max-width: 575px) {
-    .middleHR{
+    .middle-hr{
         width: 88.5%;
     }
 }
 @media only screen and (max-width: 475px) {
-    .middleHR{
+    .middle-hr{
         width: 90%;
     }
 }
@@ -114,17 +117,17 @@ hr{
         background-color: #dddddd!important;
     }
 
-    .filterOption{
+    .filter-option{
         width: 50%;
     }
     #auraxiumFilterContainer{
         border-right: 1px solid rgb(110, 110, 110);
     }
 
-    .filterOption{
+    .filter-option{
         width: 50%;
     }
-    .largeFilterOption{
+    .large-filter-option{
         width: 100%;
     }
 }
