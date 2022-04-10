@@ -268,12 +268,7 @@ export function getFirstShowAllButtonID() {
 export function init(id) {
     tableID = '#' + id;
     clearFilterButtonID = '#' + id + "-clear-filter-button";
-    // $('#weaponTable').filter(function () {
-    //     $(this).toggle($(this).text().toLowerCase().indexOf("air") > -1)
-    // });
     originalTableData = JSON.parse(JSON.stringify($(tableID).bootstrapTable('getData', false)));
-    let data = $(tableID).bootstrapTable('getData', false).filter(weapon => weapon.faction == "NC");
-    //$(tableID).bootstrapTable('load', data);
 
     updateFilterVariables();
     addFilterListeners();
