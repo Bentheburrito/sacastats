@@ -253,18 +253,6 @@ export function getClearFilterButtonID() {
     return clearFilterButtonID;
 }
 
-export function getFirstShowAllButtonID() {
-    var filterID;
-    for (let [_, filterItems] of filters) {
-        filterItems.forEach((filter) => {
-            if (filter.filterName == "showall" && filterID == undefined) {
-                filterID = filter.filterID;
-            }
-        });
-    }
-    return '#' + filterID;
-}
-
 export function init(id) {
     tableID = '#' + id;
     clearFilterButtonID = '#' + id + "-clear-filter-button";
