@@ -46,7 +46,7 @@ hr{
     overflow: auto;
 }
 
-.filterOptionContainer{
+.flexedFilterOptionsContainer{
   width: 96%;
   margin: auto;
   display: flex;
@@ -60,9 +60,9 @@ hr{
     width: 100%;
 }
 .smallFilterOption{
-    width: 50%
+    width: 50%;
 }
-#clearFilterButton{
+#weaponTableClearFilterButton{
     position: absolute;
     right: 0;
 }
@@ -117,12 +117,15 @@ hr{
     .filterOption{
         width: 50%;
     }
-    #auraxiumFilter{
+    #auraxiumFilterContainer{
         border-right: 1px solid rgb(110, 110, 110);
     }
 
     .filterOption{
         width: 50%;
+    }
+    .largeFilterOption{
+        width: 100%;
     }
 }
 

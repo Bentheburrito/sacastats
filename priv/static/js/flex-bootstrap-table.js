@@ -1,10 +1,15 @@
 import { addFormatsToPage, addAnimationToProgressBars } from "/js/formats.js";
 import { showHideNextAuraxButton } from "/js/character/weapons-table.js";
+import * as bootstrapTableFilter from "/js/flex-bootstrap-table-filter.js";
 
 let table;
 
 export function setupFlexTables() {
     init();
+
+    document.querySelectorAll('.table-responsive-stack').forEach(table => {
+        bootstrapTableFilter.init(table.id);
+    });
 
     function init() {
         initializeFlexTables();
@@ -51,7 +56,7 @@ export function setupFlexTables() {
 
     function setNextAuraxVisibilities() {
         setTimeout(function () {
-            showHideNextAuraxButton()
+            showHideNextAuraxButton();
         }, 500);
     }
 
@@ -60,6 +65,7 @@ export function setupFlexTables() {
             //TODO INIT URI query string
             setTimeout(function () {
                 //TODO Add URI query string update
+                bootstrapTableFilter.updateTableFiltration();
                 updateSortTable();
                 updateTableFormats(table.id);
             }, 500);
@@ -73,6 +79,7 @@ export function setupFlexTables() {
     }
     function tableSearchEnterDownEventHandler(e) {
         if (e.keyCode == 13) {
+            bootstrapTableFilter.revertFilteredData();
         }
     }
     function addSearchEnter() {
@@ -88,14 +95,26 @@ export function setupFlexTables() {
         var menuElement = e.target.closest('.dropdown-menu');
 
         setTimeout(function () {
-            updateSortTable();
-            if (!menuElement.classList.contains("show")) {
-                menuElement.parentElement.firstElementChild.click();
+            if (('#' + e.target.id) != bootstrapTableFilter.getClearFilterButtonID()) {
+                updateSortTable();
+                if (!menuElement.classList.contains("show")) {
+                    menuElement.parentElement.firstElementChild.click();
+                }
             }
         }, 10);
     }
     function dropDownMenuClickEventHandler(e) {
+        var menuElement = e.target.closest('.dropdown-menu');
         e.stopPropagation();
+
+        setTimeout(function () {
+            if (('#' + e.target.id) == bootstrapTableFilter.getClearFilterButtonID()) {
+                updateSortTable();
+                if (!menuElement.classList.contains("show")) {
+                    menuElement.parentElement.firstElementChild.click();
+                }
+            }
+        }, 100);
     }
     function addToolBarClick() {
         document.querySelectorAll(".dropdown-item").forEach(itemDropDown => {
