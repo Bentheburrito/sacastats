@@ -14,6 +14,7 @@ function addCustomFilters() {
     //set the custom functions object
     var customFunction = {
         "auraxium": function filterFunction(filterName, dataArray) {
+            //filter the array based on the filter name
             if (filterName == "auraxed") {
                 return dataArray.filter(weapon => weapon.kills >= 1160);
             } else if (filterName == "nonauraxed") {
@@ -23,6 +24,7 @@ function addCustomFilters() {
             }
         },
         "vehicleinfantry": function filterFunction(filterName, dataArray) {
+            //filter the array based on the filter name
             if (filterName == "infantry") {
                 return dataArray.filter(weapon => weapon.vw == "No");
             } else if (filterName == "vehicle") {
