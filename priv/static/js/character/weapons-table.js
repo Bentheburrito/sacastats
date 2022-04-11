@@ -116,7 +116,7 @@ export default function init() {
         return data.filter(function (row) {
             var template = document.createElement('template');
             template.innerHTML = row.weapon;
-            return template.content.querySelector(".weaponName").innerHTML.toLowerCase().indexOf(text.toLowerCase()) > -1
+            return template.content.querySelector(".weaponName").innerHTML.toLowerCase().indexOf(text.toLowerCase()) > -1;
         })
     }
 

@@ -50,7 +50,7 @@ function removeFilterListeners() {
 }
 
 function getNonNamedFunctionDataArray(nameToNotAdd) {
-    var filteredTableData = getOriginalTableData();
+    var filteredTableData = accountForSearch();
 
     for (let [name, filterItems] of filters) {
         if (name != nameToNotAdd) {
@@ -143,6 +143,22 @@ function accountForNoneSelected() {
     }
 }
 
+function accountForSearch() {
+    var filteredTableData = getOriginalTableData();
+    let td = $(tableID).first()[0].querySelector(".weapon");
+    if (td != undefined) {
+        var searchInput = $(".form-control.search-input").first().val();
+        if ((searchInput != undefined || searchInput != null) && searchInput != "") {
+            filteredTableData = filteredTableData.filter(function (item) {
+                var template = document.createElement('template');
+                template.innerHTML = item.weapon;
+                return template.content.querySelector(".weaponName").innerHTML.toLowerCase().indexOf(searchInput.toLowerCase()) > -1;
+            });
+        }
+    }
+    return filteredTableData;
+}
+
 export function getCheckedBoxes(filterItems) {
     var checkedFilteredItems = [];
     filterItems.forEach(filter => {
@@ -191,7 +207,7 @@ export function updateTableFiltration() {
     accountForSelectAlls();
     accountForNoneSelected();
     updateFilterVariables();
-    var filteredTableData = getOriginalTableData();
+    var filteredTableData = accountForSearch();
 
     for (let [name, filterItems] of filters) {
         filteredTableData = defaultFiltrationFunction(name, filterItems, filteredTableData);
