@@ -15,9 +15,12 @@
     }
 }
 
+.contains-disabled-input,
 input[disabled] + span > p,
-input[disabled] + span {
+input[disabled] + span,
+input[disabled]:hover {
     color: #ccc;
+    cursor: not-allowed!important;
 }
 
 .bootstrap-table{
@@ -151,8 +154,9 @@ hr{
   left: 0;
 }
 
-.search-input{
+.search-input, .search-input:hover{
     font-size: medium;
+    cursor: text;
 }
 @media only screen and (max-width: 767px) { /*for boostrap xs*/
     .search-input{

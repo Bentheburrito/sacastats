@@ -81,9 +81,14 @@ function updateEachOptionAvailability(name, filterItems) {
         }
 
         input.disabled = (newArraySize == 0);
-        if (newArraySize == 0 && filter.checked) {
-            filter.checked = false;
-            input.checked = false;
+        if (newArraySize == 0) {
+            input.parentElement.classList.add("contains-disabled-input");
+            if (filter.checked) {
+                filter.checked = false;
+                input.checked = false;
+            }
+        } else {
+            input.parentElement.classList.remove("contains-disabled-input");
         }
         input.parentElement.querySelector("span").querySelector(".filter-option-contains").innerHTML = "(" + newArraySize + ")";
     });
