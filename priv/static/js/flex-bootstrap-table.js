@@ -91,14 +91,31 @@ export function setupFlexTables() {
         });
     }
 
+    function isTargetInputDisabled(target) {
+        let input = target;
+        if (target.localName != "input") {
+            input = input.closest(".filter-option");
+            input = input.querySelector(".dropdown-item").querySelector("input");
+        }
+
+        if (input != undefined || input != null) {
+            return input.disabled;
+        } else {
+            return false;
+        }
+    }
+
     function dropDownItemMouseUpEventHandler(e) {
-        var menuElement = e.target.closest('.dropdown-menu');
+        let target = e.target;
+        var menuElement = target.closest('.dropdown-menu');
 
         setTimeout(function () {
-            if (('#' + e.target.id) != bootstrapTableFilter.getClearFilterButtonID()) {
-                updateSortTable();
-                if (!menuElement.classList.contains("show")) {
-                    menuElement.parentElement.firstElementChild.click();
+            if (('#' + target.id) != bootstrapTableFilter.getClearFilterButtonID()) {
+                if (!isTargetInputDisabled(target)) {
+                    updateSortTable();
+                    if (!menuElement.classList.contains("show")) {
+                        menuElement.parentElement.firstElementChild.click();
+                    }
                 }
             }
         }, 10);

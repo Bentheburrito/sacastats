@@ -13,59 +13,23 @@ window.addEventListener('load', (event) => {
 function addCustomFilters() {
     //set the custom functions object
     var customFunction = {
-        "auraxium": function filterFunction(filterItems, filteredTableData) {
-            //initialize variables
-            let dataArray = filteredTableData;
-            var filteredDataArray = new Set();
-
-            //check to see if there is a filter that needs to be applied
-            if (!bootstrapTableFilter.isSelectAllSelected(filterItems)) {
-                //if so, loop through the boxes that are checked
-                var checkedFilteredItems = bootstrapTableFilter.getCheckedBoxes(filterItems);
-                checkedFilteredItems.forEach(filter => {
-                    //if it's checked apply the filter the right filter
-                    if (filter.checked) {
-                        //where filter.filterName == to the first element of the input's id split by '-'
-                        //and on filter, weapon == the table row
-                        //so add .<column's data-field here> to get the non formatted value of a column
-                        if (filter.filterName == "auraxed") {
-                            filteredDataArray = new Set(([...filteredDataArray, ...dataArray.filter(weapon => weapon.kills >= 1160)]));
-                        } else if (filter.filterName == "nonauraxed") {
-                            filteredDataArray = new Set(([...filteredDataArray, ...dataArray.filter(weapon => weapon.kills < 1160)]));
-                        }
-                    }
-                });
-                dataArray = [...filteredDataArray]
+        "auraxium": function filterFunction(filterName, dataArray) {
+            if (filterName == "auraxed") {
+                return dataArray.filter(weapon => weapon.kills >= 1160);
+            } else if (filterName == "nonauraxed") {
+                return dataArray.filter(weapon => weapon.kills < 1160);
+            } else {
+                return dataArray;
             }
-
-            return dataArray;
         },
-        "vehicleinfantry": function filterFunction(filterItems, filteredTableData) {
-            //initialize variables
-            let dataArray = filteredTableData;
-            var filteredDataArray = new Set();
-
-            //check to see if there is a filter that needs to be applied
-            if (!bootstrapTableFilter.isSelectAllSelected(filterItems)) {
-                //if so, loop through the boxes that are checked
-                var checkedFilteredItems = bootstrapTableFilter.getCheckedBoxes(filterItems);
-                checkedFilteredItems.forEach(filter => {
-                    //if it's checked apply the filter the right filter
-                    if (filter.checked) {
-                        //where filter.filterName == to the first element of the input's id split by '-'
-                        //and on filter, weapon == the table row
-                        //so add .<column's data-field here> to get the non formatted value of a column
-                        if (filter.filterName == "infantry") {
-                            filteredDataArray = new Set(([...filteredDataArray, ...dataArray.filter(weapon => weapon.vw == "No")]));
-                        } else if (filter.filterName == "vehicle") {
-                            filteredDataArray = new Set(([...filteredDataArray, ...dataArray.filter(weapon => weapon.vw == "Yes")]));
-                        }
-                    }
-                });
-                dataArray = [...filteredDataArray]
+        "vehicleinfantry": function filterFunction(filterName, dataArray) {
+            if (filterName == "infantry") {
+                return dataArray.filter(weapon => weapon.vw == "No");
+            } else if (filterName == "vehicle") {
+                return dataArray.filter(weapon => weapon.vw == "Yes");
+            } else {
+                return dataArray;
             }
-
-            return dataArray;
         }
     };
 

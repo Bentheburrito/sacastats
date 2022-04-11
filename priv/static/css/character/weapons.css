@@ -15,7 +15,8 @@
     }
 }
 
-input[type=checkbox][disabled] + span {
+input[disabled] + span > p,
+input[disabled] + span {
     color: #ccc;
 }
 
@@ -68,7 +69,8 @@ hr{
 }
 .filter-option-contains{
     color: rgb(110, 110, 110);
-    font-size: x-small;
+    font-size: smaller;
+    padding-left: 4px;
 }
 /*Contained <hr/> needs strange styling to flow properly*/
 .middle-hr{

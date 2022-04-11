@@ -1,5 +1,4 @@
 var originalTableData;
-var filteredTableData;
 var tableID;
 var clearFilterButtonID;
 var customFilterFunctions = new Object();
@@ -48,6 +47,46 @@ function removeFilterListeners() {
         });
     }
     $(clearFilterButtonID).off('click', clearFiltration);
+}
+
+function getNonNamedFunctionDataArray(nameToNotAdd) {
+    var filteredTableData = getOriginalTableData();
+
+    for (let [name, filterItems] of filters) {
+        if (name != nameToNotAdd) {
+            filteredTableData = defaultFiltrationFunction(name, filterItems, filteredTableData);
+        }
+    }
+    return filteredTableData;
+}
+
+function updateFilterOptionAvailability() {
+    for (let [name, filterItems] of filters) {
+        updateEachOptionAvailability(name, filterItems);
+    }
+}
+
+function updateEachOptionAvailability(name, filterItems) {
+    var dataArray = getNonNamedFunctionDataArray(name);
+    const originalArraySize = dataArray.length;
+    filterItems.forEach(filter => {
+        let newArraySize = originalArraySize;
+        let input = document.getElementById(filter.filterID);
+        if (filter.filterName != "showall") {
+            if (customFilterFunctions.hasOwnProperty(name)) {
+                newArraySize = customFilterFunctions[name](filter.filterName, dataArray).length;
+            } else {
+                newArraySize = dataArray.filter(item => item[name] == filter.filterName).length;
+            }
+        }
+
+        input.disabled = (newArraySize == 0);
+        if (newArraySize == 0 && filter.checked) {
+            filter.checked = false;
+            input.checked = false;
+        }
+        input.parentElement.querySelector("span").querySelector(".filter-option-contains").innerHTML = "(" + newArraySize + ")";
+    });
 }
 
 export function isSelectAllSelectedBefore(filterArray) {
@@ -114,14 +153,17 @@ export function getCheckedBoxes(filterItems) {
     return checkedFilteredItems;
 }
 
-function defaultFiltrationFunction(name, filterItems) {
-    let dataArray = filteredTableData;
+function defaultFiltrationFunction(name, filterItems, dataArray) {
     var filteredDataArray = new Set();
     if (!isSelectAllSelected(filterItems)) {
         var checkedFilteredItems = getCheckedBoxes(filterItems);
         checkedFilteredItems.forEach(filter => {
             if (filter.checked) {
-                filteredDataArray = new Set(([...filteredDataArray, ...dataArray.filter(item => item[name] == filter.filterName)]));
+                if (customFilterFunctions.hasOwnProperty(name)) {
+                    filteredDataArray = new Set(([...filteredDataArray, ...customFilterFunctions[name](filter.filterName, dataArray)]));
+                } else {
+                    filteredDataArray = new Set(([...filteredDataArray, ...dataArray.filter(item => item[name] == filter.filterName)]));
+                }
             }
         });
         dataArray = [...filteredDataArray]
@@ -149,15 +191,13 @@ export function updateTableFiltration() {
     accountForSelectAlls();
     accountForNoneSelected();
     updateFilterVariables();
-    filteredTableData = getOriginalTableData();
+    var filteredTableData = getOriginalTableData();
 
     for (let [name, filterItems] of filters) {
-        if (customFilterFunctions.hasOwnProperty(name)) {
-            filteredTableData = customFilterFunctions[name](filterItems, filteredTableData);
-        } else {
-            filteredTableData = defaultFiltrationFunction(name, filterItems)
-        }
+        filteredTableData = defaultFiltrationFunction(name, filterItems, filteredTableData);
     }
+
+    updateFilterOptionAvailability();
 
     $(getTableID()).bootstrapTable('load', filteredTableData);
 }
@@ -260,4 +300,5 @@ export function init(id) {
 
     updateFilterVariables();
     addFilterListeners();
+    updateFilterOptionAvailability();
 }
