@@ -17,34 +17,28 @@
             <h5 class="text-center pb-3">Filter Options</h5>
             <div class="pb-0 pb-md-3">
                 <div class="row justify-content-center">
-                    <div class="col-12 col-md-6" id="auraxiumFilterContainer">
-                        <div id="auraxiumFilter">
-                            <h5 class="filter-option-name">Auraxium</h5>
-                            <div class="filter-options-container">
-                                <div class="filter-option large-filter-option">
+                    <div class="col-12 col-md-6" id="leftSideFilterContainer">
+                        <div id="categoryFilter">
+                            <h5 class="filter-option-name">Category</h5>
+                            <div class="filter-options-container flexed-filter-options-container">
+                                <div class="filter-option small-filter-option">
                                     <label class="dropdown-item">
-                                        <input class="form-check-input filter-input" type="radio" name="auraxium" id="showall-auraxium-filter-option" checked>
+                                        <input class="form-check-input filter-input" type="checkbox" name="category" id="showall-category-filter-option" checked>
                                         <span class="pl-2">
                                             Show All<p class="d-inline filter-option-contains"></p>
                                         </span>
                                     </label>
                                 </div>
-                                <div class="filter-option large-filter-option">
-                                    <label class="dropdown-item">
-                                        <input class="form-check-input filter-input" type="radio" name="auraxium" id="auraxed-auraxium-filter-option">
-                                        <span class="pl-2">
-                                            Auraxed Weapons<p class="d-inline filter-option-contains"></p>
-                                        </span>
-                                    </label>
-                                </div>
-                                <div class="filter-option large-filter-option">
-                                    <label class="dropdown-item">
-                                        <input class="form-check-input filter-input" type="radio" name="auraxium" id="nonauraxed-auraxium-filter-option">
-                                        <span class="pl-2">
-                                            Non-Auraxed Weapons<p class="d-inline filter-option-contains"></p>
-                                        </span>
-                                    </label>
-                                </div>
+                                <%= for category <- @character["categories"] do %>
+                                    <div class="filter-option small-filter-option">
+                                        <label class="dropdown-item">
+                                            <input class="form-check-input filter-input" type="checkbox" name="category" id={category <> "-category-filter-option"}>
+                                            <span class="pl-2">
+                                                <%= category %><p class="d-inline filter-option-contains"></p>
+                                            </span>
+                                        </label>
+                                    </div>
+                                <% end %>
                             </div>
                         </div>
                     </div>
@@ -52,7 +46,7 @@
                         <hr class="middle-hr"/>
                     </div>
                     <div class="col-12 col-md-6">
-                        <div id="vehicle-filter-option-holder">
+                        <div id="vehicleFilter">
                             <h5 class="filter-option-name">Vehicle/Infantry</h5>
                             <div class="filter-options-container">
                                 <div class="filter-option large-filter-option">
@@ -85,6 +79,60 @@
                 </div>
             </div>
             <hr/>
+            <div id="medalFilter">
+                <h5 class="filter-option-name">Medal</h5>
+                <div class="filter-options-container flexed-filter-options-container">
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="medal" id="showall-medal-filter-option" checked>
+                            <span class="pl-2">
+                                Show All<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="medal" id="auraxium-medal-filter-option">
+                            <span class="pl-2">
+                                Auraxium<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="medal" id="gold-medal-filter-option">
+                            <span class="pl-2">
+                                Gold<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="medal" id="silver-medal-filter-option">
+                            <span class="pl-2">
+                                Silver<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="medal" id="bronze-medal-filter-option">
+                            <span class="pl-2">
+                                Bronze<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="medal" id="none-medal-filter-option">
+                            <span class="pl-2">
+                                None<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <hr/>
             <div id="factionFilter">
                 <h5 class="filter-option-name">Faction</h5>
                 <div class="filter-options-container flexed-filter-options-container">
@@ -109,27 +157,73 @@
                 </div>
             </div>
             <hr/>
-            <div id="categoryFilter">
-                <h5 class="filter-option-name">Category</h5>
+            <div id="timeFilter">
+                <h5 class="filter-option-name">Time With Weapon</h5>
                 <div class="filter-options-container flexed-filter-options-container">
-                    <div class="filter-option small-filter-option">
+                    <div class="filter-option">
                         <label class="dropdown-item">
-                            <input class="form-check-input filter-input" type="checkbox" name="category" id="showall-category-filter-option" checked>
+                            <input class="form-check-input filter-input" type="checkbox" name="time" id="showall-time-filter-option" checked>
                             <span class="pl-2">
                                 Show All<p class="d-inline filter-option-contains"></p>
                             </span>
                         </label>
                     </div>
-                    <%= for category <- @character["categories"] do %>
-                        <div class="filter-option small-filter-option">
-                            <label class="dropdown-item">
-                                <input class="form-check-input filter-input" type="checkbox" name="category" id={category <> "-category-filter-option"}>
-                                <span class="pl-2">
-                                    <%= category %><p class="d-inline filter-option-contains"></p>
-                                </span>
-                            </label>
-                        </div>
-                    <% end %>
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="time" id="years-time-filter-option">
+                            <span class="pl-2">
+                                Years With<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="time" id="weeks-time-filter-option">
+                            <span class="pl-2">
+                                Weeks With<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="time" id="days-time-filter-option">
+                            <span class="pl-2">
+                                Days With<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="time" id="hours-time-filter-option">
+                            <span class="pl-2">
+                                Hours With<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="time" id="minutes-time-filter-option">
+                            <span class="pl-2">
+                                Minutes With<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="time" id="seconds-time-filter-option">
+                            <span class="pl-2">
+                                Seconds With<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="time" id="none-time-filter-option">
+                            <span class="pl-2">
+                                No Time With<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
                 </div>
             </div>
             <hr/>

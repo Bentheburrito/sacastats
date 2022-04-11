@@ -11,26 +11,59 @@ window.addEventListener('load', (event) => {
 });
 
 function addCustomFilters() {
+    //initialize variables
+    const YEAR_SECOND = 31556952;
+    const WEEK_SECOND = 604800;
+    const DAY_SECOND = 86400;
+    const HOUR_SECOND = 3600;
+    const MINUTE_SECOND = 60;
+
     //set the custom functions object
     var customFunction = {
-        "auraxium": function filterFunction(filterName, dataArray) {
+        "medal": function filterFunction(filterName, dataArray) {
             //filter the array based on the filter name
-            if (filterName == "auraxed") {
-                return dataArray.filter(weapon => weapon.kills >= 1160);
-            } else if (filterName == "nonauraxed") {
-                return dataArray.filter(weapon => weapon.kills < 1160);
-            } else {
-                return dataArray;
+            switch (filterName) {
+                case "auraxium":
+                    return dataArray.filter(weapon => weapon.kills >= 1160);
+                case "gold":
+                    return dataArray.filter(weapon => weapon.kills < 1160 && weapon.kills >= 160);
+                case "silver":
+                    return dataArray.filter(weapon => weapon.kills < 160 && weapon.kills >= 60);
+                case "bronze":
+                    return dataArray.filter(weapon => weapon.kills < 60 && weapon.kills >= 10);
+                case "none":
+                    return dataArray.filter(weapon => weapon.kills < 10);
+                default: return dataArray;
             }
         },
         "vehicleinfantry": function filterFunction(filterName, dataArray) {
             //filter the array based on the filter name
-            if (filterName == "infantry") {
-                return dataArray.filter(weapon => weapon.vw == "No");
-            } else if (filterName == "vehicle") {
-                return dataArray.filter(weapon => weapon.vw == "Yes");
-            } else {
-                return dataArray;
+            switch (filterName) {
+                case "infantry":
+                    return dataArray.filter(weapon => weapon.vw == "No");
+                case "vehicle":
+                    return dataArray.filter(weapon => weapon.vw == "Yes");
+                default: return dataArray;
+            }
+        },
+        "time": function filterFunction(filterName, dataArray) {
+            //filter the array based on the filter name
+            switch (filterName) {
+                case "years":
+                    return dataArray.filter(weapon => weapon.time >= YEAR_SECOND);
+                case "weeks":
+                    return dataArray.filter(weapon => weapon.time >= WEEK_SECOND && weapon.time < YEAR_SECOND);
+                case "days":
+                    return dataArray.filter(weapon => weapon.time >= DAY_SECOND && weapon.time < WEEK_SECOND);
+                case "hours":
+                    return dataArray.filter(weapon => weapon.time >= HOUR_SECOND && weapon.time < DAY_SECOND);
+                case "minutes":
+                    return dataArray.filter(weapon => weapon.time >= MINUTE_SECOND && weapon.time < HOUR_SECOND);
+                case "seconds":
+                    return dataArray.filter(weapon => weapon.time > 0 && weapon.time < MINUTE_SECOND);
+                case "none":
+                    return dataArray.filter(weapon => weapon.time == 0);
+                default: return dataArray;
             }
         }
     };

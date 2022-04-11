@@ -43,7 +43,8 @@ hr{
 
 #filterDropdownMenu{
     max-height: 400px;
-    max-width: 550px;
+    max-width: 570px;
+    min-width: 300px;
     overflow: auto;
 }
 
@@ -123,8 +124,8 @@ hr{
     .filter-option{
         width: 50%;
     }
-    #auraxiumFilterContainer{
-        padding-right: 20px;
+    #leftSideFilterContainer{
+        padding-right: 0;
         border-right: 1px solid rgb(110, 110, 110);
     }
 
