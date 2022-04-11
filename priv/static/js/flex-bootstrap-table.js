@@ -95,7 +95,11 @@ export function setupFlexTables() {
         let input = target;
         if (target.localName != "input") {
             input = input.closest(".filter-option");
-            input = input.querySelector(".dropdown-item").querySelector("input");
+            if (input != undefined || input != null) {
+                input = input.querySelector(".dropdown-item").querySelector("input");
+            } else {
+                return false;
+            }
         }
 
         if (input != undefined || input != null) {
