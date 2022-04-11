@@ -210,24 +210,30 @@ export function updateTableFiltration() {
 
     //set the custom functions object
     var customFunction = {
-        "auraxium": function filterFunction(filterName, dataArray) {
+        "medal": function filterFunction(filterName, dataArray) {
             //filter the array based on the filter name
-            if (filterName == "auraxed") {
-                return dataArray.filter(weapon => weapon.kills >= 1160);
-            } else if (filterName == "nonauraxed") {
-                return dataArray.filter(weapon => weapon.kills < 1160);
-            } else {
-                return dataArray;
+            switch (filterName) {
+                case "auraxium":
+                    return dataArray.filter(weapon => weapon.kills >= 1160);
+                case "gold":
+                    return dataArray.filter(weapon => weapon.kills < 1160 && weapon.kills >= 160);
+                case "silver":
+                    return dataArray.filter(weapon => weapon.kills < 160 && weapon.kills >= 60);
+                case "bronze":
+                    return dataArray.filter(weapon => weapon.kills < 60 && weapon.kills >= 10);
+                case "none":
+                    return dataArray.filter(weapon => weapon.kills < 10);
+                default: return dataArray;
             }
         },
         "vehicleinfantry": function filterFunction(filterName, dataArray) {
             //filter the array based on the filter name
-            if (filterName == "infantry") {
-                return dataArray.filter(weapon => weapon.vw == "No");
-            } else if (filterName == "vehicle") {
-                return dataArray.filter(weapon => weapon.vw == "Yes");
-            } else {
-                return dataArray;
+            switch (filterName) {
+                case "infantry":
+                    return dataArray.filter(weapon => weapon.vw == "No");
+                case "vehicle":
+                    return dataArray.filter(weapon => weapon.vw == "Yes");
+                default: return dataArray;
             }
         }
     };
