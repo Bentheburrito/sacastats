@@ -110,7 +110,7 @@ export default function init() {
         },
         customSearch: searchByWeaponName,
         dragaccept: '.drag-accept'
-    })
+    });
 
     function searchByWeaponName(data, text) {
         return data.filter(function (row) {
