@@ -5,221 +5,299 @@ var customFilterFunctions = new Object();
 var filters = new Map();
 
 function updateFilterVariables() {
+    //reinitialize variables
     filters = new Map();
 
-    $(".filter-option-name").each(function () {
-        $(this.parentElement).find(".filter-options-container").first().find(".filter-option").each(function () {
-            let input = $(this).find("input").first()[0];
-            let name = input.getAttribute("name");
-            let checked = input.checked;
-            let filterID = input.id;
-            let filterName = filterID.split("-")[0];
-            let object = new Object();
-            object.filterID = filterID;
-            object[filterName] = checked;
-            object.filterName = filterName;
-            object.checked = checked;
+    //loop through each filter option
+    $(".filter-option").each(function () {
+        //get filter property values from the input element
+        let input = $(this).find("input").first()[0];
+        let filterCategory = input.getAttribute("name");
+        let checked = input.checked;
+        let filterID = input.id;
+        let filterName = filterID.split("-")[0];
 
-            if (filters.get(name) == undefined) {
-                filters.set(name, [object]);
-            } else {
-                let array = filters.get(name);
-                array.push(object);
-                filters.set(name, array);
-            }
-        });
+        //put filter properties into an object
+        let filterObject = new Object();
+        filterObject.filterID = filterID;
+        filterObject[filterName] = checked;
+        filterObject.filterName = filterName;
+        filterObject.checked = checked;
+
+        //if there is no filter for that filter category, add the object as a new array
+        if (filters.get(filterCategory) == undefined) {
+            filters.set(filterCategory, [filterObject]);
+        } else {
+            //otherwise add the object the the array on the map
+            let array = filters.get(filterCategory);
+            array.push(filterObject);
+            filters.set(filterCategory, array);
+        }
     });
 }
 
 function addFilterListeners() {
-    for (let [_, filterItems] of filters) {
-        filterItems.forEach((filter) => {
+    //loop through filter map
+    for (let [_, filterOptions] of filters) {
+        //loop through each filter option and add a change event listener to update the filtration
+        filterOptions.forEach((filter) => {
             document.getElementById(filter.filterID).addEventListener('change', updateTableFiltration);
         });
     }
+
+    //add clear filter button click event listener
     $(clearFilterButtonID).on('click', clearFiltration);
 }
 
 function removeFilterListeners() {
-    for (let [_, filterItems] of filters) {
-        filterItems.forEach((filter) => {
+    //loop through filter map
+    for (let [_, filterOptions] of filters) {
+        //loop through each filter option and remove the change event listener that updates the filtration
+        filterOptions.forEach((filter) => {
             document.getElementById(filter.filterID).removeEventListener('change', updateTableFiltration);
         });
     }
+
+    //remove clear filter button click event listener
     $(clearFilterButtonID).off('click', clearFiltration);
 }
 
-function getNonNamedFunctionDataArray(nameToNotAdd) {
+function getNonNamedFunctionDataArray(filterCategoryToNotAdd) {
+    //get original table data with the search filter applied 
     var filteredTableData = accountForSearch();
 
-    for (let [name, filterItems] of filters) {
-        if (name != nameToNotAdd) {
-            filteredTableData = defaultFiltrationFunction(name, filterItems, filteredTableData);
+    //loop through filter map
+    for (let [filterCategory, filterOptions] of filters) {
+        //only apply filters that are not in the requested filter category
+        if (filterCategory != filterCategoryToNotAdd) {
+            filteredTableData = defaultFiltrationFunction(filterCategory, filterOptions, filteredTableData);
         }
     }
+
+    //return the filtered array
     return filteredTableData;
 }
 
 function updateFilterOptionAvailability() {
-    for (let [name, filterItems] of filters) {
-        updateEachOptionAvailability(name, filterItems);
+    //loop through filter map
+    for (let [filterCategory, filterOptions] of filters) {
+        updateEachOptionAvailability(filterCategory, filterOptions);
     }
 }
 
-function updateEachOptionAvailability(name, filterItems) {
-    var dataArray = getNonNamedFunctionDataArray(name);
+function updateEachOptionAvailability(filterCategory, filterOptions) {
+    //initialize variables
+    var dataArray = getNonNamedFunctionDataArray(filterCategory);
     const originalArraySize = dataArray.length;
-    filterItems.forEach(filter => {
+
+    //loop through each filter option
+    filterOptions.forEach(filter => {
+        //initialize variables
         let newArraySize = originalArraySize;
         let input = document.getElementById(filter.filterID);
+
+        //if the option is not a show all
         if (filter.filterName != "showall") {
-            if (customFilterFunctions.hasOwnProperty(name)) {
-                newArraySize = customFilterFunctions[name](filter.filterName, dataArray).length;
+            //if the filter name category is a custom filter apply the custom filter
+            if (customFilterFunctions.hasOwnProperty(filterCategory)) {
+                newArraySize = customFilterFunctions[filterCategory](filter.filterName, dataArray).length;
             } else {
-                newArraySize = dataArray.filter(item => item[name] == filter.filterName).length;
+                //otherwise apply the default filter
+                newArraySize = dataArray.filter(option => option[filterCategory] == filter.filterName).length;
             }
         }
 
+        //if the filtered array is empty disable it otherwise enable it
         input.disabled = (newArraySize == 0);
+
+        //if the filtered array is empty, add disabled class and update filter map
         if (newArraySize == 0) {
             input.parentElement.classList.add("contains-disabled-input");
+
+            //if the option was checked de-check the element and update the filter variable
             if (filter.checked) {
                 filter.checked = false;
                 input.checked = false;
             }
         } else {
+            //otherwise remove disabled class
             input.parentElement.classList.remove("contains-disabled-input");
         }
+
+        //update the availability count element
         input.parentElement.querySelector("span").querySelector(".filter-option-contains").innerHTML = "(" + newArraySize + ")";
     });
 }
 
-export function isSelectAllSelectedBefore(filterArray) {
+export function isShowAllSelectedBefore(filterArray) {
     return (filterArray.find(filter => { return filter["showall"] === true }) != undefined);
 }
 
-export function isSelectAllSelected(filterArray) {
+export function isShowAllSelected(filterArray) {
     return (filterArray.find(filter => { return filter.filterName == "showall" && document.getElementById(filter.filterID).checked === true }) != undefined);
 }
 
-export function isSelectAllSelectedRecently(filterArray) {
-    return !isSelectAllSelectedBefore(filterArray) && isSelectAllSelected(filterArray);
+export function isShowAllSelectedRecently(filterArray) {
+    return !isShowAllSelectedBefore(filterArray) && isShowAllSelected(filterArray);
 }
 
-function onlyCheckSelectAll(filterItems) {
-    filterItems.forEach(filter => {
+function onlyCheckShowAll(filterOptions) {
+    //loop through each filter option
+    filterOptions.forEach(filter => {
+        //check the show all option, and deselect all other options
+        document.getElementById(filter.filterID).checked = (filter.filterName == "showall");
+    });
+}
+
+function removeCheckShowAll(filterOptions) {
+    //loop through each filter option
+    filterOptions.forEach(filter => {
+        //if it's a show all option deselect it
         if (filter.filterName == "showall") {
-            document.getElementById(filter.filterID).checked = true;
-        } else {
             document.getElementById(filter.filterID).checked = false;
         }
     });
 }
 
-function removeCheckSelectAll(filterItems) {
-    filterItems.forEach(filter => {
-        if (filter.filterName == "showall") {
-            document.getElementById(filter.filterID).checked = false;
-        }
-    });
-}
-
-function accountForSelectAlls() {
-    for (let [_, filterItems] of filters) {
-        if (isSelectAllSelected(filterItems)) {
-            if (isSelectAllSelectedRecently(filterItems)) {
-                onlyCheckSelectAll(filterItems);
+function accountForShowAlls() {
+    //loop through filter map
+    for (let [_, filterOptions] of filters) {
+        if (isShowAllSelected(filterOptions)) {
+            if (isShowAllSelectedRecently(filterOptions)) {
+                onlyCheckShowAll(filterOptions);
             } else {
-                removeCheckSelectAll(filterItems);
+                removeCheckShowAll(filterOptions);
             }
         }
     }
 }
 
-function isAnItemSelected(filterArray) {
+function isAnOptionSelected(filterArray) {
     return (filterArray.find(filter => { return document.getElementById(filter.filterID).checked === true }) != undefined);
 }
 
 function accountForNoneSelected() {
-    for (let [_, filterItems] of filters) {
-        if (!isAnItemSelected(filterItems)) {
-            onlyCheckSelectAll(filterItems);
+    //loop through filter map and if nothing is selected check the show all option
+    for (let [_, filterOptions] of filters) {
+        if (!isAnOptionSelected(filterOptions)) {
+            onlyCheckShowAll(filterOptions);
         }
     }
 }
 
+function isThereInput(text) {
+    return (text != undefined || text != null) && text != "";
+}
+
 function accountForSearch() {
+    //get the original table data
     var filteredTableData = getOriginalTableData();
+
+    //if there is a weapon table
     let td = $(tableID).first()[0].querySelector(".weapon");
     if (td != undefined) {
+        //get the search input
         var searchInput = $(".form-control.search-input").first().val();
-        if ((searchInput != undefined || searchInput != null) && searchInput != "") {
-            filteredTableData = filteredTableData.filter(function (item) {
+
+        //if there is input, filter the table data based on it
+        if (isThereInput(searchInput)) {
+            filteredTableData = filteredTableData.filter(function (option) {
+                //create a template element and set it to the weapon td
                 var template = document.createElement('template');
-                template.innerHTML = item.weapon;
+                template.innerHTML = option.weapon;
+
+                //get the weapon name and filter based on the search input
                 return template.content.querySelector(".weaponName").innerHTML.toLowerCase().indexOf(searchInput.toLowerCase()) > -1;
             });
         }
     }
+    //return the filtered array
     return filteredTableData;
 }
 
-export function getCheckedBoxes(filterItems) {
-    var checkedFilteredItems = [];
-    filterItems.forEach(filter => {
+export function getCheckedBoxes(filterOptions) {
+    //initialize variables
+    var checkedFilteredOptions = [];
+
+    //loop through each filter option
+    filterOptions.forEach(filter => {
+        //if it's checked add it to the array
         if (filter.checked) {
-            checkedFilteredItems.push(filter);
+            checkedFilteredOptions.push(filter);
         }
     });
-    return checkedFilteredItems;
+
+    //return the checked boxes
+    return checkedFilteredOptions;
 }
 
-function defaultFiltrationFunction(name, filterItems, dataArray) {
+function defaultFiltrationFunction(filterCategory, filterOptions, dataArray) {
+    //initialize variables
     var filteredDataArray = new Set();
-    if (!isSelectAllSelected(filterItems)) {
-        var checkedFilteredItems = getCheckedBoxes(filterItems);
-        checkedFilteredItems.forEach(filter => {
+
+    //if show all is not selected apply filters
+    if (!isShowAllSelected(filterOptions)) {
+        //initialize variables
+        var checkedFilteredOptions = getCheckedBoxes(filterOptions);
+
+        //loop through each filter option
+        checkedFilteredOptions.forEach(filter => {
             if (filter.checked) {
-                if (customFilterFunctions.hasOwnProperty(name)) {
-                    filteredDataArray = new Set(([...filteredDataArray, ...customFilterFunctions[name](filter.filterName, dataArray)]));
+                //if the filter name category is a custom filter apply the custom filter
+                if (customFilterFunctions.hasOwnProperty(filterCategory)) {
+                    filteredDataArray = new Set(([...filteredDataArray, ...customFilterFunctions[filterCategory](filter.filterName, dataArray)]));
                 } else {
-                    filteredDataArray = new Set(([...filteredDataArray, ...dataArray.filter(item => item[name] == filter.filterName)]));
+                    //otherwise apply the default filter
+                    filteredDataArray = new Set(([...filteredDataArray, ...dataArray.filter(option => option[filterCategory] == filter.filterName)]));
                 }
             }
         });
+
+        //convert set to array
         dataArray = [...filteredDataArray]
     }
 
+    //return array
     return dataArray;
 }
 
 function clearFiltration() {
+    //make the clear silent
     removeFilterListeners();
-    for (let [_, filterItems] of filters) {
-        if (!isSelectAllSelected(filterItems)) {
-            filterItems.forEach((filter) => {
+
+    //loop through filter map
+    for (let [_, filterOptions] of filters) {
+        //if the show all option is not selected loop through each filter option and select the show all option
+        if (!isShowAllSelected(filterOptions)) {
+            filterOptions.forEach((filter) => {
                 if (filter.filterName == "showall") {
                     document.getElementById(filter.filterID).checked = true;
                 }
             });
         }
     }
+
+    //update the filtration and add the listeners back
     updateTableFiltration();
     addFilterListeners();
 }
 
 export function updateTableFiltration() {
-    accountForSelectAlls();
+    //make sure the table data and filtration are initialized
+    accountForShowAlls();
     accountForNoneSelected();
     updateFilterVariables();
     var filteredTableData = accountForSearch();
 
-    for (let [name, filterItems] of filters) {
-        filteredTableData = defaultFiltrationFunction(name, filterItems, filteredTableData);
+    //loop through filter map and filter the data
+    for (let [filterCategory, filterOptions] of filters) {
+        filteredTableData = defaultFiltrationFunction(filterCategory, filterOptions, filteredTableData);
     }
 
+    //add how many items will be there after the filter option is selected
     updateFilterOptionAvailability();
 
+    //set table data to filtered data
     $(getTableID()).bootstrapTable('load', filteredTableData);
 }
 
@@ -232,7 +310,7 @@ export function updateTableFiltration() {
     //set the custom functions object
     var customFunction = {
         "medal": function filterFunction(filterName, dataArray) {
-            //filter the array based on the filter name
+            //filter the array based on the filter name category
             switch (filterName) {
                 case "auraxium":
                     return dataArray.filter(weapon => weapon.kills >= 1160);
@@ -248,7 +326,7 @@ export function updateTableFiltration() {
             }
         },
         "vehicleinfantry": function filterFunction(filterName, dataArray) {
-            //filter the array based on the filter name
+            //filter the array based on the filter name category
             switch (filterName) {
                 case "infantry":
                     return dataArray.filter(weapon => weapon.vw == "No");
@@ -287,10 +365,12 @@ export function getClearFilterButtonID() {
 }
 
 export function init(id) {
+    //initialize class variables
     tableID = '#' + id;
     clearFilterButtonID = '#' + id + "-clear-filter-button";
     originalTableData = JSON.parse(JSON.stringify($(tableID).bootstrapTable('getData', false)));
 
+    //set up filter option data and event listeners
     updateFilterVariables();
     addFilterListeners();
     updateFilterOptionAvailability();

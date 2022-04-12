@@ -21,7 +21,7 @@ function addCustomFilters() {
     //set the custom functions object
     var customFunction = {
         "medal": function filterFunction(filterName, dataArray) {
-            //filter the array based on the filter name
+            //filter the array based on the filter name category
             switch (filterName) {
                 case "auraxium":
                     return dataArray.filter(weapon => weapon.kills >= 1160);
@@ -37,7 +37,7 @@ function addCustomFilters() {
             }
         },
         "vehicleinfantry": function filterFunction(filterName, dataArray) {
-            //filter the array based on the filter name
+            //filter the array based on the filter name category
             switch (filterName) {
                 case "infantry":
                     return dataArray.filter(weapon => weapon.vw == "No");
@@ -47,7 +47,7 @@ function addCustomFilters() {
             }
         },
         "time": function filterFunction(filterName, dataArray) {
-            //filter the array based on the filter name
+            //filter the array based on the filter name category
             switch (filterName) {
                 case "years":
                     return dataArray.filter(weapon => weapon.time >= YEAR_SECOND);
