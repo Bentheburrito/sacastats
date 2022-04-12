@@ -3,8 +3,9 @@ var tableID;
 var clearFilterButtonID;
 var customFilterFunctions = new Object();
 var filters = new Map();
+var firstGo = true;
 
-function updateFilterVariables() {
+function createFilterObjects() {
     //reinitialize variables
     filters = new Map();
 
@@ -36,12 +37,43 @@ function updateFilterVariables() {
     });
 }
 
+function updateFilterVariables() {
+    //initialize variables
+    let persistentFiltersName = window.location.pathname + "/filterMap";
+    let persistentFilters = localStorage.getItem(persistentFiltersName);
+
+    //if there are no persistent filters and it's not the first go reinitalize filter map with current and persist it 
+    if (!firstGo || (firstGo && persistentFilters == undefined)) {
+        createFilterObjects();
+        localStorage.setItem(persistentFiltersName, JSON.stringify(Array.from(filters.entries())));
+    } else {
+        filters = new Map(JSON.parse(persistentFilters));
+        updateSelections();
+    }
+
+    firstGo = false;
+}
+
+function updateSelections() {
+    //loop through filter map
+    for (let [_, filterOptions] of filters) {
+        //loop through each filter option and update their checked selections
+        filterOptions.forEach((filter) => {
+            document.getElementById(filter.filterID).checked = filter.checked;
+        });
+    }
+}
+
 function initializeSearchInput() {
     //get the query string
     let query = document.location.search;
 
     //if the query string is valid
     if (query != "" && query.toLowerCase().startsWith("?search=")) {
+        //clear filters to make search visible
+        let persistentFiltersName = window.location.pathname + "/filterMap";
+        localStorage.removeItem(persistentFiltersName);
+
         //make sure to only get the value
         let search = query.split("=")[1];
         if (search != undefined && search != "") {
@@ -134,21 +166,14 @@ function updateEachOptionAvailability(filterCategory, filterOptions) {
             }
         }
 
-        //if the filtered array is empty disable it otherwise enable it
-        input.disabled = (newArraySize == 0);
-
-        //if the filtered array is empty, add disabled class and update filter map
-        if (newArraySize == 0) {
+        //if the filtered array is empty and the filter is not checked, add disabled class and disable it
+        if (newArraySize == 0 && !filter.checked) {
             input.parentElement.classList.add("contains-disabled-input");
-
-            //if the option was checked de-check the element and update the filter variable
-            if (filter.checked) {
-                filter.checked = false;
-                input.checked = false;
-            }
+            input.disabled = true;
         } else {
-            //otherwise remove disabled class
+            //otherwise remove disabled class and enable it
             input.parentElement.classList.remove("contains-disabled-input");
+            input.disabled = false;
         }
 
         //update the availability count element
@@ -400,7 +425,6 @@ export function init(id) {
     //set up filter option data and event listeners
     initializeSearchInput();
     updateTableFiltration();
-    updateFilterVariables();
     addFilterListeners();
     updateFilterOptionAvailability();
 }
