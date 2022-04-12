@@ -70,6 +70,8 @@ hr{
 #weaponTable-clear-filter-button{
     position: absolute;
     right: 0;
+    background-color: #d9534f;
+    border-color: #d9534f;
 }
 .filter-option-contains{
     color: rgb(110, 110, 110);
