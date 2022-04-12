@@ -1,3 +1,6 @@
+import { didTableRecieveStyleUpdate } from "/js/flex-bootstrap-table.js";
+import { addFormatsToPage, addAnimationToProgressBars } from "/js/formats.js";
+
 var originalTableData;
 var tableID;
 var clearFilterButtonID;
@@ -350,7 +353,56 @@ export function updateTableFiltration() {
     updateFilterOptionAvailability();
 
     //set table data to filtered data
-    $(getTableID()).bootstrapTable('load', filteredTableData);
+    $(getTableID()).bootstrapTable('load', sortData(filteredTableData));
+}
+
+export function sortData(filteredTableData) {
+    let toSortDesc = $(getTableID()).find(".desc").first()[0];
+    let toSortAsc = $(getTableID()).find(".asc").first()[0];
+
+    if (toSortDesc != undefined) {
+        let sortOn = toSortDesc.innerText.toLowerCase();
+        applyFormatsToTable();
+        return filteredTableData.sort(dynamicsort(sortOn, "desc"));
+    } else if (toSortAsc != undefined) {
+        let sortOn = toSortAsc.innerText.toLowerCase();
+        applyFormatsToTable();
+        return filteredTableData.sort(dynamicsort(sortOn, "asc"));
+    } else {
+        applyFormatsToTable();
+        return filteredTableData;
+    }
+}
+
+function dynamicsort(property, order) {
+    var sortOrder = 1;
+    if (order === "desc") {
+        sortOrder = -1;
+    }
+    return function (a, b) {
+        if (!isNaN(a[property])) {
+            return (a[property] - b[property]) * sortOrder;
+        } else {
+            // a should come before b in the sorted order
+            if (a[property] < b[property]) {
+                return -1 * sortOrder;
+                // a should come after b in the sorted order
+            } else if (a[property] > b[property]) {
+                return 1 * sortOrder;
+                // a and b are the same
+            } else {
+                return 0 * sortOrder;
+            }
+        }
+    }
+}
+
+function applyFormatsToTable() {
+    setTimeout(function () {
+        if (!didTableRecieveStyleUpdate())
+            addAnimationToProgressBars();
+        addFormatsToPage();
+    }, 10);
 }
 
 /*

@@ -17,31 +17,6 @@ export function setupFlexTables() {
         setFlexTableVisibilities();
     }
 
-    function updateSortTable() {
-        let toSortDesc = table.querySelector(".desc");
-        let toSortAsc = table.querySelector(".asc");
-
-        if (toSortDesc != undefined) {
-            toSortDesc.click();
-            toSortDesc.click();
-        } else if (toSortAsc != undefined) {
-            toSortAsc.click();
-            toSortAsc.click();
-        }
-    }
-
-    function updateStickySortTable() {
-        let toSortDesc = document.querySelector(".sticky-header").querySelector(".desc");
-        let toSortAsc = document.querySelector(".sticky-header").querySelector(".asc");
-
-        if (toSortDesc != undefined) {
-            toSortDesc.click();
-            toSortDesc.click();
-        } else if (toSortAsc != undefined) {
-            toSortAsc.click();
-            toSortAsc.click();
-        }
-    }
     function initializeFlexTables() {
         document.querySelectorAll('.table-responsive-stack').forEach(responseTable => {
             table = responseTable;
@@ -80,7 +55,6 @@ export function setupFlexTables() {
             updateSearchParam();
             setTimeout(function () {
                 bootstrapTableFilter.updateTableFiltration();
-                updateSortTable();
                 updateTableFormats(table.id);
             }, 500);
 
@@ -130,7 +104,6 @@ export function setupFlexTables() {
             setTimeout(function () {
                 var menuElement = target.closest('.dropdown-menu');
                 if (!isTargetInputDisabled(target)) {
-                    updateSortTable();
                     if (!menuElement.classList.contains("show")) {
                         menuElement.parentElement.firstElementChild.click();
                     }
@@ -144,7 +117,6 @@ export function setupFlexTables() {
 
         if (('#' + target.id) == bootstrapTableFilter.getClearFilterButtonID()) {
             setTimeout(function () {
-                updateSortTable();
                 var menuElement = target.closest('.dropdown-menu');
                 if (!menuElement.classList.contains("show")) {
                     menuElement.parentElement.firstElementChild.click();
@@ -168,25 +140,16 @@ export function setupFlexTables() {
         window.scrollBy(0, 1);
     }
 
-    let tableMouseMoveClick = false;
+    let prevDate = new Date().getTime();
     function tableMouseMoveEventHandler(e) {
-        if (e.which == 1) {
-            tableMouseMoveClick = true;
-        } else {
-            if (tableMouseMoveClick) {
-                setTimeout(function () {
-                    if (e.target.parentElement.parentElement.parentElement.classList.contains("sticky-header")) {
-                        refreshByScroll();
-                        setTimeout(function () {
-                            if (!didTableRecieveStyleUpdate()) {
-                                updateStickySortTable();
-                            }
-                        }, 500);
-                    }
-                    updateTableFormats(table.id);
-                }, 10);
-                tableMouseMoveClick = false;
+        var date = new Date().getTime();
+        if (date - prevDate > 300) {
+            if (!didTableRecieveStyleUpdate()) {
+                addAnimationToProgressBars();
+                addFormatsToPage();
+                refreshByScroll();
             }
+            prevDate = date;
         }
     }
     function tableMouseClickEventHandler() {
@@ -196,9 +159,9 @@ export function setupFlexTables() {
         }, 1);
     }
     function addOnTHeadClick() {
-        table.firstElementChild.removeEventListener('mousemove', tableMouseMoveEventHandler);
+        table.removeEventListener('mousemove', tableMouseMoveEventHandler);
         table.firstElementChild.removeEventListener('click', tableMouseClickEventHandler);
-        table.firstElementChild.addEventListener('mousemove', tableMouseMoveEventHandler);
+        table.addEventListener('mousemove', tableMouseMoveEventHandler);
         table.firstElementChild.addEventListener('click', tableMouseClickEventHandler);
         document.querySelector(".sticky-header-container").removeEventListener('mousemove', tableMouseMoveEventHandler);
         document.querySelector(".sticky-header-container").removeEventListener('click', tableMouseClickEventHandler);
@@ -207,8 +170,10 @@ export function setupFlexTables() {
     }
 
     function updateTableFormats(tableID) {
-        addAnimationToProgressBars();
-        addFormatsToPage();
+        if (!didTableRecieveStyleUpdate()) {
+            addAnimationToProgressBars();
+            addFormatsToPage();
+        }
         setMobileHeaderTexts(tableID);
         setNextAuraxVisibilities();
         makeSureTableRecievedStyles();
@@ -228,26 +193,6 @@ export function setupFlexTables() {
                 init();
             }
         }, 500);
-    }
-
-    function didTableRecieveStyleUpdate() {
-        //loop through the rows
-        for (let tableRow of table.querySelector("tbody").querySelectorAll("tr")) {
-            let td = tableRow.querySelector(".weapon");
-            if (td != undefined) {
-                //make sure if it is over 0% that the width of the progress bar is too
-                let progress = td.querySelector(".progress-bar");
-                if (parseInt(progress.innerHTML.replace("%", "")) > 0) {
-                    if (progress.style.width.replace("px", "") == "0") {
-                        return false;
-                    }
-                }
-                //if it doesn't have a .weapon column just ignore progress bar formats
-            } else {
-                return true;
-            }
-        }
-        return true;
     }
 
     function tablePaginationClickEventHandler(e) {
@@ -283,6 +228,26 @@ export function setupFlexTables() {
     function hasMobileHeader(text) {
         return text != undefined && (text.includes("table-responsive-stack-thead") || text.trim() == "Weapon");
     }
+}
+
+export function didTableRecieveStyleUpdate() {
+    //loop through the rows
+    for (let tableRow of table.querySelector("tbody").querySelectorAll("tr")) {
+        let td = tableRow.querySelector(".weapon");
+        if (td != undefined) {
+            //make sure if it is over 0% that the width of the progress bar is too
+            let progress = td.querySelector(".progress-bar");
+            if (parseInt(progress.innerHTML.replace("%", "")) > 0) {
+                if (progress.style.width.replace("px", "") == "0") {
+                    return false;
+                }
+            }
+            //if it doesn't have a .weapon column just ignore progress bar formats
+        } else {
+            return true;
+        }
+    }
+    return true;
 }
 
 export function setFlexTableVisibilities() {
