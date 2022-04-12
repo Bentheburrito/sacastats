@@ -36,6 +36,33 @@ function updateFilterVariables() {
     });
 }
 
+function initializeSearchInput() {
+    //get the query string
+    let query = document.location.search;
+
+    //if the query string is valid
+    if (query != "" && query.toLowerCase().startsWith("?search=")) {
+        //make sure to only get the value
+        let search = query.split("=")[1];
+        if (search != undefined && search != "") {
+            let searchElement = document.querySelector("input.search-input");
+            search = search.split("&")[0];
+
+            //set the input value
+            searchElement.value = search;
+
+            //simulate a search
+            const ke = new KeyboardEvent('keydown', { keyCode: 13 });
+            searchElement.dispatchEvent(ke);
+
+            //select the text on desktop
+            if (window.innerWidth >= 768) {
+                document.querySelector("input.search-input").select();
+            }
+        }
+    }
+}
+
 function addFilterListeners() {
     //loop through filter map
     for (let [_, filterOptions] of filters) {
@@ -189,7 +216,7 @@ function isThereInput(text) {
     return (text != undefined || text != null) && text != "";
 }
 
-function accountForSearch() {
+export function accountForSearch() {
     //get the original table data
     var filteredTableData = getOriginalTableData();
 
@@ -371,6 +398,8 @@ export function init(id) {
     originalTableData = JSON.parse(JSON.stringify($(tableID).bootstrapTable('getData', false)));
 
     //set up filter option data and event listeners
+    initializeSearchInput();
+    updateTableFiltration();
     updateFilterVariables();
     addFilterListeners();
     updateFilterOptionAvailability();

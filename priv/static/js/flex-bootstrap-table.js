@@ -60,21 +60,35 @@ export function setupFlexTables() {
         }, 500);
     }
 
+    function updateSearchParam() {
+        let searchValue = document.querySelector("input.search-input").value;
+
+        if (window.history.pushState) {
+            const newURL = new URL(window.location.href);
+            if (searchValue != "") {
+                newURL.search = "?search=" + searchValue;
+            } else {
+                newURL.search = "";
+            }
+
+            window.history.pushState({ path: newURL.href }, '', newURL.href);
+        }
+    }
+
     function tableSearchEnterEventHandler(e) {
         if (e.keyCode == 13) {
-            //TODO INIT URI query string
+            updateSearchParam();
             setTimeout(function () {
-                //TODO Add URI query string update
                 bootstrapTableFilter.updateTableFiltration();
                 updateSortTable();
                 updateTableFormats(table.id);
             }, 500);
 
-            if (document.querySelector("input.search-input").value == "") {
-                setTimeout(function () {
-                    //TODO Remove URI query string 
-                }, 500);
-            } //TODO Add else and highlight text on desktop to easily remove later
+            if (document.querySelector("input.search-input").value != "") {
+                if (window.innerWidth >= 768) {
+                    document.querySelector("input.search-input").select();
+                }
+            }
         }
     }
     function tableSearchEnterDownEventHandler(e) {
