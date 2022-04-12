@@ -302,13 +302,13 @@ export function updateTableFiltration() {
 }
 
 /*
-    Add custom functions by setting them hear with an object like this:
+    Add custom filter functions by setting them here with an object like this:
 
     //get dependency
     import * as bootstrapTableFilter from "/js/flex-bootstrap-table-filter.js";
 
     //set the custom functions object
-    var customFunction = {
+    var customFunctionObject = {
         "medal": function filterFunction(filterName, dataArray) {
             //filter the array based on the filter name category
             switch (filterName) {
@@ -338,7 +338,7 @@ export function updateTableFiltration() {
     };
 
     //Add it to the filter list
-    bootstrapTableFilter.setCustomFilterFunctions(customFunction);
+    bootstrapTableFilter.setCustomFilterFunctions(customFunctionObject);
 */
 export function setCustomFilterFunctions(functions) {
     customFilterFunctions = functions;
