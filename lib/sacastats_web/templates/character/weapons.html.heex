@@ -452,9 +452,9 @@
     //initialize weapon id and kill count map
     import init from "<%= Routes.static_path(@conn, "/js/character/weapons.js") %>";
     let kills = new Map();
-    "<%= for {weapon_id, weapon} <- @character["weapons"] do %>"
-        kills.set("<%= "weapon" <> (Integer.to_string(weapon_id)) <> "Row" %>", "<%= SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character["response"]["faction_id"]) + SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character["response"]["faction_id"]) %>")
-    "<% end %>"
+    $('#weaponTable').bootstrapTable('getData', false).forEach(weapon => {
+        kills.set("weapon" + weapon.id + "Row", weapon.kills)
+    });
     init(kills);
 </script>
 
