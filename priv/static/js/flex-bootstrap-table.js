@@ -111,31 +111,32 @@ export function setupFlexTables() {
 
     function dropDownItemMouseUpEventHandler(e) {
         let target = e.target;
-        var menuElement = target.closest('.dropdown-menu');
 
-        setTimeout(function () {
-            if (('#' + target.id) != bootstrapTableFilter.getClearFilterButtonID()) {
+        if (('#' + target.id) != bootstrapTableFilter.getClearFilterButtonID()) {
+            setTimeout(function () {
+                var menuElement = target.closest('.dropdown-menu');
                 if (!isTargetInputDisabled(target)) {
                     updateSortTable();
                     if (!menuElement.classList.contains("show")) {
                         menuElement.parentElement.firstElementChild.click();
                     }
                 }
-            }
-        }, 10);
+            }, 10);
+        }
     }
     function dropDownMenuClickEventHandler(e) {
-        var menuElement = e.target.closest('.dropdown-menu');
+        let target = e.target;
         e.stopPropagation();
 
-        setTimeout(function () {
-            if (('#' + e.target.id) == bootstrapTableFilter.getClearFilterButtonID()) {
+        if (('#' + target.id) == bootstrapTableFilter.getClearFilterButtonID()) {
+            setTimeout(function () {
                 updateSortTable();
+                var menuElement = target.closest('.dropdown-menu');
                 if (!menuElement.classList.contains("show")) {
                     menuElement.parentElement.firstElementChild.click();
                 }
-            }
-        }, 100);
+            }, 100);
+        }
     }
     function addToolBarClick() {
         document.querySelectorAll(".dropdown-item").forEach(itemDropDown => {
