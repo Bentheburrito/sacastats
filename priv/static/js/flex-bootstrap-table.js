@@ -95,6 +95,10 @@ export function setupFlexTables() {
                 }
             }, 10);
         }
+
+        setTimeout(function () {
+            setFlexTableVisibilities();
+        }, 10);
     }
     function dropDownMenuClickEventHandler(e) {
         let target = e.target;
