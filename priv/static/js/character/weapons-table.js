@@ -134,14 +134,17 @@ function addRightClickTable() {
             resetCopyRowSelection();
         }
 
-        //if the ctrl key was pressed while a selection was clicked remove it
-        if (e.ctrlKey && copyRows.has(row)) {
-            copyRows.delete(row);
-            $(row).removeClass("selection");
-        } else {
-            //otherwise just add the current row to selection
-            copyRows.add(row);
-            $(e.target).closest("tr").addClass("selection");
+        //disable on-click selection for mobile
+        if (window.innerWidth > 767) {
+            //if the ctrl key was pressed while a selection was clicked remove it
+            if (e.ctrlKey && copyRows.has(row)) {
+                copyRows.delete(row);
+                $(row).removeClass("selection");
+            } else {
+                //otherwise just add the current row to selection
+                copyRows.add(row);
+                $(e.target).closest("tr").addClass("selection");
+            }
         }
     });
 
