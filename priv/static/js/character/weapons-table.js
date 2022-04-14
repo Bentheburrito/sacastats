@@ -127,24 +127,29 @@ function addRightClickTable() {
     $('#weaponTable').on('click', function (e) {
         //hide the special menu and initialize variables
         hideContextMenu();
+
+        //make sure it's only weapon rows being clicked
         let row = $(e.target).closest("tr")[0];
-
-        //if it's a new selection set reset the selections
-        if (copyRows.size > 0 && !e.ctrlKey) {
-            resetCopyRowSelection();
-        }
-
-        //disable on-click selection for mobile
-        if (window.innerWidth > 767) {
-            //if the ctrl key was pressed while a selection was clicked remove it
-            if (e.ctrlKey && copyRows.has(row)) {
-                copyRows.delete(row);
-                $(row).removeClass("selection");
-            } else {
-                //otherwise just add the current row to selection
-                copyRows.add(row);
-                $(e.target).closest("tr").addClass("selection");
+        if (row.id.includes("weapon")) {
+            //if it's a new selection set reset the selections
+            if (copyRows.size > 0 && !e.ctrlKey) {
+                resetCopyRowSelection();
             }
+
+            //disable on-click selection for mobile
+            if (window.innerWidth > 767) {
+                //if the ctrl key was pressed while a selection was clicked remove it
+                if (e.ctrlKey && copyRows.has(row)) {
+                    copyRows.delete(row);
+                    $(row).removeClass("selection");
+                } else {
+                    //otherwise just add the current row to selection
+                    copyRows.add(row);
+                    $(e.target).closest("tr").addClass("selection");
+                }
+            }
+        } else {
+            resetCopyRowSelection();
         }
     });
 
