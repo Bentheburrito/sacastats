@@ -1,12 +1,25 @@
 <link rel="stylesheet" href={Routes.static_path(@conn, "/css/character/weapons.css")}/>
 
+
+<div class="dropdown-menu dropdown-menu-sm pb-0" id="context-menu">
+    <h5 class="pl-5 pr-1" id="copyWeaponLink">Copy weapon stat link</h5>
+</div>
+<div class="dropdown-menu dropdown-menu-sm pb-0 toast" data-delay="600">
+    <div class="toast-body text-center">
+        <h5 class="p-3">Copied!</h5>
+    </div>
+</div>
+
 <div id="toolbar">
 </div>
-<button id="nextAurax" class="btn btn-secondary p-0 m-0 mt-3 float-right"  data-toggle="tooltip" data-placement="top" title="Scroll to closest weapon to auraxium">
+<button id="nextAurax" class="btn btn-secondary p-0 m-0 ml-1 mt-3 float-right"  data-toggle="tooltip" data-placement="top" title="Scroll to closest weapon to auraxium">
     <img src={Routes.static_path(@conn, "/images/character/alphaAurax.png")} class="m-auto" width="30px" alt="To Next Auraxium Weapon"/>
 </button>
+<button id="weaponTable-clear-all-filter-button" class="btn btn-secondary ml-1 py-0 px-3 m-0 mt-3 float-right" title="Clear All Filters">
+    <i class="fas fa-trash"></i>
+</button>
 <div id="tableFilterDropdown" class="dropdown">
-    <button id="weaponTable-filter-button" class="btn btn-secondary mt-3 float-right dropdown-toggle" data-toggle="dropdown" title="Filter" data-placement="top">
+    <button id="weaponTable-filter-button" class="btn btn-secondary ml-1 mt-3 float-right dropdown-toggle" data-toggle="dropdown" title="Filter" data-placement="top">
         <i class="fas fa-filter"></i>
     </button>
     <div id="filterDropdownMenu" class="dropdown-menu dropdown-menu-right">

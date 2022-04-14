@@ -35,21 +35,6 @@ export function setupFlexTables() {
         }, 500);
     }
 
-    function updateSearchParam() {
-        let searchValue = document.querySelector("input.search-input").value;
-
-        if (window.history.pushState) {
-            const newURL = new URL(window.location.href);
-            if (searchValue != "") {
-                newURL.search = "?search=" + searchValue;
-            } else {
-                newURL.search = "";
-            }
-
-            window.history.pushState({ path: newURL.href }, '', newURL.href);
-        }
-    }
-
     function tableSearchEnterEventHandler(e) {
         if (e.keyCode == 13) {
             updateSearchParam();
@@ -67,7 +52,7 @@ export function setupFlexTables() {
     }
     function tableSearchEnterDownEventHandler(e) {
         if (e.keyCode == 13) {
-            bootstrapTableFilter.revertFilteredData();
+
         }
     }
     function addSearchEnter() {
@@ -206,28 +191,44 @@ export function setupFlexTables() {
         $('a').off('click', tablePaginationClickEventHandler);
         $('a').on('click', tablePaginationClickEventHandler);
     }
+}
 
-    function setMobileHeaderTexts(tableID) {
-        //append each header text to the front of the corresponding data element and hide it
-        $('#' + tableID).find("th").each(function (i) {
-            $('#' + tableID + ' td:nth-child(' + (i + 1) + ')').prepend(getMobileHeader(hasMobileHeader($('#' + tableID + ' td:nth-child(' + (i + 1) + ')').html()) ? "" : getMobileHeader($(this).text())));
-            if (window.innerWidth > 767) {
-                $('.table-responsive-stack-thead').hide();
-            }
-        });
+export function updateSearchParam() {
+    let searchValue = document.querySelector("input.search-input").value;
+
+    if (window.history.pushState) {
+        const newURL = new URL(window.location.href);
+        if (searchValue != "") {
+            newURL.search = "?search=" + searchValue.replaceAll(" ", "_");
+        } else {
+            newURL.search = "";
+        }
+
+        window.history.pushState({ path: newURL.href }, '', newURL.href);
+        bootstrapTableFilter.turnOffIdFilter();
     }
-    function getMobileHeader(text) {
-        return !hasMobileHeader(text) ? '<span class="table-responsive-stack-thead">' + text + getSeparator(text) + '</span>' : (text.trim() == "Weapon") ? "" : text;
-    }
-    function getSeparator(text) {
-        return (isThereAHeader(text) ? ": " : "");
-    }
-    function isThereAHeader(text) {
-        return text.trim() != "" && text.trim() != "Weapon";
-    }
-    function hasMobileHeader(text) {
-        return text != undefined && (text.includes("table-responsive-stack-thead") || text.trim() == "Weapon");
-    }
+}
+
+export function setMobileHeaderTexts(tableID) {
+    //append each header text to the front of the corresponding data element and hide it
+    $('#' + tableID).find("th").each(function (i) {
+        $('#' + tableID + ' td:nth-child(' + (i + 1) + ')').prepend(getMobileHeader(hasMobileHeader($('#' + tableID + ' td:nth-child(' + (i + 1) + ')').html()) ? "" : getMobileHeader($(this).text())));
+        if (window.innerWidth > 767) {
+            $('.table-responsive-stack-thead').hide();
+        }
+    });
+}
+function getMobileHeader(text) {
+    return !hasMobileHeader(text) ? '<span class="table-responsive-stack-thead">' + text + getSeparator(text) + '</span>' : (text.trim() == "Weapon") ? "" : text;
+}
+function getSeparator(text) {
+    return (isThereAHeader(text) ? ": " : "");
+}
+function isThereAHeader(text) {
+    return text.trim() != "" && text.trim() != "Weapon";
+}
+function hasMobileHeader(text) {
+    return text != undefined && (text.includes("table-responsive-stack-thead") || text.trim() == "Weapon");
 }
 
 export function didTableRecieveStyleUpdate() {

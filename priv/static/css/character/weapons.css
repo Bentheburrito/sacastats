@@ -120,9 +120,8 @@ hr{
     .table tr:nth-child(even) td:first-child{
         background-color: #ffffff;
     }
-    tbody tr:hover,
-    tbody tr:hover >
-    td:first-child {
+    tbody tr.hover, tbody tr.hover > td:first-child,
+    tbody tr:hover, tbody tr:hover > td:first-child {
         background-color: #dddddd!important;
     }
 
@@ -164,4 +163,20 @@ hr{
     .search-input{
         font-size: small;
     }
+}
+
+#copyWeaponLink:hover{
+    color: white;
+    background-color: #9B84EE;
+    cursor: pointer;
+}
+
+.toast{
+    color: white;
+    background-color: #727272;
+    border-radius: 25px;
+    position:fixed;
+    top: 50%;
+    left: 50%;
+    cursor: default;
 }

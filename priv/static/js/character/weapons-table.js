@@ -1,6 +1,8 @@
 import { nextAuraxElementID } from "/js/character/weapons.js";
 import * as bootstrapTableFilter from "/js/flex-bootstrap-table-filter.js";
 
+let copyRow;
+
 window.addEventListener('load', (event) => {
     if (window.innerWidth >= 768) {
         $("input.search-input:first").focus();
@@ -93,6 +95,54 @@ function flashElement(elementId) {
     }, 1000);
 }
 
+function addRightClickTable() {
+    $('#weaponTable').on('contextmenu', function (e) {
+        $("tr.hover").removeClass("hover");
+        var top = ((e.clientY / $(window).height()) * 100) + "%";
+        var left = ((e.clientX / $(window).width()) * 100) + "%";
+        $("#context-menu").css({
+            display: "block",
+            position: "fixed",
+            top: top,
+            left: left
+        }).addClass("show");
+        copyRow = $(e.target).closest("tr");
+        copyRow.addClass("hover");
+        return false; //blocks default Webbrowser right click menu
+    });
+    $("#copyWeaponLink").on('click', function (e) {
+        $('.toast').toast('show');
+        hideContextMenu();
+    });
+    $(document).on("click", function () {
+        hideContextMenu();
+    });
+    $(document).on("contextmenu", function () {
+        hideContextMenu();
+    });
+
+    $("#context-menu").on("click", function () {
+        hideContextMenu();
+    });
+
+    addCopyClick();
+}
+
+function hideContextMenu() {
+    $("#context-menu").removeClass("show").hide();
+    $("tr.hover").removeClass("hover");
+}
+
+function addCopyClick() {
+    $("#copyWeaponLink").on('click', function () {
+        const newURL = new URL(window.location.href);
+        newURL.search = "?search=" + copyRow.find("td.weapon").first().find("h5.weaponName").first()[0].innerHTML.replaceAll(" ", "_");
+        newURL.search = newURL.search + "&id=" + copyRow[0].id.replaceAll("weapon", "").replaceAll("Row", "");
+
+        navigator.clipboard.writeText(newURL);
+    });
+}
+
 export function showHideNextAuraxButton() {
     if (document.getElementById("nextAurax") != undefined) {
         if (document.getElementById(nextAuraxElementID) != undefined) {
@@ -122,4 +172,5 @@ export default function init() {
 
     initializeButtonEvent();
     addCustomFilters();
+    addRightClickTable();
 }

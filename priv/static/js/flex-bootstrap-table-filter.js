@@ -1,12 +1,16 @@
-import { didTableRecieveStyleUpdate } from "/js/flex-bootstrap-table.js";
+import { setMobileHeaderTexts, updateSearchParam } from "/js/flex-bootstrap-table.js";
 import { addFormatsToPage, addAnimationToProgressBars } from "/js/formats.js";
+import { showHideNextAuraxButton } from "/js/character/weapons-table.js";
 
 var originalTableData;
 var tableID;
 var clearFilterButtonID;
+var clearAllFilterButtonID;
 var customFilterFunctions = new Object();
 var filters = new Map();
 var firstGo = true;
+var hasID = false;
+var idFilteredData;
 
 function createFilterObjects() {
     //reinitialize variables
@@ -54,6 +58,7 @@ function updateFilterVariables() {
         updateSelections();
     }
 
+    //it has been iterated through at least once
     firstGo = false;
 }
 
@@ -77,23 +82,44 @@ function initializeSearchInput() {
         let persistentFiltersName = window.location.pathname + "/filterMap";
         localStorage.removeItem(persistentFiltersName);
 
-        //make sure to only get the value
-        let search = query.split("=")[1];
-        if (search != undefined && search != "") {
-            let searchElement = document.querySelector("input.search-input");
-            search = search.split("&")[0];
+        //get variables
+        let search = query.substring(1);
+        let searchElement = document.querySelector("input.search-input");
+        let searchText = search.split("&")[0].split("=")[1].replaceAll("%20", " ").replaceAll("+", " ").replaceAll("_", " ");
 
-            //set the input value
-            searchElement.value = search;
-
+        //determine if it will need a custom filter
+        if (!search.includes("&id=")) {
             //simulate a search
             const ke = new KeyboardEvent('keydown', { keyCode: 13 });
             searchElement.dispatchEvent(ke);
+        } else {
+            //filter on name and id
+            let textArray = search.split("&");
+            //get the query object that has the id
+            textArray.find(text => {
+                if (text.includes("id=")) {
+                    //get the id and filter the data based on that and the weapon name
+                    let id = text.split("=")[1];
+                    let filteredDataArray = getOriginalTableData().filter(function (row) {
+                        var template = document.createElement('template');
+                        template.innerHTML = row.weapon;
+                        return template.content.querySelector(".weaponName").innerHTML.toLowerCase().indexOf(searchText.toLowerCase()) > -1
+                            && row.id == id;
+                    })
 
-            //select the text on desktop
-            if (window.innerWidth >= 768) {
-                document.querySelector("input.search-input").select();
-            }
+                    //set the new id and make sure to compensate for the new filtering
+                    $(getTableID()).bootstrapTable('load', filteredDataArray);
+                    hasID = true;
+                    idFilteredData = filteredDataArray;
+                }
+            });
+        }
+        //set the input value
+        searchElement.value = searchText;
+
+        //select the text on desktop
+        if (window.innerWidth >= 768) {
+            document.querySelector("input.search-input").select();
         }
     }
 }
@@ -109,6 +135,7 @@ function addFilterListeners() {
 
     //add clear filter button click event listener
     $(clearFilterButtonID).on('click', clearFiltration);
+    $(clearAllFilterButtonID).on('click', clearAllFiltration);
 }
 
 function removeFilterListeners() {
@@ -122,6 +149,7 @@ function removeFilterListeners() {
 
     //remove clear filter button click event listener
     $(clearFilterButtonID).off('click', clearFiltration);
+    $(clearAllFilterButtonID).off('click', clearAllFiltration);
 }
 
 function getNonNamedFunctionDataArray(filterCategoryToNotAdd) {
@@ -316,6 +344,19 @@ function defaultFiltrationFunction(filterCategory, filterOptions, dataArray) {
     return dataArray;
 }
 
+function clearAllFiltration() {
+    let searchElement = document.querySelector("input.search-input");
+    searchElement.value = "";
+    turnOffIdFilter();
+    updateSearchParam();
+
+    //select the text on desktop
+    if (window.innerWidth >= 768) {
+        document.querySelector("input.search-input").select();
+    }
+    clearFiltration();
+}
+
 function clearFiltration() {
     //make the clear silent
     removeFilterListeners();
@@ -337,6 +378,37 @@ function clearFiltration() {
     addFilterListeners();
 }
 
+function isThereAFilterSet() {
+    //loop through filter map
+    for (let [_, filterOptions] of filters) {
+        //if the show all option is not selected return true
+        if (!isShowAllSelected(filterOptions)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function showHideClearFilterButtons() {
+    if (isThereAFilterSet()) {
+        $(clearFilterButtonID).show();
+        $(clearAllFilterButtonID).show();
+    } else {
+        $(clearFilterButtonID).hide();
+        if (document.querySelector("input.search-input").value != "") {
+            $(clearAllFilterButtonID).show();
+        } else {
+            $(clearAllFilterButtonID).hide();
+        }
+    }
+}
+
+function setNextAuraxVisibilities() {
+    setTimeout(function () {
+        showHideNextAuraxButton();
+    }, 10);
+}
+
 export function updateTableFiltration() {
     //make sure the table data and filtration are initialized
     accountForShowAlls();
@@ -351,6 +423,10 @@ export function updateTableFiltration() {
 
     //add how many items will be there after the filter option is selected
     updateFilterOptionAvailability();
+
+    //show or hide Buttons based on new filter
+    showHideClearFilterButtons();
+    setNextAuraxVisibilities();
 
     //set table data to filtered data
     $(getTableID()).bootstrapTable('load', sortData(filteredTableData));
@@ -399,9 +475,9 @@ function dynamicsort(property, order) {
 
 function applyFormatsToTable() {
     setTimeout(function () {
-        if (!didTableRecieveStyleUpdate())
-            addAnimationToProgressBars();
+        addAnimationToProgressBars();
         addFormatsToPage();
+        setMobileHeaderTexts(getTableID().substring(1));
     }, 10);
 }
 
@@ -453,7 +529,7 @@ export function revertFilteredData() {
 }
 
 export function getOriginalTableData() {
-    return JSON.parse(JSON.stringify(originalTableData));
+    return hasID ? JSON.parse(JSON.stringify(idFilteredData)) : JSON.parse(JSON.stringify(originalTableData));
 }
 
 export function getFilteredTableData() {
@@ -468,10 +544,15 @@ export function getClearFilterButtonID() {
     return clearFilterButtonID;
 }
 
+export function turnOffIdFilter() {
+    hasID = false;
+}
+
 export function init(id) {
     //initialize class variables
     tableID = '#' + id;
     clearFilterButtonID = '#' + id + "-clear-filter-button";
+    clearAllFilterButtonID = '#' + id + "-clear-all-filter-button";
     originalTableData = JSON.parse(JSON.stringify($(tableID).bootstrapTable('getData', false)));
 
     //set up filter option data and event listeners
