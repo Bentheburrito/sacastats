@@ -120,7 +120,6 @@ hr{
     .table tr:nth-child(even) td:first-child{
         background-color: #ffffff;
     }
-    tbody tr.hover, tbody tr.hover > td:first-child,
     tbody tr:hover, tbody tr:hover > td:first-child {
         background-color: #dddddd!important;
     }
@@ -139,6 +138,25 @@ hr{
     .large-filter-option{
         width: 100%;
     }
+}
+
+tbody tr.selection, 
+tbody tr.selection > td:first-child {
+    background-color: #dddddd!important;
+}
+
+.selection{
+    position: relative;
+}
+.selection:after {
+  width: 100%;
+  height: 100%;
+  content: '';
+  outline: gold 2px solid!important;
+  outline-offset: -2px;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .flash-border{
@@ -164,11 +182,23 @@ hr{
         font-size: small;
     }
 }
-
-#copyWeaponLink:hover{
+.context-menu-help{
+    color: rgb(110, 110, 110);
+    font-size: small;
+    padding-left: 80px;
+}
+#copyWeaponLink:hover,
+#copyWeaponLink:hover .context-menu-help{
     color: white;
     background-color: #9B84EE;
     cursor: pointer;
+}
+
+@media only screen and (max-width: 767px) { /*for boostrap xs*/
+    #copyWeaponLink{
+        padding: 0;
+        padding-left: 10px!important;
+    }
 }
 
 .toast{

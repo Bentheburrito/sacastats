@@ -99,12 +99,12 @@ function initializeSearchInput() {
             textArray.find(text => {
                 if (text.includes("id=")) {
                     //get the id and filter the data based on that and the weapon name
-                    let id = text.split("=")[1];
+                    let ids = text.split("=")[1].split(",");
                     let filteredDataArray = getOriginalTableData().filter(function (row) {
                         var template = document.createElement('template');
                         template.innerHTML = row.weapon;
                         return template.content.querySelector(".weaponName").innerHTML.toLowerCase().indexOf(searchText.toLowerCase()) > -1
-                            && row.id == id;
+                            && ids.includes(row.id);
                     })
 
                     //set the new id and make sure to compensate for the new filtering
@@ -395,7 +395,7 @@ function showHideClearFilterButtons() {
         $(clearAllFilterButtonID).show();
     } else {
         $(clearFilterButtonID).hide();
-        if (document.querySelector("input.search-input").value != "") {
+        if (new URL(window.location.href).search != "") {
             $(clearAllFilterButtonID).show();
         } else {
             $(clearAllFilterButtonID).hide();

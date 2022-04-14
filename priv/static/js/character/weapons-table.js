@@ -1,7 +1,7 @@
 import { nextAuraxElementID } from "/js/character/weapons.js";
 import * as bootstrapTableFilter from "/js/flex-bootstrap-table-filter.js";
 
-let copyRow;
+let copyRows = new Set();
 
 window.addEventListener('load', (event) => {
     if (window.innerWidth >= 768) {
@@ -96,51 +96,130 @@ function flashElement(elementId) {
 }
 
 function addRightClickTable() {
+    //add special Right click on table menu
     $('#weaponTable').on('contextmenu', function (e) {
-        $("tr.hover").removeClass("hover");
+        //initialize special menu location
         var top = ((e.clientY / $(window).height()) * 100) + "%";
         var left = ((e.clientX / $(window).width()) * 100) + "%";
+
+        //show special menu at the bottom right of the mouse
         $("#context-menu").css({
             display: "block",
             position: "fixed",
             top: top,
             left: left
         }).addClass("show");
-        copyRow = $(e.target).closest("tr");
-        copyRow.addClass("hover");
+
+        //if the row was not selected before deselect other selected rows
+        let row = $(e.target).closest("tr")[0];
+        if (!copyRows.has(row)) {
+            resetCopyRowSelection();
+        }
+
+        //add current row to selection
+        copyRows.add(row);
+        $(e.target).closest("tr").addClass("selection");
+
         return false; //blocks default Webbrowser right click menu
     });
-    $("#copyWeaponLink").on('click', function (e) {
+
+    //update selections
+    $('#weaponTable').on('click', function (e) {
+        //hide the special menu and initialize variables
+        hideContextMenu();
+        let row = $(e.target).closest("tr")[0];
+
+        //if it's a new selection set reset the selections
+        if (copyRows.size > 0 && !e.ctrlKey) {
+            resetCopyRowSelection();
+        }
+
+        //if the ctrl key was pressed while a selection was clicked remove it
+        if (e.ctrlKey && copyRows.has(row)) {
+            copyRows.delete(row);
+            $(row).removeClass("selection");
+        } else {
+            //otherwise just add the current row to selection
+            copyRows.add(row);
+            $(e.target).closest("tr").addClass("selection");
+        }
+    });
+
+    //add event listner for copy click
+    $("#copyWeaponLink").on('click', function () {
         $('.toast').toast('show');
         hideContextMenu();
     });
-    $(document).on("click", function () {
-        hideContextMenu();
+
+    //add page click events
+    $(document).on("click", function (e) {
+        //if the click is not in the table remove selections and hide the special menu
+        if ($(e.target).closest("tr")[0] == undefined || $(e.target).closest("tr")[0].localName != "tr") {
+            resetCopyRowSelection();
+            hideContextMenu();
+        }
     });
+
+    //add page key events
+    $(document).on("keyup", function (e) {
+        //if the user presses ctrl-C with something selected copy selected rows
+        if (e.key === 'c' && e.ctrlKey && copyRows.size > 0) {
+            copySelectedRows();
+            $('.toast').toast('show');
+        }
+    });
+
+    //add page right click events to hide special menu
     $(document).on("contextmenu", function () {
         hideContextMenu();
     });
 
+    //hide the special menu when an option is clicked
     $("#context-menu").on("click", function () {
         hideContextMenu();
     });
 
+    //add copy clicks
     addCopyClick();
+}
+
+function resetCopyRowSelection() {
+    //remove the selection style from each row and reinit the set
+    copyRows.forEach(row => {
+        $(row).removeClass("selection");
+    });
+    copyRows = new Set();
 }
 
 function hideContextMenu() {
     $("#context-menu").removeClass("show").hide();
-    $("tr.hover").removeClass("hover");
 }
 
 function addCopyClick() {
-    $("#copyWeaponLink").on('click', function () {
-        const newURL = new URL(window.location.href);
-        newURL.search = "?search=" + copyRow.find("td.weapon").first().find("h5.weaponName").first()[0].innerHTML.replaceAll(" ", "_");
-        newURL.search = newURL.search + "&id=" + copyRow[0].id.replaceAll("weapon", "").replaceAll("Row", "");
+    $("#copyWeaponLink").on('click', copySelectedRows);
+}
 
-        navigator.clipboard.writeText(newURL);
-    });
+function copySelectedRows() {
+    //get the current url
+    const newURL = new URL(window.location.href);
+
+    //if there is only 1 selection add the weapon name to the search arg
+    newURL.search = "?search=";
+    if (copyRows.size == 1) {
+        copyRows.forEach(row => {
+            newURL.search = newURL.search + $(row).find("td.weapon").first().find("h5.weaponName").first()[0].innerHTML.replaceAll(" ", "_");
+        });
+    }
+
+    //add each selected id to the id arg separated by ','
+    newURL.search = newURL.search + "&id=" + [...copyRows][0].id.replaceAll("weapon", "").replaceAll("Row", "");
+    for (let i = 1; i < copyRows.size; i++) {
+        newURL.search = newURL.search + "," + [...copyRows][i].id.replaceAll("weapon", "").replaceAll("Row", "");
+    }
+
+    //copy the new url to clipboard and reset selection
+    navigator.clipboard.writeText(newURL);
+    resetCopyRowSelection();
 }
 
 export function showHideNextAuraxButton() {
