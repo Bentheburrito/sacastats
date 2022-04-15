@@ -161,7 +161,7 @@ defmodule SacaStatsWeb.CharacterController do
 
     faction_set =
       for id <- get_sorted_set_of_items("faction_id", complete_weapons) do
-        id |> get_faction_alias()
+        get_faction_alias(id)
       end
       |> MapSet.new()
       |> Enum.sort()
