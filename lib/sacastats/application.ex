@@ -9,7 +9,7 @@ defmodule SacaStats.Application do
   def start(_type, _args) do
     ess_opts = [
       subscriptions: SacaStats.ess_subscriptions(),
-      clients: [SacaStats.EventHandler],
+      clients: [SacaStats.EventHandler, SacaStats.EventTracker],
       service_id: SacaStats.sid()
     ]
 
