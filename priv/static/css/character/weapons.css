@@ -15,20 +15,198 @@
     }
 }
 
+.contains-disabled-input,
+input[disabled] + span > p,
+input[disabled] + span,
+input[disabled]:hover {
+    color: #ccc;
+    cursor: not-allowed!important;
+}
+
 .bootstrap-table{
     padding-bottom: 10px;
 }
 
-.flash-border{
-    outline: gold 10px solid!important;
-    outline-offset: -10px;
+.dropdown-item:hover,
+input:hover{
+    cursor: pointer;
 }
 
-.search-input{
+.dropdown-item{
+    margin-bottom: 0;
+}
+
+hr{
+    height: 1px;
+    width: 80%;
+    margin: 0 auto 12px auto;
+    background-color: rgb(110, 110, 110);
+    border: none;
+}
+
+#filterDropdownMenu{
+    max-height: 400px;
+    max-width: 570px;
+    min-width: 300px;
+    overflow: auto;
+}
+
+.flexed-filter-options-container{
+  width: 96%;
+  margin: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.dropdown-menu{
+  background-color: #eeeeee;
+}
+.filter-option{
+    width: 100%;
+}
+.small-filter-option{
+    width: 50%;
+}
+#weaponTable-clear-filter-button{
+    position: absolute;
+    right: 0;
+    background-color: #d9534f;
+    border-color: #d9534f;
+}
+.filter-option-contains{
+    color: rgb(110, 110, 110);
+    font-size: smaller;
+    padding-left: 4px;
+}
+/*Contained <hr/> needs strange styling to flow properly*/
+.middle-hr{
+    width: 85%;
+    margin-left: 10%;
+}
+@media only screen and (max-width: 660px) {
+    .middle-hr{
+        width: 86%;
+    }
+}
+@media only screen and (max-width: 600px) {
+    .middle-hr{
+        width: 87.5%;
+    }
+}
+@media only screen and (max-width: 575px) {
+    .middle-hr{
+        width: 88.5%;
+    }
+}
+@media only screen and (max-width: 475px) {
+    .middle-hr{
+        width: 90%;
+    }
+}
+
+@media only screen and (min-width: 768px) { /*for boostrap > xs*/
+    .table th:first-child,
+    .table td:first-child{
+        position: sticky;
+        top: 0;
+        left: 0;
+    }
+    .table th:first-child{
+        background-color: #ffffff;
+    }
+    .table tr:nth-child(odd) td:first-child{
+        background-color: #eeeeee;
+    }
+    .table tr:nth-child(even) td:first-child{
+        background-color: #ffffff;
+    }
+    tbody tr:hover, tbody tr:hover > td:first-child {
+        background-color: #dddddd!important;
+    }
+
+    .filter-option{
+        width: 50%;
+    }
+    #leftSideFilterContainer{
+        padding-right: 0;
+        border-right: 1px solid rgb(110, 110, 110);
+    }
+
+    .filter-option{
+        width: 50%;
+    }
+    .large-filter-option{
+        width: 100%;
+    }
+}
+
+tbody tr.selection, 
+tbody tr.selection > td:first-child {
+    background-color: #dddddd!important;
+}
+
+.selection{
+    position: relative;
+}
+.selection:after {
+  width: 100%;
+  height: 100%;
+  content: '';
+  outline: gold 2px solid!important;
+  outline-offset: -2px;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.flash-border{
+    position: relative;
+}
+.flash-border:after {
+  width: 100%;
+  height: 100%;
+  content: '';
+  outline: gold 10px solid!important;
+  outline-offset: -10px;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.search-input, .search-input:hover{
     font-size: medium;
+    cursor: text;
 }
 @media only screen and (max-width: 767px) { /*for boostrap xs*/
     .search-input{
         font-size: small;
     }
+}
+.context-menu-help{
+    color: rgb(110, 110, 110);
+    font-size: small;
+    padding-left: 80px;
+}
+#copyWeaponLink:hover,
+#copyWeaponLink:hover .context-menu-help{
+    color: white;
+    background-color: #9B84EE;
+    cursor: pointer;
+}
+
+@media only screen and (max-width: 767px) { /*for boostrap xs*/
+    #copyWeaponLink{
+        padding: 0;
+        padding-left: 10px!important;
+    }
+}
+
+.toast{
+    color: white;
+    background-color: #727272;
+    border-radius: 25px;
+    position:fixed;
+    top: 50%;
+    left: 50%;
+    cursor: default;
 }

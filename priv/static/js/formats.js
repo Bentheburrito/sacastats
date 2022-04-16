@@ -114,7 +114,10 @@ export function addAnimationToProgressBars() {
             animateProgressBar()
         }
         function animateProgressBar() {
-            $("#" + progressBar.id).animate({ width: "" + finishedWidth + "%" }, 300);
+            let progressElement = $("#" + progressBar.id);
+            if (progressElement.width() == 0 && !progressElement.is(":animated")) {
+                progressElement.animate({ width: "" + finishedWidth + "%" }, 300);
+            }
         }
     });
 }

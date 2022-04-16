@@ -1,10 +1,271 @@
 <link rel="stylesheet" href={Routes.static_path(@conn, "/css/character/weapons.css")}/>
 
+
+<div class="dropdown-menu dropdown-menu-sm pb-0" id="context-menu">
+    <h5 class="px-5 d-inline text-sm-center" id="copyWeaponLink">Copy weapon stat link<p class="d-none d-md-inline context-menu-help">Ctrl-C</p></h5>
+</div>
+<div class="dropdown-menu dropdown-menu-sm pb-0 toast" data-delay="600">
+    <div class="toast-body text-center">
+        <h5 class="p-3">Copied!</h5>
+    </div>
+</div>
+
 <div id="toolbar">
 </div>
-<button id="nextAurax" class="btn btn-secondary p-0 m-0 mt-3 float-right"  data-toggle="tooltip" data-placement="top" title="Scroll to closest weapon to auraxium">
+<button id="nextAurax" class="btn btn-secondary p-0 m-0 ml-1 mt-3 float-right"  data-toggle="tooltip" data-placement="top" title="Scroll to closest weapon to auraxium">
     <img src={Routes.static_path(@conn, "/images/character/alphaAurax.png")} class="m-auto" width="30px" alt="To Next Auraxium Weapon"/>
 </button>
+<button id="weaponTable-clear-all-filter-button" class="btn btn-secondary ml-1 py-0 px-3 m-0 mt-3 float-right" title="Clear All Filters">
+    <i class="fas fa-trash"></i>
+</button>
+<div id="tableFilterDropdown" class="dropdown">
+    <button id="weaponTable-filter-button" class="btn btn-secondary ml-1 mt-3 float-right dropdown-toggle" data-toggle="dropdown" title="Filter" data-placement="top">
+        <i class="fas fa-filter"></i>
+    </button>
+    <div id="filterDropdownMenu" class="dropdown-menu dropdown-menu-right">
+        <div class="pl-3">
+            <button id="weaponTable-clear-filter-button" class="btn btn-danger" title="Clear Filter">
+                Clear
+            </button>
+            <h5 class="text-center pb-3">Filter Options</h5>
+            <div class="pb-0 pb-md-3">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-6" id="leftSideFilterContainer">
+                        <div id="factionFilter">
+                            <h5 class="filter-option-name">Faction</h5>
+                            <div class="filter-options-container flexed-filter-options-container">
+                                <div class="filter-option small-filter-option">
+                                    <label class="dropdown-item">
+                                        <input class="form-check-input filter-input" type="checkbox" name="faction" id="showall-faction-filter-option" checked>
+                                        <span class="pl-2">
+                                            Show All<p class="d-inline filter-option-contains"></p>
+                                        </span>
+                                    </label>
+                                </div>
+                                <%= for faction <- @character["factions"] do %>
+                                    <div class="filter-option small-filter-option">
+                                        <label class="dropdown-item">
+                                            <input class="form-check-input filter-input" type="checkbox" name="faction" id={faction <> "-faction-filter-option"}>
+                                            <span class="pl-2">
+                                                <%= faction %><p class="d-inline filter-option-contains"></p>
+                                            </span>
+                                        </label>
+                                    </div>
+                                <% end %>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 d-block d-md-none ">
+                        <hr class="middle-hr"/>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div id="vehicleFilter">
+                            <h5 class="filter-option-name">Vehicle/Infantry</h5>
+                            <div class="filter-options-container">
+                                <div class="filter-option large-filter-option">
+                                    <label class="dropdown-item">
+                                        <input class="form-check-input filter-input" type="radio" name="vehicleinfantry" id="showall-vehicleinfantry-filter-option" checked>
+                                        <span class="pl-2">
+                                            Show All<p class="d-inline filter-option-contains"></p>
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="filter-option large-filter-option">
+                                    <label class="dropdown-item">
+                                        <input class="form-check-input filter-input" type="radio" name="vehicleinfantry" id="infantry-vehicleinfantry-filter-option">
+                                        <span class="pl-2">
+                                            Infantry Weapons<p class="d-inline filter-option-contains"></p>
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="filter-option large-filter-option">
+                                    <label class="dropdown-item">
+                                        <input class="form-check-input filter-input" type="radio" name="vehicleinfantry" id="vehicle-vehicleinfantry-filter-option">
+                                        <span class="pl-2">
+                                            Vehicle Weapons<p class="d-inline filter-option-contains"></p>
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr/>
+            <div id="medalFilter">
+                <h5 class="filter-option-name">Medal</h5>
+                <div class="filter-options-container flexed-filter-options-container">
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="medal" id="showall-medal-filter-option" checked>
+                            <span class="pl-2">
+                                Show All<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="medal" id="auraxium-medal-filter-option">
+                            <span class="pl-2">
+                                Auraxium<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="medal" id="gold-medal-filter-option">
+                            <span class="pl-2">
+                                Gold<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="medal" id="silver-medal-filter-option">
+                            <span class="pl-2">
+                                Silver<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="medal" id="bronze-medal-filter-option">
+                            <span class="pl-2">
+                                Bronze<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="medal" id="none-medal-filter-option">
+                            <span class="pl-2">
+                                None<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <hr/>
+            <div id="timeFilter">
+                <h5 class="filter-option-name">Time With Weapon</h5>
+                <div class="filter-options-container flexed-filter-options-container">
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="time" id="showall-time-filter-option" checked>
+                            <span class="pl-2">
+                                Show All<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="time" id="years-time-filter-option">
+                            <span class="pl-2">
+                                Years<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="time" id="weeks-time-filter-option">
+                            <span class="pl-2">
+                                Weeks<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="time" id="days-time-filter-option">
+                            <span class="pl-2">
+                                Days<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="time" id="hours-time-filter-option">
+                            <span class="pl-2">
+                                Hours<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="time" id="minutes-time-filter-option">
+                            <span class="pl-2">
+                                Minutes<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="time" id="seconds-time-filter-option">
+                            <span class="pl-2">
+                                Seconds<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="time" id="none-time-filter-option">
+                            <span class="pl-2">
+                                None<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <hr/>
+            <div id="categoryFilter">
+                <h5 class="filter-option-name">Category</h5>
+                <div class="filter-options-container flexed-filter-options-container">
+                    <div class="filter-option small-filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="category" id="showall-category-filter-option" checked>
+                            <span class="pl-2">
+                                Show All<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                    <%= for category <- @character["categories"] do %>
+                        <div class="filter-option small-filter-option">
+                            <label class="dropdown-item">
+                                <input class="form-check-input filter-input" type="checkbox" name="category" id={category <> "-category-filter-option"}>
+                                <span class="pl-2">
+                                    <%= category %><p class="d-inline filter-option-contains"></p>
+                                </span>
+                            </label>
+                        </div>
+                    <% end %>
+                </div>
+            </div>
+            <hr/>
+            <div id="typeFilter">
+                <h5 class="filter-option-name">Type</h5>
+                <div class="filter-options-container flexed-filter-options-container">
+                    <div class="filter-option">
+                        <label class="dropdown-item">
+                            <input class="form-check-input filter-input" type="checkbox" name="type" id="showall-type-filter-option" checked>
+                            <span class="pl-2">
+                                Show All<p class="d-inline filter-option-contains"></p>
+                            </span>
+                        </label>
+                    </div>
+                    <%= for type <- @character["types"] do %>
+                        <div class="filter-option">
+                            <label class="dropdown-item">
+                                <input class="form-check-input filter-input" type="checkbox" name="type" id={type <> "-type-filter-option"}>
+                                <span class="pl-2">
+                                    <%= type %><p class="d-inline filter-option-contains"></p>
+                                </span>
+                            </label>
+                        </div>
+                    <% end %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <table class="table table-bordered table-striped table-responsive-stack" id="weaponTable"
     data-toolbar="#toolbar"
     data-show-columns="true"
@@ -20,49 +281,49 @@
     data-page-list="[5, 10, 25, 50, 100, 200, All]">
     <thead class="">
         <tr>
-            <th data-field="weapon" data-toggle="tooltip" title="Weapons" class="pr-5">Weapon</th>
-            <th data-field="kills" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Total number of kills">Kills</th>
-            <th data-field="vskills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Total number of VS kills">VS-Kills</th>
-            <th data-field="nckills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Total number of NC kills">NC-Kills</th>
-            <th data-field="trkills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Total number of TR kills">TR-Kills</th>
-            <th data-field="ikills" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Infantry kills">I.Kills</th>
-            <th data-field="vsikills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="VS infantry kills">VS-I.Kills</th>
-            <th data-field="ncikills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="NC infantry kills">NC-I.Kills</th>
-            <th data-field="trikills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="TR infantry kills">TR-I.Kills</th>
-            <th data-field="vkills" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Vehicle kills">V.Kills</th>
-            <th data-field="vsvkills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="VS vehicle kills">VS-V.Kills</th>
-            <th data-field="ncvkills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="NC vehicle kills">NC-V.Kills</th>
-            <th data-field="trvkills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="TR vehicle kills">TR-V.Kills</th>
-            <th data-field="kdr" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Kills per death">KD</th>
-            <th data-field="acc" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Accuracy">Acc</th>
-            <th data-field="hits" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Number of hits">Hits</th>
-            <th data-field="shots" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Shots fired">Shots</th>
-            <th data-field="hs" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Head shots">HS</th>
-            <th data-field="vshs" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="VS head shots">VS-HS</th>
-            <th data-field="nchs" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="NC head shots">NC-HS</th>
-            <th data-field="trhs" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="TR head shots">TR-HS</th>
-            <th data-field="hsr" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Head shots per kill">HSR</th>
-            <th data-field="damageg" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Damage given">Damage.G</th>
-            <th data-field="vsdamageg" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="VS damage given">VS-Damage.G</th>
-            <th data-field="ncdamageg" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="NC damage given">NC-Damage.G</th>
-            <th data-field="trdamageg" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="TR damage given">TR-Damage.G</th>
-            <th data-field="damaget" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Damage taken">Damage.T</th>
-            <th data-field="vsdamaget" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="VS damage taken">VS-Damage.T</th>
-            <th data-field="ncdamaget" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="NC damage taken">NC-Damage.T</th>
-            <th data-field="trdamaget" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="TR damage taken">TR-Damage.T</th>
-            <th data-field="time" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Time used with">Time</th>
-            <th data-field="certs" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Certs earned with weapon">Certs</th>
-            <th data-field="score" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Score earned with weapon">Score</th>
-            <th data-field="killedby" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Number of times killed by weapon">Killed By</th>
-            <th data-field="vskilledby" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Killed by VS">VS-Killed By</th>
-            <th data-field="nckilledby" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Killed by NC">NC-Killed By</th>
-            <th data-field="trkilledby" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Killed by TR">TR-Killed By</th>
-            <th data-field="deaths" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Died with weapon">Deaths</th>
-            <th data-field="vw" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Is it a vehicle weapon?">VW</th>
-            <th data-field="faction" data-visible="false" data-sortable="true" data-sort-order="asc" data-toggle="tooltip" title="Faction weapon is from">Faction</th>
-            <th data-field="category" data-visible="false" data-sortable="true" data-sort-order="asc" data-toggle="tooltip" title="Weapon category">Category</th>
-            <th data-field="type" data-sortable="true" data-sort-order="asc" data-toggle="tooltip" title="Type of weapon">Type</th>
-            <th data-field="id" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Weapon ID number">ID</th>
+            <th data-field="weapon" data-switchable="false" data-toggle="tooltip" title="Weapons" class="pr-5">Weapon</th>
+            <th data-field="kills" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Total number of kills" class="drag-accept">Kills</th>
+            <th data-field="vskills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Total number of VS kills" class="drag-accept">VS-Kills</th>
+            <th data-field="nckills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Total number of NC kills" class="drag-accept">NC-Kills</th>
+            <th data-field="trkills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Total number of TR kills" class="drag-accept">TR-Kills</th>
+            <th data-field="ikills" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Infantry kills" class="drag-accept">I.Kills</th>
+            <th data-field="vsikills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="VS infantry kills" class="drag-accept">VS-I.Kills</th>
+            <th data-field="ncikills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="NC infantry kills" class="drag-accept">NC-I.Kills</th>
+            <th data-field="trikills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="TR infantry kills" class="drag-accept">TR-I.Kills</th>
+            <th data-field="vkills" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Vehicle kills" class="drag-accept">V.Kills</th>
+            <th data-field="vsvkills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="VS vehicle kills" class="drag-accept">VS-V.Kills</th>
+            <th data-field="ncvkills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="NC vehicle kills" class="drag-accept">NC-V.Kills</th>
+            <th data-field="trvkills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="TR vehicle kills" class="drag-accept">TR-V.Kills</th>
+            <th data-field="kdr" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Kills per death" class="drag-accept">KD</th>
+            <th data-field="acc" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Accuracy" class="drag-accept">Acc</th>
+            <th data-field="hits" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Number of hits" class="drag-accept">Hits</th>
+            <th data-field="shots" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Shots fired" class="drag-accept">Shots</th>
+            <th data-field="hs" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Head shots" class="drag-accept">HS</th>
+            <th data-field="vshs" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="VS head shots" class="drag-accept">VS-HS</th>
+            <th data-field="nchs" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="NC head shots" class="drag-accept">NC-HS</th>
+            <th data-field="trhs" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="TR head shots" class="drag-accept">TR-HS</th>
+            <th data-field="hsr" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Head shots per kill" class="drag-accept">HSR</th>
+            <th data-field="damageg" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Damage given" class="drag-accept">Damage.G</th>
+            <th data-field="vsdamageg" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="VS damage given" class="drag-accept">VS-Damage.G</th>
+            <th data-field="ncdamageg" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="NC damage given" class="drag-accept">NC-Damage.G</th>
+            <th data-field="trdamageg" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="TR damage given" class="drag-accept">TR-Damage.G</th>
+            <th data-field="damaget" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Damage taken" class="drag-accept">Damage.T</th>
+            <th data-field="vsdamaget" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="VS damage taken" class="drag-accept">VS-Damage.T</th>
+            <th data-field="ncdamaget" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="NC damage taken" class="drag-accept">NC-Damage.T</th>
+            <th data-field="trdamaget" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="TR damage taken" class="drag-accept">TR-Damage.T</th>
+            <th data-field="time" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Time used with" class="drag-accept">Time</th>
+            <th data-field="certs" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Certs earned with weapon" class="drag-accept">Certs</th>
+            <th data-field="score" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Score earned with weapon" class="drag-accept">Score</th>
+            <th data-field="killedby" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Number of times killed by weapon" class="drag-accept">Killed By</th>
+            <th data-field="vskilledby" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Killed by VS" class="drag-accept">VS-Killed By</th>
+            <th data-field="nckilledby" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Killed by NC" class="drag-accept">NC-Killed By</th>
+            <th data-field="trkilledby" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Killed by TR" class="drag-accept">TR-Killed By</th>
+            <th data-field="deaths" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Died with weapon" class="drag-accept">Deaths</th>
+            <th data-field="vw" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Is it a vehicle weapon?" class="drag-accept">VW</th>
+            <th data-field="faction" data-visible="false" data-sortable="true" data-sort-order="asc" data-toggle="tooltip" title="Faction weapon is from" class="drag-accept">Faction</th>
+            <th data-field="category" data-visible="false" data-sortable="true" data-sort-order="asc" data-toggle="tooltip" title="Weapon category" class="drag-accept">Category</th>
+            <th data-field="type" data-sortable="true" data-sort-order="asc" data-toggle="tooltip" title="Type of weapon" class="drag-accept">Type</th>
+            <th data-field="id" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Weapon ID number" class="drag-accept">ID</th>
         </tr>
     </thead>
     <tbody>
@@ -74,7 +335,13 @@
                         <img src={"https://census.daybreakgames.com/files/ps2/images/static/" <> (SacaStatsWeb.CharacterController.get_medal_code(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character["response"]["faction_id"]), 
                             SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character["response"]["faction_id"]))|> Integer.to_string()) <>".png"} alt="medal" class="medal float-left position-absolute top-0" width="30px"/>
                     <% end %>
-                    <img src={"https://census.daybreakgames.com" <> Map.get(weapon, "image_path", "/files/ps2/images/static/3.png")} alt={Map.get(weapon, "name", "N/A")} class="weapon mx-auto d-block" height="75vh"/>
+                    <img src={"https://census.daybreakgames.com" <> Map.get(weapon, "image_path", "/files/ps2/images/static/3.png")} 
+                        onerror={"this.onerror=null; this.src='" <> 
+                            (if weapon["vehicle_weapon?"], 
+                                do: Routes.static_path(@conn, "/images/character/unknownVehicleWeapon.png"), 
+                                else: Routes.static_path(@conn, "/images/character/unknownInfantryWeapon.png"))
+                            <> "'"} 
+                        alt={Map.get(weapon, "name", "N/A")} class="weapon mx-auto d-block" height="75vh"/>
                     <h5 class="weaponName align-text-bottom text-center mb-0"><%=Map.get(weapon, "name", "N/A")%></h5>
                     <div id={"weapon" <> (weapon_id |> Integer.to_string()) <> "ProgressBar"} class="progress-bar progress-bar-striped progress-bar-animated aurax-progress" role="progressbar" 
                         aria-valuenow={"#{SacaStatsWeb.CharacterController.get_aurax_percent(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character["response"]["faction_id"]), 
@@ -198,11 +465,10 @@
     //initialize weapon id and kill count map
     import init from "<%= Routes.static_path(@conn, "/js/character/weapons.js") %>";
     let kills = new Map();
-    "<%= for {weapon_id, weapon} <- @character["weapons"] do %>"
-        kills.set("<%= "weapon" <> (Integer.to_string(weapon_id)) <> "Row" %>", "<%= SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character["response"]["faction_id"]) + SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character["response"]["faction_id"]) %>")
-    "<% end %>"
+    $('#weaponTable').bootstrapTable('getData', false).forEach(weapon => {
+        kills.set("weapon" + weapon.id + "Row", weapon.kills)
+    });
     init(kills);
 </script>
 
-<script type="module" src={Routes.static_path(@conn, "/js/character/weapons.js")}></script>
 <script type="module" src={Routes.static_path(@conn, "/js/character/weapons-table.js")}></script>

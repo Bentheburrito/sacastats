@@ -1,10 +1,15 @@
 import { addFormatsToPage, addAnimationToProgressBars } from "/js/formats.js";
-import { nextAuraxElementID } from "/js/character/weapons.js";
+import { showHideNextAuraxButton } from "/js/character/weapons-table.js";
+import * as bootstrapTableFilter from "/js/flex-bootstrap-table-filter.js";
 
 let table;
 
 export function setupFlexTables() {
     init();
+
+    document.querySelectorAll('.table-responsive-stack').forEach(table => {
+        bootstrapTableFilter.init(table.id);
+    });
 
     function init() {
         initializeFlexTables();
@@ -12,35 +17,6 @@ export function setupFlexTables() {
         setFlexTableVisibilities();
     }
 
-    function updateSortTable() {
-        if (!didTableRecieveStyleUpdate()) {
-            let toSortDesc = table.querySelector(".desc");
-            let toSortAsc = table.querySelector(".asc");
-
-            if (toSortDesc != undefined) {
-                toSortDesc.click();
-                toSortDesc.click();
-            } else if (toSortAsc != undefined) {
-                toSortAsc.click();
-                toSortAsc.click();
-            }
-        }
-    }
-
-    function updateStickySortTable() {
-        if (!didTableRecieveStyleUpdate()) {
-            let toSortDesc = document.querySelector(".sticky-header").querySelector(".desc");
-            let toSortAsc = document.querySelector(".sticky-header").querySelector(".asc");
-
-            if (toSortDesc != undefined) {
-                toSortDesc.click();
-                toSortDesc.click();
-            } else if (toSortAsc != undefined) {
-                toSortAsc.click();
-                toSortAsc.click();
-            }
-        }
-    }
     function initializeFlexTables() {
         document.querySelectorAll('.table-responsive-stack').forEach(responseTable => {
             table = responseTable;
@@ -55,28 +31,28 @@ export function setupFlexTables() {
 
     function setNextAuraxVisibilities() {
         setTimeout(function () {
-            showHideNextAuraxButton()
+            showHideNextAuraxButton();
         }, 500);
     }
 
     function tableSearchEnterEventHandler(e) {
         if (e.keyCode == 13) {
-            //TODO INIT URI query string
+            updateSearchParam();
             setTimeout(function () {
-                //TODO Add URI query string update
-                updateSortTable();
+                bootstrapTableFilter.updateTableFiltration();
                 updateTableFormats(table.id);
             }, 500);
 
-            if (document.querySelector("input.search-input").value == "") {
-                setTimeout(function () {
-                    //TODO Remove URI query string 
-                }, 500);
-            } //TODO Add else and highlight text on desktop to easily remove later
+            if (document.querySelector("input.search-input").value != "") {
+                if (window.innerWidth >= 768) {
+                    document.querySelector("input.search-input").select();
+                }
+            }
         }
     }
     function tableSearchEnterDownEventHandler(e) {
         if (e.keyCode == 13) {
+
         }
     }
     function addSearchEnter() {
@@ -88,16 +64,63 @@ export function setupFlexTables() {
         });
     }
 
-    function tableToolBarClickEventHandler() {
+    function isTargetInputDisabled(target) {
+        let input = target;
+        if (target.localName != "input") {
+            input = input.closest(".filter-option");
+            if (input != undefined || input != null) {
+                input = input.querySelector(".dropdown-item").querySelector("input");
+            } else {
+                return false;
+            }
+        }
+
+        if (input != undefined || input != null) {
+            return input.disabled;
+        } else {
+            return false;
+        }
+    }
+
+    function dropDownItemMouseUpEventHandler(e) {
+        let target = e.target;
+
+        if (('#' + target.id) != bootstrapTableFilter.getClearFilterButtonID()) {
+            setTimeout(function () {
+                var menuElement = target.closest('.dropdown-menu');
+                if (!isTargetInputDisabled(target)) {
+                    if (!menuElement.classList.contains("show")) {
+                        menuElement.parentElement.firstElementChild.click();
+                    }
+                }
+            }, 10);
+        }
+
         setTimeout(function () {
-            updateSortTable();
-            $(".dropdown-toggle:first").click();
-        }, 100);
+            setFlexTableVisibilities();
+        }, 10);
+    }
+    function dropDownMenuClickEventHandler(e) {
+        let target = e.target;
+        e.stopPropagation();
+
+        if (('#' + target.id) == bootstrapTableFilter.getClearFilterButtonID()) {
+            setTimeout(function () {
+                var menuElement = target.closest('.dropdown-menu');
+                if (!menuElement.classList.contains("show")) {
+                    menuElement.parentElement.firstElementChild.click();
+                }
+            }, 100);
+        }
     }
     function addToolBarClick() {
-        document.querySelectorAll('.dropdown-item-marker').forEach(itemDropDown => {
-            itemDropDown.removeEventListener('mouseup', tableToolBarClickEventHandler);
-            itemDropDown.addEventListener('mouseup', tableToolBarClickEventHandler);
+        document.querySelectorAll(".dropdown-item").forEach(itemDropDown => {
+            itemDropDown.removeEventListener('mouseup', dropDownItemMouseUpEventHandler);
+            itemDropDown.addEventListener('mouseup', dropDownItemMouseUpEventHandler);
+        });
+        document.querySelectorAll(".dropdown-menu").forEach(menu => {
+            menu.removeEventListener('click', dropDownMenuClickEventHandler);
+            menu.addEventListener('click', dropDownMenuClickEventHandler);
         });
     }
 
@@ -106,23 +129,16 @@ export function setupFlexTables() {
         window.scrollBy(0, 1);
     }
 
-    let tableMouseMoveClick = false;
+    let prevDate = new Date().getTime();
     function tableMouseMoveEventHandler(e) {
-        if (e.which == 1) {
-            tableMouseMoveClick = true;
-        } else {
-            if (tableMouseMoveClick) {
-                setTimeout(function () {
-                    if (e.target.parentElement.parentElement.parentElement.classList.contains("sticky-header")) {
-                        refreshByScroll();
-                        setTimeout(function () {
-                            updateStickySortTable();
-                        }, 500);
-                    }
-                    updateTableFormats(table.id);
-                }, 10);
-                tableMouseMoveClick = false;
+        var date = new Date().getTime();
+        if (date - prevDate > 300) {
+            if (!didTableRecieveStyleUpdate()) {
+                addAnimationToProgressBars();
+                addFormatsToPage();
+                refreshByScroll();
             }
+            prevDate = date;
         }
     }
     function tableMouseClickEventHandler() {
@@ -132,9 +148,9 @@ export function setupFlexTables() {
         }, 1);
     }
     function addOnTHeadClick() {
-        table.firstElementChild.removeEventListener('mousemove', tableMouseMoveEventHandler);
+        table.removeEventListener('mousemove', tableMouseMoveEventHandler);
         table.firstElementChild.removeEventListener('click', tableMouseClickEventHandler);
-        table.firstElementChild.addEventListener('mousemove', tableMouseMoveEventHandler);
+        table.addEventListener('mousemove', tableMouseMoveEventHandler);
         table.firstElementChild.addEventListener('click', tableMouseClickEventHandler);
         document.querySelector(".sticky-header-container").removeEventListener('mousemove', tableMouseMoveEventHandler);
         document.querySelector(".sticky-header-container").removeEventListener('click', tableMouseClickEventHandler);
@@ -143,8 +159,10 @@ export function setupFlexTables() {
     }
 
     function updateTableFormats(tableID) {
-        addAnimationToProgressBars();
-        addFormatsToPage();
+        if (!didTableRecieveStyleUpdate()) {
+            addAnimationToProgressBars();
+            addFormatsToPage();
+        }
         setMobileHeaderTexts(tableID);
         setNextAuraxVisibilities();
         makeSureTableRecievedStyles();
@@ -166,26 +184,6 @@ export function setupFlexTables() {
         }, 500);
     }
 
-    function didTableRecieveStyleUpdate() {
-        //loop through the rows
-        for (let tableRow of table.querySelector("tbody").querySelectorAll("tr")) {
-            let td = tableRow.querySelector(".weapon");
-            if (td != undefined) {
-                //make sure if it is over 0% that the width of the progress bar is too
-                let progress = td.querySelector(".progress-bar");
-                if (parseInt(progress.innerHTML.replace("%", "")) > 0) {
-                    if (progress.style.width.replace("px", "") == "0") {
-                        return false;
-                    }
-                }
-                //if it doesn't have a .weapon column just ignore progress bar formats
-            } else {
-                return true;
-            }
-        }
-        return true;
-    }
-
     function tablePaginationClickEventHandler(e) {
         if (e.target.classList.contains("page-link") || e.target.classList.contains("dropdown-item")) {
             setTimeout(function () {
@@ -197,38 +195,64 @@ export function setupFlexTables() {
         $('a').off('click', tablePaginationClickEventHandler);
         $('a').on('click', tablePaginationClickEventHandler);
     }
+}
 
-    function showHideNextAuraxButton() {
-        if (document.getElementById("nextAurax") != undefined) {
-            if (document.getElementById(nextAuraxElementID) != undefined) {
-                $("#nextAurax").show();
-            } else {
-                $("#nextAurax").hide();
+export function updateSearchParam() {
+    let searchValue = document.querySelector("input.search-input").value;
+
+    if (window.history.pushState) {
+        const newURL = new URL(window.location.href);
+        if (searchValue != "") {
+            newURL.search = "?search=" + searchValue.replaceAll(" ", "_");
+        } else {
+            newURL.search = "";
+        }
+
+        window.history.pushState({ path: newURL.href }, '', newURL.href);
+        bootstrapTableFilter.turnOffIdFilter();
+    }
+}
+
+export function setMobileHeaderTexts(tableID) {
+    //append each header text to the front of the corresponding data element and hide it
+    $('#' + tableID).find("th").each(function (i) {
+        $('#' + tableID + ' td:nth-child(' + (i + 1) + ')').prepend(getMobileHeader(hasMobileHeader($('#' + tableID + ' td:nth-child(' + (i + 1) + ')').html()) ? "" : getMobileHeader($(this).text())));
+        if (window.innerWidth > 767) {
+            $('.table-responsive-stack-thead').hide();
+        }
+    });
+}
+function getMobileHeader(text) {
+    return !hasMobileHeader(text) ? '<span class="table-responsive-stack-thead">' + text + getSeparator(text) + '</span>' : (text.trim() == "Weapon") ? "" : text;
+}
+function getSeparator(text) {
+    return (isThereAHeader(text) ? ": " : "");
+}
+function isThereAHeader(text) {
+    return text.trim() != "" && text.trim() != "Weapon";
+}
+function hasMobileHeader(text) {
+    return text != undefined && (text.includes("table-responsive-stack-thead") || text.trim() == "Weapon");
+}
+
+export function didTableRecieveStyleUpdate() {
+    //loop through the rows
+    for (let tableRow of table.querySelector("tbody").querySelectorAll("tr")) {
+        let td = tableRow.querySelector(".weapon");
+        if (td != undefined) {
+            //make sure if it is over 0% that the width of the progress bar is too
+            let progress = td.querySelector(".progress-bar");
+            if (parseInt(progress.innerHTML.replace("%", "")) > 0) {
+                if (progress.style.width.replace("px", "") == "0") {
+                    return false;
+                }
             }
+            //if it doesn't have a .weapon column just ignore progress bar formats
+        } else {
+            return true;
         }
     }
-
-    function setMobileHeaderTexts(tableID) {
-        //append each header text to the front of the corresponding data element and hide it
-        $('#' + tableID).find("th").each(function (i) {
-            $('#' + tableID + ' td:nth-child(' + (i + 1) + ')').prepend(getMobileHeader(hasMobileHeader($('#' + tableID + ' td:nth-child(' + (i + 1) + ')').html()) ? "" : getMobileHeader($(this).text())));
-            if (window.innerWidth > 767) {
-                $('.table-responsive-stack-thead').hide();
-            }
-        });
-    }
-    function getMobileHeader(text) {
-        return !hasMobileHeader(text) ? '<span class="table-responsive-stack-thead">' + text + getSeparator(text) + '</span>' : (text.trim() == "Weapon") ? "" : text;
-    }
-    function getSeparator(text) {
-        return (isThereAHeader(text) ? ": " : "");
-    }
-    function isThereAHeader(text) {
-        return text.trim() != "" && text.trim() != "Weapon";
-    }
-    function hasMobileHeader(text) {
-        return text != undefined && (text.includes("table-responsive-stack-thead") || text.trim() == "Weapon");
-    }
+    return true;
 }
 
 export function setFlexTableVisibilities() {
