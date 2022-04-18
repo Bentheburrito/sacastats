@@ -38,6 +38,20 @@ defmodule SacaStats.Session do
     field :logout_timestamp, Events.PlayerLogout.t()
   end
 
+  @default_aggregation %{
+    kill_count: 0,
+    kill_hs_count: 0,
+    kill_ivi_count: 0,
+    kill_hs_ivi_count: 0,
+    death_count: 0,
+    death_ivi_count: 0,
+    vehicle_kill_count: 0,
+    vehicle_death_count: 0,
+    nanites_destroyed: 0,
+    nanites_lost: 0,
+    xp_earned: 0,
+  }
+
   def get_all(character_id) do
     character_info_task = Task.async(fn ->
       Query.new(collection: "single_character_by_id")
@@ -59,8 +73,8 @@ defmodule SacaStats.Session do
     latest_login = List.first(logins)
     latest_logout = List.first(logouts)
 
-    # If this character is currently online/has a session open, then their most recent login will intuitively be more
-    # recent than their most recent logout.
+    # If this character is currently online/has a session open, then their most recent login will be more
+    # recent than their most recent logout. So we should add a map with a timestamp field that tells us just that.
     logouts =
       cond do
         is_nil(latest_login) or is_nil(latest_logout) ->
@@ -117,12 +131,12 @@ defmodule SacaStats.Session do
 
   defp aggregate(character_id, event_lists) do
     event_lists
-    |> Stream.map(fn events -> Enum.reduce(events, %{}, &event_reducer(character_id, &1, &2)) end)
+    |> Stream.map(fn events -> Enum.reduce(events, @default_aggregation, &event_reducer(character_id, &1, &2)) end)
     |> Enum.reduce(&Map.merge/2)
   end
 
   defp event_reducer(character_id, %Events.Death{} = death, acc) do
-    attackers_weapon = SacaStats.weapons()[String.to_integer(death.attacker_weapon_id)]
+    attackers_weapon = SacaStats.weapons()[death.attacker_weapon_id]
 
     kill_count_add = death.attacker_character_id == character_id && 1 || 0
     kill_hs_count_add = death.attacker_character_id == character_id and death.is_headshot && 1 || 0
@@ -145,7 +159,7 @@ defmodule SacaStats.Session do
   end
 
   defp event_reducer(character_id, %Events.VehicleDestroy{} = vehicle, acc) do
-    character_vehicle = SacaStats.vehicles()[String.to_integer(vehicle.vehicle_id)]
+    character_vehicle = SacaStats.vehicles()[vehicle.vehicle_id]
 
     vehicle_kill_count_add = vehicle.attacker_character_id == character_id && 1 || 0
     vehicle_death_count_add = vehicle.character_id == character_id && 1 || 0
