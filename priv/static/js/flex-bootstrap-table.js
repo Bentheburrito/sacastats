@@ -1,6 +1,7 @@
 import { addFormatsToPage, addAnimationToProgressBars } from "/js/formats.js";
 import { showHideNextAuraxButton } from "/js/character/weapons-table.js";
 import * as bootstrapTableFilter from "/js/flex-bootstrap-table-filter.js";
+import * as bootstrapSelection from "/js/flex-bootstrap-table-selection.js";
 
 let table;
 
@@ -9,6 +10,7 @@ export function setupFlexTables() {
 
     document.querySelectorAll('.table-responsive-stack').forEach(table => {
         bootstrapTableFilter.init(table.id);
+        bootstrapSelection.init(table.id);
     });
 
     function init() {

@@ -147,16 +147,7 @@ tbody tr.selection > td:first-child {
 
 .selection{
     position: relative;
-}
-.selection:after {
-  width: 100%;
-  height: 100%;
-  content: '';
-  outline: gold 2px solid!important;
-  outline-offset: -2px;
-  position: absolute;
-  top: 0;
-  left: 0;
+    border: gold 2px solid!important;
 }
 
 .flash-border{
@@ -187,15 +178,23 @@ tbody tr.selection > td:first-child {
     font-size: small;
     padding-left: 80px;
 }
-#copyWeaponLink:hover,
-#copyWeaponLink:hover .context-menu-help{
+#weaponTable-copy-link:hover,
+#weaponTable-copy-link:hover .context-menu-help{
     color: white;
     background-color: #9B84EE;
     cursor: pointer;
 }
 
+#weaponTable{
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none; 
+}
+
 @media only screen and (max-width: 767px) { /*for boostrap xs*/
-    #copyWeaponLink{
+    #weaponTable-copy-link{
         padding: 0;
         padding-left: 10px!important;
     }
@@ -209,4 +208,38 @@ tbody tr.selection > td:first-child {
     top: 50%;
     left: 50%;
     cursor: default;
+}
+
+tr.selection.main-selected,
+tbody tr.selection.main-selected > td:first-child{
+    background-color: #d9544f54!important;
+}
+
+.fixed-table-body::-webkit-scrollbar {
+    -webkit-appearance: none;
+}
+
+.fixed-table-body::-webkit-scrollbar:vertical {
+    width: 12px;
+}
+
+.fixed-table-body::-webkit-scrollbar:horizontal {
+    height: 12px;
+}
+
+.fixed-table-body::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, .5);
+    border-radius: 10px;
+    border: 2px solid #ffffff;
+    display: block;
+    position: absolute;
+    top: 50%;
+}
+
+.fixed-table-body::-webkit-scrollbar-track {
+    border-radius: 10px;  
+    background-color: #ffffff; 
+    display: block;
+    position: absolute;
+    top: 50%;
 }
