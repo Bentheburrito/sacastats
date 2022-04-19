@@ -93,11 +93,48 @@ function addCustomCopyFunction() {
             newURL.search = newURL.search + "," + [...copyRows][i].id.replaceAll("weapon", "").replaceAll("Row", "");
         }
 
-        //copy the new url to clipboard and reset selection
+        //return the new url
         return newURL;
-    }
+    };
+
+    let customCopyFunction = function () {
+        //create a header line
+        let copyString = document.getElementById("characterName").innerText + "'s Weapon Stats\n\n";
+
+        //initialize variables
+        let headerArray = [...$('#weaponTable').find('thead').first().find('tr').first()[0].children];
+        let index = 0;
+        let copyRows = bootstrapSelection.getSelectedRows();
+
+        //loop through each selected weapon row
+        copyRows.forEach(row => {
+            let dataArray = $(row).find('td');
+
+            //create a weapon subheader
+            copyString = copyString + dataArray[0].innerText.split("\n")[0] + " (" + row.id.replaceAll("weapon", "").replaceAll("Row", "") + "):\n";
+
+            //loop through each coloumn and separate them by commas and property values by colons
+            for (let i = 1; i < dataArray.length; i++) {
+                if (i > 1) {
+                    copyString = copyString + ", ";
+                }
+                copyString = copyString + headerArray[i].innerText + ": " + dataArray[i].innerText;
+            }
+
+            //create new line space between each weapon stat
+            if (index < copyRows.size - 1) {
+                copyString = copyString + "\n\n";
+                index++;
+            }
+
+        });
+
+        //return the copy string
+        return copyString;
+    };
 
     //bootstrapSelection.setCustomCopyFunction(customFunction);
+    bootstrapSelection.setCustomCopyFunction(customCopyFunction);
 }
 
 function initializeButtonEvent() {
