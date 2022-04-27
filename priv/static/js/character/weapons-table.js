@@ -80,21 +80,23 @@ function addCustomCopyFunction() {
 
         //if there is only 1 selection add the weapon name to the search arg
         let copyRows = bootstrapSelection.getSelectedRows();
-        newURL.search = "?search=";
         if (copyRows.size == 1) {
+            newURL.search = "?search=";
             copyRows.forEach(row => {
                 newURL.search = newURL.search + $(row).find("td.weapon").first().find("h5.weaponName").first()[0].innerHTML.replaceAll(" ", "_");
             });
+            newURL.search = newURL.search.replaceAll('%22', '\"') + "&";
+        } else {
+            newURL.search = "?";
         }
-
         //add each selected id to the id arg separated by ','
-        newURL.search = newURL.search + "&id=" + [...copyRows][0].id.replaceAll("weapon", "").replaceAll("Row", "");
+        newURL.search = newURL.search + "id=" + [...copyRows][0].id.replaceAll("weapon", "").replaceAll("Row", "");
         for (let i = 1; i < copyRows.size; i++) {
             newURL.search = newURL.search + "," + [...copyRows][i].id.replaceAll("weapon", "").replaceAll("Row", "");
         }
 
         //return the new url
-        return newURL;
+        return newURL.toString().replaceAll('%22', '\"');
     };
 
     let customCopyFunction = function () {
@@ -133,8 +135,8 @@ function addCustomCopyFunction() {
         return copyString;
     };
 
-    //bootstrapSelection.setCustomCopyFunction(customFunction);
-    bootstrapSelection.setCustomCopyFunction(customCopyFunction);
+    bootstrapSelection.setCustomCopyFunction(customFunction);
+    //bootstrapSelection.setCustomCopyFunction(customCopyFunction);
 }
 
 function initializeButtonEvent() {
