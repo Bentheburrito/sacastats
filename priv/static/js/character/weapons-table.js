@@ -85,7 +85,7 @@ function addCustomCopyFunction() {
             copyRows.forEach(row => {
                 newURL.search = newURL.search + $(row).find("td.weapon").first().find("h5.weaponName").first()[0].innerHTML.replaceAll(" ", "_");
             });
-            newURL.search = newURL.search.replaceAll('%22', '\"') + "&";
+            newURL.search = newURL.search + "&";
         } else {
             newURL.search = "?";
         }
