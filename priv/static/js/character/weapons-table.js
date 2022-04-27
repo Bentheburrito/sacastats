@@ -77,18 +77,18 @@ function addCustomCopyFunction() {
     let customFunction = function () {
         //get the current url
         const newURL = new URL(window.location.href);
+        newURL.search = "?";
 
         //if there is only 1 selection add the weapon name to the search arg
         let copyRows = bootstrapSelection.getSelectedRows();
         if (copyRows.size == 1) {
-            newURL.search = "?search=";
+            newURL.search = newURL.search + "search=";
             copyRows.forEach(row => {
                 newURL.search = newURL.search + $(row).find("td.weapon").first().find("h5.weaponName").first()[0].innerHTML.replaceAll(" ", "_");
             });
             newURL.search = newURL.search + "&";
-        } else {
-            newURL.search = "?";
         }
+
         //add each selected id to the id arg separated by ','
         newURL.search = newURL.search + "id=" + [...copyRows][0].id.replaceAll("weapon", "").replaceAll("Row", "");
         for (let i = 1; i < copyRows.size; i++) {
