@@ -80,19 +80,18 @@ function addCustomCopyFunction() {
         newURL.search = "?";
 
         //if there is only 1 selection add the weapon name to the search arg
-        let copyRows = bootstrapSelection.getSelectedRows();
-        if (copyRows.size == 1) {
+        let copyRows = [...bootstrapSelection.getSelectedRows()];
+        let firstCopyElement = copyRows[0];
+        if (copyRows.length == 1) {
             newURL.search = newURL.search + "search=";
-            copyRows.forEach(row => {
-                newURL.search = newURL.search + $(row).find("td.weapon").first().find("h5.weaponName").first()[0].innerHTML.replaceAll(" ", "_");
-            });
+            newURL.search = newURL.search + $(firstCopyElement).find("td.weapon").first().find("h5.weaponName").first()[0].innerHTML.replaceAll(" ", "_");
             newURL.search = newURL.search + "&";
         }
 
         //add each selected id to the id arg separated by ','
-        newURL.search = newURL.search + "id=" + [...copyRows][0].id.replaceAll("weapon", "").replaceAll("Row", "");
-        for (let i = 1; i < copyRows.size; i++) {
-            newURL.search = newURL.search + "," + [...copyRows][i].id.replaceAll("weapon", "").replaceAll("Row", "");
+        newURL.search = newURL.search + "id=" + firstCopyElement.id.replaceAll("weapon", "").replaceAll("Row", "");
+        for (let i = 1; i < copyRows.length; i++) {
+            newURL.search = newURL.search + "," + copyRows[i].id.replaceAll("weapon", "").replaceAll("Row", "");
         }
 
         //return the new url
