@@ -1,0 +1,51 @@
+tbody tr.selection, 
+tbody tr.selection > td:first-child {
+    background-color: #dddddd!important;
+}
+
+.selection{
+    position: relative;
+    border: gold 2px solid!important;
+}
+
+.table{
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none; 
+}
+
+.table-context-menu-help{
+    color: rgb(110, 110, 110);
+    font-size: small;
+    padding-left: 80px;
+}
+#table-copy-link:hover,
+#table-copy-link:hover .context-menu-help{
+    color: white;
+    background-color: #9B84EE;
+    cursor: pointer;
+}
+
+@media only screen and (max-width: 767px) { /*for boostrap xs*/
+    #table-copy-link{
+        padding: 0;
+        padding-left: 10px!important;
+    }
+}
+
+.toast{
+    color: white;
+    background-color: #727272;
+    border-radius: 25px;
+    position:fixed;
+    top: 50%;
+    left: 50%;
+    cursor: default;
+}
+
+tr.selection.main-selected,
+tbody tr.selection.main-selected > td:first-child{
+    background-color: #d9544f54!important;
+}

@@ -1,0 +1,77 @@
+@import "flex-bootstrap-table-filter.css";
+
+.table-responsive-stack .table-responsive-stack-thead {
+    font-weight: bold;
+    min-width: 300px;
+}
+
+@media screen and (max-width: 767px) { /*for boostrap xs*/
+    td:first-child{
+        padding-left: 7.5px;
+    }
+    .table-responsive-stack td, .table-responsive-stack th {
+        display:block;
+        -ms-flex: 1 1 auto;
+        flex: 1 1 auto;
+    }
+    .table-responsive-stack tr {
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        border-bottom: 3px solid #ccc; /*row splitting line info*/
+        display:block;
+    }
+    .table-responsive-stack td {
+        float: left\9;
+        width:100%;
+    }
+}
+
+.bootstrap-table{
+    padding-bottom: 10px;
+}
+
+.dropdown-item:hover,
+input:hover{
+    cursor: pointer;
+}
+
+.dropdown-item{
+    margin-bottom: 0;
+}
+
+.dropdown-menu{
+    background-color: #eeeeee;
+}
+
+@media only screen and (min-width: 768px) { /*for boostrap > xs*/
+    .table th:first-child,
+    .table td:first-child{
+        position: sticky;
+        top: 0;
+        left: 0;
+    }
+    .table th:first-child{
+        background-color: #ffffff;
+    }
+    .table tr:nth-child(odd) td:first-child{
+        background-color: #eeeeee;
+    }
+    .table tr:nth-child(even) td:first-child{
+        background-color: #ffffff;
+    }
+    tbody tr:hover, tbody tr:hover > td:first-child {
+        background-color: #dddddd!important;
+    }
+}
+
+.search-input, .search-input:hover{
+    font-size: medium;
+    cursor: text;
+}
+@media only screen and (max-width: 767px) { /*for boostrap xs*/
+    .search-input{
+        font-size: small;
+    }
+}
