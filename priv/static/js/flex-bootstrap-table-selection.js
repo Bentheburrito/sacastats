@@ -58,7 +58,7 @@ function addRightClickTable() {
         //hide the special menu and initialize variables
         hideContextMenu();
 
-        //make sure it's only weapon rows being clicked
+        //make sure it's only tbody rows being clicked
         let row = $(e.target).closest("tr")[0];
         if (!dragged) {
             if (overARow(row)) {

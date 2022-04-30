@@ -103,7 +103,7 @@ function initializeSearchInput() {
             //get the query object that has the id
             textArray.find(text => {
                 if (text.includes("id=")) {
-                    //get the id and filter the data based on that and the weapon name
+                    //get the id and filter the data based on that and the search key
                     let ids = text.split("=")[1].split(",");
                     filterByIds(ids);
                 }
