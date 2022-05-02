@@ -27,6 +27,7 @@ export function setupFlexTables() {
             addToolBarClick();
             addSearchEnter();
             addPaginationClick();
+            addOnDocumentMouseUp();
             showHideNextAuraxButton();
         });
     }
@@ -129,6 +130,21 @@ export function setupFlexTables() {
     function refreshByScroll() {
         window.scrollBy(0, -1);
         window.scrollBy(0, 1);
+    }
+
+    function documentMouseUpEventHandler() {
+        setTimeout(function () {
+            if (!didTableRecieveStyleUpdate()) {
+                addAnimationToProgressBars();
+                addFormatsToPage();
+                refreshByScroll();
+            }
+        }, 100);
+    }
+
+    function addOnDocumentMouseUp() {
+        $(document).off("mouseup", documentMouseUpEventHandler);
+        $(document).on("mouseup", documentMouseUpEventHandler);
     }
 
     let prevDate = new Date().getTime();
