@@ -47,5 +47,5 @@ tbody tr.selection > td:first-child {
 
 tr.selection.main-selected,
 tbody tr.selection.main-selected > td:first-child{
-    background-color: #d9544f54!important;
+    background-color: #b8b8b8!important;
 }
