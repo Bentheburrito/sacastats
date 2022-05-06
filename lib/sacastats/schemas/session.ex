@@ -71,10 +71,16 @@ defmodule SacaStats.Session do
     # recent than their most recent logout. So we should add a map with a timestamp field that tells us just that.
     logouts =
       cond do
-        is_nil(latest_login) or is_nil(latest_logout) ->
+        # If this character hasn't logged in before, do nothing with logouts
+        is_nil(latest_login) ->
           logouts
-        latest_login.timestamp > latest_logout.timestamp ->
+
+        # If this character has logged in at least once, but has never logged out, they are currently online and this
+        # is their first recorded session. Or, if their latest login > latest logout, they are currently online. Either
+        # way, mark the latest logout as an active session.
+        (not is_nil(latest_login) and is_nil(latest_logout)) or latest_login.timestamp > latest_logout.timestamp ->
           [%{timestamp: :current_session} | logouts]
+
         :else ->
           logouts
       end
@@ -98,13 +104,17 @@ defmodule SacaStats.Session do
     character_id = SacaStats.Utils.maybe_to_int(character_id)
 
     where_clause = [character_id: character_id]
+    attack_where_clause = dynamic([e],
+      field(e, :character_id) == ^character_id or
+      field(e, :attacker_character_id) == ^character_id
+    )
 
     all_br_ups = Repo.all(gen_session_events_query(Events.BattleRankUp, where_clause))
-    all_deaths = Repo.all(gen_session_events_query(Events.Death, where_clause))
+    all_deaths = Repo.all(gen_session_events_query(Events.Death, attack_where_clause))
     all_gain_xp = Repo.all(gen_session_events_query(Events.GainExperience, where_clause))
     all_facility_caps = Repo.all(gen_session_events_query(Events.PlayerFacilityCapture, where_clause))
     all_facility_defs = Repo.all(gen_session_events_query(Events.PlayerFacilityDefend, where_clause))
-    all_vehicle_destroys = Repo.all(gen_session_events_query(Events.VehicleDestroy, where_clause))
+    all_vehicle_destroys = Repo.all(gen_session_events_query(Events.VehicleDestroy, attack_where_clause))
 
     logins = Repo.all(from login in Events.PlayerLogin, where: login.character_id == ^character_id, order_by: [desc: :timestamp])
     logouts = Repo.all(from logout in Events.PlayerLogout, where: logout.character_id == ^character_id, order_by: [desc: :timestamp])
@@ -189,12 +199,26 @@ defmodule SacaStats.Session do
           dynamic([e], field(e, :timestamp) <= ^logout_timestamp and ^where_clause)
       end
 
+    attack_where_clause = dynamic([e],
+      (field(e, :character_id) == ^character_id or
+      field(e, :attacker_character_id) == ^character_id) and
+      field(e, :timestamp) >= ^login_timestamp
+    )
+
+    attack_where_clause =
+      case logout_timestamp do
+        :current_session ->
+          attack_where_clause
+        logout_timestamp ->
+          dynamic([e], field(e, :timestamp) <= ^logout_timestamp and ^attack_where_clause)
+      end
+
     br_ups = Repo.all(gen_session_events_query(Events.BattleRankUp, where_clause))
-    deaths = Repo.all(gen_session_events_query(Events.Death, where_clause))
+    deaths = Repo.all(gen_session_events_query(Events.Death, attack_where_clause))
     gain_xp = Repo.all(gen_session_events_query(Events.GainExperience, where_clause))
     facility_caps = Repo.all(gen_session_events_query(Events.PlayerFacilityCapture, where_clause))
     facility_defs = Repo.all(gen_session_events_query(Events.PlayerFacilityDefend, where_clause))
-    vehicle_destroys = Repo.all(gen_session_events_query(Events.VehicleDestroy, where_clause))
+    vehicle_destroys = Repo.all(gen_session_events_query(Events.VehicleDestroy, attack_where_clause))
 
     aggregations = aggregate(character_id, [deaths, gain_xp, vehicle_destroys])
 
@@ -203,7 +227,7 @@ defmodule SacaStats.Session do
       limit: 1)
     logout =
       if logout_timestamp == :current_session do
-        :current_session
+        %{timestamp: :current_session}
       else
         Repo.one!(from event in Events.PlayerLogout,
           where: event.timestamp == ^logout_timestamp and event.character_id == ^character_id,
@@ -246,7 +270,7 @@ defmodule SacaStats.Session do
 
     {:ok, %QueryResult{data: character_info}} =
       Query.new(collection: "character")
-      |> term(term, character_id_or_name)
+      |> term(term, String.downcase(character_id_or_name))
       |> show(["character_id", "name", "faction_id"])
       |> PS2.API.query_one(SacaStats.sid())
 
