@@ -34,8 +34,8 @@ defmodule SacaStats.Session do
     field :player_facility_captures, Events.PlayerFacilityCaptures.t()
     field :player_facility_defends, Events.PlayerFacilityDefend.t()
     field :vehicle_destroys, Events.VehicleDestroy.t()
-    field :login_timestamp, Events.PlayerLogin.t()
-    field :logout_timestamp, Events.PlayerLogout.t()
+    field :login, Events.PlayerLogin.t()
+    field :logout, Events.PlayerLogout.t()
   end
 
   @default_aggregation %{
@@ -52,23 +52,17 @@ defmodule SacaStats.Session do
     xp_earned: 0,
   }
 
-  def get_all(character_id) do
-    character_info_task = Task.async(fn ->
-      Query.new(collection: "single_character_by_id")
-      |> term("character_id", character_id)
-      |> show(["character_id", "name", "faction_id"])
-      |> PS2.API.query_one(SacaStats.sid())
-    end)
+  @doc """
+  Gets a summary of all a character's sessions. This function is similar to `get_all/1`, except it does not fetch events
+  (besides PlayerLogins and PlayerLogouts), and does not calculate aggregations. Therefore, this function is useful
+  for seeing session durations and start/end times at a glance, when specific session data is not needed yet.
+  """
+  def get_summary(character_id_or_name) do
+    %{"character_id" => character_id} = character_info = get_character_info(character_id_or_name)
+    character_id = SacaStats.Utils.maybe_to_int(character_id)
 
-    all_br_ups = Repo.all(from event in Events.BattleRankUp, where: event.character_id == ^character_id)
-    all_deaths = Repo.all(from event in Events.Death, where: event.character_id == ^character_id)
-    all_gain_xp = Repo.all(from event in Events.GainExperience, where: event.character_id == ^character_id)
-    all_facility_caps = Repo.all(from event in Events.PlayerFacilityCapture, where: event.character_id == ^character_id)
-    all_facility_defs = Repo.all(from event in Events.PlayerFacilityDefend, where: event.character_id == ^character_id)
-    all_vehicle_destroys = Repo.all(from event in Events.VehicleDestroy, where: event.character_id == ^character_id)
-
-    logins = Repo.all(from login in Events.PlayerLogin, where: login.character_id == ^character_id)
-    logouts = Repo.all(from logout in Events.PlayerLogout, where: logout.character_id == ^character_id)
+    logins = Repo.all(from login in Events.PlayerLogin, where: login.character_id == ^character_id, order_by: [desc: :timestamp])
+    logouts = Repo.all(from logout in Events.PlayerLogout, where: logout.character_id == ^character_id, order_by: [desc: :timestamp])
 
     latest_login = List.first(logins)
     latest_logout = List.first(logouts)
@@ -85,7 +79,50 @@ defmodule SacaStats.Session do
           logouts
       end
 
-    {:ok, %QueryResult{data: character_info}} = Task.await(character_info_task)
+    logins
+    |> Stream.zip(logouts)
+    |> Stream.map(fn {login, logout} ->
+      %Session{
+        character_id: character_id,
+        faction_id: SacaStats.Utils.maybe_to_int(character_info["faction_id"]),
+        name: character_info["name"]["first_lower"],
+        login: login,
+        logout: logout,
+      }
+    end)
+    |> Enum.to_list()
+  end
+
+  def get_all(character_id_or_name) do
+    %{"character_id" => character_id} = character_info = get_character_info(character_id_or_name)
+    character_id = SacaStats.Utils.maybe_to_int(character_id)
+
+    where_clause = [character_id: character_id]
+
+    all_br_ups = Repo.all(gen_session_events_query(Events.BattleRankUp, where_clause))
+    all_deaths = Repo.all(gen_session_events_query(Events.Death, where_clause))
+    all_gain_xp = Repo.all(gen_session_events_query(Events.GainExperience, where_clause))
+    all_facility_caps = Repo.all(gen_session_events_query(Events.PlayerFacilityCapture, where_clause))
+    all_facility_defs = Repo.all(gen_session_events_query(Events.PlayerFacilityDefend, where_clause))
+    all_vehicle_destroys = Repo.all(gen_session_events_query(Events.VehicleDestroy, where_clause))
+
+    logins = Repo.all(from login in Events.PlayerLogin, where: login.character_id == ^character_id, order_by: [desc: :timestamp])
+    logouts = Repo.all(from logout in Events.PlayerLogout, where: logout.character_id == ^character_id, order_by: [desc: :timestamp])
+
+    latest_login = List.first(logins)
+    latest_logout = List.first(logouts)
+
+    # If this character is currently online/has a session open, then their most recent login will be more
+    # recent than their most recent logout. So we should add a map with a timestamp field that tells us just that.
+    logouts =
+      cond do
+        is_nil(latest_login) or is_nil(latest_logout) ->
+          logouts
+        latest_login.timestamp > latest_logout.timestamp ->
+          [%{timestamp: :current_session} | logouts]
+        :else ->
+          logouts
+      end
 
     logins
     |> Stream.zip(logouts)
@@ -103,7 +140,7 @@ defmodule SacaStats.Session do
 
       %Session{
         character_id: character_id,
-        faction_id: character_info["faction_id"],
+        faction_id: SacaStats.Utils.maybe_to_int(character_info["faction_id"]),
         name: character_info["name"]["first_lower"],
         kill_count: aggregations.kill_count,
         kill_hs_count: aggregations.kill_hs_count,
@@ -122,17 +159,123 @@ defmodule SacaStats.Session do
         player_facility_captures: facility_caps,
         player_facility_defends: facility_defs,
         vehicle_destroys: vehicle_destroys,
-        login_timestamp: login,
-        logout_timestamp: logout,
+        login: login,
+        logout: logout,
       }
     end)
     |> Enum.to_list()
   end
 
+  def get(character_id_or_name, %Events.PlayerLogin{timestamp: timestamp}) do
+    get(character_id_or_name, timestamp)
+  end
+
+  def get(character_id_or_name, login_timestamp) do
+    %{"character_id" => character_id} = character_info = get_character_info(character_id_or_name)
+    character_id = SacaStats.Utils.maybe_to_int(character_id)
+
+    logout_timestamp = get_logout_timestamp(character_id, login_timestamp)
+
+    where_clause = dynamic([e],
+      field(e, :character_id) == ^character_id and
+      field(e, :timestamp) >= ^login_timestamp
+    )
+
+    where_clause =
+      case logout_timestamp do
+        :current_session ->
+          where_clause
+        logout_timestamp ->
+          dynamic([e], field(e, :timestamp) <= ^logout_timestamp and ^where_clause)
+      end
+
+    br_ups = Repo.all(gen_session_events_query(Events.BattleRankUp, where_clause))
+    deaths = Repo.all(gen_session_events_query(Events.Death, where_clause))
+    gain_xp = Repo.all(gen_session_events_query(Events.GainExperience, where_clause))
+    facility_caps = Repo.all(gen_session_events_query(Events.PlayerFacilityCapture, where_clause))
+    facility_defs = Repo.all(gen_session_events_query(Events.PlayerFacilityDefend, where_clause))
+    vehicle_destroys = Repo.all(gen_session_events_query(Events.VehicleDestroy, where_clause))
+
+    aggregations = aggregate(character_id, [deaths, gain_xp, vehicle_destroys])
+
+    login = Repo.one!(from event in Events.PlayerLogin,
+      where: event.timestamp == ^login_timestamp and event.character_id == ^character_id,
+      limit: 1)
+    logout =
+      if logout_timestamp == :current_session do
+        :current_session
+      else
+        Repo.one!(from event in Events.PlayerLogout,
+          where: event.timestamp == ^logout_timestamp and event.character_id == ^character_id,
+          limit: 1)
+      end
+
+    %Session{
+      character_id: character_id,
+      faction_id: SacaStats.Utils.maybe_to_int(character_info["faction_id"]),
+      name: character_info["name"]["first_lower"],
+      kill_count: aggregations.kill_count,
+      kill_hs_count: aggregations.kill_hs_count,
+      kill_ivi_count: aggregations.kill_ivi_count,
+      kill_hs_ivi_count: aggregations.kill_hs_ivi_count,
+      death_count: aggregations.death_count,
+      death_ivi_count: aggregations.death_ivi_count,
+      vehicle_kill_count: aggregations.vehicle_kill_count,
+      vehicle_death_count: aggregations.vehicle_death_count,
+      nanites_destroyed: aggregations.nanites_destroyed,
+      nanites_lost: aggregations.nanites_lost,
+      xp_earned: aggregations.xp_earned,
+      battle_rank_ups: length(br_ups),
+      deaths: deaths,
+      gain_experiences: gain_xp,
+      player_facility_captures: facility_caps,
+      player_facility_defends: facility_defs,
+      vehicle_destroys: vehicle_destroys,
+      login: login,
+      logout: logout,
+    }
+  end
+
+  defp get_character_info(character_id_or_name) do
+    term =
+      if is_binary(character_id_or_name) do
+        "name.first_lower"
+      else
+        "character_id"
+      end
+
+    {:ok, %QueryResult{data: character_info}} =
+      Query.new(collection: "character")
+      |> term(term, character_id_or_name)
+      |> show(["character_id", "name", "faction_id"])
+      |> PS2.API.query_one(SacaStats.sid())
+
+    character_info
+  end
+
+  defp get_logout_timestamp(character_id, login_timestamp) do
+    query = from event in Events.PlayerLogout,
+      select: min(event.timestamp),
+      where: event.character_id == ^character_id and event.timestamp > ^login_timestamp
+
+    case Repo.one(query) do
+      nil -> :current_session
+      logout_timestamp -> logout_timestamp
+    end
+  end
+
+  defp gen_session_events_query(event_module, conditional) do
+    from event in event_module, where: ^conditional
+  end
+
   defp aggregate(character_id, event_lists) do
-    event_lists
-    |> Stream.map(fn events -> Enum.reduce(events, @default_aggregation, &event_reducer(character_id, &1, &2)) end)
-    |> Enum.reduce(&Map.merge/2)
+    # event_lists
+    # |> Stream.map(fn events -> Enum.reduce(events, @default_aggregation, &event_reducer(character_id, &1, &2)) end)
+    # |> Enum.reduce(&Map.merge/2)
+
+    Enum.reduce(event_lists, @default_aggregation, fn event_list, aggregates ->
+      Enum.reduce(event_list, aggregates, &event_reducer(character_id, &1, &2))
+    end)
   end
 
   defp event_reducer(character_id, %Events.Death{} = death, acc) do

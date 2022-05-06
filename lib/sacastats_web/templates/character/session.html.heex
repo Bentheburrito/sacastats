@@ -1,4 +1,26 @@
 <h2><%= @session.name %></h2>
-<h4>Kills: <%= @session.kills %></h4>
-<h4>Deaths: <%= @session.deaths %></h4>
-<h4>KDR: <%= @session.kills / (@session.deaths == 0 && 1 || @session.deaths) %></h4>
+<%= link "<- Back to Sessions", to: Routes.character_path(@conn, :character_sessions, @session.name) %>
+
+<div class="poll-item">
+  Session Summary
+  <ul>
+    <li>Kills: <%= @session.kill_count %></li>
+    <li>Deaths: <%= @session.death_count %></li>
+    <li>KDR: <%= Float.round(@session.kill_count / (@session.death_count == 0 && 1 || @session.death_count), 2) %></li>
+  </ul>
+</div>
+
+<div class="poll-item">
+  Event Log
+  <ul>
+    <%= for %SacaStats.Events.Death{} = death <- @session.deaths do %>
+      <li>
+        <%= death.attacker_character_id %> killed <%= death.character_id %>
+        with <%= SacaStats.weapons()[death.attacker_weapon_id]["name"] %> (<%= death.attacker_weapon_id %>)
+        <%= death.is_headshot && "(headshot)" || "" %>
+        -
+        <%= SacaStatsWeb.CharacterView.prettify_timestamp(death.timestamp) %>
+      </li>
+    <% end %>
+  </ul>
+</div>

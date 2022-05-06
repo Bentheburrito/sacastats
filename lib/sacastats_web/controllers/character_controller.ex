@@ -171,17 +171,14 @@ defmodule SacaStatsWeb.CharacterController do
     render(conn, "template.html", character: character)
   end
 
-  def character_session(conn, %{"character_name" => name, "stat_type" => "session"}) do
-    # case CAIData.API.get_session_by_name(name) do
-    #   {:ok, session} ->
-    #     character_stuff = %{"name" => name, "stat_page" => "session.html"}
-    #     render(conn, "characterTemplate.html", character: character_stuff, session: session)
+  def character_sessions(conn, %{"character_name" => name}) do
+    sessions = SacaStats.Session.get_summary(name)
+    render(conn, "sessions.html", sessions: sessions, character_name: name)
+  end
 
-    #   :none ->
-    #     conn
-    #     |> put_flash(:error, "No session under a character with that name.")
-    #     |> render("index.html")
-    # end
+  def character_session(conn, %{"character_name" => name, "login_timestamp" => login_timestamp}) do
+    session = SacaStats.Session.get(name, login_timestamp)
+    render(conn, "session.html", session: session)
   end
 
   def character_general(conn, %{"character_name" => _name}) do
