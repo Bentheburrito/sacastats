@@ -9,6 +9,7 @@ let upDown = false; //up is true down is false
 let mainSelectionClass = "main-selected";
 let selectionClass = "selection";
 let customCopyFunction;
+let secondCustomCopyFunction;
 
 //selection helper lists
 let rowArray;
@@ -17,6 +18,7 @@ let copyRows = new Set();
 //ids
 let tableID;
 let copyLinkID;
+let copyTextID;
 let contextMenuID;
 let copyToastID;
 
@@ -97,9 +99,8 @@ function addRightClickTable() {
         }
     });
 
-    //add event listner for copy click
-    $(copyLinkID).on('click', function () {
-        $(copyToastID).toast('show');
+    //add page down events
+    $(document).on("mousedown", function () {
         hideContextMenu();
     });
 
@@ -108,16 +109,33 @@ function addRightClickTable() {
         //if the click is not in the table remove selections and hide the special menu
         if ($(e.target).closest("table")[0] == undefined && !dragged) {
             resetCopyRowSelection(e);
-            hideContextMenu();
         }
     });
 
     //add page key events
     $(document).on("keyup", function (e) {
-        //if the user presses ctrl-C with something selected copy selected rows
-        if (e.key === 'c' && e.ctrlKey && copyRows.size > 0) {
-            copySelectedRows();
-            $(copyToastID).toast('show');
+        //make sure the key combo is valid
+        if (copyRows.size <= 0 || (e.key !== 'c' && e.key !== 'x')) {
+            return;
+        }
+
+        //all combos must have ctrlkey
+        if (e.ctrlKey) {
+            //get the target.id
+            let saveTargetID = JSON.parse(JSON.stringify(e.target.id));
+
+            //set it to simulate a certain click
+            if (e.key === 'x') {
+                e.target.id = copyTextID.substring(1);
+            } else {
+                e.target.id = copyLinkID.substring(1);
+            }
+
+            //copy the rows and show the toast
+            copySelectedRows(e);
+
+            //reset the target.id
+            e.target.id = saveTargetID;
         }
     });
 
@@ -152,13 +170,39 @@ function hideContextMenu() {
 }
 
 function addCopyClick() {
-    $(copyLinkID).on('click', copySelectedRows);
+    //add event listner for copy click
+    $(copyLinkID).on('mousedown', function (e) {
+        //get the target.id
+        let saveTargetID = JSON.parse(JSON.stringify(e.target.id));
+
+        //set it to be the right id
+        e.target.id = copyLinkID.substring(1);
+
+        //copy the rows and show the toast
+        copySelectedRows(e);
+
+        //reset the target.id
+        e.target.id = saveTargetID;
+    });
+    $(copyTextID).on('mousedown', function (e) {
+        //get the target.id
+        let saveTargetID = JSON.parse(JSON.stringify(e.target.id));
+
+        //set it to be the right id
+        e.target.id = copyTextID.substring(1);
+
+        //copy the rows and show the toast
+        copySelectedRows(e);
+
+        //reset the target.id
+        e.target.id = saveTargetID;
+    });
 }
 
 function addTableMove() {
     $(tableID).on('mousedown', function (e) {
         let row = $(e.target).closest("tr")[0];
-        if (overARow(row)) {
+        if (overARow(row) && ((!row.classList.contains(selectionClass) && e.which == 3) || e.which != 3)) {
             $(tableID).off('mousemove', tableMouseMoveEventHandler);
             $(tableID).on('mousemove', tableMouseMoveEventHandler);
         }
@@ -382,9 +426,15 @@ function overARow(row) {
 }
 
 function copySelectedRows(e) {
+    $(copyToastID).toast('show');
+    hideContextMenu();
     let copyString = "";
-    if (customCopyFunction != undefined) {
-        copyString = customCopyFunction();
+    if (customCopyFunction != undefined || secondCustomCopyFunction != undefined) {
+        if (e.target.id == copyLinkID.substring(1)) {
+            copyString = customCopyFunction();
+        } else {
+            copyString = secondCustomCopyFunction();
+        }
     } else {
         let headerArray = [...$(tableID).find('thead').first().find('tr').first()[0].children];
         let index = 0;
@@ -415,11 +465,16 @@ export function setCustomCopyFunction(customFunction) {
     customCopyFunction = customFunction;
 }
 
+export function setSecondCustomCopyFunction(customFunction) {
+    secondCustomCopyFunction = customFunction;
+}
+
 export function init(id) {
     tableID = '#' + id;
-    copyLinkID = tableID + "-copy-link";
-    contextMenuID = tableID + "-context-menu";
-    copyToastID = tableID + "-copy-toast";
+    copyLinkID = "#table-copy-link-row";
+    copyTextID = "#table-copy-text-row";
+    contextMenuID = "#table-context-menu";
+    copyToastID = "#table-copy-toast";
     rowArray = [...$(tableID).find("tbody").first()[0].children];
 
     addRightClickTable();

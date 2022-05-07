@@ -1,10 +1,26 @@
 <link rel="stylesheet" href={Routes.static_path(@conn, "/css/character/weapons.css")}/>
 
 
-<div class="dropdown-menu dropdown-menu-sm pb-0" id="weaponTable-context-menu">
-    <h5 class="px-5 d-inline text-sm-center" id="weaponTable-copy-link">Copy weapon stat link<p class="d-none d-md-inline context-menu-help">Ctrl-C</p></h5>
+<div class="dropdown-menu dropdown-menu-sm pb-0" id="table-context-menu">
+    <div class="row context-menu-row" id="table-copy-link-row">
+        <div class="col-8">
+            <h5 class="d-block text-center text-md-left" id="table-copy-link">Copy weapon stat link</h5>
+        </div>
+        <div class="col-4 text-right">
+            <p class="d-none d-md-inline context-menu-help">Ctrl-C</p>
+        </div>
+    </div>
+
+    <div class="row context-menu-row" id="table-copy-text-row">
+        <div class="col-8">
+            <h5 class="d-block text-center text-md-left" id="table-copy-text">Copy stat text</h5>
+        </div>
+        <div class="col-4 text-right">
+            <p class="d-none d-md-inline context-menu-help">Ctrl-Shift-C</p>
+        </div>
+    </div>
 </div>
-<div id="weaponTable-copy-toast" class="dropdown-menu dropdown-menu-sm pb-0 toast" data-delay="600">
+<div id="table-copy-toast" class="dropdown-menu dropdown-menu-sm pb-0 toast" data-delay="600">
     <div class="toast-body text-center">
         <h5 class="p-3">Copied!</h5>
     </div>

@@ -135,7 +135,7 @@ function addCustomCopyFunction() {
     };
 
     bootstrapSelection.setCustomCopyFunction(customFunction);
-    //bootstrapSelection.setCustomCopyFunction(customCopyFunction);
+    bootstrapSelection.setSecondCustomCopyFunction(customCopyFunction);
 }
 
 function initializeButtonEvent() {
