@@ -91,7 +91,7 @@ defmodule SacaStats.Session do
       %Session{
         character_id: character_id,
         faction_id: SacaStats.Utils.maybe_to_int(character_info["faction_id"]),
-        name: character_info["name"]["first_lower"],
+        name: character_info["name"]["first"],
         login: login,
         logout: logout,
       }
@@ -151,7 +151,7 @@ defmodule SacaStats.Session do
       %Session{
         character_id: character_id,
         faction_id: SacaStats.Utils.maybe_to_int(character_info["faction_id"]),
-        name: character_info["name"]["first_lower"],
+        name: character_info["name"]["first"],
         kill_count: aggregations.kill_count,
         kill_hs_count: aggregations.kill_hs_count,
         kill_ivi_count: aggregations.kill_ivi_count,
@@ -163,7 +163,7 @@ defmodule SacaStats.Session do
         nanites_destroyed: aggregations.nanites_destroyed,
         nanites_lost: aggregations.nanites_lost,
         xp_earned: aggregations.xp_earned,
-        battle_rank_ups: length(br_ups),
+        battle_rank_ups: br_ups,
         deaths: deaths,
         gain_experiences: gain_xp,
         player_facility_captures: facility_caps,
@@ -237,7 +237,7 @@ defmodule SacaStats.Session do
     %Session{
       character_id: character_id,
       faction_id: SacaStats.Utils.maybe_to_int(character_info["faction_id"]),
-      name: character_info["name"]["first_lower"],
+      name: character_info["name"]["first"],
       kill_count: aggregations.kill_count,
       kill_hs_count: aggregations.kill_hs_count,
       kill_ivi_count: aggregations.kill_ivi_count,
@@ -249,7 +249,7 @@ defmodule SacaStats.Session do
       nanites_destroyed: aggregations.nanites_destroyed,
       nanites_lost: aggregations.nanites_lost,
       xp_earned: aggregations.xp_earned,
-      battle_rank_ups: length(br_ups),
+      battle_rank_ups: br_ups,
       deaths: deaths,
       gain_experiences: gain_xp,
       player_facility_captures: facility_caps,

@@ -16,6 +16,16 @@ defmodule SacaStats.Utils do
     end
   end
 
+  def safe_divide(numerator, denominator, to_round \\ :no_rounding)
+
+  def safe_divide(numerator, denominator, :no_rounding) do
+    numerator / (denominator == 0 && 1 || denominator)
+  end
+
+  def safe_divide(numerator, denominator, to_round) do
+    Float.round(safe_divide(numerator, denominator), to_round)
+  end
+
   # via https://dorgan.netlify.app/posts/2021/04/the_elixir_ast_typedstruct/
   defmacro typedstruct(do: ast) do
     fields_ast =

@@ -1,4 +1,5 @@
 <h2><%= @session.name %></h2>
+<h3><%= @session.character_id %></h3>
 <%= link "<- Back to Sessions", to: Routes.character_path(@conn, :character_sessions, @session.name) %>
 
 <div class="poll-item">
@@ -6,21 +7,43 @@
   <ul>
     <li>Kills: <%= @session.kill_count %></li>
     <li>Deaths: <%= @session.death_count %></li>
-    <li>KDR: <%= Float.round(@session.kill_count / (@session.death_count == 0 && 1 || @session.death_count), 2) %></li>
+    <li>KDR: <%= SacaStats.Utils.safe_divide(@session.kill_count, @session.death_count, 2) %></li>
+    <li>Headshot Kills: <%= @session.kill_hs_count %></li>
+    <li>Time Played: 
+      <%= SacaStatsWeb.CharacterView.prettify_duration(@session.login.timestamp, @session.logout.timestamp) %>
+    </li>
+    <li>XP Earned: <%= @session.xp_earned %></li>
+    <li>Battle Ranks Earned: 
+      <%= length(@session.battle_rank_ups) > 0 && Enum.join(@session.battle_rank_ups, ", ") || "None"%>
+    </li>
+    <li>Facilities Captured: <%= length(@session.player_facility_captures) %></li>
+    <li>Facilities Defended: <%= length(@session.player_facility_defends) %></li>
+  </ul>
+</div>
+
+<div class="poll-item">
+  Vehicle Stats
+  <ul>
+    <li>Kills: <%= @session.vehicle_kill_count %></li>
+    <li>Deaths: <%= @session.vehicle_death_count %></li>
+    <li>KDR: <%= SacaStats.Utils.safe_divide(@session.vehicle_kill_count, @session.vehicle_death_count, 2) %></li>
+    <li>Kills in Nanites: <%= @session.nanites_destroyed %></li>
+    <li>Deaths in Nanites: <%= @session.nanites_lost %></li>
+    <li>Nanite Efficiency: <%= SacaStats.Utils.safe_divide(@session.nanites_destroyed, @session.nanites_lost, 2) %></li>
+  </ul>
+</div>
+
+<div class="poll-item">
+  Infantry vs. Infantry (IvI) Stats
+  <ul>
+    <li>Kills: <%= @session.kill_ivi_count %></li>
+    <li>Deaths: <%= @session.death_ivi_count %></li>
+    <li>KDR: <%= SacaStats.Utils.safe_divide(@session.kill_ivi_count, @session.death_ivi_count, 2) %></li>
+    <li>Headshot Kills: <%= @session.kill_hs_ivi_count %></li>
   </ul>
 </div>
 
 <div class="poll-item">
   Event Log
-  <ul>
-    <%= for %SacaStats.Events.Death{} = death <- @session.deaths do %>
-      <li>
-        <%= death.attacker_character_id %> killed <%= death.character_id %>
-        with <%= SacaStats.weapons()[death.attacker_weapon_id]["name"] %> (<%= death.attacker_weapon_id %>)
-        <%= death.is_headshot && "(headshot)" || "" %>
-        -
-        <%= SacaStatsWeb.CharacterView.prettify_timestamp(death.timestamp) %>
-      </li>
-    <% end %>
-  </ul>
+  <%= SacaStatsWeb.CharacterView.build_event_log(assigns, @session) %>
 </div>
