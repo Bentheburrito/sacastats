@@ -10,11 +10,10 @@ defmodule SacaStats.Events do
     Code.ensure_loaded(module)
 
     with true <- function_exported?(module, :changeset, 2),
-         %Changeset{valid?: true} = changeset <- module.changeset(struct(module), payload) do
-      {:ok, Changeset.apply_changes(changeset)}
+         %Changeset{} = changeset <- module.changeset(struct(module), payload) do
+      {:ok, changeset}
     else
       false -> {:error, :unknown_event}
-      %Changeset{valid?: false} -> {:error, :bad_payload}
     end
   rescue
     ArgumentError -> {:error, :module_no_exist}

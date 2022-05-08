@@ -24,5 +24,6 @@ defmodule SacaStats.Events.BattleRankUp do
 
     event
     |> cast(params, field_list)
+    |> unique_constraint([:character_id, :timestamp, :battle_rank], name: "battle_rank_ups_pkey")
   end
 end

@@ -30,5 +30,6 @@ defmodule SacaStats.Events.Death do
 
     event
     |> cast(params, field_list)
+    |> unique_constraint([:character_id, :timestamp, :attacker_character_id], name: "deaths_pkey")
   end
 end

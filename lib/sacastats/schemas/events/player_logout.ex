@@ -22,5 +22,6 @@ defmodule SacaStats.Events.PlayerLogout do
 
     event
     |> cast(params, field_list)
+    |> unique_constraint([:character_id, :timestamp], name: "player_logouts_pkey")
   end
 end

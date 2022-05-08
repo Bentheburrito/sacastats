@@ -25,5 +25,6 @@ defmodule SacaStats.Events.PlayerFacilityCapture do
 
     event
     |> cast(params, field_list)
+    |> unique_constraint([:character_id, :timestamp], name: "player_facility_captures_pkey")
   end
 end

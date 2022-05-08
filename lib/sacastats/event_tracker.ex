@@ -12,10 +12,13 @@ defmodule SacaStats.EventTracker do
 
   @impl PS2.SocketClient
   def handle_event({event_name, payload}) do
-    {:ok, event} = Events.cast_event(event_name, payload)
+    {:ok, event_changeset} = Events.cast_event(event_name, payload)
 
-    PubSub.broadcast(SacaStats.PubSub, event_name, event)
-    Repo.insert!(event)
+    PubSub.broadcast(SacaStats.PubSub, event_name, event_changeset)
+    case Repo.insert(event_changeset) do
+      {:ok, _} -> nil
+      {:error, _} -> Logger.info("Discarded duplicate event for #{event_name}")
+    end
   end
 
   # Catch-all callback.
