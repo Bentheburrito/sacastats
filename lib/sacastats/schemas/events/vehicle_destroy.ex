@@ -6,17 +6,17 @@ defmodule SacaStats.Events.VehicleDestroy do
 
   import Ecto.Changeset
 
-  @primary_key {:id, :id, autogenerate: true}
+  @primary_key false
 
   schema "vehicle_destroys" do
-    field :attacker_character_id, :integer
+    field :character_id, :integer, primary_key: true
+    field :timestamp, :integer, primary_key: true
+    field :attacker_character_id, :integer, primary_key: true
     field :attacker_loadout_id, :integer
     field :attacker_vehicle_id, :integer
     field :attacker_weapon_id, :integer
-    field :character_id, :integer
     field :facility_id, :integer
     field :faction_id, :integer
-    field :timestamp, :integer
     field :vehicle_id, :integer
     field :world_id, :integer
     field :zone_id, :integer

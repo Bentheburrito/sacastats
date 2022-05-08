@@ -6,11 +6,11 @@ defmodule SacaStats.Events.PlayerLogin do
 
   import Ecto.Changeset
 
-  @primary_key {:id, :id, autogenerate: true}
+  @primary_key false
 
   schema "player_logins" do
-    field :character_id, :integer
-    field :timestamp, :integer
+    field :character_id, :integer, primary_key: true
+    field :timestamp, :integer, primary_key: true
     field :world_id, :integer
   end
 
