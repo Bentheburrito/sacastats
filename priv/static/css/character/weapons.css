@@ -42,3 +42,26 @@ hr{
   top: 0;
   left: 0;
 }
+
+.w-33{
+    width:33.3333%
+}
+.menu-item{
+    padding-left: 20px;
+}
+.selection-mobile-menu-top,
+.selection-mobile-menu-bottom{
+    position: fixed;
+    left: 0;
+    z-index: 1021;
+    height: 50px;
+    width: 100%;
+    background-color: rgba(34, 34, 34, .9);
+    color: rgb(218, 218, 218);
+}
+.selection-mobile-menu-top{
+    top: 0;
+}
+.selection-mobile-menu-bottom{
+    bottom: 170px;
+}

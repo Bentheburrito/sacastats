@@ -1,5 +1,49 @@
 <link rel="stylesheet" href={Routes.static_path(@conn, "/css/character/weapons.css")}/>
 
+<div class="d-none selection-mobile-menu-top selection-mobile-menu">
+    <div class="d-flex h-100 justify-content-between">
+        <div class="w-50 align-self-center">
+            <label class="menu-item h-100">
+                <div class="">
+                    <input class="form-check-input" type="checkbox" name="" id="selectall-faction-filter-option">
+                    <span class="pl-2">
+                        Select All
+                    </span>
+                </div>
+            </label>
+        </div> 
+        <div class="w-50 align-self-center">
+            <label class="h-100 text-right">
+                1 Selected
+            </label>
+        </div> 
+    </div>
+</div>
+<div class="d-none selection-mobile-menu-bottom selection-mobile-menu">
+    <div class="d-flex h-100 justify-content-center">
+        <div class="w-33 align-self-center">
+            <label class="">
+                <div class="h-100 text-center">
+                    Copy Link
+                </div>
+            </label>
+        </div> 
+        <div class="w-33 align-self-center">
+            <label class="">
+                <div class="h-100 text-center">
+                    Copy Text
+                </div>
+            </label>
+        </div> 
+        <div class="w-33 align-self-center">
+            <label class="">
+                <div class="h-100 text-center">
+                    Back
+                </div>
+            </label>
+        </div> 
+    </div>
+</div>
 
 <div class="dropdown-menu dropdown-menu-sm pb-0" id="table-context-menu">
     <div class="row context-menu-row" id="table-copy-link-row">
