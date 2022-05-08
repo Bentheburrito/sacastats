@@ -8,8 +8,8 @@ defmodule SacaStats.Session do
 
   import Ecto.Query
   import PS2.API.QueryBuilder
-  alias PS2.API.{QueryResult, Query}
-  import SacaStats.Utils, only: [typedstruct: 1]
+  alias PS2.API.{Query, QueryResult}
+  import SacaStats.Utils, only: [typedstruct: 1, bool_to_int: 1]
 
   typedstruct do
     field :character_id, integer(), required?: true
@@ -49,7 +49,7 @@ defmodule SacaStats.Session do
     vehicle_death_count: 0,
     nanites_destroyed: 0,
     nanites_lost: 0,
-    xp_earned: 0,
+    xp_earned: 0
   }
 
   @doc """
@@ -61,8 +61,19 @@ defmodule SacaStats.Session do
     %{"character_id" => character_id} = character_info = get_character_info(character_id_or_name)
     character_id = SacaStats.Utils.maybe_to_int(character_id)
 
-    logins = Repo.all(from login in Events.PlayerLogin, where: login.character_id == ^character_id, order_by: [desc: :timestamp])
-    logouts = Repo.all(from logout in Events.PlayerLogout, where: logout.character_id == ^character_id, order_by: [desc: :timestamp])
+    logins =
+      Repo.all(
+        from login in Events.PlayerLogin,
+          where: login.character_id == ^character_id,
+          order_by: [desc: :timestamp]
+      )
+
+    logouts =
+      Repo.all(
+        from logout in Events.PlayerLogout,
+          where: logout.character_id == ^character_id,
+          order_by: [desc: :timestamp]
+      )
 
     latest_login = List.first(logins)
     latest_logout = List.first(logouts)
@@ -78,7 +89,8 @@ defmodule SacaStats.Session do
         # If this character has logged in at least once, but has never logged out, they are currently online and this
         # is their first recorded session. Or, if their latest login > latest logout, they are currently online. Either
         # way, mark the latest logout as an active session.
-        (not is_nil(latest_login) and is_nil(latest_logout)) or latest_login.timestamp > latest_logout.timestamp ->
+        (not is_nil(latest_login) and is_nil(latest_logout)) or
+            latest_login.timestamp > latest_logout.timestamp ->
           [%{timestamp: :current_session} | logouts]
 
         :else ->
@@ -93,7 +105,7 @@ defmodule SacaStats.Session do
         faction_id: SacaStats.Utils.maybe_to_int(character_info["faction_id"]),
         name: character_info["name"]["first"],
         login: login,
-        logout: logout,
+        logout: logout
       }
     end)
     |> Enum.to_list()
@@ -104,20 +116,40 @@ defmodule SacaStats.Session do
     character_id = SacaStats.Utils.maybe_to_int(character_id)
 
     where_clause = [character_id: character_id]
-    attack_where_clause = dynamic([e],
-      field(e, :character_id) == ^character_id or
-      field(e, :attacker_character_id) == ^character_id
-    )
+
+    attack_where_clause =
+      dynamic(
+        [e],
+        field(e, :character_id) == ^character_id or
+          field(e, :attacker_character_id) == ^character_id
+      )
 
     all_br_ups = Repo.all(gen_session_events_query(Events.BattleRankUp, where_clause))
     all_deaths = Repo.all(gen_session_events_query(Events.Death, attack_where_clause))
     all_gain_xp = Repo.all(gen_session_events_query(Events.GainExperience, where_clause))
-    all_facility_caps = Repo.all(gen_session_events_query(Events.PlayerFacilityCapture, where_clause))
-    all_facility_defs = Repo.all(gen_session_events_query(Events.PlayerFacilityDefend, where_clause))
-    all_vehicle_destroys = Repo.all(gen_session_events_query(Events.VehicleDestroy, attack_where_clause))
 
-    logins = Repo.all(from login in Events.PlayerLogin, where: login.character_id == ^character_id, order_by: [desc: :timestamp])
-    logouts = Repo.all(from logout in Events.PlayerLogout, where: logout.character_id == ^character_id, order_by: [desc: :timestamp])
+    all_facility_caps =
+      Repo.all(gen_session_events_query(Events.PlayerFacilityCapture, where_clause))
+
+    all_facility_defs =
+      Repo.all(gen_session_events_query(Events.PlayerFacilityDefend, where_clause))
+
+    all_vehicle_destroys =
+      Repo.all(gen_session_events_query(Events.VehicleDestroy, attack_where_clause))
+
+    logins =
+      Repo.all(
+        from login in Events.PlayerLogin,
+          where: login.character_id == ^character_id,
+          order_by: [desc: :timestamp]
+      )
+
+    logouts =
+      Repo.all(
+        from logout in Events.PlayerLogout,
+          where: logout.character_id == ^character_id,
+          order_by: [desc: :timestamp]
+      )
 
     latest_login = List.first(logins)
     latest_logout = List.first(logouts)
@@ -128,8 +160,10 @@ defmodule SacaStats.Session do
       cond do
         is_nil(latest_login) or is_nil(latest_logout) ->
           logouts
+
         latest_login.timestamp > latest_logout.timestamp ->
           [%{timestamp: :current_session} | logouts]
+
         :else ->
           logouts
       end
@@ -170,7 +204,7 @@ defmodule SacaStats.Session do
         player_facility_defends: facility_defs,
         vehicle_destroys: vehicle_destroys,
         login: login,
-        logout: logout,
+        logout: logout
       }
     end)
     |> Enum.to_list()
@@ -186,52 +220,52 @@ defmodule SacaStats.Session do
 
     logout_timestamp = get_logout_timestamp(character_id, login_timestamp)
 
-    where_clause = dynamic([e],
-      field(e, :character_id) == ^character_id and
-      field(e, :timestamp) >= ^login_timestamp
-    )
-
     where_clause =
-      case logout_timestamp do
-        :current_session ->
-          where_clause
-        logout_timestamp ->
-          dynamic([e], field(e, :timestamp) <= ^logout_timestamp and ^where_clause)
-      end
+      dynamic(
+        [e],
+        field(e, :character_id) == ^character_id and
+          field(e, :timestamp) >= ^login_timestamp
+      )
 
-    attack_where_clause = dynamic([e],
-      (field(e, :character_id) == ^character_id or
-      field(e, :attacker_character_id) == ^character_id) and
-      field(e, :timestamp) >= ^login_timestamp
-    )
+    where_clause = build_where_clause(where_clause, logout_timestamp)
 
     attack_where_clause =
-      case logout_timestamp do
-        :current_session ->
-          attack_where_clause
-        logout_timestamp ->
-          dynamic([e], field(e, :timestamp) <= ^logout_timestamp and ^attack_where_clause)
-      end
+      dynamic(
+        [e],
+        (field(e, :character_id) == ^character_id or
+           field(e, :attacker_character_id) == ^character_id) and
+          field(e, :timestamp) >= ^login_timestamp
+      )
+
+    attack_where_clause = build_where_clause(attack_where_clause, logout_timestamp)
 
     br_ups = Repo.all(gen_session_events_query(Events.BattleRankUp, where_clause))
     deaths = Repo.all(gen_session_events_query(Events.Death, attack_where_clause))
     gain_xp = Repo.all(gen_session_events_query(Events.GainExperience, where_clause))
     facility_caps = Repo.all(gen_session_events_query(Events.PlayerFacilityCapture, where_clause))
     facility_defs = Repo.all(gen_session_events_query(Events.PlayerFacilityDefend, where_clause))
-    vehicle_destroys = Repo.all(gen_session_events_query(Events.VehicleDestroy, attack_where_clause))
+
+    vehicle_destroys =
+      Repo.all(gen_session_events_query(Events.VehicleDestroy, attack_where_clause))
 
     aggregations = aggregate(character_id, [deaths, gain_xp, vehicle_destroys])
 
-    login = Repo.one!(from event in Events.PlayerLogin,
-      where: event.timestamp == ^login_timestamp and event.character_id == ^character_id,
-      limit: 1)
+    login =
+      Repo.one!(
+        from event in Events.PlayerLogin,
+          where: event.timestamp == ^login_timestamp and event.character_id == ^character_id,
+          limit: 1
+      )
+
     logout =
       if logout_timestamp == :current_session do
         %{timestamp: :current_session}
       else
-        Repo.one!(from event in Events.PlayerLogout,
-          where: event.timestamp == ^logout_timestamp and event.character_id == ^character_id,
-          limit: 1)
+        Repo.one!(
+          from event in Events.PlayerLogout,
+            where: event.timestamp == ^logout_timestamp and event.character_id == ^character_id,
+            limit: 1
+        )
       end
 
     %Session{
@@ -256,7 +290,7 @@ defmodule SacaStats.Session do
       player_facility_defends: facility_defs,
       vehicle_destroys: vehicle_destroys,
       login: login,
-      logout: logout,
+      logout: logout
     }
   end
 
@@ -278,9 +312,10 @@ defmodule SacaStats.Session do
   end
 
   defp get_logout_timestamp(character_id, login_timestamp) do
-    query = from event in Events.PlayerLogout,
-      select: min(event.timestamp),
-      where: event.character_id == ^character_id and event.timestamp > ^login_timestamp
+    query =
+      from event in Events.PlayerLogout,
+        select: min(event.timestamp),
+        where: event.character_id == ^character_id and event.timestamp > ^login_timestamp
 
     case Repo.one(query) do
       nil -> :current_session
@@ -305,12 +340,30 @@ defmodule SacaStats.Session do
   defp event_reducer(character_id, %Events.Death{} = death, acc) do
     attackers_weapon = SacaStats.weapons()[death.attacker_weapon_id]
 
-    kill_count_add = death.attacker_character_id == character_id && 1 || 0
-    kill_hs_count_add = death.attacker_character_id == character_id and death.is_headshot && 1 || 0
-    kill_ivi_count_add = death.attacker_character_id == character_id and attackers_weapon["sanction"] == "infantry" && 1 || 0
-    kill_hs_ivi_count_add = death.attacker_character_id == character_id and attackers_weapon["sanction"] == "infantry" and death.is_headshot && 1 || 0
-    death_count_add = death.character_id == character_id && 1 || 0
-    death_ivi_count_add = death.character_id == character_id and attackers_weapon["sanction"] == "infantry" && 1 || 0
+    kill_count_add = bool_to_int(death.attacker_character_id == character_id)
+
+    kill_hs_count_add =
+      bool_to_int(death.attacker_character_id == character_id and death.is_headshot)
+
+    kill_ivi_count_add =
+      bool_to_int(
+        death.attacker_character_id == character_id and
+          attackers_weapon["sanction"] == "infantry"
+      )
+
+    kill_hs_ivi_count_add =
+      bool_to_int(
+        death.attacker_character_id == character_id and
+          attackers_weapon["sanction"] == "infantry" and
+          death.is_headshot
+      )
+
+    death_count_add = bool_to_int(death.character_id == character_id)
+
+    death_ivi_count_add =
+      bool_to_int(
+        death.character_id == character_id and attackers_weapon["sanction"] == "infantry"
+      )
 
     acc
     |> Map.update(:kill_count, kill_count_add, &(&1 + kill_count_add))
@@ -328,15 +381,28 @@ defmodule SacaStats.Session do
   defp event_reducer(character_id, %Events.VehicleDestroy{} = vehicle, acc) do
     character_vehicle = SacaStats.vehicles()[vehicle.vehicle_id]
 
-    vehicle_kill_count_add = vehicle.attacker_character_id == character_id && 1 || 0
-    vehicle_death_count_add = vehicle.character_id == character_id && 1 || 0
-    nanites_destroyed_add = vehicle.attacker_character_id == character_id && character_vehicle["cost"] || 0
-    nanites_lost_add = vehicle.character_id == character_id && character_vehicle["cost"] || 0
+    vehicle_kill_count_add = bool_to_int(vehicle.attacker_character_id == character_id)
+    vehicle_death_count_add = bool_to_int(vehicle.character_id == character_id)
+
+    nanites_destroyed_add =
+      (vehicle.attacker_character_id == character_id && character_vehicle["cost"]) || 0
+
+    nanites_lost_add = (vehicle.character_id == character_id && character_vehicle["cost"]) || 0
 
     acc
     |> Map.update(:vehicle_kill_count, vehicle_kill_count_add, &(&1 + vehicle_kill_count_add))
     |> Map.update(:vehicle_death_count, vehicle_death_count_add, &(&1 + vehicle_death_count_add))
     |> Map.update(:nanites_destroyed, nanites_destroyed_add, &(&1 + nanites_destroyed_add))
     |> Map.update(:nanites_lost, nanites_lost_add, &(&1 + nanites_lost_add))
+  end
+
+  defp build_where_clause(clause, logout_timestamp) do
+    case logout_timestamp do
+      :current_session ->
+        clause
+
+      logout_timestamp ->
+        dynamic([e], field(e, :timestamp) <= ^logout_timestamp and ^clause)
+    end
   end
 end

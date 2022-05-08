@@ -30,6 +30,8 @@ defmodule SacaStats.Events.VehicleDestroy do
 
     event
     |> cast(params, field_list)
-    |> unique_constraint([:character_id, :timestamp, :attacker_character_id], name: "vehicle_destroys_pkey")
+    |> unique_constraint([:character_id, :timestamp, :attacker_character_id],
+      name: "vehicle_destroys_pkey"
+    )
   end
 end

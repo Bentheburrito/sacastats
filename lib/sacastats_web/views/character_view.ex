@@ -28,7 +28,8 @@ defmodule SacaStatsWeb.CharacterView do
     "#{dt.day}/#{dt.month}/#{dt.year} #{dt.hour}:#{padded_minutes}:#{padded_seconds}"
   end
 
-  def prettify_duration(start_ts, :current_session), do: prettify_duration(start_ts, System.os_time(:second))
+  def prettify_duration(start_ts, :current_session),
+    do: prettify_duration(start_ts, System.os_time(:second))
 
   def prettify_duration(start_ts, end_ts) do
     total_seconds = end_ts - start_ts
@@ -44,11 +45,11 @@ defmodule SacaStatsWeb.CharacterView do
 
   def build_event_log(assigns, %Session{} = session) do
     events =
-      session.battle_rank_ups ++
-      session.player_facility_captures ++
-      session.player_facility_defends ++
-      session.vehicle_destroys ++
-      session.deaths
+      (session.battle_rank_ups ++
+         session.player_facility_captures ++
+         session.player_facility_defends ++
+         session.vehicle_destroys ++
+         session.deaths)
       |> Enum.sort_by(fn event -> event.timestamp end, :desc)
 
     ~H"""
