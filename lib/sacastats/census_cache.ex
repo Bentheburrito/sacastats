@@ -1,6 +1,6 @@
-defmodule SacaStats.CharacterCache do
+defmodule SacaStats.CensusCache do
   @moduledoc """
-  A cache for data retrieved from the "character" or "single_character_by_id" collections in the Census API.
+  A cache for data retrieved from Census collections, such as "character" or "single_character_by_id".
   """
   use GenServer
 
