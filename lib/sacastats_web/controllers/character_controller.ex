@@ -191,7 +191,7 @@ defmodule SacaStatsWeb.CharacterController do
         "character_id" => session.character_id,
         "name" => %{"first" => session.name}
       },
-      "status" => String.to_integer(status["online_status"]) > 0 && "online" || "offline"
+      "status" => (String.to_integer(status["online_status"]) > 0 && "online") || "offline"
     }
 
     render(conn, "template.html", session: session, character: character)
