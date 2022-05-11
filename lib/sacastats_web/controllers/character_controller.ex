@@ -178,7 +178,23 @@ defmodule SacaStatsWeb.CharacterController do
 
   def character_session(conn, %{"character_name" => name, "login_timestamp" => login_timestamp}) do
     session = SacaStats.Session.get(name, login_timestamp)
-    render(conn, "session.html", session: session)
+
+    {:ok, %PS2.API.QueryResult{data: status}} =
+      Query.new(collection: "characters_online_status")
+      |> term("character_id", session.character_id)
+      |> lang("en")
+      |> PS2.API.query_one(SacaStats.sid())
+
+    character = %{
+      "stat_page" => "session.html",
+      "response" => %{
+        "character_id" => session.character_id,
+        "name" => %{"first" => session.name}
+      },
+      "status" => String.to_integer(status["online_status"]) > 0 && "online" || "offline"
+    }
+
+    render(conn, "template.html", session: session, character: character)
   end
 
   def character_general(conn, %{"character_name" => _name}) do
