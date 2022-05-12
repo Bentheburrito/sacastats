@@ -6,8 +6,8 @@ defmodule SacaStatsWeb.CharacterView do
   require Logger
 
   def pretty_session_summary(assigns, session) do
-    login_time = prettify_timestamp(session.login.timestamp)
-    logout_time = prettify_timestamp(session.logout.timestamp)
+    login_time = prettify_timestamp(assigns, session.login.timestamp)
+    logout_time = prettify_timestamp(assigns, session.logout.timestamp)
     session_duration = prettify_duration(session.login.timestamp, session.logout.timestamp)
 
     ~H"""
@@ -19,13 +19,18 @@ defmodule SacaStatsWeb.CharacterView do
     """
   end
 
-  def prettify_timestamp(:current_session), do: "Current Session"
+  def prettify_timestamp(_assigns, :current_session), do: "Current Session"
 
-  def prettify_timestamp(timestamp) do
-    dt = DateTime.from_unix!(timestamp)
-    padded_minutes = dt.minute |> Integer.to_string() |> String.pad_leading(2, "0")
-    padded_seconds = dt.second |> Integer.to_string() |> String.pad_leading(2, "0")
-    "#{dt.day}/#{dt.month}/#{dt.year} #{dt.hour}:#{padded_minutes}:#{padded_seconds}"
+  def prettify_timestamp(assigns, timestamp) do
+    dt_string =
+      timestamp
+      |> DateTime.from_unix!()
+      |> to_string()
+      |> String.trim_trailing("Z")
+
+    ~H"""
+    <span class="date-time"><%= dt_string %></span>
+    """
   end
 
   def prettify_duration(start_ts, :current_session),
@@ -65,7 +70,7 @@ defmodule SacaStatsWeb.CharacterView do
     ~H"""
     <li>
       <%= session.name %> ranked up to <%= br_up.battle_rank %> -
-      <%= SacaStatsWeb.CharacterView.prettify_timestamp(br_up.timestamp) %>
+      <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, br_up.timestamp) %>
     </li>
     """
   end
@@ -77,7 +82,7 @@ defmodule SacaStatsWeb.CharacterView do
       with <%= SacaStats.weapons()[death.attacker_weapon_id]["name"] %> (<%= death.attacker_weapon_id %>)
       <%= death.is_headshot && "(headshot)" || "" %>
       -
-      <%= SacaStatsWeb.CharacterView.prettify_timestamp(death.timestamp) %>
+      <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, death.timestamp) %>
     </li>
     """
   end
@@ -86,7 +91,7 @@ defmodule SacaStatsWeb.CharacterView do
     ~H"""
     <li>
       <%= session.name %> captured <%= cap.facility_id %> (new outfit owner: <%= cap.outfit_id %>) -
-      <%= SacaStatsWeb.CharacterView.prettify_timestamp(cap.timestamp) %>
+      <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, cap.timestamp) %>
     </li>
     """
   end
@@ -95,7 +100,7 @@ defmodule SacaStatsWeb.CharacterView do
     ~H"""
     <li>
       <%= session.name %> defended <%= def.facility_id %> (outfit owner: <%= def.outfit_id %>) -
-      <%= SacaStatsWeb.CharacterView.prettify_timestamp(def.timestamp) %>
+      <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, def.timestamp) %>
     </li>
     """
   end
@@ -107,7 +112,7 @@ defmodule SacaStatsWeb.CharacterView do
       with <%= SacaStats.weapons()[vd.attacker_weapon_id]["name"] %> (<%= vd.attacker_weapon_id %>)
       <%= vd.attacker_vehicle_id != 0 && " while in a #{SacaStats.vehicles()[vd.attacker_vehicle_id]["name"]}" || "" %>
       -
-      <%= SacaStatsWeb.CharacterView.prettify_timestamp(vd.timestamp) %>
+      <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, vd.timestamp) %>
     </li>
     """
   end
