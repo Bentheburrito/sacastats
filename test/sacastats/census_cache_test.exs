@@ -37,6 +37,8 @@ defmodule SacaStats.CensusCacheTest do
         | params: %{"character_id" => 5_428_713_425_545_165_425, "c:show" => "faction_id"}
       }
 
+      fallback = {&PS2.API.query_one/2, [query, SacaStats.sid()]}
+
       assert {:ok, ^value} = CensusCache.get(cache, 321, fallback)
     end
   end
