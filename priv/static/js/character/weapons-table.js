@@ -119,7 +119,7 @@ function addCustomCopyFunction() {
                 if (i > 1) {
                     copyString = copyString + ", ";
                 }
-                copyString = copyString + headerArray[i].innerText + ": " + dataArray[i].innerText;
+                copyString = copyString + (isMobileScreen() ? "" : (headerArray[i].innerText + ": ")) + dataArray[i].innerText;
             }
 
             //create new line space between each weapon stat
@@ -157,6 +157,10 @@ function flashElement(elementId) {
         window.clearInterval(flashInterval);
         $("#" + elementId).removeClass("flash-border");
     }, 1000);
+}
+
+function isMobileScreen() {
+    return window.innerWidth <= 767;
 }
 
 export function showHideNextAuraxButton() {

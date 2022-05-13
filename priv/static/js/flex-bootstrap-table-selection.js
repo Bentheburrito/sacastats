@@ -8,6 +8,7 @@ let upDown = false; //up is true down is false
 
 let mainSelectionClass = "main-selected";
 let selectionClass = "selection";
+let mobileSelectionMenu = "selection-mobile-menu";
 let customCopyFunction;
 let secondCustomCopyFunction;
 
@@ -25,30 +26,40 @@ let copyToastID;
 function addRightClickTable() {
     //add special Right click on table menu
     $(tableID).on('contextmenu', function (e) {
-        //initialize special menu location
-        var top = ((e.clientY / $(window).height()) * 100) + "%";
-        var left = ((e.clientX / $(window).width()) * 100) + "%";
-
-        //show special menu at the bottom right of the mouse
-        $(contextMenuID).css({
-            display: "block",
-            position: "fixed",
-            top: top,
-            left: left
-        }).addClass("show");
-
         //get the row
         let row = $(e.target).closest("tr")[0];
 
-        //if it's not selected and the control key wasn't pressed reset the selection
-        if (!row.classList.contains(selectionClass) && !e.ctrlKey) {
-            resetCopyRowSelection();
+        if (!isMobileScreen()) {
+            //initialize special menu location
+            let yAdj = (e.clientY + $(contextMenuID).height() > $(window).height()) ? (e.clientY - $(contextMenuID).height() - 5) : e.clientY; //adjust height to show all of menu
+            let xAdj = (e.clientX + $(contextMenuID).width() > $(window).width()) ? (e.clientX - $(contextMenuID).width() - 2) : e.clientX; //adjust width to show all of menu
+            var top = ((yAdj / $(window).height()) * 100) + "%";
+            var left = ((xAdj / $(window).width()) * 100) + "%";
 
-            //if the shift key was pressed, select start index to recently clicked index
-            if (e.shiftKey) {
-                selectStartToCurrent(getRowArrayIndex(row));
+            //show special menu at the bottom right of the mouse
+            $(contextMenuID).css({
+                display: "block",
+                position: "fixed",
+                top: top,
+                left: left
+            }).addClass("show");
+
+            //if it's not selected and the control key wasn't pressed reset the selection
+            if (!row.classList.contains(selectionClass) && !e.ctrlKey) {
+                resetCopyRowSelection();
+
+                //if the shift key was pressed, select start index to recently clicked index
+                if (e.shiftKey) {
+                    selectStartToCurrent(getRowArrayIndex(row));
+                }
             }
+
+            //if it's a mobile screen and the row is already selected, delete it and return false to block default right click menu
+        } else if (copyRows.has(row)) {
+            deleteRowFromSelection(row);
+            return false;
         }
+
         //add current row to selection
         addRowToSelection(row, e);
 
@@ -65,11 +76,11 @@ function addRightClickTable() {
         if (!dragged) {
             if (overARow(row)) {
                 //if it's a new selection set reset the selections
-                if (copyRows.size > 0 && !e.ctrlKey && !e.shiftKey) {
+                if (copyRows.size > 0 && !e.ctrlKey && !e.shiftKey && !isMobileScreen()) {
                     resetCopyRowSelection(e);
                 }
 
-                //disable on-click selection for mobile
+                //disable on-click selection for mobile without others selected
                 if (!isMobileScreen()) {
                     //if the ctrl key was pressed while a selection was clicked remove it
                     let rowIndex = getRowArrayIndex(row);
@@ -92,12 +103,42 @@ function addRightClickTable() {
                         selectedRowIndex = rowIndex;
                         addRowToSelection(row);
                     }
+                } else if (copyRows.size > 0 || $("." + mobileSelectionMenu).is(":visible")) {
+                    if (copyRows.has(row)) {
+                        deleteRowFromSelection(row);
+                    } else {
+                        addRowToSelection(row, e);
+                    }
                 }
             } else {
                 resetCopyRowSelection(e);
             }
         }
     });
+
+    //add pagination events
+    $("a.dropdown-item").on("click", resetCopyRowSelection);
+
+    $('a.page-link').on('click', resetCopyRowSelection);
+    // function handlePageLinkClicks() {
+    //     setTimeout(function () {
+    //         rowArray = [...$(tableID).find("tbody").first()[0].children];
+    //         let copyRowArray = [...copyRows];
+    //         for (let i = 0; i < copyRowArray.length; i++) {
+    //             if (copyRowArray[i].classList != undefined) {
+    //                 copyRowArray[i].classList.remove(selectionClass);
+    //             }
+    //         }
+    //         copyRows = new Set(copyRowArray);
+    //         for (let i = 0; i < rowArray.length; i++) {
+    //             if (copyRows.has(rowArray[i])) {
+    //                 deleteRowFromSelection(rowArray[i]);
+    //                 addRowToSelection(rowArray[i]);
+    //             }
+    //         }
+    //         $('a.page-link').on('click', handlePageLinkClicks);
+    //     }, 10);
+    // }
 
     //add page down events
     $(document).on("mousedown", function () {
@@ -107,10 +148,13 @@ function addRightClickTable() {
     //add page click events
     $(document).on("click", function (e) {
         //if the click is not in the table remove selections and hide the special menu
-        if ($(e.target).closest("table")[0] == undefined && !dragged) {
+        if ($(e.target).closest("table")[0] == undefined && !dragged && $(e.target).closest("." + mobileSelectionMenu)[0] == undefined) {
             resetCopyRowSelection(e);
         }
     });
+
+    //add scroll events
+    $(document).on("scroll", hideContextMenu);
 
     //add page key events
     $(document).on("keyup", function (e) {
@@ -154,6 +198,41 @@ function addRightClickTable() {
     addTableMove();
 }
 
+function addMobileSelectionMenuClickEvents() {
+    //initialize button variables
+    let backBtn = document.getElementById(mobileSelectionMenu + "-back-btn");
+    let selectAllBtn = document.getElementById(mobileSelectionMenu + "-select-all-btn");
+    let copyTextBtn = document.getElementById(mobileSelectionMenu + "-copy-text-btn");
+    let copyLinkBtn = document.getElementById(mobileSelectionMenu + "-copy-link-btn");
+
+    //handle back button clicks
+    backBtn.addEventListener("click", function (e) {
+        resetCopyRowSelection(e);
+    });
+
+    //handle select all clicks
+    selectAllBtn.addEventListener("click", function () {
+        if (selectAllBtn.checked) {
+            for (let i = 0; i < rowArray.length; i++) {
+                if (!copyRows.has(rowArray[i])) {
+                    addRowToSelection(rowArray[i]);
+                }
+            }
+        } else {
+            for (let i = 0; i < rowArray.length; i++) {
+                if (copyRows.has(rowArray[i])) {
+                    deleteRowFromSelection(rowArray[i]);
+                }
+            }
+        }
+
+    });
+
+    //handle copy buttons clicks
+    copyTextBtn.addEventListener("click", copyTextHandler);
+    copyLinkBtn.addEventListener("click", copyLinkHandler);
+}
+
 function resetCopyRowSelection(e) {
     //remove the selection style from each row and reinit the set
     copyRows.forEach(row => {
@@ -163,6 +242,8 @@ function resetCopyRowSelection(e) {
     if (e == undefined || !e.shiftKey) {
         selectedRowIndex = undefined;
     }
+    handleMobileMenu();
+    showHideSelectionMobileMenu();
 }
 
 function hideContextMenu() {
@@ -170,33 +251,37 @@ function hideContextMenu() {
 }
 
 function addCopyClick() {
-    //add event listner for copy click
-    $(copyLinkID).on('mousedown', function (e) {
-        //get the target.id
-        let saveTargetID = JSON.parse(JSON.stringify(e.target.id));
+    //add event listner for copy clicks
+    $(copyLinkID).on('mousedown', copyLinkHandler);
+    $(copyTextID).on('mousedown', copyTextHandler);
+}
 
-        //set it to be the right id
-        e.target.id = copyLinkID.substring(1);
+function copyLinkHandler(e) {
+    //get the target.id
+    let saveTargetID = JSON.parse(JSON.stringify(e.target.id));
 
-        //copy the rows and show the toast
-        copySelectedRows(e);
+    //set it to be the right id
+    e.target.id = copyLinkID.substring(1);
 
-        //reset the target.id
-        e.target.id = saveTargetID;
-    });
-    $(copyTextID).on('mousedown', function (e) {
-        //get the target.id
-        let saveTargetID = JSON.parse(JSON.stringify(e.target.id));
+    //copy the rows and show the toast
+    copySelectedRows(e);
 
-        //set it to be the right id
-        e.target.id = copyTextID.substring(1);
+    //reset the target.id
+    e.target.id = saveTargetID;
+}
 
-        //copy the rows and show the toast
-        copySelectedRows(e);
+function copyTextHandler(e) {
+    //get the target.id
+    let saveTargetID = JSON.parse(JSON.stringify(e.target.id));
 
-        //reset the target.id
-        e.target.id = saveTargetID;
-    });
+    //set it to be the right id
+    e.target.id = copyTextID.substring(1);
+
+    //copy the rows and show the toast
+    copySelectedRows(e);
+
+    //reset the target.id
+    e.target.id = saveTargetID;
 }
 
 function addTableMove() {
@@ -328,6 +413,23 @@ function isSelectionMoveValid(rowIndex) {
     return currentRowIndex == rowIndex || rowIndex == currentRowIndex + 1 || rowIndex == currentRowIndex - 1;
 }
 
+function handleMobileMenu() {
+    updateCountShown();
+}
+
+function updateCountShown() {
+    document.getElementById(mobileSelectionMenu + "-selection-count").innerHTML = copyRows.size + " Selected"
+}
+
+function showHideSelectionMobileMenu() {
+    //if it's a mobile screen and the menu is not visible, show it
+    if (isMobileScreen() && !$("." + mobileSelectionMenu).is(":visible")) {
+        $("." + mobileSelectionMenu).show();
+    } else {
+        $("." + mobileSelectionMenu).hide();
+    }
+}
+
 function getRowArrayIndex(row) {
     if (row != undefined) {
         rowArray = [...$(tableID).find("tbody").first()[0].children];
@@ -349,6 +451,11 @@ function deleteRowFromSelection(row) {
     if (!isThereAMainSelection()) {
         mainSelectClosestSelection(rowIndex);
     }
+    if (isMobileScreen()) {
+        $('.' + selectionClass).removeClass(mainSelectionClass);
+        handleMobileMenu();
+        document.getElementById(mobileSelectionMenu + "-select-all-btn").checked = false;
+    }
 }
 
 function addRowToSelection(row, e) {
@@ -366,6 +473,14 @@ function addRowToSelection(row, e) {
     }
     if (!isThereAMainSelection()) {
         mainSelectClosestSelection(getRowArrayIndex(row));
+    }
+    if (isMobileScreen()) {
+        $('.' + selectionClass).removeClass(mainSelectionClass);
+        handleMobileMenu();
+        $("." + mobileSelectionMenu).show();
+        if (copyRows.size == rowArray.length) {
+            document.getElementById(mobileSelectionMenu + "-select-all-btn").checked = true;
+        }
     }
 }
 
@@ -440,9 +555,9 @@ function copySelectedRows(e) {
         let index = 0;
         copyRows.forEach(row => {
             let dataArray = $(row).find('td');
-            copyString = copyString + headerArray[0].innerText + ": " + dataArray[0].innerText;
+            copyString = copyString + (isMobileScreen() ? "" : (headerArray[0].innerText + ": ")) + dataArray[0].innerText;
             for (let i = 1; i < dataArray.length; i++) {
-                copyString = copyString + ", " + headerArray[i].innerText + ": " + dataArray[i].innerText;
+                copyString = copyString + ", " + (isMobileScreen() ? "" : (headerArray[i].innerText + ": ")) + dataArray[i].innerText;
             }
             if (index < copyRows.size - 1) {
                 copyString = copyString + "\n\n";
@@ -478,4 +593,6 @@ export function init(id) {
     rowArray = [...$(tableID).find("tbody").first()[0].children];
 
     addRightClickTable();
+    showHideSelectionMobileMenu();
+    addMobileSelectionMenuClickEvents();
 }

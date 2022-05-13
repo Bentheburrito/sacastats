@@ -1,11 +1,11 @@
 <link rel="stylesheet" href={Routes.static_path(@conn, "/css/character/weapons.css")}/>
 
-<div class="d-none selection-mobile-menu-top selection-mobile-menu">
+<div class="selection-mobile-menu-top selection-mobile-menu">
     <div class="d-flex h-100 justify-content-between">
         <div class="w-50 align-self-center">
             <label class="menu-item h-100">
                 <div class="">
-                    <input class="form-check-input" type="checkbox" name="" id="selectall-faction-filter-option">
+                    <input class="form-check-input" type="checkbox" name="" id="selection-mobile-menu-select-all-btn">
                     <span class="pl-2">
                         Select All
                     </span>
@@ -13,29 +13,27 @@
             </label>
         </div> 
         <div class="w-50 align-self-center">
-            <label class="h-100 text-right">
-                1 Selected
-            </label>
+            <label id="selection-mobile-menu-selection-count" class="h-100 text-right pr-2"></label>
         </div> 
     </div>
 </div>
-<div class="d-none selection-mobile-menu-bottom selection-mobile-menu">
+<div class="selection-mobile-menu-bottom selection-mobile-menu">
     <div class="d-flex h-100 justify-content-center">
-        <div class="w-33 align-self-center">
+        <div id="selection-mobile-menu-copy-link-btn" class="w-33 align-self-center">
             <label class="">
                 <div class="h-100 text-center">
                     Copy Link
                 </div>
             </label>
         </div> 
-        <div class="w-33 align-self-center">
+        <div id="selection-mobile-menu-copy-text-btn" class="w-33 align-self-center">
             <label class="">
                 <div class="h-100 text-center">
                     Copy Text
                 </div>
             </label>
         </div> 
-        <div class="w-33 align-self-center">
+        <div id="selection-mobile-menu-back-btn" class="w-33 align-self-center">
             <label class="">
                 <div class="h-100 text-center">
                     Back
@@ -60,7 +58,7 @@
             <h5 class="d-block text-center text-md-left" id="table-copy-text">Copy stat text</h5>
         </div>
         <div class="col-4 text-right">
-            <p class="d-none d-md-inline context-menu-help">Ctrl-Shift-C</p>
+            <p class="d-none d-md-inline context-menu-help">Ctrl-X</p>
         </div>
     </div>
 </div>
