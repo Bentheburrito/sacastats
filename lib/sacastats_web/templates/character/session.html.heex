@@ -10,7 +10,7 @@
     <li>Time Played: 
       <%= SacaStatsWeb.CharacterView.prettify_duration(@session.login.timestamp, @session.logout.timestamp) %>
     </li>
-    <li>XP Earned: <%= @session.xp_earned %></li>
+    <li class="number">XP Earned: <%= @session.xp_earned %></li>
     <li>Battle Ranks Earned: 
       <%= length(@session.battle_rank_ups) > 0 && Enum.join(@session.battle_rank_ups.battle_rank, ", ") || "None"%>
     </li>
@@ -25,8 +25,8 @@
     <li>Kills: <%= @session.vehicle_kill_count %></li>
     <li>Deaths: <%= @session.vehicle_death_count %></li>
     <li>KDR: <%= SacaStats.Utils.safe_divide(@session.vehicle_kill_count, @session.vehicle_death_count, 2) %></li>
-    <li>Kills in Nanites: <%= @session.nanites_destroyed %></li>
-    <li>Deaths in Nanites: <%= @session.nanites_lost %></li>
+    <li class="number">Kills in Nanites: <%= @session.nanites_destroyed %></li>
+    <li class="number">Deaths in Nanites: <%= @session.nanites_lost %></li>
     <li>Nanite Efficiency: <%= SacaStats.Utils.safe_divide(@session.nanites_destroyed, @session.nanites_lost, 2) %></li>
   </ul>
 </div>

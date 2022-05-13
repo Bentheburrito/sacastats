@@ -2,10 +2,12 @@ require Logger
 
 defmodule SacaStatsWeb.CharacterController do
   use SacaStatsWeb, :controller
-  alias SacaStatsWeb.CharacterView
+
   import PS2.API.QueryBuilder
   import SacaStats.Utils
+
   alias PS2.API.{Join, Query}
+  alias SacaStats.Session
 
   def character(conn, %{"character_name" => name, "stat_type" => "lookup"}) do
     redirect(conn, to: Routes.character_path(conn, :character, name, "general"))
@@ -173,7 +175,27 @@ defmodule SacaStatsWeb.CharacterController do
 
   def character_sessions(conn, %{"character_name" => name}) do
     sessions = SacaStats.Session.get_summary(name)
-    render(conn, "sessions.html", sessions: sessions, character_name: name)
+    latest_session = List.first(sessions)
+
+    status =
+      case latest_session do
+        %Session{logout: %SacaStats.Events.PlayerLogout{timestamp: ts}} when ts == :current_session ->
+          "online"
+
+        _ ->
+          "offline"
+      end
+
+    character = %{
+      "stat_page" => "sessions.html",
+      "response" => %{
+        "character_id" => nil, # nil for now until we can pull it from the cache, instead of hitting the Census again
+        "name" => %{"first" => name}
+      },
+      "status" => status
+    }
+
+    render(conn, "template.html", sessions: sessions, character: character)
   end
 
   def character_session(conn, %{"character_name" => name, "login_timestamp" => login_timestamp}) do

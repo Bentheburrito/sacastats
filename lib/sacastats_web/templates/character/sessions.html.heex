@@ -1,10 +1,8 @@
-<h2><%= @character_name %>'s sessions</h2>
-<h6>Date format is in dd/mm/yyyy</h6>
 <%= if length(@sessions) == 0 do %>
   No sessions for this character
 <% else %>
   <%= for %SacaStats.Session{} = session <- @sessions do %>
-    <%= link to: Routes.character_path(@conn, :character_session, @character_name, session.login.timestamp) do %>
+    <%= link to: Routes.character_path(@conn, :character_session, session.name, session.login.timestamp) do %>
       <%= SacaStatsWeb.CharacterView.pretty_session_summary(assigns, session) %>
     <% end %>
   <% end %>
