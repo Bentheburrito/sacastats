@@ -179,7 +179,8 @@ defmodule SacaStatsWeb.CharacterController do
 
     status =
       case latest_session do
-        %Session{logout: %SacaStats.Events.PlayerLogout{timestamp: ts}} when ts == :current_session ->
+        %Session{logout: %SacaStats.Events.PlayerLogout{timestamp: ts}}
+        when ts == :current_session ->
           "online"
 
         _ ->
@@ -189,7 +190,8 @@ defmodule SacaStatsWeb.CharacterController do
     character = %{
       "stat_page" => "sessions.html",
       "response" => %{
-        "character_id" => nil, # nil for now until we can pull it from the cache, instead of hitting the Census again
+        # nil for now until we can pull it from the cache, instead of hitting the Census again
+        "character_id" => nil,
         "name" => %{"first" => name}
       },
       "status" => status
