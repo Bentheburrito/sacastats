@@ -4,11 +4,14 @@ defmodule SacaStats.CensusCache do
   """
   use GenServer
 
-  @type cache_result :: {:ok, value :: any()} | {:error, :not_found} |
-    {:error, HTTPoison.Error.t() | Jason.DecodeError.t() | PS2.API.Error.t()}
+  @type cache_result ::
+          {:ok, value :: any()}
+          | {:error, :not_found}
+          | {:error, HTTPoison.Error.t() | Jason.DecodeError.t() | PS2.API.Error.t()}
 
-  @type fallback_fn :: (... ->
-    {:ok, PS2.API.QueryResult.t} | {:error, any()})
+  @type fallback_fn ::
+          (... ->
+             {:ok, PS2.API.QueryResult.t()} | {:error, any()})
 
   ### API
 
@@ -39,7 +42,11 @@ defmodule SacaStats.CensusCache do
   If the key-value is neither in the cache nor retrieved by the fallback function, {:error, :not_found} is returned, or
   another error tuple if returned by the fallback function.
   """
-  @spec get(cache :: pid() | atom(), key :: any(), {fallback_fn :: fallback_fn(), args :: [any()]} | nil) :: cache_result()
+  @spec get(
+          cache :: pid() | atom(),
+          key :: any(),
+          {fallback_fn :: fallback_fn(), args :: [any()]} | nil
+        ) :: cache_result()
   def get(cache, key, fallback \\ nil) when is_pid(cache) or is_atom(cache) do
     GenServer.call(cache, {:get, key, fallback})
   end
@@ -72,7 +79,7 @@ defmodule SacaStats.CensusCache do
   defp eval_fallback_fn({fallback_fn, args}, key, cache_state) do
     case apply(fallback_fn, args) do
       {:ok, %PS2.API.QueryResult{returned: 0}} -> {{:error, :not_found}, cache_state}
-      {:ok, %PS2.API.QueryResult{data: data }} -> {{:ok, data}, Map.put(cache_state, key, data)}
+      {:ok, %PS2.API.QueryResult{data: data}} -> {{:ok, data}, Map.put(cache_state, key, data)}
       {:error, _e} = error -> {error, cache_state}
     end
   end

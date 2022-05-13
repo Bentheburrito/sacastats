@@ -1,8 +1,8 @@
 defmodule SacaStats.CensusCacheTest do
   use ExUnit.Case
 
-  alias SacaStats.CensusCache
   alias PS2.API.Query
+  alias SacaStats.CensusCache
 
   setup_all do
     %{cache: start_supervised!(CensusCache)}
@@ -27,10 +27,17 @@ defmodule SacaStats.CensusCacheTest do
         collection: "character",
         params: %{"character_id" => 321, "c:show" => "faction_id"}
       }
-      assert {:error, :not_found} = CensusCache.get(cache, 321, {&PS2.API.query_one/2, [query, SacaStats.sid()]})
 
-      query = %Query{query | params: %{"character_id" => 5428713425545165425, "c:show" => "faction_id"}}
-      assert {:ok, ^value} = CensusCache.get(cache, 321, {&PS2.API.query_one/2, [query, SacaStats.sid()]})
+      fallback = {&PS2.API.query_one/2, [query, SacaStats.sid()]}
+
+      assert {:error, :not_found} = CensusCache.get(cache, 321, fallback)
+
+      query = %Query{
+        query
+        | params: %{"character_id" => 5_428_713_425_545_165_425, "c:show" => "faction_id"}
+      }
+
+      assert {:ok, ^value} = CensusCache.get(cache, 321, fallback)
     end
   end
 end
