@@ -13,7 +13,6 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     env:
       MIX_ENV: github
-      SERVICE_ID: ${{ secrets.SERVICE_ID }}
     strategy:
       matrix:
         elixir-version: ['1.12']
@@ -38,6 +37,7 @@ jobs:
         name: Run Tests
         env:
           MIX_ENV: test
+          SERVICE_ID: ${{ secrets.SERVICE_ID }}
       - run: mix credo --strict
         name: Strict Credo Checks
       - run: mix format --check-formatted
