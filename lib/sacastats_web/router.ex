@@ -31,6 +31,8 @@ defmodule SacaStatsWeb.Router do
 
     get "/", CharacterController, :character_search
     get "/:character_name", CharacterController, :character_general
+    get "/:character_name/sessions", CharacterController, :character_sessions
+    get "/:character_name/sessions/:login_timestamp", CharacterController, :character_session
     get "/:character_name/:stat_type", CharacterController, :character
   end
 
