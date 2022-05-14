@@ -25,6 +25,8 @@ defmodule SacaStats.Application do
       {Phoenix.PubSub, name: SacaStats.PubSub},
       # Start the Endpoint (http/https)
       SacaStatsWeb.Endpoint,
+      # Start caches
+      {SacaStats.CensusCache, [name: SacaStats.CharacterCache]},
       # Start the ESS Websocket
       {PS2.Socket, ess_opts}
     ]

@@ -37,6 +37,7 @@ jobs:
         name: Run Tests
         env:
           MIX_ENV: test
+          SERVICE_ID: ${{ secrets.SERVICE_ID }}
       - run: mix credo --strict
         name: Strict Credo Checks
       - run: mix format --check-formatted
