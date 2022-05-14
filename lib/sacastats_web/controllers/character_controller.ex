@@ -2,10 +2,12 @@ require Logger
 
 defmodule SacaStatsWeb.CharacterController do
   use SacaStatsWeb, :controller
-  alias SacaStatsWeb.CharacterView
+
   import PS2.API.QueryBuilder
   import SacaStats.Utils
+
   alias PS2.API.{Join, Query}
+  alias SacaStats.Session
 
   def character(conn, %{"character_name" => name, "stat_type" => "lookup"}) do
     redirect(conn, to: Routes.character_path(conn, :character, name, "general"))
@@ -184,17 +186,52 @@ defmodule SacaStatsWeb.CharacterController do
     render(conn, "template.html", character: character)
   end
 
-  def character_session(conn, %{"character_name" => name, "stat_type" => "session"}) do
-    # case CAIData.API.get_session_by_name(name) do
-    #   {:ok, session} ->
-    #     character_stuff = %{"name" => name, "stat_page" => "session.html"}
-    #     render(conn, "characterTemplate.html", character: character_stuff, session: session)
+  def character_sessions(conn, %{"character_name" => name}) do
+    sessions = SacaStats.Session.get_summary(name)
+    latest_session = List.first(sessions)
 
-    #   :none ->
-    #     conn
-    #     |> put_flash(:error, "No session under a character with that name.")
-    #     |> render("index.html")
-    # end
+    status =
+      case latest_session do
+        %Session{logout: %SacaStats.Events.PlayerLogout{timestamp: ts}}
+        when ts == :current_session ->
+          "online"
+
+        _ ->
+          "offline"
+      end
+
+    character = %{
+      "stat_page" => "sessions.html",
+      "response" => %{
+        # nil for now until we can pull it from the cache, instead of hitting the Census again
+        "character_id" => nil,
+        "name" => %{"first" => name}
+      },
+      "status" => status
+    }
+
+    render(conn, "template.html", sessions: sessions, character: character)
+  end
+
+  def character_session(conn, %{"character_name" => name, "login_timestamp" => login_timestamp}) do
+    session = SacaStats.Session.get(name, login_timestamp)
+
+    {:ok, %PS2.API.QueryResult{data: status}} =
+      Query.new(collection: "characters_online_status")
+      |> term("character_id", session.character_id)
+      |> lang("en")
+      |> PS2.API.query_one(SacaStats.sid())
+
+    character = %{
+      "stat_page" => "session.html",
+      "response" => %{
+        "character_id" => session.character_id,
+        "name" => %{"first" => session.name}
+      },
+      "status" => (String.to_integer(status["online_status"]) > 0 && "online") || "offline"
+    }
+
+    render(conn, "template.html", session: session, character: character)
   end
 
   def character_general(conn, %{"character_name" => _name}) do

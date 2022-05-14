@@ -9,7 +9,7 @@ defmodule SacaStats.Application do
   def start(_type, _args) do
     ess_opts = [
       subscriptions: SacaStats.ess_subscriptions(),
-      clients: [SacaStats.EventHandler],
+      clients: [SacaStats.EventTracker],
       service_id: SacaStats.sid()
     ]
 
@@ -27,8 +27,6 @@ defmodule SacaStats.Application do
       SacaStatsWeb.Endpoint,
       # Start caches
       {SacaStats.CensusCache, [name: SacaStats.CharacterCache]},
-      # Start the session tracker
-      {SacaStats.SessionTracker, {%{}, []}},
       # Start the ESS Websocket
       {PS2.Socket, ess_opts}
     ]
