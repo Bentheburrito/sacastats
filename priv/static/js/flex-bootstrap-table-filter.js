@@ -420,6 +420,11 @@ function setNextAuraxVisibilities() {
     }, 10);
 }
 
+function refreshByScroll() {
+    window.scrollBy(0, -1);
+    window.scrollBy(0, 1);
+}
+
 export function setStickyHeaderWidths() {
     let headers = document.querySelector("thead.sticky-header > tr").querySelectorAll("th");
     let columns = document.querySelector(tableID + ">tbody>tr").querySelectorAll("td");
@@ -427,6 +432,7 @@ export function setStickyHeaderWidths() {
         let width = $(columns[i]).width();
         headers[i].style.width = (width + "px");
     }
+    refreshByScroll();
 }
 
 export function updateTableFiltration() {

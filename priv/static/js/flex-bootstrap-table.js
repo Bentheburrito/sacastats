@@ -12,6 +12,7 @@ export function setupFlexTables() {
         bootstrapSelection.init(table.id);
         init();
     });
+    refreshByScroll(); //fixes sticky header being in the wrong position on start
 
     function init() {
         initializeFlexTables();
@@ -155,7 +156,6 @@ export function setupFlexTables() {
 
                 setTimeout(function () {
                     bootstrapTableFilter.setStickyHeaderWidths();
-                    refreshByScroll();
                 }, 100);
             }
         }, 100);
