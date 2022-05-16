@@ -56,6 +56,19 @@ hr {
     width: auto;
 }
 
+.weapon-image-container,
+.weaponName,
+.weapon>.th-inner {
+    border-left: 1px solid #dee2e6;
+    border-right: 1px solid #dee2e6;
+}
+
+.weapon,
+.table {
+    border-left-width: 0px !important;
+}
+
+
 .w-33 {
     width: 33.3333%
 }

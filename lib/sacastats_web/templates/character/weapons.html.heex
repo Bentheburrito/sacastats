@@ -395,13 +395,15 @@
                         <img src={"https://census.daybreakgames.com/files/ps2/images/static/" <> (SacaStatsWeb.CharacterController.get_medal_code(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character["response"]["faction_id"]), 
                             SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character["response"]["faction_id"]))|> Integer.to_string()) <>".png"} alt="medal" class="medal float-left position-absolute top-0" width="30px"/>
                     <% end %>
-                    <img src={"https://census.daybreakgames.com" <> Map.get(weapon, "image_path", "/files/ps2/images/static/3.png")} 
-                        onerror={"this.onerror=null; this.src='" <> 
-                            (if weapon["vehicle_weapon?"], 
-                                do: Routes.static_path(@conn, "/images/character/unknownVehicleWeapon.png"), 
-                                else: Routes.static_path(@conn, "/images/character/unknownInfantryWeapon.png"))
-                            <> "'"} 
-                        alt={Map.get(weapon, "name", "N/A")} class="weapon-image mx-auto d-block"/>
+                    <div class="weapon-image-container w-100">
+                        <img src={"https://census.daybreakgames.com" <> Map.get(weapon, "image_path", "/files/ps2/images/static/3.png")} 
+                            onerror={"this.onerror=null; this.src='" <> 
+                                (if weapon["vehicle_weapon?"], 
+                                    do: Routes.static_path(@conn, "/images/character/unknownVehicleWeapon.png"), 
+                                    else: Routes.static_path(@conn, "/images/character/unknownInfantryWeapon.png"))
+                                <> "'"} 
+                            alt={Map.get(weapon, "name", "N/A")} class="weapon-image mx-auto d-block"/>
+                    </div>
                     <h5 class="weaponName align-text-bottom text-center mb-0"><%=Map.get(weapon, "name", "N/A")%></h5>
                     <div class="progress-bar-background">
                         <div id={"weapon" <> (weapon_id |> Integer.to_string()) <> "ProgressBar"} class="progress-bar progress-bar-striped progress-bar-animated aurax-progress" role="progressbar" 
