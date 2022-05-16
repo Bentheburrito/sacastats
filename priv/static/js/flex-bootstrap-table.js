@@ -149,6 +149,7 @@ export function setupFlexTables() {
     function documentMouseUpEventHandler() {
         setTimeout(function () {
             if (!didTableRecieveStyleUpdate()) {
+                setMobileHeaderTexts(table.id);
                 addAnimationToProgressBars();
                 addFormatsToPage();
                 refreshByScroll();
