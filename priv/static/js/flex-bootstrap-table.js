@@ -40,16 +40,26 @@ export function setupFlexTables() {
 
     function tableSearchEnterEventHandler(e) {
         if (e.keyCode == 13) {
-            updateSearchParam();
+            searchTable(e);
+        } else {
+            let text = JSON.parse(JSON.stringify(document.querySelector("input.search-input").value));
             setTimeout(function () {
-                bootstrapTableFilter.updateTableFiltration();
-                updateTableFormats(table.id);
-            }, 10);
-
-            if (document.querySelector("input.search-input").value != "") {
-                if (window.innerWidth >= 768) {
-                    document.querySelector("input.search-input").select();
+                if (text == document.querySelector("input.search-input").value) {
+                    searchTable(e);
                 }
+            }, 300);
+        }
+    }
+    function searchTable(e) {
+        updateSearchParam();
+        setTimeout(function () {
+            bootstrapTableFilter.updateTableFiltration();
+            updateTableFormats(table.id);
+        }, 10);
+
+        if (document.querySelector("input.search-input").value != "" && e.keyCode == 13) {
+            if (window.innerWidth >= 768) {
+                document.querySelector("input.search-input").select();
             }
         }
     }
