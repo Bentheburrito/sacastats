@@ -124,7 +124,7 @@ function addRightClickTable() {
 
     function handleAnchorClickEvents() {
         resetCopyRowSelection();
-        showHideSelectionMobileMenu();
+        $("." + mobileSelectionMenu).hide();
     }
     // function handlePageLinkClicks() {
     //     setTimeout(function () {

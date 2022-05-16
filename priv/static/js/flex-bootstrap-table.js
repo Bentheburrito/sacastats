@@ -102,6 +102,10 @@ export function setupFlexTables() {
         setTimeout(function () {
             setFlexTableVisibilities();
         }, 10);
+
+        setTimeout(function () {
+            setMobileHeaderTexts(table.id);
+        }, 500);
     }
     function dropDownMenuClickEventHandler(e) {
         let target = e.target;
@@ -236,7 +240,9 @@ export function updateSearchParam() {
 export function setMobileHeaderTexts(tableID) {
     //append each header text to the front of the corresponding data element and hide it
     $('#' + tableID).find("th").each(function (i) {
-        $('#' + tableID + ' td:nth-child(' + (i + 1) + ')').prepend(getMobileHeader(hasMobileHeader($('#' + tableID + ' td:nth-child(' + (i + 1) + ')').html()) ? "" : getMobileHeader($(this).text())));
+        let tds = '#' + tableID + ' td:nth-child(' + (i + 1) + ')';
+        $(tds).prepend(getMobileHeader(hasMobileHeader($(tds).html()) ? ""
+            : getMobileHeader((document.querySelector(tds).hasAttribute('data-mobile-title')) ? document.querySelector(tds).getAttribute('data-mobile-title') : $(this).text())));
         if (window.innerWidth > 767) {
             $('.table-responsive-stack-thead').hide();
         }
