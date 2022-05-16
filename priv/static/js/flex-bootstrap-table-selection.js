@@ -124,7 +124,7 @@ function addRightClickTable() {
 
     function handleAnchorClickEvents() {
         resetCopyRowSelection();
-        $("." + mobileSelectionMenu).hide();
+        hideSelectionMobileMenu();
     }
     // function handlePageLinkClicks() {
     //     setTimeout(function () {
@@ -156,7 +156,7 @@ function addRightClickTable() {
         //if the click is not in the table remove selections and hide the special menu
         if ($(e.target).closest("table")[0] == undefined && !dragged && $(e.target).closest("." + mobileSelectionMenu)[0] == undefined) {
             resetCopyRowSelection(e);
-            $("." + mobileSelectionMenu).hide();
+            hideSelectionMobileMenu();
         }
     });
 
@@ -433,8 +433,13 @@ function showHideSelectionMobileMenu() {
     if (isMobileScreen() && !$("." + mobileSelectionMenu).is(":visible")) {
         $("." + mobileSelectionMenu).show();
     } else {
-        $("." + mobileSelectionMenu).hide();
+        hideSelectionMobileMenu();
     }
+}
+
+function hideSelectionMobileMenu() {
+    $("." + mobileSelectionMenu).hide();
+    document.getElementById(mobileSelectionMenu + "-select-all-btn").checked = false;
 }
 
 function getRowArrayIndex(row) {
