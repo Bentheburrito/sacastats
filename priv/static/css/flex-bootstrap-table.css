@@ -40,7 +40,7 @@
 }
 
 .dropdown-item:hover,
-input:hover {
+input:not(input[type=text]):not(input[type=search]):hover {
     cursor: pointer;
 }
 
@@ -80,10 +80,8 @@ input:hover {
     }
 }
 
-.search-input,
-.search-input:hover {
+.search-input {
     font-size: medium;
-    cursor: text;
 }
 
 @media only screen and (max-width: 767px) {
