@@ -400,7 +400,7 @@ function isThereAFilterSet() {
     return false;
 }
 
-function showHideClearFilterButtons() {
+export function showHideClearFilterButtons() {
     if (isThereAFilterSet()) {
         $(clearFilterButtonID).show();
         $(clearAllFilterButtonID).show();
@@ -418,6 +418,15 @@ function setNextAuraxVisibilities() {
     setTimeout(function () {
         showHideNextAuraxButton();
     }, 10);
+}
+
+export function setStickyHeaderWidths() {
+    let headers = document.querySelector("thead.sticky-header > tr").querySelectorAll("th");
+    let columns = document.querySelector(tableID + ">tbody>tr").querySelectorAll("td");
+    for (let i = 0; i < headers.length; i++) {
+        let width = $(columns[i]).width();
+        headers[i].style.width = (width + "px");
+    }
 }
 
 export function updateTableFiltration() {
@@ -489,6 +498,7 @@ function applyFormatsToTable() {
         addAnimationToProgressBars();
         addFormatsToPage();
         setMobileHeaderTexts(getTableID().substring(1));
+        setStickyHeaderWidths();
     }, 10);
 }
 

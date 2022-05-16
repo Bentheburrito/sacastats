@@ -1,67 +1,65 @@
-.aurax-progress{
-    background-color: #c29ffa!important;
+.aurax-progress {
+    background-color: #c29ffa !important;
 }
 
-#nextAurax{
+#nextAurax {
     position: relative;
     -webkit-box-flex: 0;
     -ms-flex: 0 1 auto;
     flex: 0 1 auto;
 }
 
-@media only screen and (min-width: 768px) { /*for boostrap > xs*/
-    nav{
+@media only screen and (min-width: 768px) {
+
+    /*for boostrap > xs*/
+    nav {
         opacity: 1;
     }
 }
 
-hr{
+hr {
     height: 1px;
     width: 80%;
     margin: 0 auto 12px auto;
     background-color: rgb(110, 110, 110);
     border: none;
 }
-#weaponTable-clear-filter-button{
+
+#weaponTable-clear-filter-button {
     position: absolute;
     right: 0;
     background-color: #d9534f;
     border-color: #d9534f;
 }
 
-.flash-border{
+.flash-border {
     position: relative;
 }
+
 .flash-border:after {
-  width: 100%;
-  height: 100%;
-  content: '';
-  outline: gold 10px solid!important;
-  outline-offset: -10px;
-  position: absolute;
-  top: 0;
-  left: 0;
+    width: 100%;
+    height: 100%;
+    content: '';
+    outline: gold 10px solid !important;
+    outline-offset: -10px;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
-.w-33{
-    width:33.3333%
+.weapon {
+    min-width: 150px;
 }
-.menu-item{
+
+.weapon-image {
+    height: 75px;
+    width: auto;
+}
+
+.w-33 {
+    width: 33.3333%
+}
+
+.menu-item {
     padding-left: 20px;
-}
-.selection-mobile-menu-top,
-.selection-mobile-menu-bottom{
-    position: fixed;
-    left: 0;
-    z-index: 1021;
-    height: 50px;
-    width: 100%;
-    background-color: rgba(34, 34, 34, .9);
-    color: rgb(218, 218, 218);
-}
-.selection-mobile-menu-top{
-    top: 0;
-}
-.selection-mobile-menu-bottom{
-    bottom: 170px;
 }

@@ -1,56 +1,81 @@
-tbody tr.selection, 
-tbody tr.selection > td:first-child {
-    background-color: #dddddd!important;
+tbody tr.selection,
+tbody tr.selection>td:first-child {
+    background-color: #dddddd !important;
 }
 
-.selection{
+.selection {
     position: relative;
-    border: gold 2px solid!important;
+    border: gold 2px solid !important;
 }
 
-.table{
+.table {
     -moz-user-select: none;
     -webkit-user-select: none;
     -ms-user-select: none;
     -o-user-select: none;
-    user-select: none; 
+    user-select: none;
 }
-#table-context-menu{
+
+#table-context-menu {
     width: 300px;
 }
-.context-menu-help{
+
+.context-menu-help {
     color: rgb(110, 110, 110);
     font-size: small;
 }
+
 .context-menu-row:hover,
-.context-menu-row:hover .context-menu-help{
+.context-menu-row:hover .context-menu-help {
     color: white;
     background-color: #9B84EE;
     cursor: pointer;
 }
-.context-menu-row{
+
+.context-menu-row {
     margin-left: 0;
 }
 
-@media only screen and (max-width: 767px) { /*for boostrap xs*/
+@media only screen and (max-width: 767px) {
+
+    /*for boostrap xs*/
     #table-copy-link,
-    #table-copy-text{
+    #table-copy-text {
         padding: 0;
-        padding-left: 10px!important;
+        padding-left: 10px !important;
     }
 }
 
-.toast{
+.toast {
     color: white;
     background-color: #727272;
     border-radius: 25px;
-    position:fixed;
+    position: fixed;
     top: 50%;
     left: 50%;
     cursor: default;
 }
 
 tr.selection.main-selected,
-tbody tr.selection.main-selected > td:first-child{
-    background-color: #b8b8b8!important;
+tbody tr.selection.main-selected>td:first-child {
+    background-color: #b8b8b8 !important;
+}
+
+.selection-mobile-menu-top,
+.selection-mobile-menu-bottom {
+    position: fixed;
+    left: 0;
+    z-index: 1021;
+    height: 50px;
+    width: 100%;
+    background-color: rgba(34, 34, 34, .9);
+    color: rgb(218, 218, 218);
+}
+
+.selection-mobile-menu-top {
+    top: 0;
+}
+
+.selection-mobile-menu-bottom {
+    bottom: 170px;
 }

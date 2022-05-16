@@ -59,7 +59,7 @@ export function setupFlexTables() {
         }
     }
     function addSearchEnter() {
-        document.querySelectorAll('.search-input').forEach(searchInput => {
+        document.querySelectorAll('input.search-input').forEach(searchInput => {
             searchInput.removeEventListener('keydown', tableSearchEnterDownEventHandler);
             searchInput.addEventListener('keydown', tableSearchEnterDownEventHandler);
             searchInput.removeEventListener('keyup', tableSearchEnterEventHandler);
@@ -183,7 +183,9 @@ export function setupFlexTables() {
         }
         setMobileHeaderTexts(tableID);
         setNextAuraxVisibilities();
+        bootstrapTableFilter.showHideClearFilterButtons();
         makeSureTableRecievedStyles();
+        bootstrapTableFilter.setStickyHeaderWidths();
     }
 
     function makeSureTableRecievedStyles(tableID) {

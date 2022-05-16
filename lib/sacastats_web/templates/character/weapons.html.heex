@@ -68,7 +68,11 @@
     </div>
 </div>
 
-<div id="toolbar">
+<div class="p-0 m-0 ml-1 mt-3 float-none float-md-right search btn-group">
+        <input class="form-control search-input mx-auto" type="search" placeholder="Search Weapon Name" autocomplete="off">
+</div>
+
+<div id="weaponTable-toolbar">
 </div>
 <button id="nextAurax" class="btn btn-secondary p-0 m-0 ml-1 mt-3 float-right"  data-toggle="tooltip" data-placement="top" title="Scroll to closest weapon to auraxium">
     <img src={Routes.static_path(@conn, "/images/character/alphaAurax.png")} class="m-auto" width="30px" alt="To Next Auraxium Weapon"/>
@@ -325,21 +329,19 @@
     </div>
 </div>
 <table class="table table-bordered table-striped table-responsive-stack" id="weaponTable"
-    data-toolbar="#toolbar"
+    data-toolbar="#weaponTable-toolbar"
     data-show-columns="true"
     data-reorderable-columns="true"
     data-sort-name="kills"
     data-sort-order="desc"
     data-sticky-header="true"
     data-sticky-header-offset-y="210"
-    data-search="true"
-    data-search-on-enter-key="true"
     data-pagination="true"
     data-page-size="5"
     data-page-list="[5, 10, 25, 50, 100, 200, All]">
     <thead class="">
         <tr>
-            <th data-field="weapon" data-switchable="false" data-toggle="tooltip" title="Weapons" class="pr-5">Weapon</th>
+            <th data-field="weapon" data-switchable="false" data-toggle="tooltip" title="Weapons" class="weapon">Weapon</th>
             <th data-field="kills" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Total number of kills" class="drag-accept">Kills</th>
             <th data-field="vskills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Total number of VS kills" class="drag-accept">VS-Kills</th>
             <th data-field="nckills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Total number of NC kills" class="drag-accept">NC-Kills</th>
@@ -399,7 +401,7 @@
                                 do: Routes.static_path(@conn, "/images/character/unknownVehicleWeapon.png"), 
                                 else: Routes.static_path(@conn, "/images/character/unknownInfantryWeapon.png"))
                             <> "'"} 
-                        alt={Map.get(weapon, "name", "N/A")} class="weapon mx-auto d-block" height="75vh"/>
+                        alt={Map.get(weapon, "name", "N/A")} class="weapon-image mx-auto d-block"/>
                     <h5 class="weaponName align-text-bottom text-center mb-0"><%=Map.get(weapon, "name", "N/A")%></h5>
                     <div id={"weapon" <> (weapon_id |> Integer.to_string()) <> "ProgressBar"} class="progress-bar progress-bar-striped progress-bar-animated aurax-progress" role="progressbar" 
                         aria-valuenow={"#{SacaStatsWeb.CharacterController.get_aurax_percent(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character["response"]["faction_id"]), 

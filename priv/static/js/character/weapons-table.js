@@ -175,20 +175,8 @@ export function showHideNextAuraxButton() {
 
 export default function init() {
     $('#weaponTable').bootstrapTable({
-        formatSearch: function () {
-            return 'Search Weapon Name'
-        },
-        customSearch: searchByWeaponName,
         dragaccept: '.drag-accept'
     });
-
-    function searchByWeaponName(data, text) {
-        return bootstrapTableFilter.sortData(data.filter(function (row) {
-            var template = document.createElement('template');
-            template.innerHTML = row.weapon;
-            return template.content.querySelector(".weaponName").innerHTML.toLowerCase().indexOf(text.toLowerCase()) > -1;
-        }));
-    }
 
     initializeButtonEvent();
     addCustomFilters();

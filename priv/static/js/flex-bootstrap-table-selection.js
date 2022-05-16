@@ -31,8 +31,9 @@ function addRightClickTable() {
 
         if (!isMobileScreen()) {
             //initialize special menu location
-            let yAdj = (e.clientY + $(contextMenuID).height() > $(window).height()) ? (e.clientY - $(contextMenuID).height() - 5) : e.clientY; //adjust height to show all of menu
-            let xAdj = (e.clientX + $(contextMenuID).width() > $(window).width()) ? (e.clientX - $(contextMenuID).width() - 2) : e.clientX; //adjust width to show all of menu
+            let isFireFox = navigator.userAgent.indexOf("Firefox") != -1;
+            let yAdj = (e.clientY + $(contextMenuID).height() > $(window).height()) ? (e.clientY - $(contextMenuID).height() - (isFireFox ? 0 : 5)) : e.clientY; //adjust height to show all of menu
+            let xAdj = (e.clientX + $(contextMenuID).width() > $(window).width()) ? (e.clientX - $(contextMenuID).width() - (isFireFox ? 0 : 2)) : e.clientX; //adjust width to show all of menu
             var top = ((yAdj / $(window).height()) * 100) + "%";
             var left = ((xAdj / $(window).width()) * 100) + "%";
 
@@ -117,9 +118,14 @@ function addRightClickTable() {
     });
 
     //add pagination events
-    $("a.dropdown-item").on("click", resetCopyRowSelection);
+    $("a.dropdown-item").on("click", handleAnchorClickEvents);
 
-    $('a.page-link').on('click', resetCopyRowSelection);
+    $('a.page-link').on('click', handleAnchorClickEvents);
+
+    function handleAnchorClickEvents() {
+        resetCopyRowSelection();
+        showHideSelectionMobileMenu();
+    }
     // function handlePageLinkClicks() {
     //     setTimeout(function () {
     //         rowArray = [...$(tableID).find("tbody").first()[0].children];
@@ -150,6 +156,7 @@ function addRightClickTable() {
         //if the click is not in the table remove selections and hide the special menu
         if ($(e.target).closest("table")[0] == undefined && !dragged && $(e.target).closest("." + mobileSelectionMenu)[0] == undefined) {
             resetCopyRowSelection(e);
+            $("." + mobileSelectionMenu).hide();
         }
     });
 
@@ -208,6 +215,7 @@ function addMobileSelectionMenuClickEvents() {
     //handle back button clicks
     backBtn.addEventListener("click", function (e) {
         resetCopyRowSelection(e);
+        showHideSelectionMobileMenu();
     });
 
     //handle select all clicks
@@ -243,7 +251,6 @@ function resetCopyRowSelection(e) {
         selectedRowIndex = undefined;
     }
     handleMobileMenu();
-    showHideSelectionMobileMenu();
 }
 
 function hideContextMenu() {
@@ -570,6 +577,7 @@ function copySelectedRows(e) {
     //copy the new url to clipboard and reset selection
     navigator.clipboard.writeText(copyString);
     resetCopyRowSelection(e);
+    showHideSelectionMobileMenu();
 }
 
 export function getSelectedRows() {
