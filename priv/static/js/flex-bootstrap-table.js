@@ -152,7 +152,11 @@ export function setupFlexTables() {
                 setMobileHeaderTexts(table.id);
                 addAnimationToProgressBars();
                 addFormatsToPage();
-                refreshByScroll();
+
+                setTimeout(function () {
+                    bootstrapTableFilter.setStickyHeaderWidths();
+                    refreshByScroll();
+                }, 100);
             }
         }, 100);
     }
