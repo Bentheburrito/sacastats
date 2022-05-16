@@ -5,7 +5,17 @@ tbody tr.selection>td:first-child {
 
 .selection {
     position: relative;
-    border: gold 2px solid !important;
+}
+
+.selection:after {
+    width: 100%;
+    height: 100%;
+    content: '';
+    outline: gold 4px solid !important;
+    outline-offset: -4px;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
 .table {
