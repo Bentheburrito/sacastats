@@ -5,6 +5,14 @@
     min-width: 300px;
 }
 
+.progress-bar-background {
+    background-color: rgba(194, 194, 194, 0.9);
+}
+
+.medal {
+    background: radial-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0) 70%);
+}
+
 @media screen and (max-width: 767px) {
 
     /*for boostrap xs*/
