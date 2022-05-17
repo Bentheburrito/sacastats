@@ -10,9 +10,9 @@ export function setupFlexTables() {
     document.querySelectorAll('.table-responsive-stack').forEach(table => {
         bootstrapTableFilter.init(table.id);
         bootstrapSelection.init(table.id);
+        initializeStickyHeaderWidths();
         init();
     });
-    initializeStickyHeaderWidths();
 
     function init() {
         initializeFlexTables();
