@@ -10,7 +10,6 @@ export function setupFlexTables() {
     document.querySelectorAll('.table-responsive-stack').forEach(table => {
         bootstrapTableFilter.init(table.id);
         bootstrapSelection.init(table.id);
-        initializeStickyHeaderWidths();
         init();
     });
 
@@ -23,6 +22,7 @@ export function setupFlexTables() {
     function initializeFlexTables() {
         document.querySelectorAll('.table-responsive-stack').forEach(responseTable => {
             table = responseTable;
+            initializeStickyHeaderWidths();
             setMobileHeaderTexts(table.id);
             addOnTHeadClick();
             addToolBarClick();
