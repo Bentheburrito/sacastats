@@ -33,18 +33,13 @@ hr {
 }
 
 .flash-border {
-    position: relative;
+    z-index: 2;
+    outline: gold 4px solid !important;
+    outline-offset: -4px;
 }
 
-.flash-border:after {
-    width: 100%;
-    height: 100%;
-    content: '';
-    outline: gold 10px solid !important;
-    outline-offset: -10px;
-    position: absolute;
-    top: 0;
-    left: 0;
+.flash-border>td {
+    z-index: -1;
 }
 
 .weapon {

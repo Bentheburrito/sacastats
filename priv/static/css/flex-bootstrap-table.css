@@ -82,8 +82,11 @@ input:not(input[type=text]):not(input[type=search]):hover {
         background-color: #ffffff;
     }
 
-    tbody tr:hover,
-    tbody tr:hover>td:first-child {
+    .table tr.selected td:first-child {
+        background-color: #ffffff;
+    }
+
+    tbody tr:hover>td {
         background-color: #dddddd !important;
     }
 }

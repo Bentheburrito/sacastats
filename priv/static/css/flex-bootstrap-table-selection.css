@@ -1,21 +1,15 @@
-tbody tr.selection,
-tbody tr.selection>td:first-child {
+tbody tr.selection>td {
     background-color: #dddddd !important;
 }
 
 .selection {
-    position: relative;
-}
-
-.selection:after {
-    width: 100%;
-    height: 100%;
-    content: '';
+    z-index: 2;
     outline: gold 4px solid !important;
     outline-offset: -4px;
-    position: absolute;
-    top: 0;
-    left: 0;
+}
+
+.selection>td {
+    z-index: -1;
 }
 
 .table {
@@ -66,8 +60,7 @@ tbody tr.selection>td:first-child {
     cursor: default;
 }
 
-tr.selection.main-selected,
-tbody tr.selection.main-selected>td:first-child {
+tbody tr.selection.main-selected>td {
     background-color: #b8b8b8 !important;
 }
 
