@@ -86,8 +86,16 @@ input:not(input[type=text]):not(input[type=search]):hover {
         background-color: #ffffff;
     }
 
-    tbody tr:hover>td {
+    tbody tr:not(tr.selection):hover>td {
         background-color: #dddddd !important;
+    }
+
+    tr.selection:hover {
+        background-color: rgba(0, 0, 0, 0) !important;
+    }
+
+    tr.selection {
+        background-color: rgba(0, 0, 0, 0) !important;
     }
 }
 
