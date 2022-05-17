@@ -420,9 +420,11 @@ function setNextAuraxVisibilities() {
     }, 10);
 }
 
-function refreshByScroll() {
-    window.scrollBy(0, -1);
-    window.scrollBy(0, 1);
+function initializeStickyHeaderWidths() {
+    let top = JSON.parse(JSON.stringify(document.body.scrollTop));
+    document.body.scrollTop = 0;
+    setStickyHeaderWidths();
+    document.body.scrollTop = top;
 }
 
 export function setStickyHeaderWidths() {
@@ -430,9 +432,10 @@ export function setStickyHeaderWidths() {
     let columns = document.querySelector(tableID + ">tbody>tr").querySelectorAll("td");
     for (let i = 0; i < headers.length; i++) {
         let width = $(columns[i]).width();
-        headers[i].style.width = (width + "px");
+        $(headers[i]).css({
+            'width': width + 'px'
+        });
     }
-    refreshByScroll();
 }
 
 export function updateTableFiltration() {
@@ -584,6 +587,7 @@ export function init(id) {
 
     //set up filter option data and event listeners
     initializeSearchInput();
+    initializeStickyHeaderWidths();
     updateTableFiltration();
     addFilterListeners();
     updateFilterOptionAvailability();
