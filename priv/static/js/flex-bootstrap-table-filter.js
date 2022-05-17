@@ -421,15 +421,23 @@ function setNextAuraxVisibilities() {
 }
 
 function initializeStickyHeaderWidths() {
+    //get the current scroll position and scroll to the top of the page
     let top = JSON.parse(JSON.stringify(document.body.scrollTop));
     document.body.scrollTop = 0;
+
+    //set the sticky header widths
     setStickyHeaderWidths();
+
+    //reset the scroll position to the original
     document.body.scrollTop = top;
 }
 
 export function setStickyHeaderWidths() {
+    //initialize variables
     let headers = document.querySelector("thead.sticky-header > tr").querySelectorAll("th");
     let columns = document.querySelector(tableID + ">tbody>tr").querySelectorAll("td");
+
+    //make sure each header matches it's matching td
     for (let i = 0; i < headers.length; i++) {
         let width = $(columns[i]).width();
         $(headers[i]).css({
