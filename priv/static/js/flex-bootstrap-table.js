@@ -12,7 +12,7 @@ export function setupFlexTables() {
         bootstrapSelection.init(table.id);
         init();
     });
-    refreshByScroll(); //fixes sticky header being in the wrong position on start
+    initializeStickyHeaderWidths();
 
     function init() {
         initializeFlexTables();
@@ -155,7 +155,7 @@ export function setupFlexTables() {
                 addFormatsToPage();
 
                 setTimeout(function () {
-                    bootstrapTableFilter.setStickyHeaderWidths();
+                    setStickyHeaderWidths();
                 }, 100);
             }
         }, 100);
@@ -204,7 +204,7 @@ export function setupFlexTables() {
         setNextAuraxVisibilities();
         bootstrapTableFilter.showHideClearFilterButtons();
         makeSureTableRecievedStyles();
-        bootstrapTableFilter.setStickyHeaderWidths();
+        setStickyHeaderWidths();
     }
 
     function makeSureTableRecievedStyles(tableID) {
@@ -294,6 +294,32 @@ export function didTableRecieveStyleUpdate() {
         }
     }
     return true;
+}
+
+function initializeStickyHeaderWidths() {
+    //get the current scroll position and scroll to the top of the page
+    let top = JSON.parse(JSON.stringify(document.body.scrollTop));
+    document.body.scrollTop = 0;
+
+    //set the sticky header widths
+    setStickyHeaderWidths();
+
+    //reset the scroll position to the original
+    document.body.scrollTop = top;
+}
+
+export function setStickyHeaderWidths() {
+    //initialize variables
+    let headers = document.querySelector("thead.sticky-header > tr").querySelectorAll("th");
+    let columns = document.querySelector("#" + table.id + ">tbody>tr").querySelectorAll("td");
+
+    //make sure each header matches it's matching td
+    for (let i = 0; i < headers.length; i++) {
+        let width = $(columns[i]).width();
+        $(headers[i]).css({
+            'width': width + 'px'
+        });
+    }
 }
 
 export function setFlexTableVisibilities() {

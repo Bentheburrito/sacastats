@@ -1,4 +1,4 @@
-import { setMobileHeaderTexts, updateSearchParam } from "/js/flex-bootstrap-table.js";
+import { setMobileHeaderTexts, updateSearchParam, setStickyHeaderWidths } from "/js/flex-bootstrap-table.js";
 import { addFormatsToPage, addAnimationToProgressBars } from "/js/formats.js";
 import { showHideNextAuraxButton } from "/js/character/weapons-table.js";
 
@@ -420,32 +420,6 @@ function setNextAuraxVisibilities() {
     }, 10);
 }
 
-function initializeStickyHeaderWidths() {
-    //get the current scroll position and scroll to the top of the page
-    let top = JSON.parse(JSON.stringify(document.body.scrollTop));
-    document.body.scrollTop = 0;
-
-    //set the sticky header widths
-    setStickyHeaderWidths();
-
-    //reset the scroll position to the original
-    document.body.scrollTop = top;
-}
-
-export function setStickyHeaderWidths() {
-    //initialize variables
-    let headers = document.querySelector("thead.sticky-header > tr").querySelectorAll("th");
-    let columns = document.querySelector(tableID + ">tbody>tr").querySelectorAll("td");
-
-    //make sure each header matches it's matching td
-    for (let i = 0; i < headers.length; i++) {
-        let width = $(columns[i]).width();
-        $(headers[i]).css({
-            'width': width + 'px'
-        });
-    }
-}
-
 export function updateTableFiltration() {
     //make sure the table data and filtration are initialized
     accountForShowAlls();
@@ -595,7 +569,6 @@ export function init(id) {
 
     //set up filter option data and event listeners
     initializeSearchInput();
-    initializeStickyHeaderWidths();
     updateTableFiltration();
     addFilterListeners();
     updateFilterOptionAvailability();
