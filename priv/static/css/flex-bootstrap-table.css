@@ -41,6 +41,10 @@
         float: left\9;
         width: 100%;
     }
+
+    .bootstrap-table {
+        padding-bottom: 500px;
+    }
 }
 
 .bootstrap-table {
