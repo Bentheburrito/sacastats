@@ -1,4 +1,5 @@
 @import "flex-bootstrap-table.css";
+@import "navbar-events.css";
 
 /*General*/
 footer {
@@ -47,96 +48,6 @@ figure {
   .progress>div {
     height: 30px;
   }
-}
-
-/*Navbar*/
-.nav-link {
-  font-family: 'Teko', sans-serif;
-  text-align: center;
-  padding-left: 20px;
-}
-
-.navbar-nav {
-  padding: 20px;
-  padding-bottom: 0px;
-}
-
-.second-nav {
-  position: -webkit-sticky;
-  position: sticky;
-  top: 167px;
-  z-index: 1020;
-}
-
-nav {
-  opacity: 0.94;
-}
-
-.navbar-expand-md .navbar-collapse {
-  flex-direction: column;
-  align-items: flex-end;
-}
-
-.top-bottom-nav {
-  transition: .3s;
-}
-
-.sticky-top {
-  margin-bottom: 0px;
-}
-
-.active-page {
-  border-bottom: 3px solid gold;
-  transition: .5s;
-}
-
-.active-subpage {
-  border-bottom: 3px solid gold;
-  transition: .5s;
-}
-
-/*individual hover colors*/
-ul.navbar-nav li:not(.active-page):not(.active-subpage) {
-  box-sizing: border-box;
-  border-bottom: 3px solid transparent;
-  transition: .5s;
-}
-
-ul.navbar-nav li:hover,
-ul.navbar-nav li:hover>a.moving-nav-link {
-  margin-top: -10px;
-  transition: .2s;
-}
-
-ul.navbar-nav li:hover,
-ul.navbar-nav li {
-  height: 100%;
-}
-
-ul.navbar-nav li:hover,
-ul.navbar-nav li:hover>a.static-nav-link {
-  margin-top: 0px;
-  transition: 0s;
-}
-
-ul.navbar-nav li:hover:nth-child(4n+1) {
-  border-bottom: 3px solid #9370DB;
-  color: #9370DB;
-}
-
-ul.navbar-nav li:hover:nth-child(4n+2) {
-  border-bottom: 3px solid #1E90FF;
-  color: #1E90FF;
-}
-
-ul.navbar-nav li:hover:nth-child(4n+3) {
-  border-bottom: 3px solid #CD5C5C;
-  color: #CD5C5C;
-}
-
-ul.navbar-nav li:hover:nth-child(4n+4) {
-  border-bottom: 3px solid #716857;
-  color: #716857;
 }
 
 /*Padding*/
