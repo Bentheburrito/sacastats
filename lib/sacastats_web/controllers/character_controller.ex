@@ -8,138 +8,60 @@ defmodule SacaStatsWeb.CharacterController do
 
   alias PS2.API.{Join, Query}
   alias SacaStats.Session
+  alias SacaStatsWeb.CharacterController
 
-  def character(conn, %{"character_name" => name, "stat_type" => "lookup"}) do
-    redirect(conn, to: Routes.character_path(conn, :character, name, "general"))
+  @excluded_weapon_categories [
+    "Infantry Abilities",
+    "Vehicle Abilities",
+    "ANT Harvesting Tool"
+  ]
+
+  @query_gens %{
+    "general" => &CharacterController.general_query/1,
+    "stats" => &CharacterController.stats_query/1,
+    "directives" => &CharacterController.stats_query/1,
+    "weapons" => &CharacterController.weapons_query/1
+  }
+
+  def general(conn, %{"character_name" => _name}) do
+    redirect(conn, to: conn.request_path <> "/general")
   end
 
-  def character(conn, %{"character_name" => name, "stat_type" => "general"}) do
-    query =
-      Query.new(collection: "character")
-      |> term("name.first_lower", String.downcase(name))
-      |> resolve([
-        "online_status",
-        "world",
-        "outfit(alias,id,name)"
-      ])
-      |> lang("en")
-
-    body = query_or_redirect(conn, query, name)
-
-    next_rank =
-      body
-      |> get_in(["battle_rank", "value"])
-      |> String.to_integer()
-      |> Kernel.+(1)
-
-    status = if body["online_status"] |> String.to_integer() > 0, do: "online", else: "offline"
-
-    character = %{
-      "stat_page" => "general.html",
-      "response" => body,
-      "next_rank" => next_rank,
-      "status" => status
-    }
-
-    render(conn, "template.html", character: character)
+  def search(conn, _params) do
+    render(conn, "lookup.html")
   end
 
-  def character(conn, %{"character_name" => name, "stat_type" => "stats"}) do
-    query =
-      Query.new(collection: "character")
-      |> term("name.first_lower", String.downcase(name))
-      |> resolve([
-        "online_status",
-        "world",
-        "outfit(alias,id,name)"
-      ])
-      |> join(
-        Join.new(collection: "item_profile")
-        |> on("items.item_id")
-        |> to("item_id")
-        |> list(true)
-        |> show("profile_id")
-        |> inject_at("classes_list")
-      )
-      |> lang("en")
+  def character(%Plug.Conn{} = conn, %{"character_name" => name, "stat_type" => stat_type}) do
+    with {:ok, query_gen} <- Map.fetch(@query_gens, stat_type),
+         {:ok, info} <- SacaStats.CensusCache.get(SacaStats.CharacterCache, name, query_gen.(name)),
+         {:ok, status} <- SacaStats.CensusCache.get(SacaStats.OnlineStatusCache, name, online_status_query(info["character_id"])) do
+      parse_and_render(conn, info, status, stat_type)
+    else
+      {:error, :not_found} ->
+        conn
+        |> put_flash(:error, "The character '#{name}' doesn't appear to exist.")
+        |> redirect(to: Routes.character_path(conn, :search))
 
-    body = query_or_redirect(conn, query, name)
+      {:error, e} ->
+        Logger.error("Error fetching character: #{inspect(e)}")
 
-    next_rank =
-      body
-      |> get_in(["battle_rank", "value"])
-      |> String.to_integer()
-      |> Kernel.+(1)
+        conn
+        |> put_flash(:error, "We are unable to get that character right now. Please try again soon.")
+        |> redirect(to: Routes.character_path(conn, :search))
 
-    status = if body["online_status"] |> String.to_integer() > 0, do: "online", else: "offline"
-
-    character = %{
-      "stat_page" => "stats.html",
-      "response" => body,
-      "next_rank" => next_rank,
-      "status" => status
-    }
-
-    render(conn, "template.html", character: character)
+      :error ->
+        conn
+        |> put_flash(:error, "'#{stat_type}' is an unknown page.")
+        |> redirect(to: Routes.character_path(conn, :search))
+    end
   end
 
-  def character(conn, %{"character_name" => name, "stat_type" => "directives"}) do
-    query =
-      Query.new(collection: "character")
-      |> term("name.first_lower", String.downcase(name))
-      |> resolve([
-        "online_status",
-        "world",
-        "outfit(alias,id,name)"
-      ])
-      |> join(
-        Join.new(collection: "item_profile")
-        |> on("items.item_id")
-        |> to("item_id")
-        |> list(true)
-        |> show("profile_id")
-        |> inject_at("classes_list")
-      )
-      |> lang("en")
+  defp parse_and_render(conn, info, status, "weapons") do
 
-    body = query_or_redirect(conn, query, name)
-
-    next_rank =
-      body
-      |> get_in(["battle_rank", "value"])
-      |> String.to_integer()
-      |> Kernel.+(1)
-
-    status = if body["online_status"] |> String.to_integer() > 0, do: "online", else: "offline"
-
-    character = %{
-      "stat_page" => "directives.html",
-      "response" => body,
-      "next_rank" => next_rank,
-      "status" => status
-    }
-
-    render(conn, "template.html", character: character)
-  end
-
-  def character(conn, %{"character_name" => name, "stat_type" => "weapons"}) do
-    query =
-      Query.new(collection: "character")
-      |> term("name.first_lower", String.downcase(name))
-      |> resolve([
-        "online_status",
-        "outfit(alias,id,name)",
-        "weapon_stat",
-        "weapon_stat_by_faction"
-      ])
-      |> lang("en")
-
-    body = query_or_redirect(conn, query, name)
-
-    weapon_general_stats = Enum.reduce(body["stats"]["weapon_stat"], %{}, &put_weapon_stat/2)
+    weapon_general_stats = Enum.reduce(info["stats"]["weapon_stat"], %{}, &put_weapon_stat/2)
 
     weapon_faction_stats =
-      Enum.reduce(body["stats"]["weapon_stat_by_faction"], %{}, &put_weapon_stat/2)
+      Enum.reduce(info["stats"]["weapon_stat_by_faction"], %{}, &put_weapon_stat/2)
 
     complete_weapon_stats =
       Map.merge(weapon_general_stats, weapon_faction_stats, fn _item_id, map1, map2 ->
@@ -148,45 +70,36 @@ defmodule SacaStatsWeb.CharacterController do
 
     complete_weapons =
       for {weapon_id, weapon} <- SacaStats.weapons(),
-          is_map_key(complete_weapon_stats, Integer.to_string(weapon_id)),
-          is_map_key(complete_weapon_stats[Integer.to_string(weapon_id)], "weapon_play_time") or
-            is_map_key(complete_weapon_stats[Integer.to_string(weapon_id)], "weapon_killed_by"),
-          weapon["category"] not in [
-            "Infantry Abilities",
-            "Vehicle Abilities",
-            "ANT Harvesting Tool"
-          ],
+          weapon_id = Integer.to_string(weapon_id),
+          is_map_key(complete_weapon_stats, weapon_id),
+          is_map_key(complete_weapon_stats[weapon_id], "weapon_play_time") or
+            is_map_key(complete_weapon_stats[weapon_id], "weapon_killed_by"),
+          weapon["category"] not in @excluded_weapon_categories,
           into: %{} do
         weapon_stats = Map.fetch!(complete_weapon_stats, Integer.to_string(weapon_id))
         {weapon_id, Map.merge(weapon, weapon_stats)}
       end
 
-    faction_set =
-      for id <- get_sorted_set_of_items("faction_id", complete_weapons) do
-        get_faction_alias(id)
-      end
-      |> MapSet.new()
-      |> Enum.sort()
-
     type_set = get_sorted_set_of_items("category", complete_weapons)
     category_set = get_sorted_set_of_items("sanction", complete_weapons)
 
-    status = if body["online_status"] |> String.to_integer() > 0, do: "online", else: "offline"
+    assigns = [
+      character_info: info,
+      online_status: status,
+      stat_page: "weapons.html",
+      weapons: complete_weapons,
+      types: type_set,
+      categories: category_set
+    ]
 
-    character = %{
-      "stat_page" => "weapons.html",
-      "response" => body,
-      "weapons" => complete_weapons,
-      "status" => status,
-      "factions" => faction_set,
-      "types" => type_set,
-      "categories" => category_set
-    }
-
-    render(conn, "template.html", character: character)
+    render(conn, "template.html", assigns)
   end
 
-  def character_sessions(conn, %{"character_name" => name}) do
+  defp parse_and_render(conn, info, status, stat_type) do
+    render(conn, "template.html", character_info: info, online_status: status, stat_page: stat_type <> ".html")
+  end
+
+  def character(conn, %{"character_name" => name, "stat_type" => "sessions"}) do
     sessions = SacaStats.Session.get_summary(name)
     latest_session = List.first(sessions)
 
@@ -213,7 +126,7 @@ defmodule SacaStatsWeb.CharacterController do
     render(conn, "template.html", sessions: sessions, character: character)
   end
 
-  def character_session(conn, %{"character_name" => name, "login_timestamp" => login_timestamp}) do
+  def session(conn, %{"character_name" => name, "login_timestamp" => login_timestamp}) do
     session = SacaStats.Session.get(name, login_timestamp)
 
     {:ok, %PS2.API.QueryResult{data: status}} =
@@ -234,43 +147,51 @@ defmodule SacaStatsWeb.CharacterController do
     render(conn, "template.html", session: session, character: character)
   end
 
-  def character_general(conn, %{"character_name" => _name}) do
-    redirect(conn, to: conn.request_path <> "/general")
+  def general_query(name) do
+    {&PS2.API.query_one/2,
+      [Query.new(collection: "character")
+      |> term("name.first_lower", String.downcase(name))
+      |> resolve([
+        "outfit(alias,id,name)"
+      ])
+      |> lang("en"), SacaStats.sid()]}
   end
 
-  def character_search(conn, _params) do
-    render(conn, "lookup.html")
+  def stats_query(name) do
+    {&PS2.API.query_one/2,
+      [Query.new(collection: "character")
+      |> term("name.first_lower", String.downcase(name))
+      |> resolve([
+        "outfit(alias,id,name)"
+      ])
+      |> join(
+        Join.new(collection: "item_profile")
+        |> on("items.item_id")
+        |> to("item_id")
+        |> list(true)
+        |> show("profile_id")
+        |> inject_at("classes_list")
+      )
+      |> lang("en"), SacaStats.sid()]}
   end
 
-  def character_find(conn, _params) do
-    conn = parse(conn)
-    name = conn.params["character"]
-
-    redirect(conn, to: Routes.character_path(conn, :character, name, "general"))
+  def weapons_query(name) do
+    {&PS2.API.query_one/2,
+      [Query.new(collection: "character")
+      |> term("name.first_lower", String.downcase(name))
+      |> resolve([
+        "online_status",
+        "outfit(alias,id,name)",
+        "weapon_stat",
+        "weapon_stat_by_faction"
+      ])
+      |> lang("en")], SacaStats.sid()}
   end
 
-  def parse(conn, opts \\ []) do
-    opts = Keyword.put_new(opts, :parsers, [Plug.Parsers.URLENCODED, Plug.Parsers.MULTIPART])
-    Plug.Parsers.call(conn, Plug.Parsers.init(opts))
-  end
-
-  def query_or_redirect(conn, query, name) do
-    case PS2.API.query(query, SacaStats.sid()) do
-      {:ok, %PS2.API.QueryResult{returned: 0}} ->
-        conn
-        |> put_flash(:error, "The character '#{name}' doesn't appear to exist.")
-        |> redirect(to: Routes.character_path(conn, :character_search))
-
-      {:ok, %PS2.API.QueryResult{data: [body]}} ->
-        body
-
-      {:error, e} ->
-        Logger.error("Error fetching character: #{inspect(e)}")
-
-        conn
-        |> put_flash(:error, "Couldn't get that character right now. Please try again soon.")
-        |> redirect(to: Routes.character_path(conn, :character_search))
-    end
+  def online_status_query(character_id) do
+    {&PS2.API.query_one/2,
+      [Query.new(collection: "characters_online_status")
+      |> term("character_id", character_id), SacaStats.sid()]}
   end
 
   defp put_weapon_stat(weapon_stat, acc) do
@@ -294,37 +215,17 @@ defmodule SacaStatsWeb.CharacterController do
     |> min(100)
   end
 
-  def get_medal_code(infantry_kills, vehicle_kills) do
-    total_kills = infantry_kills + vehicle_kills
+  def get_medal_code(infantry_kills, vehicle_kills) when infantry_kills + vehicle_kills >= 1160, do: 3068
+  def get_medal_code(infantry_kills, vehicle_kills) when infantry_kills + vehicle_kills >= 160, do: 3075
+  def get_medal_code(infantry_kills, vehicle_kills) when infantry_kills + vehicle_kills >= 60, do: 3079
+  def get_medal_code(infantry_kills, vehicle_kills) when infantry_kills + vehicle_kills >= 10, do: 3072
+  def get_medal_code(_infantry_kills, _vehicle_kills), do: -1
 
-    cond do
-      total_kills >= 1160 ->
-        3068
-
-      total_kills >= 160 ->
-        3075
-
-      total_kills >= 60 ->
-        3079
-
-      total_kills >= 10 ->
-        3072
-
-      true ->
-        -1
-    end
-  end
-
-  def get_faction_alias(faction_id) do
-    case faction_id do
-      nil -> "NS"
-      0 -> "NS"
-      1 -> "VS"
-      2 -> "NC"
-      3 -> "TR"
-      4 -> "NSO"
-    end
-  end
+  def get_faction_alias(4), do: "NSO"
+  def get_faction_alias(3), do: "TR"
+  def get_faction_alias(2), do: "NC"
+  def get_faction_alias(1), do: "VS"
+  def get_faction_alias(faction_id) when faction_id in [nil, 0], do: "NS"
 
   def get_total_values(nil, _faction_id), do: 0
 

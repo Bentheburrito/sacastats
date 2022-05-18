@@ -37,7 +37,7 @@ defmodule SacaStats.CensusCache do
   Returns {:ok, value} if the key-value is present in the cache. If a fallback function is provided, it will be lazily
   evaluated to obtain the value, and update the cache automatically. The fallback function is expected to be either
   `c:PS2.API.query/3` or `c:PS2.API.query_one/3`, though a custom function can be provided as long as its returns are
-  the same.
+  the same as the previous two functions.
 
   If the key-value is neither in the cache nor retrieved by the fallback function, {:error, :not_found} is returned, or
   another error tuple if returned by the fallback function.

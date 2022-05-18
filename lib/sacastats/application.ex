@@ -26,7 +26,8 @@ defmodule SacaStats.Application do
       # Start the Endpoint (http/https)
       SacaStatsWeb.Endpoint,
       # Start caches
-      {SacaStats.CensusCache, [name: SacaStats.CharacterCache]},
+      Supervisor.child_spec({SacaStats.CensusCache, [name: SacaStats.CharacterCache]}, id: :character_cache),
+      Supervisor.child_spec({SacaStats.CensusCache, [name: SacaStats.OnlineStatusCache]}, id: :online_status_cache),
       # Start the ESS Websocket
       {PS2.Socket, ess_opts}
     ]

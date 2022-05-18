@@ -42,7 +42,7 @@
                                         </span>
                                     </label>
                                 </div>
-                                <%= for faction <- @character["factions"] do %>
+                                <%= for faction <- ["NC", "TR", "VS", "NS", "NSO"] do %>
                                     <div class="filter-option small-filter-option">
                                         <label class="dropdown-item">
                                             <input class="form-check-input filter-input" type="checkbox" name="faction" id={faction <> "-faction-filter-option"}>
