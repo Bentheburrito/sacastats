@@ -59,7 +59,9 @@ export function addFormatsToPage() {
         const MINUTE_SECOND = 60;
 
         seconds.forEach(second => {
-            let secondCount = +second.innerHTML;
+            let secondFindingArray = second.innerHTML.split("</span>");
+            let secondCount = +secondFindingArray[secondFindingArray.length - 1];
+
             //if it's a number
             if (!isNaN(secondCount)) {
                 let time = "";

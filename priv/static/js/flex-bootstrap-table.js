@@ -1,14 +1,16 @@
 import { addFormatsToPage, addAnimationToProgressBars } from "/js/formats.js";
 import { showHideNextAuraxButton } from "/js/character/weapons-table.js";
 import * as bootstrapTableFilter from "/js/flex-bootstrap-table-filter.js";
+import * as bootstrapSelection from "/js/flex-bootstrap-table-selection.js";
 
 let table;
 
 export function setupFlexTables() {
-    init();
 
     document.querySelectorAll('.table-responsive-stack').forEach(table => {
         bootstrapTableFilter.init(table.id);
+        bootstrapSelection.init(table.id);
+        init();
     });
 
     function init() {
@@ -20,11 +22,13 @@ export function setupFlexTables() {
     function initializeFlexTables() {
         document.querySelectorAll('.table-responsive-stack').forEach(responseTable => {
             table = responseTable;
+            initializeStickyHeaderWidths();
             setMobileHeaderTexts(table.id);
             addOnTHeadClick();
             addToolBarClick();
             addSearchEnter();
             addPaginationClick();
+            addOnDocumentMouseUp();
             showHideNextAuraxButton();
         });
     }
@@ -32,21 +36,31 @@ export function setupFlexTables() {
     function setNextAuraxVisibilities() {
         setTimeout(function () {
             showHideNextAuraxButton();
-        }, 500);
+        }, 10);
     }
 
     function tableSearchEnterEventHandler(e) {
         if (e.keyCode == 13) {
-            updateSearchParam();
+            searchTable(e);
+        } else {
+            let text = JSON.parse(JSON.stringify(document.querySelector("input.search-input").value));
             setTimeout(function () {
-                bootstrapTableFilter.updateTableFiltration();
-                updateTableFormats(table.id);
-            }, 500);
-
-            if (document.querySelector("input.search-input").value != "") {
-                if (window.innerWidth >= 768) {
-                    document.querySelector("input.search-input").select();
+                if (text == document.querySelector("input.search-input").value) {
+                    searchTable(e);
                 }
+            }, 300);
+        }
+    }
+    function searchTable(e) {
+        updateSearchParam();
+        setTimeout(function () {
+            bootstrapTableFilter.updateTableFiltration();
+            updateTableFormats(table.id);
+        }, 10);
+
+        if (document.querySelector("input.search-input").value != "" && e.keyCode == 13) {
+            if (window.innerWidth >= 768) {
+                document.querySelector("input.search-input").select();
             }
         }
     }
@@ -56,7 +70,7 @@ export function setupFlexTables() {
         }
     }
     function addSearchEnter() {
-        document.querySelectorAll('.search-input').forEach(searchInput => {
+        document.querySelectorAll('input.search-input').forEach(searchInput => {
             searchInput.removeEventListener('keydown', tableSearchEnterDownEventHandler);
             searchInput.addEventListener('keydown', tableSearchEnterDownEventHandler);
             searchInput.removeEventListener('keyup', tableSearchEnterEventHandler);
@@ -99,6 +113,10 @@ export function setupFlexTables() {
         setTimeout(function () {
             setFlexTableVisibilities();
         }, 10);
+
+        setTimeout(function () {
+            setMobileHeaderTexts(table.id);
+        }, 500);
     }
     function dropDownMenuClickEventHandler(e) {
         let target = e.target;
@@ -127,6 +145,25 @@ export function setupFlexTables() {
     function refreshByScroll() {
         window.scrollBy(0, -1);
         window.scrollBy(0, 1);
+    }
+
+    function documentMouseUpEventHandler() {
+        setTimeout(function () {
+            if (!didTableRecieveStyleUpdate()) {
+                setMobileHeaderTexts(table.id);
+                addAnimationToProgressBars();
+                addFormatsToPage();
+
+                setTimeout(function () {
+                    setStickyHeaderWidths();
+                }, 100);
+            }
+        }, 100);
+    }
+
+    function addOnDocumentMouseUp() {
+        $(document).off("mouseup", documentMouseUpEventHandler);
+        $(document).on("mouseup", documentMouseUpEventHandler);
     }
 
     let prevDate = new Date().getTime();
@@ -165,7 +202,9 @@ export function setupFlexTables() {
         }
         setMobileHeaderTexts(tableID);
         setNextAuraxVisibilities();
+        bootstrapTableFilter.showHideClearFilterButtons();
         makeSureTableRecievedStyles();
+        setStickyHeaderWidths();
     }
 
     function makeSureTableRecievedStyles(tableID) {
@@ -181,19 +220,19 @@ export function setupFlexTables() {
                 //otherwise reinitialize the table
                 init();
             }
-        }, 500);
+        }, 10);
     }
 
     function tablePaginationClickEventHandler(e) {
-        if (e.target.classList.contains("page-link") || e.target.classList.contains("dropdown-item")) {
-            setTimeout(function () {
-                updateTableFormats(table.id);
-            }, 500);
-        }
+        setTimeout(function () {
+            updateTableFormats(table.id);
+        }, 10);
     }
     function addPaginationClick() {
-        $('a').off('click', tablePaginationClickEventHandler);
-        $('a').on('click', tablePaginationClickEventHandler);
+        $('a.page-link').off('click', tablePaginationClickEventHandler);
+        $('a.dropdown-item').off('click', tablePaginationClickEventHandler);
+        $('a.page-link').on('click', tablePaginationClickEventHandler);
+        $('a.dropdown-item').on('click', tablePaginationClickEventHandler);
     }
 }
 
@@ -216,7 +255,9 @@ export function updateSearchParam() {
 export function setMobileHeaderTexts(tableID) {
     //append each header text to the front of the corresponding data element and hide it
     $('#' + tableID).find("th").each(function (i) {
-        $('#' + tableID + ' td:nth-child(' + (i + 1) + ')').prepend(getMobileHeader(hasMobileHeader($('#' + tableID + ' td:nth-child(' + (i + 1) + ')').html()) ? "" : getMobileHeader($(this).text())));
+        let tds = '#' + tableID + ' td:nth-child(' + (i + 1) + ')';
+        $(tds).prepend(getMobileHeader(hasMobileHeader($(tds).html()) ? ""
+            : getMobileHeader((document.querySelector(tds).hasAttribute('data-mobile-title')) ? document.querySelector(tds).getAttribute('data-mobile-title') : $(this).text())));
         if (window.innerWidth > 767) {
             $('.table-responsive-stack-thead').hide();
         }
@@ -253,6 +294,32 @@ export function didTableRecieveStyleUpdate() {
         }
     }
     return true;
+}
+
+function initializeStickyHeaderWidths() {
+    //get the current scroll position and scroll to the top of the page
+    let top = JSON.parse(JSON.stringify(document.body.scrollTop));
+    document.body.scrollTop = 0;
+
+    //set the sticky header widths
+    setStickyHeaderWidths();
+
+    //reset the scroll position to the original
+    document.body.scrollTop = top;
+}
+
+export function setStickyHeaderWidths() {
+    //initialize variables
+    let headers = document.querySelector("thead.sticky-header > tr").querySelectorAll("th");
+    let columns = document.querySelector("#" + table.id + ">tbody>tr").querySelectorAll("td");
+
+    //make sure each header matches it's matching td
+    for (let i = 0; i < headers.length; i++) {
+        let width = $(columns[i]).width();
+        $(headers[i]).css({
+            'width': width + 'px'
+        });
+    }
 }
 
 export function setFlexTableVisibilities() {
