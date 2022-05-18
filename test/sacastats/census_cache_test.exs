@@ -5,7 +5,7 @@ defmodule SacaStats.CensusCacheTest do
   alias SacaStats.CensusCache
 
   setup_all do
-    %{cache: start_supervised!(CensusCache)}
+    %{cache: start_supervised!({CensusCache, [fallback_fn: &census_char_fallback/1]})}
   end
 
   describe "CensusCache" do
@@ -16,30 +16,36 @@ defmodule SacaStats.CensusCacheTest do
     end
 
     test "can get values", %{cache: cache} do
-      assert {:error, :not_found} = CensusCache.get(cache, :fake_key)
+      assert {:error, :not_found} = CensusCache.get(cache, "fake_key")
 
       value = %{"faction_id" => "2"}
       CensusCache.put(cache, 123, value)
 
       assert {:ok, ^value} = CensusCache.get(cache, 123)
+      assert {:error, :not_found} = CensusCache.get(cache, 321)
+      assert {:ok, ^value} = CensusCache.get(cache, 5_428_713_425_545_165_425)
+    end
+  end
 
-      query = %Query{
-        collection: "character",
-        params: %{"character_id" => 321, "c:show" => "faction_id"}
-      }
+  defp census_char_fallback(key), do: census_char_fallback(key, 1)
+  defp census_char_fallback(key, 3), do: :not_found
 
-      fallback = {&PS2.API.query_one/2, [query, SacaStats.sid()]}
+  defp census_char_fallback(key, attempt) do
+    query = %Query{
+      collection: "character",
+      params: %{"character_id" => key, "c:show" => "faction_id"}
+    }
 
-      assert {:error, :not_found} = CensusCache.get(cache, 321, fallback)
+    case PS2.API.query_one(query, SacaStats.sid()) do
+      {:ok, %PS2.API.QueryResult{returned: 0}} ->
+        :not_found
 
-      query = %Query{
-        query
-        | params: %{"character_id" => 5_428_713_425_545_165_425, "c:show" => "faction_id"}
-      }
+      {:ok, %PS2.API.QueryResult{data: data}} ->
+        data
 
-      fallback = {&PS2.API.query_one/2, [query, SacaStats.sid()]}
-
-      assert {:ok, ^value} = CensusCache.get(cache, 321, fallback)
+      {:error, e} ->
+        IO.puts("Query returned error: #{inspect(e)}")
+        census_char_fallback(key, attempt + 1)
     end
   end
 end
