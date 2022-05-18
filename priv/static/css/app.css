@@ -41,8 +41,6 @@ button,
 input[type='button'],
 input[type='reset'],
 input[type='submit'] {
-  background-color: #0069d9;
-  border: 0.1rem solid #0069d9;
   border-radius: .4rem;
   color: #fff;
   cursor: pointer;
@@ -59,20 +57,6 @@ input[type='submit'] {
   white-space: nowrap
 }
 
-.button:hover,
-button:hover,
-input[type='button']:focus,
-input[type='button']:hover,
-input[type='reset']:focus,
-input[type='reset']:hover,
-input[type='submit']:focus,
-input[type='submit']:hover {
-  background-color: #606c76;
-  border-color: #606c76;
-  color: #fff;
-  outline: 0
-}
-
 .button[disabled],
 button[disabled],
 input[type='button'][disabled],
@@ -82,27 +66,12 @@ input[type='submit'][disabled] {
   opacity: .5
 }
 
-.button[disabled]:focus,
-.button[disabled]:hover,
-button[disabled]:focus,
-button[disabled]:hover,
-input[type='button'][disabled]:focus,
-input[type='button'][disabled]:hover,
-input[type='reset'][disabled]:focus,
-input[type='reset'][disabled]:hover,
-input[type='submit'][disabled]:focus,
-input[type='submit'][disabled]:hover {
-  background-color: #0069d9;
-  border-color: #0069d9
-}
-
 .button.button-outline,
 button.button-outline,
 input[type='button'].button-outline,
 input[type='reset'].button-outline,
 input[type='submit'].button-outline {
   background-color: transparent;
-  color: #0069d9
 }
 
 .button.button-outline:focus,
@@ -131,7 +100,6 @@ input[type='reset'].button-outline[disabled]:hover,
 input[type='submit'].button-outline[disabled]:focus,
 input[type='submit'].button-outline[disabled]:hover {
   border-color: inherit;
-  color: #0069d9
 }
 
 .button.button-clear,
@@ -141,7 +109,6 @@ input[type='reset'].button-clear,
 input[type='submit'].button-clear {
   background-color: transparent;
   border-color: transparent;
-  color: #0069d9
 }
 
 .button.button-clear:focus,
@@ -157,19 +124,6 @@ input[type='submit'].button-clear:hover {
   background-color: transparent;
   border-color: transparent;
   color: #606c76
-}
-
-.button.button-clear[disabled]:focus,
-.button.button-clear[disabled]:hover,
-button.button-clear[disabled]:focus,
-button.button-clear[disabled]:hover,
-input[type='button'].button-clear[disabled]:focus,
-input[type='button'].button-clear[disabled]:hover,
-input[type='reset'].button-clear[disabled]:focus,
-input[type='reset'].button-clear[disabled]:hover,
-input[type='submit'].button-clear[disabled]:focus,
-input[type='submit'].button-clear[disabled]:hover {
-  color: #0069d9
 }
 
 code {
@@ -231,7 +185,6 @@ input[type='text']:focus,
 input[type='url']:focus,
 textarea:focus,
 select:focus {
-  border-color: #0069d9;
   outline: 0
 }
 
@@ -441,7 +394,6 @@ input[type='radio'] {
 }
 
 a {
-  color: #0069d9;
   text-decoration: none
 }
 
