@@ -4,7 +4,7 @@
     <div class="d-flex h-100 justify-content-between">
         <div class="w-50 align-self-center">
             <label class="menu-item h-100">
-                <div class="">
+                <div class="checkbox checkbox-primary">
                     <input class="form-check-input" type="checkbox" name="" id="selection-mobile-menu-select-all-btn">
                     <span class="pl-2">
                         Select All
@@ -97,7 +97,7 @@
                             <h5 class="filter-option-name">Faction</h5>
                             <div class="filter-options-container flexed-filter-options-container">
                                 <div class="filter-option small-filter-option">
-                                    <label class="dropdown-item">
+                                    <label class="dropdown-item checkbox checkbox-primary">
                                         <input class="form-check-input filter-input" type="checkbox" name="faction" id="showall-faction-filter-option" checked>
                                         <span class="pl-2">
                                             Show All<p class="d-inline filter-option-contains"></p>
@@ -106,7 +106,7 @@
                                 </div>
                                 <%= for faction <- @character["factions"] do %>
                                     <div class="filter-option small-filter-option">
-                                        <label class="dropdown-item">
+                                        <label class="dropdown-item checkbox checkbox-primary">
                                             <input class="form-check-input filter-input" type="checkbox" name="faction" id={faction <> "-faction-filter-option"}>
                                             <span class="pl-2">
                                                 <%= faction %><p class="d-inline filter-option-contains"></p>
@@ -125,7 +125,7 @@
                             <h5 class="filter-option-name">Vehicle/Infantry</h5>
                             <div class="filter-options-container">
                                 <div class="filter-option large-filter-option">
-                                    <label class="dropdown-item">
+                                    <label class="dropdown-item radio radio-primary">
                                         <input class="form-check-input filter-input" type="radio" name="vehicleinfantry" id="showall-vehicleinfantry-filter-option" checked>
                                         <span class="pl-2">
                                             Show All<p class="d-inline filter-option-contains"></p>
@@ -133,7 +133,7 @@
                                     </label>
                                 </div>
                                 <div class="filter-option large-filter-option">
-                                    <label class="dropdown-item">
+                                    <label class="dropdown-item radio radio-primary">
                                         <input class="form-check-input filter-input" type="radio" name="vehicleinfantry" id="infantry-vehicleinfantry-filter-option">
                                         <span class="pl-2">
                                             Infantry Weapons<p class="d-inline filter-option-contains"></p>
@@ -141,7 +141,7 @@
                                     </label>
                                 </div>
                                 <div class="filter-option large-filter-option">
-                                    <label class="dropdown-item">
+                                    <label class="dropdown-item radio radio-primary">
                                         <input class="form-check-input filter-input" type="radio" name="vehicleinfantry" id="vehicle-vehicleinfantry-filter-option">
                                         <span class="pl-2">
                                             Vehicle Weapons<p class="d-inline filter-option-contains"></p>
@@ -158,7 +158,7 @@
                 <h5 class="filter-option-name">Medal</h5>
                 <div class="filter-options-container flexed-filter-options-container">
                     <div class="filter-option">
-                        <label class="dropdown-item">
+                        <label class="dropdown-item checkbox checkbox-primary">
                             <input class="form-check-input filter-input" type="checkbox" name="medal" id="showall-medal-filter-option" checked>
                             <span class="pl-2">
                                 Show All<p class="d-inline filter-option-contains"></p>
@@ -166,7 +166,7 @@
                         </label>
                     </div>
                     <div class="filter-option">
-                        <label class="dropdown-item">
+                        <label class="dropdown-item checkbox checkbox-primary">
                             <input class="form-check-input filter-input" type="checkbox" name="medal" id="auraxium-medal-filter-option">
                             <span class="pl-2">
                                 Auraxium<p class="d-inline filter-option-contains"></p>
@@ -174,7 +174,7 @@
                         </label>
                     </div>
                     <div class="filter-option">
-                        <label class="dropdown-item">
+                        <label class="dropdown-item checkbox checkbox-primary">
                             <input class="form-check-input filter-input" type="checkbox" name="medal" id="gold-medal-filter-option">
                             <span class="pl-2">
                                 Gold<p class="d-inline filter-option-contains"></p>
@@ -182,7 +182,7 @@
                         </label>
                     </div>
                     <div class="filter-option">
-                        <label class="dropdown-item">
+                        <label class="dropdown-item checkbox checkbox-primary">
                             <input class="form-check-input filter-input" type="checkbox" name="medal" id="silver-medal-filter-option">
                             <span class="pl-2">
                                 Silver<p class="d-inline filter-option-contains"></p>
@@ -190,7 +190,7 @@
                         </label>
                     </div>
                     <div class="filter-option">
-                        <label class="dropdown-item">
+                        <label class="dropdown-item checkbox checkbox-primary">
                             <input class="form-check-input filter-input" type="checkbox" name="medal" id="bronze-medal-filter-option">
                             <span class="pl-2">
                                 Bronze<p class="d-inline filter-option-contains"></p>
@@ -198,7 +198,7 @@
                         </label>
                     </div>
                     <div class="filter-option">
-                        <label class="dropdown-item">
+                        <label class="dropdown-item checkbox checkbox-primary">
                             <input class="form-check-input filter-input" type="checkbox" name="medal" id="none-medal-filter-option">
                             <span class="pl-2">
                                 None<p class="d-inline filter-option-contains"></p>
@@ -212,7 +212,7 @@
                 <h5 class="filter-option-name">Time With Weapon</h5>
                 <div class="filter-options-container flexed-filter-options-container">
                     <div class="filter-option">
-                        <label class="dropdown-item">
+                        <label class="dropdown-item checkbox checkbox-primary">
                             <input class="form-check-input filter-input" type="checkbox" name="time" id="showall-time-filter-option" checked>
                             <span class="pl-2">
                                 Show All<p class="d-inline filter-option-contains"></p>
@@ -220,7 +220,7 @@
                         </label>
                     </div>
                     <div class="filter-option">
-                        <label class="dropdown-item">
+                        <label class="dropdown-item checkbox checkbox-primary">
                             <input class="form-check-input filter-input" type="checkbox" name="time" id="years-time-filter-option">
                             <span class="pl-2">
                                 Years<p class="d-inline filter-option-contains"></p>
@@ -228,7 +228,7 @@
                         </label>
                     </div>
                     <div class="filter-option">
-                        <label class="dropdown-item">
+                        <label class="dropdown-item checkbox checkbox-primary">
                             <input class="form-check-input filter-input" type="checkbox" name="time" id="weeks-time-filter-option">
                             <span class="pl-2">
                                 Weeks<p class="d-inline filter-option-contains"></p>
@@ -236,7 +236,7 @@
                         </label>
                     </div>
                     <div class="filter-option">
-                        <label class="dropdown-item">
+                        <label class="dropdown-item checkbox checkbox-primary">
                             <input class="form-check-input filter-input" type="checkbox" name="time" id="days-time-filter-option">
                             <span class="pl-2">
                                 Days<p class="d-inline filter-option-contains"></p>
@@ -244,7 +244,7 @@
                         </label>
                     </div>
                     <div class="filter-option">
-                        <label class="dropdown-item">
+                        <label class="dropdown-item checkbox checkbox-primary">
                             <input class="form-check-input filter-input" type="checkbox" name="time" id="hours-time-filter-option">
                             <span class="pl-2">
                                 Hours<p class="d-inline filter-option-contains"></p>
@@ -252,7 +252,7 @@
                         </label>
                     </div>
                     <div class="filter-option">
-                        <label class="dropdown-item">
+                        <label class="dropdown-item checkbox checkbox-primary">
                             <input class="form-check-input filter-input" type="checkbox" name="time" id="minutes-time-filter-option">
                             <span class="pl-2">
                                 Minutes<p class="d-inline filter-option-contains"></p>
@@ -260,7 +260,7 @@
                         </label>
                     </div>
                     <div class="filter-option">
-                        <label class="dropdown-item">
+                        <label class="dropdown-item checkbox checkbox-primary">
                             <input class="form-check-input filter-input" type="checkbox" name="time" id="seconds-time-filter-option">
                             <span class="pl-2">
                                 Seconds<p class="d-inline filter-option-contains"></p>
@@ -268,7 +268,7 @@
                         </label>
                     </div>
                     <div class="filter-option">
-                        <label class="dropdown-item">
+                        <label class="dropdown-item checkbox checkbox-primary">
                             <input class="form-check-input filter-input" type="checkbox" name="time" id="none-time-filter-option">
                             <span class="pl-2">
                                 None<p class="d-inline filter-option-contains"></p>
@@ -282,7 +282,7 @@
                 <h5 class="filter-option-name">Category</h5>
                 <div class="filter-options-container flexed-filter-options-container">
                     <div class="filter-option small-filter-option">
-                        <label class="dropdown-item">
+                        <label class="dropdown-item checkbox checkbox-primary">
                             <input class="form-check-input filter-input" type="checkbox" name="category" id="showall-category-filter-option" checked>
                             <span class="pl-2">
                                 Show All<p class="d-inline filter-option-contains"></p>
@@ -291,7 +291,7 @@
                     </div>
                     <%= for category <- @character["categories"] do %>
                         <div class="filter-option small-filter-option">
-                            <label class="dropdown-item">
+                            <label class="dropdown-item checkbox checkbox-primary">
                                 <input class="form-check-input filter-input" type="checkbox" name="category" id={category <> "-category-filter-option"}>
                                 <span class="pl-2">
                                     <%= category %><p class="d-inline filter-option-contains"></p>
@@ -306,7 +306,7 @@
                 <h5 class="filter-option-name">Type</h5>
                 <div class="filter-options-container flexed-filter-options-container">
                     <div class="filter-option">
-                        <label class="dropdown-item">
+                        <label class="dropdown-item checkbox checkbox-primary">
                             <input class="form-check-input filter-input" type="checkbox" name="type" id="showall-type-filter-option" checked>
                             <span class="pl-2">
                                 Show All<p class="d-inline filter-option-contains"></p>
@@ -315,7 +315,7 @@
                     </div>
                     <%= for type <- @character["types"] do %>
                         <div class="filter-option">
-                            <label class="dropdown-item">
+                            <label class="dropdown-item checkbox checkbox-primary">
                                 <input class="form-check-input filter-input" type="checkbox" name="type" id={type <> "-type-filter-option"}>
                                 <span class="pl-2">
                                     <%= type %><p class="d-inline filter-option-contains"></p>
