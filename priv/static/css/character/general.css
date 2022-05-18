@@ -1,37 +1,41 @@
-#characterGeneral{
-    padding-top: 3vh
+#characterGeneral {
+    padding-top: 3vh;
+    margin: 0;
 }
 
-p{
-    margin-bottom:1rem !important;
-}
-
-h3{
+p {
     margin-bottom: 1rem !important;
 }
 
-h4{
+h3 {
     margin-bottom: 1rem !important;
 }
 
-.move-up-4{
+h4 {
+    margin-bottom: 1rem !important;
+}
+
+.move-up-4 {
     position: relative;
     top: -4rem !important;
 }
-@media only screen and (max-width: 767px) { /*for boostrap xs*/
-    .move-up-4{
+
+/*for boostrap xs*/
+@media only screen and (max-width: 767px) {
+    .move-up-4 {
         position: relative;
         top: -2rem !important;
     }
 }
 
-#characterModel{
+#characterModel {
     position: relative;
     top: -4rem !important;
     left: -15rem !important;
     width: 100%;
     height: 65vh;
 }
-#characterModel:hover{
+
+#characterModel:hover {
     cursor: grab;
 }

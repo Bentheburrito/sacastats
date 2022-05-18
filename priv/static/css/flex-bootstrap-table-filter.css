@@ -1,0 +1,106 @@
+.contains-disabled-input,
+input[disabled] + span > p,
+input[disabled] + span,
+input[disabled]:hover {
+    color: #ccc;
+    cursor: not-allowed!important;
+}
+
+#filterDropdownMenu{
+    max-height: 400px;
+    max-width: 570px;
+    min-width: 300px;
+    overflow: auto;
+}
+
+.flexed-filter-options-container{
+  width: 96%;
+  margin: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.filter-option{
+    width: 100%;
+}
+.small-filter-option{
+    width: 50%;
+}
+
+.filter-option-contains{
+    color: rgb(110, 110, 110);
+    font-size: smaller;
+    padding-left: 4px;
+}
+
+/*Contained <hr/> needs strange styling to flow properly*/
+.middle-hr{
+    width: 85%;
+    margin-left: 10%;
+}
+@media only screen and (max-width: 660px) {
+    .middle-hr{
+        width: 86%;
+    }
+}
+@media only screen and (max-width: 600px) {
+    .middle-hr{
+        width: 87.5%;
+    }
+}
+@media only screen and (max-width: 575px) {
+    .middle-hr{
+        width: 88.5%;
+    }
+}
+@media only screen and (max-width: 475px) {
+    .middle-hr{
+        width: 90%;
+    }
+}
+
+@media only screen and (min-width: 768px) { /*for boostrap > xs*/
+    .filter-option{
+        width: 50%;
+    }
+    #leftSideFilterContainer{
+        padding-right: 0;
+        border-right: 1px solid rgb(110, 110, 110);
+    }
+
+    .filter-option{
+        width: 50%;
+    }
+    .large-filter-option{
+        width: 100%;
+    }
+}
+
+.fixed-table-body::-webkit-scrollbar {
+    -webkit-appearance: none;
+}
+
+.fixed-table-body::-webkit-scrollbar:vertical {
+    width: 12px;
+}
+
+.fixed-table-body::-webkit-scrollbar:horizontal {
+    height: 12px;
+}
+
+.fixed-table-body::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, .5);
+    border-radius: 10px;
+    border: 2px solid #ffffff;
+    display: block;
+    position: absolute;
+    top: 50%;
+}
+
+.fixed-table-body::-webkit-scrollbar-track {
+    border-radius: 10px;  
+    background-color: #ffffff; 
+    display: block;
+    position: absolute;
+    top: 50%;
+}

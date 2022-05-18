@@ -1,4 +1,4 @@
-import { setMobileHeaderTexts, updateSearchParam } from "/js/flex-bootstrap-table.js";
+import { setMobileHeaderTexts, updateSearchParam, setStickyHeaderWidths } from "/js/flex-bootstrap-table.js";
 import { addFormatsToPage, addAnimationToProgressBars } from "/js/formats.js";
 import { showHideNextAuraxButton } from "/js/character/weapons-table.js";
 
@@ -77,7 +77,7 @@ function initializeSearchInput() {
     let query = document.location.search;
 
     //if the query string is valid
-    if (query != "" && query.toLowerCase().startsWith("?search=")) {
+    if (query != "" && (query.toLowerCase().startsWith("?search=") || query.toLowerCase().startsWith("?id="))) {
         //clear filters to make search visible
         let persistentFiltersName = window.location.pathname + "/filterMap";
         localStorage.removeItem(persistentFiltersName);
@@ -85,10 +85,15 @@ function initializeSearchInput() {
         //get variables
         let search = query.substring(1);
         let searchElement = document.querySelector("input.search-input");
-        let searchText = search.split("&")[0].split("=")[1].replaceAll("%20", " ").replaceAll("+", " ").replaceAll("_", " ");
+        let searchText = getSearchTextFromSearchQuery(search);
 
         //determine if it will need a custom filter
-        if (!search.includes("&id=")) {
+        if (search.startsWith("id=")) {
+            //filter by ids present
+            searchText = "";
+            let ids = search.split("=")[1].split(",");
+            filterByIds(ids);
+        } else if (!search.includes("&id=")) {
             //simulate a search
             const ke = new KeyboardEvent('keydown', { keyCode: 13 });
             searchElement.dispatchEvent(ke);
@@ -98,19 +103,9 @@ function initializeSearchInput() {
             //get the query object that has the id
             textArray.find(text => {
                 if (text.includes("id=")) {
-                    //get the id and filter the data based on that and the weapon name
+                    //get the id and filter the data based on that and the search key
                     let ids = text.split("=")[1].split(",");
-                    let filteredDataArray = getOriginalTableData().filter(function (row) {
-                        var template = document.createElement('template');
-                        template.innerHTML = row.weapon;
-                        return template.content.querySelector(".weaponName").innerHTML.toLowerCase().indexOf(searchText.toLowerCase()) > -1
-                            && ids.includes(row.id);
-                    })
-
-                    //set the new id and make sure to compensate for the new filtering
-                    $(getTableID()).bootstrapTable('load', filteredDataArray);
-                    hasID = true;
-                    idFilteredData = filteredDataArray;
+                    filterByIds(ids);
                 }
             });
         }
@@ -122,6 +117,22 @@ function initializeSearchInput() {
             document.querySelector("input.search-input").select();
         }
     }
+}
+
+function getSearchTextFromSearchQuery(searchQuery) {
+    return searchQuery.split("&")[0].split("=")[1].replaceAll("%20", " ").replaceAll('%22', '\"').replaceAll("+", " ").replaceAll("_", " ");
+}
+
+function filterByIds(ids) {
+    //filter original data based off of id
+    let filteredDataArray = getOriginalTableData().filter(function (row) {
+        return ids.includes(row.id.replaceAll("weapon", "").replaceAll("Row", ""));
+    })
+
+    //set the new id and make sure to compensate for the new filtering
+    $(getTableID()).bootstrapTable('load', filteredDataArray);
+    hasID = true;
+    idFilteredData = filteredDataArray;
 }
 
 function addFilterListeners() {
@@ -389,7 +400,7 @@ function isThereAFilterSet() {
     return false;
 }
 
-function showHideClearFilterButtons() {
+export function showHideClearFilterButtons() {
     if (isThereAFilterSet()) {
         $(clearFilterButtonID).show();
         $(clearAllFilterButtonID).show();
@@ -478,6 +489,7 @@ function applyFormatsToTable() {
         addAnimationToProgressBars();
         addFormatsToPage();
         setMobileHeaderTexts(getTableID().substring(1));
+        setStickyHeaderWidths();
     }, 10);
 }
 

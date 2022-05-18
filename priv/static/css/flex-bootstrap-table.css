@@ -1,0 +1,116 @@
+@import "flex-bootstrap-table-filter.css";
+
+.table-responsive-stack .table-responsive-stack-thead {
+    font-weight: bold;
+    min-width: 300px;
+}
+
+.progress-bar-background {
+    background-color: rgba(194, 194, 194, 0.9);
+}
+
+.medal {
+    background: radial-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0) 70%);
+}
+
+@media screen and (max-width: 767px) {
+
+    /*for boostrap xs*/
+    td:first-child {
+        padding-left: 7.5px;
+    }
+
+    .table-responsive-stack td,
+    .table-responsive-stack th {
+        display: block;
+        -ms-flex: 1 1 auto;
+        flex: 1 1 auto;
+    }
+
+    .table-responsive-stack tr {
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        border-bottom: 3px solid #ccc;
+        /*row splitting line info*/
+        display: block;
+    }
+
+    .table-responsive-stack td {
+        float: left\9;
+        width: 100%;
+    }
+
+    .bootstrap-table {
+        padding-bottom: 500px;
+    }
+}
+
+.bootstrap-table {
+    padding-bottom: 10px;
+}
+
+.dropdown-item:hover,
+input:not(input[type=text]):not(input[type=search]):hover {
+    cursor: pointer;
+}
+
+.dropdown-item {
+    margin-bottom: 0;
+}
+
+.dropdown-menu {
+    background-color: #eeeeee;
+}
+
+@media only screen and (min-width: 768px) {
+
+    /*for boostrap > xs*/
+    .table th:first-child,
+    .table td:first-child {
+        position: sticky;
+        top: 0;
+        left: 0;
+    }
+
+    .table th:first-child {
+        background-color: #ffffff;
+    }
+
+    .table tr:nth-child(odd) td:first-child {
+        background-color: #eeeeee;
+    }
+
+    .table tr:nth-child(even) td:first-child {
+        background-color: #ffffff;
+    }
+
+    .table tr.selected td:first-child {
+        background-color: #ffffff;
+    }
+
+    tbody tr:not(tr.selection):hover>td {
+        background-color: #dddddd !important;
+    }
+
+    tr.selection:hover {
+        background-color: rgba(0, 0, 0, 0) !important;
+    }
+
+    tr.selection {
+        background-color: rgba(0, 0, 0, 0) !important;
+    }
+}
+
+.search-input {
+    font-size: medium;
+}
+
+@media only screen and (max-width: 767px) {
+
+    /*for boostrap xs*/
+    .search-input {
+        font-size: small;
+    }
+}

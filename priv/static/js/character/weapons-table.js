@@ -1,7 +1,6 @@
 import { nextAuraxElementID } from "/js/character/weapons.js";
 import * as bootstrapTableFilter from "/js/flex-bootstrap-table-filter.js";
-
-let copyRows = new Set();
+import * as bootstrapSelection from "/js/flex-bootstrap-table-selection.js";
 
 window.addEventListener('load', (event) => {
     if (window.innerWidth >= 768) {
@@ -74,6 +73,71 @@ function addCustomFilters() {
     bootstrapTableFilter.setCustomFilterFunctions(customFunction);
 }
 
+function addCustomCopyFunction() {
+    let customFunction = function () {
+        //get the current url
+        const newURL = new URL(window.location.href);
+        newURL.search = "?";
+
+        //if there is only 1 selection add the weapon name to the search arg
+        let copyRows = [...bootstrapSelection.getSelectedRows()];
+        let firstCopyElement = copyRows[0];
+        if (copyRows.length == 1) {
+            newURL.search = newURL.search + "search=";
+            newURL.search = newURL.search + $(firstCopyElement).find("td.weapon").first().find("h5.weaponName").first()[0].innerHTML.replaceAll(" ", "_");
+            newURL.search = newURL.search + "&";
+        }
+
+        //add each selected id to the id arg separated by ','
+        newURL.search = newURL.search + "id=" + firstCopyElement.id.replaceAll("weapon", "").replaceAll("Row", "");
+        for (let i = 1; i < copyRows.length; i++) {
+            newURL.search = newURL.search + "," + copyRows[i].id.replaceAll("weapon", "").replaceAll("Row", "");
+        }
+
+        //return the new url
+        return newURL.toString().replaceAll('%22', '\"');
+    };
+
+    let customCopyFunction = function () {
+        //create a header line
+        let copyString = document.getElementById("characterName").innerText + "'s Weapon Stats\n\n";
+
+        //initialize variables
+        let headerArray = [...$('#weaponTable').find('thead').first().find('tr').first()[0].children];
+        let index = 0;
+        let copyRows = bootstrapSelection.getSelectedRows();
+
+        //loop through each selected weapon row
+        copyRows.forEach(row => {
+            let dataArray = $(row).find('td');
+
+            //create a weapon subheader
+            copyString = copyString + dataArray[0].innerText.split("\n")[0] + " (" + row.id.replaceAll("weapon", "").replaceAll("Row", "") + "):\n";
+
+            //loop through each coloumn and separate them by commas and property values by colons
+            for (let i = 1; i < dataArray.length; i++) {
+                if (i > 1) {
+                    copyString = copyString + ", ";
+                }
+                copyString = copyString + (isMobileScreen() ? "" : (headerArray[i].innerText + ": ")) + dataArray[i].innerText;
+            }
+
+            //create new line space between each weapon stat
+            if (index < copyRows.size - 1) {
+                copyString = copyString + "\n\n";
+                index++;
+            }
+
+        });
+
+        //return the copy string
+        return copyString;
+    };
+
+    bootstrapSelection.setCustomCopyFunction(customFunction);
+    bootstrapSelection.setSecondCustomCopyFunction(customCopyFunction);
+}
+
 function initializeButtonEvent() {
     document.getElementById("nextAurax").addEventListener('click', function () {
         $('html, body').animate({
@@ -95,139 +159,8 @@ function flashElement(elementId) {
     }, 1000);
 }
 
-function addRightClickTable() {
-    //add special Right click on table menu
-    $('#weaponTable').on('contextmenu', function (e) {
-        //initialize special menu location
-        var top = ((e.clientY / $(window).height()) * 100) + "%";
-        var left = ((e.clientX / $(window).width()) * 100) + "%";
-
-        //show special menu at the bottom right of the mouse
-        $("#context-menu").css({
-            display: "block",
-            position: "fixed",
-            top: top,
-            left: left
-        }).addClass("show");
-
-        //if the row was not selected before deselect other selected rows
-        let row = $(e.target).closest("tr")[0];
-        if (!copyRows.has(row)) {
-            resetCopyRowSelection();
-        }
-
-        //add current row to selection
-        copyRows.add(row);
-        $(e.target).closest("tr").addClass("selection");
-
-        return false; //blocks default Webbrowser right click menu
-    });
-
-    //update selections
-    $('#weaponTable').on('click', function (e) {
-        //hide the special menu and initialize variables
-        hideContextMenu();
-
-        //make sure it's only weapon rows being clicked
-        let row = $(e.target).closest("tr")[0];
-        if (row.id.includes("weapon")) {
-            //if it's a new selection set reset the selections
-            if (copyRows.size > 0 && !e.ctrlKey) {
-                resetCopyRowSelection();
-            }
-
-            //disable on-click selection for mobile
-            if (window.innerWidth > 767) {
-                //if the ctrl key was pressed while a selection was clicked remove it
-                if (e.ctrlKey && copyRows.has(row)) {
-                    copyRows.delete(row);
-                    $(row).removeClass("selection");
-                } else {
-                    //otherwise just add the current row to selection
-                    copyRows.add(row);
-                    $(e.target).closest("tr").addClass("selection");
-                }
-            }
-        } else {
-            resetCopyRowSelection();
-        }
-    });
-
-    //add event listner for copy click
-    $("#copyWeaponLink").on('click', function () {
-        $('.toast').toast('show');
-        hideContextMenu();
-    });
-
-    //add page click events
-    $(document).on("click", function (e) {
-        //if the click is not in the table remove selections and hide the special menu
-        if ($(e.target).closest("tr")[0] == undefined || $(e.target).closest("tr")[0].localName != "tr") {
-            resetCopyRowSelection();
-            hideContextMenu();
-        }
-    });
-
-    //add page key events
-    $(document).on("keyup", function (e) {
-        //if the user presses ctrl-C with something selected copy selected rows
-        if (e.key === 'c' && e.ctrlKey && copyRows.size > 0) {
-            copySelectedRows();
-            $('.toast').toast('show');
-        }
-    });
-
-    //add page right click events to hide special menu
-    $(document).on("contextmenu", function () {
-        hideContextMenu();
-    });
-
-    //hide the special menu when an option is clicked
-    $("#context-menu").on("click", function () {
-        hideContextMenu();
-    });
-
-    //add copy clicks
-    addCopyClick();
-}
-
-function resetCopyRowSelection() {
-    //remove the selection style from each row and reinit the set
-    copyRows.forEach(row => {
-        $(row).removeClass("selection");
-    });
-    copyRows = new Set();
-}
-
-function hideContextMenu() {
-    $("#context-menu").removeClass("show").hide();
-}
-
-function addCopyClick() {
-    $("#copyWeaponLink").on('click', copySelectedRows);
-}
-
-function copySelectedRows() {
-    //get the current url
-    const newURL = new URL(window.location.href);
-
-    //if there is only 1 selection add the weapon name to the search arg
-    newURL.search = "?search=";
-    if (copyRows.size == 1) {
-        copyRows.forEach(row => {
-            newURL.search = newURL.search + $(row).find("td.weapon").first().find("h5.weaponName").first()[0].innerHTML.replaceAll(" ", "_");
-        });
-    }
-
-    //add each selected id to the id arg separated by ','
-    newURL.search = newURL.search + "&id=" + [...copyRows][0].id.replaceAll("weapon", "").replaceAll("Row", "");
-    for (let i = 1; i < copyRows.size; i++) {
-        newURL.search = newURL.search + "," + [...copyRows][i].id.replaceAll("weapon", "").replaceAll("Row", "");
-    }
-
-    //copy the new url to clipboard and reset selection
-    navigator.clipboard.writeText(newURL);
-    resetCopyRowSelection();
+function isMobileScreen() {
+    return window.innerWidth <= 767;
 }
 
 export function showHideNextAuraxButton() {
@@ -242,22 +175,10 @@ export function showHideNextAuraxButton() {
 
 export default function init() {
     $('#weaponTable').bootstrapTable({
-        formatSearch: function () {
-            return 'Search Weapon Name'
-        },
-        customSearch: searchByWeaponName,
         dragaccept: '.drag-accept'
     });
 
-    function searchByWeaponName(data, text) {
-        return bootstrapTableFilter.sortData(data.filter(function (row) {
-            var template = document.createElement('template');
-            template.innerHTML = row.weapon;
-            return template.content.querySelector(".weaponName").innerHTML.toLowerCase().indexOf(text.toLowerCase()) > -1;
-        }));
-    }
-
     initializeButtonEvent();
     addCustomFilters();
-    addRightClickTable();
+    addCustomCopyFunction();
 }
