@@ -5,6 +5,8 @@ defmodule SacaStats.Application do
 
   use Application
 
+  alias SacaStats.CensusCache.Fallbacks
+
   @impl true
   def start(_type, _args) do
     ess_opts = [
@@ -26,8 +28,16 @@ defmodule SacaStats.Application do
       # Start the Endpoint (http/https)
       SacaStatsWeb.Endpoint,
       # Start caches
-      Supervisor.child_spec({SacaStats.CensusCache, [name: SacaStats.CharacterCache]}, id: :character_cache),
-      Supervisor.child_spec({SacaStats.CensusCache, [name: SacaStats.OnlineStatusCache]}, id: :online_status_cache),
+      Supervisor.child_spec(
+        {SacaStats.CensusCache,
+         [name: SacaStats.CharacterCache, fallback_fn: &Fallbacks.character/1]},
+        id: :character_cache
+      ),
+      Supervisor.child_spec(
+        {SacaStats.CensusCache,
+         [name: SacaStats.OnlineStatusCache, fallback_fn: &Fallbacks.online_status/1]},
+        id: :online_status_cache
+      ),
       # Start the ESS Websocket
       {PS2.Socket, ess_opts}
     ]

@@ -289,7 +289,7 @@
                             </span>
                         </label>
                     </div>
-                    <%= for category <- @character["categories"] do %>
+                    <%= for category <- @categories do %>
                         <div class="filter-option small-filter-option">
                             <label class="dropdown-item checkbox checkbox-primary">
                                 <input class="form-check-input filter-input" type="checkbox" name="category" id={category <> "-category-filter-option"}>
@@ -313,7 +313,7 @@
                             </span>
                         </label>
                     </div>
-                    <%= for type <- @character["types"] do %>
+                    <%= for type <- @types do %>
                         <div class="filter-option">
                             <label class="dropdown-item checkbox checkbox-primary">
                                 <input class="form-check-input filter-input" type="checkbox" name="type" id={type <> "-type-filter-option"}>
@@ -387,13 +387,13 @@
         </tr>
     </thead>
     <tbody>
-        <%= for {weapon_id, weapon} <- @character["weapons"] do %>
-            <tr id={"weapon" <> (weapon_id |> Integer.to_string()) <> "Row"} class="">
+        <%= for {weapon_id, weapon} <- @weapons do %>
+            <tr id={"weapon" <> (weapon_id) <> "Row"} class="">
                 <td class="weapon p-0">
-                    <%= if SacaStatsWeb.CharacterController.get_medal_code(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character["response"]["faction_id"]), 
-                            SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character["response"]["faction_id"])) > 0 do%>
-                        <img src={"https://census.daybreakgames.com/files/ps2/images/static/" <> (SacaStatsWeb.CharacterController.get_medal_code(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character["response"]["faction_id"]), 
-                            SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character["response"]["faction_id"]))|> Integer.to_string()) <>".png"} alt="medal" class="medal float-left position-absolute top-0" width="30px"/>
+                    <%= if SacaStatsWeb.CharacterController.get_medal_code(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character_info["faction_id"]), 
+                            SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character_info["faction_id"])) > 0 do%>
+                        <img src={"https://census.daybreakgames.com/files/ps2/images/static/" <> (SacaStatsWeb.CharacterController.get_medal_code(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character_info["faction_id"]), 
+                            SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character_info["faction_id"]))|> Integer.to_string()) <>".png"} alt="medal" class="medal float-left position-absolute top-0" width="30px"/>
                     <% end %>
                     <div class="weapon-image-container w-100">
                         <img src={"https://census.daybreakgames.com" <> Map.get(weapon, "image_path", "/files/ps2/images/static/3.png")} 
@@ -406,17 +406,17 @@
                     </div>
                     <h5 class="weaponName align-text-bottom text-center mb-0"><%=Map.get(weapon, "name", "N/A")%></h5>
                     <div class="progress-bar-background">
-                        <div id={"weapon" <> (weapon_id |> Integer.to_string()) <> "ProgressBar"} class="progress-bar progress-bar-striped progress-bar-animated aurax-progress" role="progressbar" 
-                            aria-valuenow={"#{SacaStatsWeb.CharacterController.get_aurax_percent(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character["response"]["faction_id"]), 
-                                SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character["response"]["faction_id"]))}"} 
+                        <div id={"weapon" <> (weapon_id) <> "ProgressBar"} class="progress-bar progress-bar-striped progress-bar-animated aurax-progress" role="progressbar" 
+                            aria-valuenow={"#{SacaStatsWeb.CharacterController.get_aurax_percent(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character_info["faction_id"]), 
+                                SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character_info["faction_id"]))}"} 
                             aria-valuemin="0" aria-valuemax="100" style="width: 0;">
-                            <%= SacaStatsWeb.CharacterController.get_aurax_percent(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character["response"]["faction_id"]), 
-                                SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character["response"]["faction_id"]))%>%
+                            <%= SacaStatsWeb.CharacterController.get_aurax_percent(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character_info["faction_id"]), 
+                                SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character_info["faction_id"]))%>%
                         </div>
                     </div>
                 </td>
-                <td data-mobile-title="Total Kills" id={"weapon" <> (weapon_id |> Integer.to_string()) <> "Kills"} class="number text-center total-kills">
-                    <%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character["response"]["faction_id"]) + SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character["response"]["faction_id"])%>
+                <td data-mobile-title="Total Kills" id={"weapon" <> (weapon_id) <> "Kills"} class="number text-center total-kills">
+                    <%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character_info["faction_id"]) + SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character_info["faction_id"])%>
                 </td>
                 <td data-mobile-title="Total VS Kills" class="number text-center">
                     <%=SacaStats.Utils.maybe_to_int(weapon["weapon_kills"]["value_vs"]) + SacaStats.Utils.maybe_to_int(weapon["weapon_vehicle_kills"]["value_vs"])%>
@@ -427,7 +427,7 @@
                 <td data-mobile-title="Total TR Kills" class="number text-center">
                     <%=SacaStats.Utils.maybe_to_int(weapon["weapon_kills"]["value_tr"]) + SacaStats.Utils.maybe_to_int(weapon["weapon_vehicle_kills"]["value_tr"])%>
                 </td>
-                <td data-mobile-title="Infantry Kills" class="number text-center"><%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character["response"]["faction_id"])%></td>
+                <td data-mobile-title="Infantry Kills" class="number text-center"><%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character_info["faction_id"])%></td>
                 <td data-mobile-title="VS Infantry Kills" class="number text-center">
                     <%=SacaStats.Utils.maybe_to_int(weapon["weapon_kills"]["value_vs"])%>
                 </td>
@@ -437,7 +437,7 @@
                 <td data-mobile-title="TR Infantry Kills" class="number text-center">
                     <%=SacaStats.Utils.maybe_to_int(weapon["weapon_kills"]["value_tr"])%>
                 </td>
-                <td data-mobile-title="Vehicle Kills" class="number text-center"><%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character["response"]["faction_id"])%></td>
+                <td data-mobile-title="Vehicle Kills" class="number text-center"><%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character_info["faction_id"])%></td>
                 <td data-mobile-title="VS Vehicle Kills" class="number text-center">
                     <%=SacaStats.Utils.maybe_to_int(weapon["weapon_vehicle_kills"]["value_vs"])%>
                 </td>
@@ -448,8 +448,8 @@
                     <%=SacaStats.Utils.maybe_to_int(weapon["weapon_vehicle_kills"]["value_tr"])%>
                 </td>
                 <td data-mobile-title="Kill/ Death Ratio" class="text-center">
-                    <%=SacaStatsWeb.CharacterController.get_percent_ratio((SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character["response"]["faction_id"]) 
-                    + SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character["response"]["faction_id"])),
+                    <%=SacaStatsWeb.CharacterController.get_percent_ratio((SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character_info["faction_id"]) 
+                    + SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character_info["faction_id"])),
                         SacaStats.Utils.maybe_to_int(weapon["weapon_deaths"]))%>
                 </td>
                 <td data-mobile-title="Accuracy" class="text-center percentage">
@@ -461,7 +461,7 @@
                 <td class="number text-center">
                     <%=SacaStats.Utils.maybe_to_int(weapon["weapon_fire_count"])%>
                 </td>
-                <td data-mobile-title="Headshots" class="number text-center"><%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_headshots"), @character["response"]["faction_id"])%></td>
+                <td data-mobile-title="Headshots" class="number text-center"><%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_headshots"), @character_info["faction_id"])%></td>
                 <td data-mobile-title="VS Headshots" class="number text-center">
                     <%=SacaStats.Utils.maybe_to_int(weapon["weapon_headshots"]["value_vs"])%>
                 </td>
@@ -472,10 +472,10 @@
                     <%=SacaStats.Utils.maybe_to_int(weapon["weapon_headshots"]["value_tr"])%>
                 </td>
                 <td data-mobile-title="Headshot Ratio" class="text-center percentage">
-                    <%=SacaStatsWeb.CharacterController.get_percent_ratio(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_headshots"), @character["response"]["faction_id"]), 
-                        (SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character["response"]["faction_id"]) + SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character["response"]["faction_id"])))%>
+                    <%=SacaStatsWeb.CharacterController.get_percent_ratio(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_headshots"), @character_info["faction_id"]), 
+                        (SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character_info["faction_id"]) + SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character_info["faction_id"])))%>
                 </td>
-                <td data-mobile-title="Damage Given" class="number text-center"><%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_damage_given"), @character["response"]["faction_id"])%></td>
+                <td data-mobile-title="Damage Given" class="number text-center"><%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_damage_given"), @character_info["faction_id"])%></td>
                 <td data-mobile-title="VS Damage Given" class="number text-center">
                     <%=SacaStats.Utils.maybe_to_int(weapon["weapon_damage_given"]["value_vs"])%>
                 </td>
@@ -485,7 +485,7 @@
                 <td data-mobile-title="TR Damage Given" class="number text-center">
                     <%=SacaStats.Utils.maybe_to_int(weapon["weapon_damage_given"]["value_tr"])%>
                 </td>
-                <td data-mobile-title="Damage Taken" class="number text-center"><%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_damage_taken_by"), @character["response"]["faction_id"])%></td>
+                <td data-mobile-title="Damage Taken" class="number text-center"><%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_damage_taken_by"), @character_info["faction_id"])%></td>
                 <td data-mobile-title="VS Damage Taken" class="number text-center">
                     <%=SacaStats.Utils.maybe_to_int(weapon["weapon_damage_taken_by"]["value_vs"])%>
                 </td>
@@ -498,7 +498,7 @@
                 <td class="text-center seconds-to-readable"><%=SacaStats.Utils.maybe_to_int(weapon["weapon_play_time"])%></td>
                 <td class="number text-center"><%=SacaStatsWeb.CharacterController.get_cert_count(weapon["weapon_score"])%></td>
                 <td class="number text-center"><%=weapon["weapon_score"]%></td>
-                <td class="number text-center"><%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_killed_by"), @character["response"]["faction_id"])%></td>
+                <td class="number text-center"><%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_killed_by"), @character_info["faction_id"])%></td>
                 <td data-mobile-title="Killed By VS" class="number text-center">
                     <%=SacaStats.Utils.maybe_to_int(weapon["weapon_killed_by"]["value_vs"])%>
                 </td>

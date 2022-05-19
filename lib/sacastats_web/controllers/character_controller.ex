@@ -3,25 +3,15 @@ require Logger
 defmodule SacaStatsWeb.CharacterController do
   use SacaStatsWeb, :controller
 
-  import PS2.API.QueryBuilder
   import SacaStats.Utils
 
-  alias PS2.API.{Join, Query}
-  alias SacaStats.Session
-  alias SacaStatsWeb.CharacterController
+  alias SacaStats.{CensusCache, Session}
 
   @excluded_weapon_categories [
     "Infantry Abilities",
     "Vehicle Abilities",
     "ANT Harvesting Tool"
   ]
-
-  @query_gens %{
-    "general" => &CharacterController.general_query/1,
-    "stats" => &CharacterController.stats_query/1,
-    "directives" => &CharacterController.stats_query/1,
-    "weapons" => &CharacterController.weapons_query/1
-  }
 
   def general(conn, %{"character_name" => _name}) do
     redirect(conn, to: conn.request_path <> "/general")
@@ -31,33 +21,50 @@ defmodule SacaStatsWeb.CharacterController do
     render(conn, "lookup.html")
   end
 
+  def character(conn, %{"character_name" => name, "stat_type" => "sessions"}) do
+    {:ok, info} = CensusCache.get(SacaStats.CharacterCache, name)
+    sessions = Session.get_summary(name)
+
+    {:ok, status} =
+      CensusCache.get(SacaStats.OnlineStatusCache, String.to_integer(info["character_id"]))
+
+    assigns = [
+      character_info: info,
+      online_status: status,
+      stat_page: "sessions.html",
+      sessions: sessions
+    ]
+
+    render(conn, "template.html", assigns)
+  end
+
   def character(%Plug.Conn{} = conn, %{"character_name" => name, "stat_type" => stat_type}) do
-    with {:ok, query_gen} <- Map.fetch(@query_gens, stat_type),
-         {:ok, info} <- SacaStats.CensusCache.get(SacaStats.CharacterCache, name, query_gen.(name)),
-         {:ok, status} <- SacaStats.CensusCache.get(SacaStats.OnlineStatusCache, name, online_status_query(info["character_id"])) do
-      parse_and_render(conn, info, status, stat_type)
+    with {:ok, info} <- CensusCache.get(SacaStats.CharacterCache, name),
+         {:ok, status} <- CensusCache.get(SacaStats.OnlineStatusCache, info["character_id"]) do
+      assigns = build_assigns(conn, info, status, stat_type)
+      render(conn, "template.html", assigns)
     else
       {:error, :not_found} ->
         conn
-        |> put_flash(:error, "The character '#{name}' doesn't appear to exist.")
+        |> put_flash(
+          :error,
+          "Could not find a character called '#{name}'. Make sure it's spelled correctly, then try again"
+        )
         |> redirect(to: Routes.character_path(conn, :search))
 
       {:error, e} ->
         Logger.error("Error fetching character: #{inspect(e)}")
 
         conn
-        |> put_flash(:error, "We are unable to get that character right now. Please try again soon.")
-        |> redirect(to: Routes.character_path(conn, :search))
-
-      :error ->
-        conn
-        |> put_flash(:error, "'#{stat_type}' is an unknown page.")
+        |> put_flash(
+          :error,
+          "We are unable to get that character right now. Please try again soon."
+        )
         |> redirect(to: Routes.character_path(conn, :search))
     end
   end
 
-  defp parse_and_render(conn, info, status, "weapons") do
-
+  defp build_assigns(conn, info, status, "weapons") do
     weapon_general_stats = Enum.reduce(info["stats"]["weapon_stat"], %{}, &put_weapon_stat/2)
 
     weapon_faction_stats =
@@ -76,14 +83,14 @@ defmodule SacaStatsWeb.CharacterController do
             is_map_key(complete_weapon_stats[weapon_id], "weapon_killed_by"),
           weapon["category"] not in @excluded_weapon_categories,
           into: %{} do
-        weapon_stats = Map.fetch!(complete_weapon_stats, Integer.to_string(weapon_id))
+        weapon_stats = Map.fetch!(complete_weapon_stats, weapon_id)
         {weapon_id, Map.merge(weapon, weapon_stats)}
       end
 
     type_set = get_sorted_set_of_items("category", complete_weapons)
     category_set = get_sorted_set_of_items("sanction", complete_weapons)
 
-    assigns = [
+    [
       character_info: info,
       online_status: status,
       stat_page: "weapons.html",
@@ -91,107 +98,31 @@ defmodule SacaStatsWeb.CharacterController do
       types: type_set,
       categories: category_set
     ]
-
-    render(conn, "template.html", assigns)
   end
 
-  defp parse_and_render(conn, info, status, stat_type) do
-    render(conn, "template.html", character_info: info, online_status: status, stat_page: stat_type <> ".html")
-  end
-
-  def character(conn, %{"character_name" => name, "stat_type" => "sessions"}) do
-    sessions = SacaStats.Session.get_summary(name)
-    latest_session = List.first(sessions)
-
-    status =
-      case latest_session do
-        %Session{logout: %SacaStats.Events.PlayerLogout{timestamp: ts}}
-        when ts == :current_session ->
-          "online"
-
-        _ ->
-          "offline"
-      end
-
-    character = %{
-      "stat_page" => "sessions.html",
-      "response" => %{
-        # nil for now until we can pull it from the cache, instead of hitting the Census again
-        "character_id" => nil,
-        "name" => %{"first" => name}
-      },
-      "status" => status
-    }
-
-    render(conn, "template.html", sessions: sessions, character: character)
+  defp build_assigns(conn, info, status, stat_type) do
+    [
+      character_info: info,
+      online_status: status,
+      stat_page: stat_type <> ".html"
+    ]
   end
 
   def session(conn, %{"character_name" => name, "login_timestamp" => login_timestamp}) do
-    session = SacaStats.Session.get(name, login_timestamp)
+    session = Session.get(name, login_timestamp)
+    {:ok, status} = CensusCache.get(SacaStats.OnlineStatusCache, session.character_id)
 
-    {:ok, %PS2.API.QueryResult{data: status}} =
-      Query.new(collection: "characters_online_status")
-      |> term("character_id", session.character_id)
-      |> lang("en")
-      |> PS2.API.query_one(SacaStats.sid())
-
-    character = %{
-      "stat_page" => "session.html",
-      "response" => %{
+    assigns = [
+      character_info: %{
         "character_id" => session.character_id,
         "name" => %{"first" => session.name}
       },
-      "status" => (String.to_integer(status["online_status"]) > 0 && "online") || "offline"
-    }
+      online_status: status,
+      stat_page: "session.html",
+      session: session
+    ]
 
-    render(conn, "template.html", session: session, character: character)
-  end
-
-  def general_query(name) do
-    {&PS2.API.query_one/2,
-      [Query.new(collection: "character")
-      |> term("name.first_lower", String.downcase(name))
-      |> resolve([
-        "outfit(alias,id,name)"
-      ])
-      |> lang("en"), SacaStats.sid()]}
-  end
-
-  def stats_query(name) do
-    {&PS2.API.query_one/2,
-      [Query.new(collection: "character")
-      |> term("name.first_lower", String.downcase(name))
-      |> resolve([
-        "outfit(alias,id,name)"
-      ])
-      |> join(
-        Join.new(collection: "item_profile")
-        |> on("items.item_id")
-        |> to("item_id")
-        |> list(true)
-        |> show("profile_id")
-        |> inject_at("classes_list")
-      )
-      |> lang("en"), SacaStats.sid()]}
-  end
-
-  def weapons_query(name) do
-    {&PS2.API.query_one/2,
-      [Query.new(collection: "character")
-      |> term("name.first_lower", String.downcase(name))
-      |> resolve([
-        "online_status",
-        "outfit(alias,id,name)",
-        "weapon_stat",
-        "weapon_stat_by_faction"
-      ])
-      |> lang("en")], SacaStats.sid()}
-  end
-
-  def online_status_query(character_id) do
-    {&PS2.API.query_one/2,
-      [Query.new(collection: "characters_online_status")
-      |> term("character_id", character_id), SacaStats.sid()]}
+    render(conn, "template.html", assigns)
   end
 
   defp put_weapon_stat(weapon_stat, acc) do
@@ -215,10 +146,18 @@ defmodule SacaStatsWeb.CharacterController do
     |> min(100)
   end
 
-  def get_medal_code(infantry_kills, vehicle_kills) when infantry_kills + vehicle_kills >= 1160, do: 3068
-  def get_medal_code(infantry_kills, vehicle_kills) when infantry_kills + vehicle_kills >= 160, do: 3075
-  def get_medal_code(infantry_kills, vehicle_kills) when infantry_kills + vehicle_kills >= 60, do: 3079
-  def get_medal_code(infantry_kills, vehicle_kills) when infantry_kills + vehicle_kills >= 10, do: 3072
+  def get_medal_code(infantry_kills, vehicle_kills) when infantry_kills + vehicle_kills >= 1160,
+    do: 3068
+
+  def get_medal_code(infantry_kills, vehicle_kills) when infantry_kills + vehicle_kills >= 160,
+    do: 3075
+
+  def get_medal_code(infantry_kills, vehicle_kills) when infantry_kills + vehicle_kills >= 60,
+    do: 3079
+
+  def get_medal_code(infantry_kills, vehicle_kills) when infantry_kills + vehicle_kills >= 10,
+    do: 3072
+
   def get_medal_code(_infantry_kills, _vehicle_kills), do: -1
 
   def get_faction_alias(4), do: "NSO"
@@ -243,8 +182,7 @@ defmodule SacaStatsWeb.CharacterController do
 
   def get_cert_count(score) do
     score
-    |> Integer.parse()
-    |> elem(0)
+    |> SacaStats.Utils.maybe_to_int()
     |> div(250)
   end
 
