@@ -2,16 +2,16 @@ defmodule SacaStatsWeb do
   @moduledoc """
   The entrypoint for defining your web interface, such
   as controllers, views, channels and so on.
-
+  
   This can be used in your application as:
-
+  
       use SacaStatsWeb, :controller
       use SacaStatsWeb, :view
-
+  
   The definitions below will be executed for every view,
   controller, etc, so keep them short and clean, focused
   on imports, uses and aliases.
-
+  
   Do NOT define functions inside the quoted expressions
   below. Instead, define any helper function in modules
   and import those modules here.
@@ -76,6 +76,47 @@ defmodule SacaStatsWeb do
       use Phoenix.Channel
       import SacaStatsWeb.Gettext
     end
+  end
+
+  def generate_page_title(endpoint) do
+    site_name = "Saca Stats"
+    separator = " - "
+    postfix = separator <> site_name
+    endpoint_arr = String.split(endpoint, "/", trim: true)
+
+    case length(endpoint_arr) do
+      0 -> site_name
+      _ -> generate_subpage_title(endpoint_arr, separator) <> postfix
+    end
+  end
+
+  def generate_subpage_title(endpoint_arr, separator) do
+    if(Enum.at(endpoint_arr, 0) == "character" && length(endpoint_arr) > 1) do
+      generate_character_title(endpoint_arr, separator)
+    else
+      endpoint_arr
+      |> Enum.map(fn endpoint -> String.capitalize(endpoint) end)
+      |> Enum.join(separator)
+    end
+  end
+
+  def generate_character_title(endpoint_arr, separator) do
+    endpoint_arr
+    |> Enum.with_index()
+    |> Enum.map(fn {endpoint, index} ->
+      cond do
+        index == 1 ->
+          endpoint
+
+        index > 1 ->
+          String.capitalize(endpoint)
+
+        true ->
+          ""
+      end
+    end)
+    |> Enum.filter(fn endpoint -> endpoint != "" end)
+    |> Enum.join(separator)
   end
 
   defp view_helpers do
