@@ -1,0 +1,36 @@
+#login-main-btn {
+    font-size: 1.4rem;
+}
+
+#login-nav-btn {
+    font-size: 1.2rem;
+}
+
+.dropdown-menu-right {
+    right: 0;
+    left: auto;
+}
+
+#account-dropdown {
+    min-width: 300px;
+}
+
+.account-login-menu {
+    position: relative;
+    top: 13px;
+}
+
+.profile-picture {
+    border-radius: 50%;
+    margin: 0 10px;
+}
+
+.discriminator {
+    color: rgb(110, 110, 110);
+    font-size: small;
+}
+
+.account,
+.account:hover {
+    color: #9B84EE;
+}

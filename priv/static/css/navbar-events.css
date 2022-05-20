@@ -14,7 +14,12 @@
     position: -webkit-sticky;
     position: sticky;
     top: 167px;
-    z-index: 1020;
+    z-index: 0;
+}
+
+#collapse_bottom_target {
+    max-height: 200px;
+    overflow: scroll;
 }
 
 nav {

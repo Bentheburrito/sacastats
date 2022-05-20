@@ -1,0 +1,17 @@
+<div class="row justify-content-center account-container">
+  <div class="col-12 col-md-7 col-xl-4">
+    <div class="profile-picture-container">
+        <img src={@user["avatar_url"]} alt="Profile Picture" class="profile-picture mx-auto" width="100" onerror={"this.onerror=null; this.src='" <> 
+                                Routes.static_path(@conn, "/images/user/defaultUserProfilePicture.png")
+                                <> "'"}>
+    </div>
+    <h1 class="d-inline align-middle discord-username"><%= @user["username"] %></h1>
+    <h1 class="d-inline align-middle discriminator"><%="##{@user["discriminator"]}" %></h1>
+    <h2 class="pt-3 welcome-message">Welcome to your account page!</h2>
+    <p>There will be more content here in the future.</p>
+    
+    <div class="form-group d-flex flex-row-reverse">
+        <button class="btn btn-danger" type="button" onclick={"location.href='/logout?redirect_to=/'"}>Logout</button>
+    </div>
+  </div>
+</div>
