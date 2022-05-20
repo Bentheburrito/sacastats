@@ -355,6 +355,7 @@
             <th data-field="vsvkills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="VS vehicle kills" class="drag-accept">VS-V.Kills</th>
             <th data-field="ncvkills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="NC vehicle kills" class="drag-accept">NC-V.Kills</th>
             <th data-field="trvkills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="TR vehicle kills" class="drag-accept">TR-V.Kills</th>
+            <th data-field="aurax" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Kills to next medal" class="drag-accept">N.Medal</th>
             <th data-field="kdr" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Kills per death" class="drag-accept">KD</th>
             <th data-field="acc" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Accuracy" class="drag-accept">Acc</th>
             <th data-field="hits" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Number of hits" class="drag-accept">Hits</th>
@@ -447,6 +448,9 @@
                 </td>
                 <td data-mobile-title="TR Vehicle Kills" class="number text-center">
                     <%=SacaStats.Utils.maybe_to_int(weapon["weapon_vehicle_kills"]["value_tr"])%>
+                </td>
+                <td data-mobile-title="Kills to Next Medal" class="number text-center">
+                    <%= SacaStatsWeb.CharacterController.get_kills_to_next_medals(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character["response"]["faction_id"]) + SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character["response"]["faction_id"]))%>
                 </td>
                 <td data-mobile-title="Kill/ Death Ratio" class="text-center">
                     <%=SacaStatsWeb.CharacterController.get_percent_ratio((SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character["response"]["faction_id"]) 

@@ -365,4 +365,19 @@ defmodule SacaStatsWeb.CharacterController do
     )
     |> Enum.sort()
   end
+
+  def get_kills_to_next_medals(total_kills) when total_kills >= 1160,
+    do: "N/A"
+
+  def get_kills_to_next_medals(total_kills) when total_kills >= 160,
+    do: 1160 - total_kills
+
+  def get_kills_to_next_medals(total_kills) when total_kills >= 60,
+    do: 160 - total_kills
+
+  def get_kills_to_next_medals(total_kills) when total_kills >= 10,
+    do: 60 - total_kills
+
+  def get_kills_to_next_medals(total_kills),
+    do: 10 - total_kills
 end
