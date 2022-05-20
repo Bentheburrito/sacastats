@@ -376,7 +376,9 @@
             <th data-field="trdamaget" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="TR damage taken" class="drag-accept">TR-Damage.T</th>
             <th data-field="time" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Time used with" class="drag-accept">Time</th>
             <th data-field="certs" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Certs earned with weapon" class="drag-accept">Certs</th>
+            <th data-field="cpm" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Certs per minute" class="drag-accept">CPM</th>
             <th data-field="score" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Score earned with weapon" class="drag-accept">Score</th>
+            <th data-field="spm" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Score per minute" class="drag-accept">SPM</th>
             <th data-field="killedby" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Number of times killed by weapon" class="drag-accept">Killed By</th>
             <th data-field="vskilledby" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Killed by VS" class="drag-accept">VS-Killed By</th>
             <th data-field="nckilledby" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Killed by NC" class="drag-accept">NC-Killed By</th>
@@ -506,7 +508,13 @@
                 </td>
                 <td class="text-center seconds-to-readable"><%=SacaStats.Utils.maybe_to_int(weapon["weapon_play_time"])%></td>
                 <td class="number text-center"><%=SacaStatsWeb.CharacterController.get_cert_count(weapon["weapon_score"])%></td>
+                <td data-mobile-title="Certs Per Minute" class="text-center">
+                    <%=SacaStats.Utils.safe_divide(SacaStatsWeb.CharacterController.get_cert_count(weapon["weapon_score"]), SacaStats.Utils.safe_divide(SacaStats.Utils.maybe_to_int(weapon["weapon_play_time"]), 60, 0), 2)%>
+                </td>
                 <td class="number text-center"><%=weapon["weapon_score"]%></td>
+                <td data-mobile-title="Score Per Minute" class="text-center">
+                    <%=SacaStats.Utils.safe_divide(SacaStats.Utils.maybe_to_int(weapon["weapon_score"]), SacaStats.Utils.safe_divide(SacaStats.Utils.maybe_to_int(weapon["weapon_play_time"]), 60, 0), 2)%>
+                </td>
                 <td class="number text-center"><%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_killed_by"), @character["response"]["faction_id"])%></td>
                 <td data-mobile-title="Killed By VS" class="number text-center">
                     <%=SacaStats.Utils.maybe_to_int(weapon["weapon_killed_by"]["value_vs"])%>
