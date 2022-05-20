@@ -361,6 +361,8 @@
             <th data-field="acc" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Accuracy" class="drag-accept">Acc</th>
             <th data-field="hits" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Number of hits" class="drag-accept">Hits</th>
             <th data-field="shots" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Shots fired" class="drag-accept">Shots</th>
+            <th data-field="hpk" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Hits per kill" class="drag-accept">HPK</th>
+            <th data-field="spk" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Shots per kill" class="drag-accept">SPK</th>
             <th data-field="hs" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Headshots" class="drag-accept">HS</th>
             <th data-field="vshs" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="VS headshots" class="drag-accept">VS-HS</th>
             <th data-field="nchs" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="NC headshots" class="drag-accept">NC-HS</th>
@@ -471,6 +473,12 @@
                 </td>
                 <td class="number text-center">
                     <%=SacaStats.Utils.maybe_to_int(weapon["weapon_fire_count"])%>
+                </td>
+                <td data-mobile-title="Hits Per Kill" class="number text-center">
+                    <%=SacaStats.Utils.safe_divide(SacaStats.Utils.maybe_to_int(weapon["weapon_hit_count"]), SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character["response"]["faction_id"]), 2)%>
+                </td>
+                <td data-mobile-title="Shots Per Kill" class="number text-center">
+                    <%=SacaStats.Utils.safe_divide(SacaStats.Utils.maybe_to_int(weapon["weapon_fire_count"]), SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character["response"]["faction_id"]), 2)%>
                 </td>
                 <td data-mobile-title="Headshots" class="number text-center"><%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_headshots"), @character["response"]["faction_id"])%></td>
                 <td data-mobile-title="VS Headshots" class="number text-center">
