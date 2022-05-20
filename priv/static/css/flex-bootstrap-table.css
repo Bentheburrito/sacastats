@@ -9,10 +9,6 @@
     background-color: rgba(194, 194, 194, 0.9);
 }
 
-.medal {
-    background: radial-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0) 70%);
-}
-
 @media screen and (max-width: 767px) {
 
     /*for boostrap xs*/
@@ -84,22 +80,6 @@ input:not(input[type=text]):not(input[type=search]):hover {
 
     .table tr:nth-child(even) td:first-child {
         background-color: #ffffff;
-    }
-
-    .table tr.selected td:first-child {
-        background-color: #ffffff;
-    }
-
-    tbody tr:not(tr.selection):hover>td {
-        background-color: #dddddd !important;
-    }
-
-    tr.selection:hover {
-        background-color: rgba(0, 0, 0, 0) !important;
-    }
-
-    tr.selection {
-        background-color: rgba(0, 0, 0, 0) !important;
     }
 }
 
