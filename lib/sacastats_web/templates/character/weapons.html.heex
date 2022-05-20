@@ -357,6 +357,7 @@
             <th data-field="trvkills" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="TR vehicle kills" class="drag-accept">TR-V.Kills</th>
             <th data-field="aurax" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Kills to next medal" class="drag-accept">N.Medal</th>
             <th data-field="kdr" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Kills per death" class="drag-accept">KD</th>
+            <th data-field="kpm" data-visible="true" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Kills per minute" class="drag-accept">KPM</th>
             <th data-field="acc" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Accuracy" class="drag-accept">Acc</th>
             <th data-field="hits" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Number of hits" class="drag-accept">Hits</th>
             <th data-field="shots" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Shots fired" class="drag-accept">Shots</th>
@@ -456,6 +457,9 @@
                     <%=SacaStatsWeb.CharacterController.get_percent_ratio((SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character["response"]["faction_id"]) 
                     + SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character["response"]["faction_id"])),
                         SacaStats.Utils.maybe_to_int(weapon["weapon_deaths"]))%>
+                </td>
+                <td data-mobile-title="Kills Per Minute" class="text-center">
+                    <%=SacaStats.Utils.safe_divide(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character["response"]["faction_id"]), SacaStats.Utils.safe_divide(SacaStats.Utils.maybe_to_int(weapon["weapon_play_time"]), 60, 0), 2)%>
                 </td>
                 <td data-mobile-title="Accuracy" class="text-center percentage">
                     <%=SacaStatsWeb.CharacterController.get_percent_ratio(weapon["weapon_hit_count"], weapon["weapon_fire_count"])%>
