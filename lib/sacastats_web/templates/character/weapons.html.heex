@@ -450,7 +450,7 @@
                     <%=SacaStats.Utils.maybe_to_int(weapon["weapon_vehicle_kills"]["value_tr"])%>
                 </td>
                 <td data-mobile-title="Kills to Next Medal" class="number text-center">
-                    <%= SacaStatsWeb.CharacterController.get_kills_to_next_medals(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character["response"]["faction_id"]) + SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character["response"]["faction_id"]))%>
+                    <%= SacaStatsWeb.CharacterController.get_kills_to_next_medal(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character["response"]["faction_id"]) + SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character["response"]["faction_id"]))%>
                 </td>
                 <td data-mobile-title="Kill/ Death Ratio" class="text-center">
                     <%=SacaStatsWeb.CharacterController.get_percent_ratio((SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character["response"]["faction_id"]) 
