@@ -113,4 +113,8 @@ input:not(input[type=text]):not(input[type=search]):hover {
     .search-input {
         font-size: small;
     }
+
+    .search.btn-group {
+        width: 100%;
+    }
 }
