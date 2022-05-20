@@ -91,9 +91,9 @@ defmodule SacaStatsWeb do
     end
   end
 
-  def generate_subpage_title([first | rest], separator)
-      when first == "character" and length([first | rest]) > 1,
-      do: generate_character_title([first | rest], separator)
+  def generate_subpage_title(["character" | _rest] = endpoint_arr, separator)
+      when length(endpoint_arr) > 1,
+      do: generate_character_title(endpoint_arr, separator)
 
   def generate_subpage_title(endpoint_arr, separator) do
     Enum.map_join(endpoint_arr, separator, &String.capitalize(&1))
