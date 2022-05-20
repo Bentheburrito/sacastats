@@ -22,6 +22,10 @@ defmodule SacaStats.Utils do
     numerator / ((denominator == 0 && 1) || denominator)
   end
 
+  def safe_divide(numerator, denominator, to_round) when to_round == 0 do
+    safe_divide(numerator, denominator) |> Float.round(to_round) |> trunc()
+  end
+
   def safe_divide(numerator, denominator, to_round) do
     Float.round(safe_divide(numerator, denominator), to_round)
   end
