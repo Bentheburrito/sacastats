@@ -62,11 +62,36 @@ defmodule SacaStats do
 
   def factions,
     do: %{
-      0 => %{name: "No Faction", alias: "NS", color: 0x575757, image: "https://i.imgur.com/9nHbnUh.jpg"},
-      1 => %{name: "Vanu Sovereignty", alias: "VS", color: 0xB035F2, image: "https://bit.ly/2RCsHXs"},
-      2 => %{name: "New Conglomerate", alias: "NC", color: 0x2A94F7, image: "https://bit.ly/2AOZJJB"},
-      3 => %{name: "Terran Republic", alias: "TR", color: 0xE52D2D, image: "https://bit.ly/2Mm6wij"},
-      4 => %{name: "Nanite Systems", alias: "NSO", color: 0xE5E5E5, image: "https://i.imgur.com/9nHbnUh.jpg"}
+      0 => %{
+        name: "No Faction",
+        alias: "NS",
+        color: 0x575757,
+        image: "https://i.imgur.com/9nHbnUh.jpg"
+      },
+      1 => %{
+        name: "Vanu Sovereignty",
+        alias: "VS",
+        color: 0xB035F2,
+        image: "https://bit.ly/2RCsHXs"
+      },
+      2 => %{
+        name: "New Conglomerate",
+        alias: "NC",
+        color: 0x2A94F7,
+        image: "https://bit.ly/2AOZJJB"
+      },
+      3 => %{
+        name: "Terran Republic",
+        alias: "TR",
+        color: 0xE52D2D,
+        image: "https://bit.ly/2Mm6wij"
+      },
+      4 => %{
+        name: "Nanite Systems",
+        alias: "NSO",
+        color: 0xE5E5E5,
+        image: "https://i.imgur.com/9nHbnUh.jpg"
+      }
     }
 
   def ess_subscriptions do
