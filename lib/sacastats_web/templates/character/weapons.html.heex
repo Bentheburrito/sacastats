@@ -104,7 +104,7 @@
                                         </span>
                                     </label>
                                 </div>
-                                <%= for faction <- ["NC", "TR", "VS", "NS", "NSO"] do %>
+                                <%= for faction <- Enum.map(SacaStats.factions(), fn {_id, info} -> info.alias end) do %>
                                     <div class="filter-option small-filter-option">
                                         <label class="dropdown-item checkbox checkbox-primary">
                                             <input class="form-check-input filter-input" type="checkbox" name="faction" id={faction <> "-faction-filter-option"}>

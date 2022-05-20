@@ -112,7 +112,7 @@ defmodule SacaStatsWeb.CharacterView do
     """
   end
 
-  defp build_event_log_item(assigns, %Events.VehicleDestroy{} = vd, %Session{} = session) do
+  defp build_event_log_item(assigns, %Events.VehicleDestroy{} = vd, %Session{} = _session) do
     ~H"""
     <li>
       <%= vd.attacker_character_id %> destroyed <%= vd.character_id %>'s <%= SacaStats.vehicles()[vd.vehicle_id]["name"] %>

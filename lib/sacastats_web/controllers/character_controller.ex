@@ -41,7 +41,7 @@ defmodule SacaStatsWeb.CharacterController do
   def character(%Plug.Conn{} = conn, %{"character_name" => name, "stat_type" => stat_type}) do
     with {:ok, info} <- CensusCache.get(SacaStats.CharacterCache, name),
          {:ok, status} <- CensusCache.get(SacaStats.OnlineStatusCache, info["character_id"]) do
-      assigns = build_assigns(conn, info, status, stat_type)
+      assigns = build_assigns(info, status, stat_type)
       render(conn, "template.html", assigns)
     else
       {:error, :not_found} ->
@@ -64,7 +64,7 @@ defmodule SacaStatsWeb.CharacterController do
     end
   end
 
-  defp build_assigns(conn, info, status, "weapons") do
+  defp build_assigns(info, status, "weapons") do
     weapon_general_stats = Enum.reduce(info["stats"]["weapon_stat"], %{}, &put_weapon_stat/2)
 
     weapon_faction_stats =
@@ -100,7 +100,7 @@ defmodule SacaStatsWeb.CharacterController do
     ]
   end
 
-  defp build_assigns(conn, info, status, stat_type) do
+  defp build_assigns(info, status, stat_type) do
     [
       character_info: info,
       online_status: status,
