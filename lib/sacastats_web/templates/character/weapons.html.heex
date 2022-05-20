@@ -463,7 +463,7 @@
                         SacaStats.Utils.maybe_to_int(weapon["weapon_deaths"]))%>
                 </td>
                 <td data-mobile-title="Kills Per Minute" class="text-center">
-                    <%=SacaStats.Utils.safe_divide(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character_info["faction_id"]), SacaStats.Utils.safe_divide(SacaStats.Utils.maybe_to_int(weapon["weapon_play_time"]), 60, 0), 2)%>
+                    <%=SacaStats.Utils.safe_divide(SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_kills"), @character_info["faction_id"]), trunc(SacaStats.Utils.safe_divide(SacaStats.Utils.maybe_to_int(weapon["weapon_play_time"]), 60, 0)), 2)%>
                 </td>
                 <td data-mobile-title="Accuracy" class="text-center percentage">
                     <%=SacaStatsWeb.CharacterController.get_percent_ratio(weapon["weapon_hit_count"], weapon["weapon_fire_count"])%>
@@ -517,11 +517,11 @@
                 <td class="text-center seconds-to-readable"><%=SacaStats.Utils.maybe_to_int(weapon["weapon_play_time"])%></td>
                 <td class="number text-center"><%=SacaStatsWeb.CharacterController.get_cert_count(weapon["weapon_score"])%></td>
                 <td data-mobile-title="Certs Per Minute" class="text-center">
-                    <%=SacaStats.Utils.safe_divide(SacaStatsWeb.CharacterController.get_cert_count(weapon["weapon_score"]), SacaStats.Utils.safe_divide(SacaStats.Utils.maybe_to_int(weapon["weapon_play_time"]), 60, 0), 2)%>
+                    <%=SacaStats.Utils.safe_divide(SacaStatsWeb.CharacterController.get_cert_count(weapon["weapon_score"]), trunc(SacaStats.Utils.safe_divide(SacaStats.Utils.maybe_to_int(weapon["weapon_play_time"]), 60, 0)), 2)%>
                 </td>
                 <td class="number text-center"><%=weapon["weapon_score"]%></td>
                 <td data-mobile-title="Score Per Minute" class="text-center">
-                    <%=SacaStats.Utils.safe_divide(SacaStats.Utils.maybe_to_int(weapon["weapon_score"]), SacaStats.Utils.safe_divide(SacaStats.Utils.maybe_to_int(weapon["weapon_play_time"]), 60, 0), 2)%>
+                    <%=SacaStats.Utils.safe_divide(SacaStats.Utils.maybe_to_int(weapon["weapon_score"]), trunc(SacaStats.Utils.safe_divide(SacaStats.Utils.maybe_to_int(weapon["weapon_play_time"]), 60, 0)), 2)%>
                 </td>
                 <td class="number text-center"><%=SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_killed_by"), @character_info["faction_id"])%></td>
                 <td data-mobile-title="Killed By VS" class="number text-center">
