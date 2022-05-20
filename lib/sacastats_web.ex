@@ -84,9 +84,10 @@ defmodule SacaStatsWeb do
     postfix = separator <> site_name
     endpoint_arr = String.split(endpoint, "/", trim: true)
 
-    case length(endpoint_arr) do
-      0 -> site_name
-      _ -> generate_subpage_title(endpoint_arr, separator) <> postfix
+    if length(endpoint_arr) == 0 do
+      site_name
+    else
+      generate_subpage_title(endpoint_arr, separator) <> postfix
     end
   end
 
