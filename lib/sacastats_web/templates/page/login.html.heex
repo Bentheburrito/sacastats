@@ -1,5 +1,20 @@
-<div class="row">
-    <div class="col-sm-6 col-xl-3 col-xs-12 mx-auto">
-      <%= link "Login with Discord", to: "/login/new", class: "btn btn-primary" %>
+<div class="row justify-content-center">
+  <div class="col-12 col-md-7 col-xl-4">
+    <div class="card">
+      <div class="card-body">
+        <h3 class="card-title">Login</h3>
+        <p class="card-text">
+          You can login to Saca Stats using Discord OAuth. Click the button below to be redirected to Discord's website, and allow us access to public information on your Discord account (username, avatar, and banner).
+          <br/>
+          <br/>
+          We use this information when you create custom polls, vote in private polls, save settings, and more.
+        </p>
+        <div class="w-100">
+          <div class="text-center">
+            <%= link "Login with Discord", to: "/login/new", class: "btn btn-primary", id: "login-main-btn" %>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>

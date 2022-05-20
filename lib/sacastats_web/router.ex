@@ -20,6 +20,7 @@ defmodule SacaStatsWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+    get "/account", PageController, :account
     get "/login", PageController, :login
     get "/login/new", PageController, :login_discord
     get "/login/redir", PageController, :login_discord_callback

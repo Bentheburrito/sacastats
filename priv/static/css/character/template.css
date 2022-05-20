@@ -2,31 +2,40 @@
 .navbar-nav.character-nav {
     padding: 0px;
 }
-.character-nav > li.nav-item > a.nav-link{
+
+.character-nav>li.nav-item>a.nav-link {
     padding-bottom: 0px;
 }
-.character-nav{
+
+.character-nav {
     padding-bottom: 0px;
 }
+
 .pb-10 {
-    padding-bottom: 10rem !important;
+    padding-bottom: 7rem !important;
 }
-@media only screen and (max-width: 767px) { /*for boostrap xs*/
-    .main-content{
-      padding-bottom: 18rem !important;
+
+@media only screen and (max-width: 767px) {
+
+    /*for boostrap xs*/
+    .main-content {
+        padding-bottom: 18rem !important;
     }
 }
 
 /*Character Header*/
-#characterName{
+#characterName {
     margin-bottom: 0;
 }
 
-#characterId{
+#characterId {
     padding-left: 15px;
 }
-@media only screen and (max-width: 767px) { /*for boostrap xs*/
-    #characterId{
+
+@media only screen and (max-width: 767px) {
+
+    /*for boostrap xs*/
+    #characterId {
         padding-left: 0px;
         text-align: center;
     }
