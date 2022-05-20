@@ -2,16 +2,16 @@ defmodule SacaStatsWeb do
   @moduledoc """
   The entrypoint for defining your web interface, such
   as controllers, views, channels and so on.
-
+  
   This can be used in your application as:
-
+  
       use SacaStatsWeb, :controller
       use SacaStatsWeb, :view
-
+  
   The definitions below will be executed for every view,
   controller, etc, so keep them short and clean, focused
   on imports, uses and aliases.
-
+  
   Do NOT define functions inside the quoted expressions
   below. Instead, define any helper function in modules
   and import those modules here.
@@ -99,22 +99,12 @@ defmodule SacaStatsWeb do
     |> Enum.map_join(separator, fn endpoint -> String.capitalize(endpoint) end)
   end
 
-  def generate_character_title(endpoint_arr, separator) do
-    endpoint_arr
-    |> Enum.with_index()
-    |> Enum.map(fn {endpoint, index} ->
-      cond do
-        index == 1 ->
-          endpoint
+  def generate_character_title([_first | rest], separator) do
+    [char_name | rest] = rest
 
-        index > 1 ->
-          String.capitalize(endpoint)
-
-        true ->
-          ""
-      end
-    end)
-    |> Enum.filter(fn endpoint -> endpoint != "" end)
+    rest
+    |> Enum.map(&String.capitalize(&1))
+    |> then(&[char_name | &1])
     |> Enum.join(separator)
   end
 
