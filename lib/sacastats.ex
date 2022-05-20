@@ -3,8 +3,6 @@ defmodule SacaStats do
   SacaStats API for interacting with the census and data collected via ESS.
   """
 
-  import Ecto.Query
-
   alias SacaStats.Utils.StaticData
 
   @zone_instance_bitmask 0x0000FFFF
@@ -64,11 +62,36 @@ defmodule SacaStats do
 
   def factions,
     do: %{
-      0 => {"No Faction", 0x575757, "https://i.imgur.com/9nHbnUh.jpg"},
-      1 => {"Vanu Sovereignty", 0xB035F2, "https://bit.ly/2RCsHXs"},
-      2 => {"New Conglomerate", 0x2A94F7, "https://bit.ly/2AOZJJB"},
-      3 => {"Terran Republic", 0xE52D2D, "https://bit.ly/2Mm6wij"},
-      4 => {"Nanite Systems", 0xE5E5E5, "https://i.imgur.com/9nHbnUh.jpg"}
+      0 => %{
+        name: "No Faction",
+        alias: "NS",
+        color: 0x575757,
+        image: "https://i.imgur.com/9nHbnUh.jpg"
+      },
+      1 => %{
+        name: "Vanu Sovereignty",
+        alias: "VS",
+        color: 0xB035F2,
+        image: "https://bit.ly/2RCsHXs"
+      },
+      2 => %{
+        name: "New Conglomerate",
+        alias: "NC",
+        color: 0x2A94F7,
+        image: "https://bit.ly/2AOZJJB"
+      },
+      3 => %{
+        name: "Terran Republic",
+        alias: "TR",
+        color: 0xE52D2D,
+        image: "https://bit.ly/2Mm6wij"
+      },
+      4 => %{
+        name: "Nanite Systems",
+        alias: "NSO",
+        color: 0xE5E5E5,
+        image: "https://i.imgur.com/9nHbnUh.jpg"
+      }
     }
 
   def ess_subscriptions do

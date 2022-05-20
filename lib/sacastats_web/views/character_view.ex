@@ -5,6 +5,13 @@ defmodule SacaStatsWeb.CharacterView do
 
   require Logger
 
+  def next_battle_rank(character_info) do
+    character_info
+    |> get_in(["battle_rank", "value"])
+    |> String.to_integer()
+    |> Kernel.+(1)
+  end
+
   def pretty_session_summary(assigns, session) do
     login_time = prettify_timestamp(assigns, session.login.timestamp)
     logout_time = prettify_timestamp(assigns, session.logout.timestamp)
@@ -105,7 +112,7 @@ defmodule SacaStatsWeb.CharacterView do
     """
   end
 
-  defp build_event_log_item(assigns, %Events.VehicleDestroy{} = vd, %Session{} = session) do
+  defp build_event_log_item(assigns, %Events.VehicleDestroy{} = vd, %Session{} = _session) do
     ~H"""
     <li>
       <%= vd.attacker_character_id %> destroyed <%= vd.character_id %>'s <%= SacaStats.vehicles()[vd.vehicle_id]["name"] %>

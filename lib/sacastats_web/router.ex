@@ -29,11 +29,10 @@ defmodule SacaStatsWeb.Router do
   scope "/character", SacaStatsWeb do
     pipe_through :browser
 
-    get "/", CharacterController, :character_search
-    get "/:character_name", CharacterController, :character_general
-    get "/:character_name/sessions", CharacterController, :character_sessions
-    get "/:character_name/sessions/:login_timestamp", CharacterController, :character_session
+    get "/", CharacterController, :search
+    get "/:character_name", CharacterController, :general
     get "/:character_name/:stat_type", CharacterController, :character
+    get "/:character_name/sessions/:login_timestamp", CharacterController, :session
   end
 
   scope "/outfit", SacaStatsWeb do
