@@ -84,7 +84,7 @@ defmodule SacaStatsWeb do
     postfix = separator <> site_name
     endpoint_arr = String.split(endpoint, "/", trim: true)
 
-    if length(endpoint_arr) == 0 do
+    if endpoint_arr == [] do
       site_name
     else
       generate_subpage_title(endpoint_arr, separator) <> postfix
