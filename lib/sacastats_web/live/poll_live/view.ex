@@ -5,23 +5,31 @@ defmodule SacaStatsWeb.PollLive.View do
   use SacaStatsWeb, :live_view
   use Phoenix.HTML
 
-  alias SacaStats.Poll
-  alias SacaStats.PollItem.{MultiChoice, Text}
-  alias SacaStats.Repo
+  alias Ecto.Multi
+  alias SacaStats.{Poll, Repo}
+  alias SacaStats.Poll.{Item, Vote}
 
   def render(assigns) do
     Phoenix.View.render(SacaStatsWeb.PollView, "view.html", assigns)
   end
 
   def mount(%{"id" => id}, session, socket) do
-    %Poll{} = poll = Repo.get(Poll, id) |> Repo.preload([:text_items, :multi_choice_items])
+    %Poll{} = poll =
+      Poll
+      |> Repo.get(id)
+      |> Repo.preload([items: [:choices, :votes]])
 
-    changeset = Poll.new_vote_changeset(poll, %{})
+    voter_id = not is_nil(session["user"]) && session["user"]["id"] || 0
+
+    vote_changesets = for item <- poll.items, into: %{} do
+      changeset = Vote.changeset(%Vote{}, %{"voter_discord_id" => voter_id, "item_id" => item.id})
+      {item.id, changeset}
+    end
 
     {:ok,
      socket
      |> assign(:poll, poll)
-     |> assign(:changeset, changeset)
+     |> assign(:vote_changesets, vote_changesets)
      |> assign(:user, session["user"])
      |> assign(:_csrf_token, session["_csrf_token"])}
   end
@@ -31,30 +39,21 @@ defmodule SacaStatsWeb.PollLive.View do
     {:noreply, socket}
   end
 
-  def handle_event("field_change", %{"poll" => params}, socket) do
-    changeset = Poll.new_vote_changeset(socket.assigns.poll, params)
-    {:noreply, assign(socket, :changeset, changeset)}
+  def handle_event("field_change", %{"vote" => params}, socket) do
+    changeset = Vote.changeset(%Vote{}, params)
+    vote_changesets = Map.put(socket.assigns.vote_changesets, params["item_id"], changeset)
+    {:noreply, assign(socket, :vote_changesets, vote_changesets)}
   end
 
-  def handle_event("form_submit", %{"poll" => params}, socket) do
-    new_params =
-      params
-      |> Map.update("text_items", %{}, &combine_votes(&1, socket.assigns.poll.text_items))
-      |> Map.update(
-        "multi_choice_items",
-        %{},
-        &combine_votes(&1, socket.assigns.poll.multi_choice_items)
-      )
+  def handle_event("form_submit", _params, socket) do
+    transaction =
+      Enum.reduce(socket.assigns.vote_changesets, Multi.new(), fn changeset, multi ->
+        Multi.insert(multi, :vote, changeset)
+      end)
 
-    changeset =
-      Repo.get!(Poll, socket.assigns.poll.id)
-      |> Repo.preload([:text_items, :multi_choice_items])
-      |> Poll.new_vote_changeset(new_params)
-      |> Map.put(:action, :update)
-
-    case Repo.update(changeset) do
-      {:ok, %Poll{id: id}} ->
-        {:noreply, redirect(socket, to: "/outfit/poll/#{id}")}
+    case Repo.transaction(changeset) do
+      {:ok, _} ->
+        {:noreply, redirect(socket, to: "/outfit/poll/#{id}/results")}
 
       {:error, changeset} ->
         {:noreply,

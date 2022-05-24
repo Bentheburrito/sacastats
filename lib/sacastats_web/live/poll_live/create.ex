@@ -5,10 +5,7 @@ defmodule SacaStatsWeb.PollLive.Create do
   use SacaStatsWeb, :live_view
   use Phoenix.HTML
 
-  alias SacaStats.Poll
-  alias SacaStats.PollItem.{MultiChoice, Text}
-  alias SacaStats.Repo
-  alias SacaStats.Utils
+  alias SacaStats.{Poll, Repo, Utils}
 
   def render(assigns) do
     Phoenix.View.render(SacaStatsWeb.PollView, "create.html", assigns)
@@ -16,27 +13,25 @@ defmodule SacaStatsWeb.PollLive.Create do
 
   def mount(_params, session, socket) do
     user = session["user"]
-    init_changes = %{"owner_discord_id" => user["id"]}
 
     if is_nil(user) do
       {:ok,
-       socket
-       |> put_flash(:error, "You need to be logged in to create polls.")
-       |> redirect(to: "/")}
+      socket
+      |> put_flash(:error, "You need to be logged in to create polls.")
+      |> redirect(to: "/")}
     else
-      changeset = Poll.changeset(%Poll{}, init_changes)
+      changeset = Poll.changeset(%Poll{}, %{})
 
       {:ok,
        socket
+       |> assign(:owner_discord_id, user["id"])
        |> assign(:changeset, changeset)
-       |> assign(:prev_params, init_changes)}
+       |> assign(:prev_params, %{})}
     end
   end
 
   def handle_event("field_change", %{"poll" => params}, socket) do
-    changeset =
-      %Poll{}
-      |> Poll.changeset(params)
+    changeset = Poll.changeset(%Poll{}, params)
 
     {:noreply,
      socket
@@ -44,21 +39,13 @@ defmodule SacaStatsWeb.PollLive.Create do
      |> assign(:prev_params, params)}
   end
 
-  def handle_event("add_text", _params, socket) do
-    next_position = get_next_position(socket.assigns.changeset.changes)
-
-    next_index =
-      socket.assigns.prev_params
-      |> Map.get("text_items", %{})
-      |> map_size()
-      |> Integer.to_string()
-
+  def handle_event("add_item", _params, socket) do
     params =
       Map.update(
         socket.assigns.prev_params,
-        "text_items",
-        %{"0" => %{"position" => next_position}},
-        &Map.put(&1, next_index, %{"position" => next_position})
+        "items",
+        %{"0" => %{}},
+        &Map.put(&1, to_string(map_size(socket.assigns.prev_params["items"])), %{})
       )
 
     changeset = Poll.changeset(%Poll{}, params)
@@ -69,21 +56,17 @@ defmodule SacaStatsWeb.PollLive.Create do
      |> assign(:prev_params, params)}
   end
 
-  def handle_event("add_multi", _params, socket) do
-    next_position = get_next_position(socket.assigns.changeset.changes)
-
-    next_index =
-      socket.assigns.prev_params
-      |> Map.get("multi_choice_items", %{})
-      |> map_size()
-      |> Integer.to_string()
-
+  def handle_event("add_choice:" <> item_index, _params, socket) do
+    IO.inspect socket.assigns.prev_params, label: "prev params add choice"
+    IO.inspect socket.assigns.changeset, label: "changeset add choice"
     params =
-      Map.update(
+      update_in(
         socket.assigns.prev_params,
-        "multi_choice_items",
-        %{"0" => %{"position" => next_position}},
-        &Map.put(&1, next_index, %{"position" => next_position})
+        ["items", item_index, "choices"],
+        fn
+          nil -> %{"0" => %{}}
+          choices -> Map.put(choices, to_string(map_size(choices)), %{})
+        end
       )
 
     changeset = Poll.changeset(%Poll{}, params)
@@ -94,14 +77,36 @@ defmodule SacaStatsWeb.PollLive.Create do
      |> assign(:prev_params, params)}
   end
 
-  def handle_event("remove_item:" <> to_remove_position, _params, socket) do
-    to_remove_position = String.to_integer(to_remove_position)
+  def handle_event("remove_item:" <> to_remove_index, _params, socket) do
+    params =
+      Map.update(
+        socket.assigns.prev_params,
+        "items",
+        %{},
+        &remove_at(&1, to_remove_index)
+      )
+
+    changeset = Poll.changeset(%Poll{}, params)
+
+    {:noreply,
+     socket
+     |> assign(:changeset, changeset)
+     |> assign(:prev_params, params)}
+  end
+
+  def handle_event("remove_choice:" <> indexes, _params, socket) do
+    [item_index, choice_index] = String.split(indexes, ":")
+
+    IO.inspect socket.assigns.prev_params, label: "prev params"
+    IO.inspect item_index, label: "item index"
 
     params =
-      socket.assigns.prev_params
-      |> Map.update("text_items", %{}, &remove_item(&1, to_remove_position))
-      |> Map.update("multi_choice_items", %{}, &remove_item(&1, to_remove_position))
-
+      update_in(
+        socket.assigns.prev_params,
+        ["items", item_index, "choices"],
+        &remove_at(&1, choice_index)
+      )
+    IO.inspect params, label: "PARAMS"
     changeset = Poll.changeset(%Poll{}, params)
 
     {:noreply,
@@ -111,6 +116,7 @@ defmodule SacaStatsWeb.PollLive.Create do
   end
 
   def handle_event("form_submit", _params, socket) do
+    IO.inspect socket.assigns.changeset, label: "on submit changeset"
     case Repo.insert(socket.assigns.changeset) do
       {:ok, %Poll{id: id}} ->
         {:noreply, redirect(socket, to: "/outfit/poll/#{id}")}
@@ -124,81 +130,62 @@ defmodule SacaStatsWeb.PollLive.Create do
   end
 
   def encode_poll_items(form, assigns) do
-    text_items = inputs_for(form, :text_items)
-    multi_choice_items = inputs_for(form, :multi_choice_items)
-
-    poll_items =
-      Enum.sort_by(text_items ++ multi_choice_items, fn a -> a.source.changes.position end)
-
+    items = inputs_for(form, :items)
+    IO.inspect(items, label: "inputs for items encode")
     ~H"""
-    <%= for item <- poll_items do %>
+    <%= for {item, index} <- Enum.with_index(items) do %>
       <div class="poll-item">
         <button type="button"
-          phx-click={"remove_item:#{item.source.changes.position}"}
+          phx-click={"remove_item:#{index}"}
           class="btn-danger btn-sm remove-item-button">
           Remove Field
         </button>
-        <%= encode_poll_item(assigns, item) %>
+        <%= encode_poll_item(assigns, item, index) %>
       </div>
     <% end %>
     """
   end
 
-  defp encode_poll_item(assigns, %Phoenix.HTML.Form{data: %Text{}} = text_item) do
-    position = text_item.source.changes.position
+  defp encode_poll_item(assigns, %Phoenix.HTML.Form{} = item, item_index) do
+    choices = inputs_for(item, :choices)
 
     ~H"""
-    <h4><%= position %>. Text Field</h4>
+    <h4><%= length(choices) == 0 && "Text" || "Multiple-Choice" %> Field</h4>
 
-    <%= label text_item, :description %>
-    <%= text_input text_item, :description %>
-    <%= error_tag text_item, :description %>
-
-    <%= hidden_input text_item, :position, value: position %>
+    <%= label item, :description %>
+    <%= text_input item, :description %>
+    <%= error_tag item, :description %>
+    <ul>
+      <%= for {choice, choice_index} <- Enum.with_index(choices) do %>
+        <button type="button"
+          phx-click={"remove_choice:#{item_index}:#{choice_index}"}
+          class="btn-danger btn-sm remove-item-button">
+          Remove Choice
+        </button>
+        <%= encode_poll_item_choice(assigns, choice) %>
+      <% end %>
+    </ul>
+    <button type="button" phx-click={"add_choice:#{item_index}"} class="btn-info">Add Multiple-Choice Option</button>
     """
   end
 
-  defp encode_poll_item(assigns, %Phoenix.HTML.Form{data: %MultiChoice{}} = multi_choice_item) do
-    position = multi_choice_item.source.changes.position
-
-    choices_value =
-      if is_list(multi_choice_item.source.changes[:choices]) do
-        Enum.join(multi_choice_item.source.changes[:choices], ", ")
-      else
-        multi_choice_item.source.changes[:choices]
-      end
-
+  defp encode_poll_item_choice(assigns, %Phoenix.HTML.Form{} = choice) do
     ~H"""
-    <h4><%= position %>. Multiple-Choice Field</h4>
-
-    <%= label multi_choice_item, :description %>
-    <%= text_input multi_choice_item, :description %>
-    <%= error_tag multi_choice_item, :description %>
-
-    <%= label multi_choice_item, :choices %>
-    <%= text_input multi_choice_item, :choices, value: choices_value, placeholder: "Enter choices separated by commas. (e.g. \"option one, option two, option three\")" %>
-    <%= error_tag multi_choice_item, :choices %>
-
-    <%= hidden_input multi_choice_item, :position, value: position %>
+    <li>
+    <div class="d-inline">
+      <%= label choice, :description, "Choice Description", class: "d-inline" %>
+      <%= text_input choice, :description, class: "d-inline" %>
+      <%= error_tag choice, :description %>
+      </div>
+    </li>
     """
   end
 
-  defp get_next_position(changes) do
-    text_items = Map.get(changes, :text_items, [])
-    multi_choice_items = Map.get(changes, :multi_choice_items, [])
-    length(text_items) + length(multi_choice_items) + 1
-  end
-
-  defp remove_item(items, position) when is_integer(position) do
-    for {index, %{"position" => item_pos} = item} <- items,
-        item_pos = Utils.maybe_to_int(item_pos),
-        position != item_pos,
-        into: %{} do
-      if item_pos > position do
-        {item_pos - 1, %{item | "position" => item_pos - 1}}
-      else
-        {index, item}
-      end
-    end
+  defp remove_at(map, to_remove_index) do
+    Enum.reduce(map, %{}, fn
+     {index, item}, acc when index < to_remove_index -> Map.put(acc, index, item)
+     {index, _item}, acc when index == to_remove_index -> acc
+     {index, item}, acc when index > to_remove_index -> Map.put(acc, to_string(String.to_integer(index) - 1), item)
+    end)
   end
 end

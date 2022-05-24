@@ -3,25 +3,24 @@ defmodule SacaStats.Repo.Migrations.AddPollSchema do
 
   def change do
     create table(:polls) do
-      add :owner_discord_id, :integer
+      add :owner_discord_id, :bigint
       add :title, :string
     end
 
-    create table(:poll_items_text) do
+    create table(:poll_items) do
       add :description, :string
-      # Mapped by voter's discord_id => their text response
-      add :votes, {:map, :string}
-      add :position, :integer
       add :poll_id, references("polls")
     end
 
-    create table(:poll_items_multi_choice) do
+    create table(:poll_item_choices) do
       add :description, :string
-      add :choices, {:array, :string}
-      # Mapped by voter's discord_id => their selected choice
-      add :votes, {:map, :string}
-      add :position, :integer
-      add :poll_id, references("polls")
+      add :item_id, references("poll_items")
+    end
+
+    create table(:poll_item_votes) do
+      add :voter_discord_id, :bigint
+      add :content, :string
+      add :item_id, references("poll_items")
     end
   end
 end
