@@ -50,6 +50,7 @@ const CHARACTER_CLASS_MAP = new Map([
     ["MAX", 5]
 ]);
 const CHARACTER_HEADID_TO_HEAD_MAP = new Map([
+    [0, "Head_Male_NSO"],
     [1, "Head_Male_Caucasian"],
     [2, "Head_Male_African"],
     [3, "Head_Male_Asian"],
@@ -61,7 +62,7 @@ const CHARACTER_HEADID_TO_HEAD_MAP = new Map([
 ]);
 
 function setModelBase() {
-    modelBase = generalPrefix + ((characterClassID == 0) ? "Stealth_" : "") + ((characterClassID == 5) ? "Max_" : "") + "Base";
+    modelBase = generalPrefix + ((characterClassID == 0 && characterFactionAlias != "NSO") ? "Stealth_" : "") + ((characterClassID == 5 && characterFactionAlias != "NSO") ? "Max_" : "") + "Base";
 }
 
 function setCharacterVariables(factionAlias, headID, characterClass) {
@@ -72,7 +73,11 @@ function setCharacterVariables(factionAlias, headID, characterClass) {
 }
 
 function setCharacterHead(headID) {
-    characterHead = CHARACTER_HEADID_TO_HEAD_MAP.get(+headID);
+    if (characterFactionAlias != "NSO") {
+        characterHead = CHARACTER_HEADID_TO_HEAD_MAP.get(+headID);
+    } else {
+        characterHead = CHARACTER_HEADID_TO_HEAD_MAP.get(0);
+    }
     characterHeadID = headID;
 }
 
