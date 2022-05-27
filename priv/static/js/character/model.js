@@ -23,11 +23,77 @@ let directionalLight;
 let controls;
 let renderer;
 let scene;
-let MODEL_PATH = "/js/assets/models/";
+const ASSETS_MODELS_PATH = "/js/assets/models/infantry/";
+let modelPath = ASSETS_MODELS_PATH;
 let highQuality = false; //true: constantly re-renders; false: only re-renders when camera angle changes
 
 const mixers = [];
 const clock = new Clock();
+
+//initialize variables
+let characterFactionAlias;
+let characterSex;
+let characterClass;
+let characterClassID;
+let generalPrefix;
+let modelBase;
+const characterClassMap = new Map([
+    ["Infiltrator", 0],
+    ["Light Assault", 1],
+    ["Combat Medic", 2],
+    ["Engineer", 3],
+    ["Heavy Assault", 4],
+    ["MAX", 5]
+]);
+
+function setModelBase() {
+    modelBase = generalPrefix + ((characterClassID == 0) ? "Stealth_" : "") + ((characterClassID == 5) ? "Max_" : "") + "Base.glb";
+}
+
+function setCharacterVariables(factionAlias, headID, characterClass) {
+    setCharacterFaction(factionAlias);
+    setCharacterSex(headID);
+    setCharacterClassInfo(characterClass);
+}
+
+function getNonNullCharacterVariables(factionAlias, headID, characterClass) {
+    if (factionAlias == "" || factionAlias == undefined) {
+        factionAlias = "VS";
+    }
+    if (headID == "" || headID == undefined) {
+        headID = 1;
+    }
+    if (characterClass == "" || characterClass == undefined) {
+        characterClass = "Engineer";
+    }
+
+    return [factionAlias, headID, characterClass];
+}
+
+function setCharacterFaction(factionAlias) {
+    if (factionAlias == "NS") {
+        factionAlias = "NSO";
+    }
+    characterFactionAlias = factionAlias;
+    modelPath = modelPath + factionAlias + "/";
+}
+
+function setGeneralPrefix() {
+    generalPrefix = characterFactionAlias + "_" + characterSex + "_";
+}
+
+function setCharacterClassInfo(clazz) {
+    characterClass = clazz;
+    characterClassID = characterClassMap.get(clazz);
+}
+
+function setCharacterSex(headID) {
+    if (headID > 4) {
+        characterSex = "Female"
+    } else {
+        characterSex = "Male"
+    }
+}
 
 function createCamera() {
     //initialize camera
@@ -120,28 +186,28 @@ function loadModels() {
 
     //add model pieces
     loader.load(
-        MODEL_PATH + "VS_Sniper.glb",
+        ASSETS_MODELS_PATH + "VS_Sniper.glb",
         (gltf) => onLoad(gltf, modelPosition, true),
         null,
         null
     );
 
     loader.load(
-        MODEL_PATH + "VS_Stealth_Base.glb",
+        modelPath + modelBase,
         (gltf) => onLoad(gltf, modelPosition, false),
         null,
         null
     );
 
     loader.load(
-        MODEL_PATH + "VS_Infil_Armor.glb",
+        ASSETS_MODELS_PATH + "VS_Infil_Armor.glb",
         (gltf) => onLoad(gltf, modelPosition, true),
         null,
         null
     );
 
     loader.load(
-        MODEL_PATH + "caucasianFemaleHead.glb",
+        ASSETS_MODELS_PATH + "caucasianFemaleHead.glb",
         (gltf) => onLoad(gltf, modelPosition, false),
         null,
         null
@@ -210,7 +276,7 @@ function onWindowResize() {
     render();
 }
 
-export default function init(containerID) {
+export default function init(containerID, factionAlias, headID, clazz) {
     //get the container div
     container = document.querySelector(containerID);
 
@@ -221,6 +287,16 @@ export default function init(containerID) {
     createCamera();
     createControls();
     createLights();
+
+    //make sure the variables are non nulls
+    let adjustedVars = getNonNullCharacterVariables(factionAlias, headID, clazz);
+    factionAlias = adjustedVars[0];
+    headID = adjustedVars[1];
+    clazz = adjustedVars[2];
+
+    setCharacterVariables(factionAlias, headID, clazz);
+    setGeneralPrefix();
+    setModelBase();
     loadModels();
     createRenderer();
 

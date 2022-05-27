@@ -27,7 +27,8 @@ defmodule SacaStats.CensusCache.Fallbacks do
         "online_status",
         "outfit(alias,id,name)",
         "weapon_stat",
-        "weapon_stat_by_faction"
+        "weapon_stat_by_faction",
+        "profile(profile_type_description)"
       ])
       |> join(
         Join.new(collection: "item_profile")
