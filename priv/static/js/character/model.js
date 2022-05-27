@@ -23,8 +23,10 @@ let directionalLight;
 let controls;
 let renderer;
 let scene;
+const MODEL_FILE_TYPE = ".glb";
 const ASSETS_MODELS_PATH = "/js/assets/models/infantry/";
-let modelPath = ASSETS_MODELS_PATH;
+let basePath = ASSETS_MODELS_PATH;
+const HEAD_PATH = ASSETS_MODELS_PATH + "heads/";
 let highQuality = false; //true: constantly re-renders; false: only re-renders when camera angle changes
 
 const mixers = [];
@@ -32,12 +34,14 @@ const clock = new Clock();
 
 //initialize variables
 let characterFactionAlias;
+let characterHead;
+let characterHeadID;
 let characterSex;
 let characterClass;
 let characterClassID;
 let generalPrefix;
 let modelBase;
-const characterClassMap = new Map([
+const CHARACTER_CLASS_MAP = new Map([
     ["Infiltrator", 0],
     ["Light Assault", 1],
     ["Combat Medic", 2],
@@ -45,15 +49,31 @@ const characterClassMap = new Map([
     ["Heavy Assault", 4],
     ["MAX", 5]
 ]);
+const CHARACTER_HEADID_TO_HEAD_MAP = new Map([
+    [1, "Head_Male_Caucasian"],
+    [2, "Head_Male_African"],
+    [3, "Head_Male_Asian"],
+    [4, "Head_Male_Hispanic"],
+    [5, "Head_Female_Caucasian"],
+    [6, "Head_Female_African"],
+    [7, "Head_Female_Asian"],
+    [8, "Head_Female_Hispanic"],
+]);
 
 function setModelBase() {
-    modelBase = generalPrefix + ((characterClassID == 0) ? "Stealth_" : "") + ((characterClassID == 5) ? "Max_" : "") + "Base.glb";
+    modelBase = generalPrefix + ((characterClassID == 0) ? "Stealth_" : "") + ((characterClassID == 5) ? "Max_" : "") + "Base";
 }
 
 function setCharacterVariables(factionAlias, headID, characterClass) {
     setCharacterFaction(factionAlias);
+    setCharacterHead(headID);
     setCharacterSex(headID);
     setCharacterClassInfo(characterClass);
+}
+
+function setCharacterHead(headID) {
+    characterHead = CHARACTER_HEADID_TO_HEAD_MAP.get(+headID);
+    characterHeadID = headID;
 }
 
 function getNonNullCharacterVariables(factionAlias, headID, characterClass) {
@@ -75,7 +95,7 @@ function setCharacterFaction(factionAlias) {
         factionAlias = "NSO";
     }
     characterFactionAlias = factionAlias;
-    modelPath = modelPath + factionAlias + "/";
+    basePath = basePath + factionAlias + "/";
 }
 
 function setGeneralPrefix() {
@@ -84,7 +104,7 @@ function setGeneralPrefix() {
 
 function setCharacterClassInfo(clazz) {
     characterClass = clazz;
-    characterClassID = characterClassMap.get(clazz);
+    characterClassID = CHARACTER_CLASS_MAP.get(clazz);
 }
 
 function setCharacterSex(headID) {
@@ -193,7 +213,7 @@ function loadModels() {
     );
 
     loader.load(
-        modelPath + modelBase,
+        basePath + modelBase + MODEL_FILE_TYPE,
         (gltf) => onLoad(gltf, modelPosition, false),
         null,
         null
@@ -207,7 +227,7 @@ function loadModels() {
     );
 
     loader.load(
-        ASSETS_MODELS_PATH + "caucasianFemaleHead.glb",
+        HEAD_PATH + characterHead + MODEL_FILE_TYPE,
         (gltf) => onLoad(gltf, modelPosition, false),
         null,
         null
