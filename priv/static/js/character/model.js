@@ -26,6 +26,7 @@ let scene;
 const MODEL_FILE_TYPE = ".glb";
 const ASSETS_MODELS_PATH = "/js/assets/models/infantry/";
 let basePath = ASSETS_MODELS_PATH;
+let armorPath = ASSETS_MODELS_PATH;
 const HEAD_PATH = ASSETS_MODELS_PATH + "heads/";
 let highQuality = false; //true: constantly re-renders; false: only re-renders when camera angle changes
 
@@ -34,6 +35,7 @@ const clock = new Clock();
 
 //initialize variables
 let characterFactionAlias;
+let characterArmor;
 let characterHead;
 let characterHeadID;
 let characterSex;
@@ -72,6 +74,10 @@ function setCharacterVariables(factionAlias, headID, characterClass) {
     setCharacterClassInfo(characterClass);
 }
 
+function setCharacterArmor() {
+    characterArmor = generalPrefix + characterClass.replaceAll(" ", "") + "_Armor";
+}
+
 function setCharacterHead(headID) {
     if (characterFactionAlias != "NSO") {
         characterHead = CHARACTER_HEADID_TO_HEAD_MAP.get(+headID);
@@ -100,7 +106,8 @@ function setCharacterFaction(factionAlias) {
         factionAlias = "NSO";
     }
     characterFactionAlias = factionAlias;
-    basePath = basePath + factionAlias + "/";
+    basePath = basePath + factionAlias + "/base/";
+    armorPath = armorPath + factionAlias + "/armor/";
 }
 
 function setGeneralPrefix() {
@@ -225,7 +232,7 @@ function loadModels() {
     );
 
     loader.load(
-        ASSETS_MODELS_PATH + "VS_Infil_Armor.glb",
+        armorPath + characterArmor + MODEL_FILE_TYPE,
         (gltf) => onLoad(gltf, modelPosition, true),
         null,
         null
@@ -322,6 +329,7 @@ export default function init(containerID, factionAlias, headID, clazz) {
     setCharacterVariables(factionAlias, headID, clazz);
     setGeneralPrefix();
     setModelBase();
+    setCharacterArmor();
     loadModels();
     createRenderer();
 
