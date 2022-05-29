@@ -27,6 +27,7 @@ const MODEL_FILE_TYPE = ".glb";
 const ASSETS_MODELS_PATH = "/js/assets/models/infantry/";
 let basePath = ASSETS_MODELS_PATH;
 let armorPath = ASSETS_MODELS_PATH;
+let weaponPath = ASSETS_MODELS_PATH;
 const HEAD_PATH = ASSETS_MODELS_PATH + "heads/";
 let highQuality = false; //true: constantly re-renders; false: only re-renders when camera angle changes
 
@@ -35,6 +36,7 @@ const clock = new Clock();
 
 //initialize variables
 let characterFactionAlias;
+let characterWeapon;
 let characterArmor;
 let characterHead;
 let characterHeadID;
@@ -62,10 +64,14 @@ const CHARACTER_HEADID_TO_HEAD_MAP = new Map([
     [7, "Head_Female_Asian"],
     [8, "Head_Female_Hispanic"],
 ]);
-
-function setModelBase() {
-    modelBase = generalPrefix + ((characterClassID == 0 && characterFactionAlias != "NSO") ? "Stealth_" : "") + ((characterClassID == 5 && characterFactionAlias != "NSO") ? "Max_" : "") + "Base";
-}
+const CHARACTER_WEAPON_MAP = new Map([
+    ["Infiltrator", "Sniper"],
+    ["Light Assault", "Carbine"],
+    ["Combat Medic", "AssaultRifle"],
+    ["Engineer", "Carbine"],
+    ["Heavy Assault", "LMG"],
+    ["MAX", "MAX"]
+]);
 
 function setCharacterVariables(factionAlias, headID, characterClass) {
     setCharacterFaction(factionAlias);
@@ -74,8 +80,16 @@ function setCharacterVariables(factionAlias, headID, characterClass) {
     setCharacterClassInfo(characterClass);
 }
 
+function setCharacterWeapon() {
+    characterWeapon = characterFactionAlias + "_" + CHARACTER_WEAPON_MAP.get(characterClass) + "_Weapon";
+}
+
 function setCharacterArmor() {
     characterArmor = generalPrefix + characterClass.replaceAll(" ", "") + "_Armor";
+}
+
+function setModelBase() {
+    modelBase = generalPrefix + ((characterClassID == 0 && characterFactionAlias != "NSO") ? "Stealth_" : "") + ((characterClassID == 5 && characterFactionAlias != "NSO") ? "Max_" : "") + "Base";
 }
 
 function setCharacterHead(headID) {
@@ -108,6 +122,7 @@ function setCharacterFaction(factionAlias) {
     characterFactionAlias = factionAlias;
     basePath = basePath + factionAlias + "/base/";
     armorPath = armorPath + factionAlias + "/armor/";
+    weaponPath = weaponPath + factionAlias + "/weapons/";
 }
 
 function setGeneralPrefix() {
@@ -218,7 +233,7 @@ function loadModels() {
 
     //add model pieces
     loader.load(
-        ASSETS_MODELS_PATH + "VS_Sniper.glb",
+        weaponPath + characterWeapon + MODEL_FILE_TYPE,
         (gltf) => onLoad(gltf, modelPosition, true),
         null,
         null
@@ -330,6 +345,7 @@ export default function init(containerID, factionAlias, headID, clazz) {
     setGeneralPrefix();
     setModelBase();
     setCharacterArmor();
+    setCharacterWeapon();
     loadModels();
     createRenderer();
 
