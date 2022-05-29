@@ -146,7 +146,7 @@ function createCamera() {
     //initialize camera
     camera = new PerspectiveCamera(
         20,
-        container.clientWidth / container.clientHeight + .3,
+        container.clientWidth / container.clientHeight + .45,
         1,
         1000
     );
@@ -275,7 +275,7 @@ function createRenderer() {
         antialias: true,
         alpha: true //transparent background
     });
-    renderer.setSize(container.clientWidth + 230, container.clientHeight + 30, false); //give a bit more room on the height and width to allow for larger guns
+    renderer.setSize(container.clientWidth + 330, container.clientHeight + 30, false); //give a bit more room on the height and width to allow for larger guns
 
     renderer.physicallyCorrectLights = true;
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -311,13 +311,13 @@ function updateLightPosition() {
 
 function onWindowResize() {
     //maintain aspect ratio
-    camera.aspect = container.clientWidth / container.clientHeight + .3;
+    camera.aspect = container.clientWidth / container.clientHeight + .45;
 
     // update the camera's frustum
     camera.updateProjectionMatrix();
 
     //resize the canvas
-    renderer.setSize(container.clientWidth + 230, container.clientHeight + 30);
+    renderer.setSize(container.clientWidth + 330, container.clientHeight + 30);
 
     //re-render
     render();
@@ -341,11 +341,14 @@ export default function init(containerID, factionAlias, headID, clazz) {
     headID = adjustedVars[1];
     clazz = adjustedVars[2];
 
+    //set character variables and objects
     setCharacterVariables(factionAlias, headID, clazz);
     setGeneralPrefix();
     setModelBase();
     setCharacterArmor();
     setCharacterWeapon();
+
+    //load and render model
     loadModels();
     createRenderer();
 
