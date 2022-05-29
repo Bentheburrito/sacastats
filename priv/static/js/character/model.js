@@ -62,7 +62,7 @@ const CHARACTER_HEADID_TO_HEAD_MAP = new Map([
     [5, "Head_Female_Caucasian"],
     [6, "Head_Female_African"],
     [7, "Head_Female_Asian"],
-    [8, "Head_Female_Hispanic"],
+    [8, "Head_Female_Hispanic"]
 ]);
 const CHARACTER_WEAPON_MAP = new Map([
     ["Infiltrator", "Sniper"],
@@ -75,9 +75,9 @@ const CHARACTER_WEAPON_MAP = new Map([
 
 function setCharacterVariables(factionAlias, headID, characterClass) {
     setCharacterFaction(factionAlias);
+    setCharacterClassInfo(characterClass);
     setCharacterHead(headID);
     setCharacterSex(headID);
-    setCharacterClassInfo(characterClass);
 }
 
 function setCharacterWeapon() {
@@ -89,11 +89,13 @@ function setCharacterArmor() {
 }
 
 function setModelBase() {
-    modelBase = generalPrefix + ((characterClassID == 0 && characterFactionAlias != "NSO") ? "Stealth_" : "") + ((characterClassID == 5 && characterFactionAlias != "NSO") ? "Max_" : "") + "Base";
+    modelBase = generalPrefix + ((characterClassID == 0 && characterFactionAlias != "NSO") ? "Stealth_" : "") + ((characterClassID == 5) ? "Max_" : "") + "Base";
 }
 
 function setCharacterHead(headID) {
-    if (characterFactionAlias != "NSO") {
+    if (characterClassID == 5) {
+        characterHead = "Head_" + characterFactionAlias + "_MAX";
+    } else if (characterFactionAlias != "NSO") {
         characterHead = CHARACTER_HEADID_TO_HEAD_MAP.get(+headID);
     } else {
         characterHead = CHARACTER_HEADID_TO_HEAD_MAP.get(0);
@@ -126,7 +128,7 @@ function setCharacterFaction(factionAlias) {
 }
 
 function setGeneralPrefix() {
-    generalPrefix = characterFactionAlias + "_" + characterSex + "_";
+    generalPrefix = characterFactionAlias + "_" + ((characterClassID == 5) ? "" : (characterSex + "_"));
 }
 
 function setCharacterClassInfo(clazz) {
@@ -232,12 +234,14 @@ function loadModels() {
     };
 
     //add model pieces
-    loader.load(
-        weaponPath + characterWeapon + MODEL_FILE_TYPE,
-        (gltf) => onLoad(gltf, modelPosition, true),
-        null,
-        null
-    );
+    if (!(characterClassID == 5 && characterFactionAlias == "NSO")) {
+        loader.load(
+            weaponPath + characterWeapon + MODEL_FILE_TYPE,
+            (gltf) => onLoad(gltf, modelPosition, true),
+            null,
+            null
+        );
+    }
 
     loader.load(
         basePath + modelBase + MODEL_FILE_TYPE,
@@ -246,12 +250,14 @@ function loadModels() {
         null
     );
 
-    loader.load(
-        armorPath + characterArmor + MODEL_FILE_TYPE,
-        (gltf) => onLoad(gltf, modelPosition, true),
-        null,
-        null
-    );
+    if (!(characterClassID == 5 && characterFactionAlias == "NSO")) {
+        loader.load(
+            armorPath + characterArmor + MODEL_FILE_TYPE,
+            (gltf) => onLoad(gltf, modelPosition, true),
+            null,
+            null
+        );
+    }
 
     loader.load(
         HEAD_PATH + characterHead + MODEL_FILE_TYPE,
