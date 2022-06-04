@@ -40,6 +40,11 @@ figure {
   }
 }
 
+.progress,
+.progress>div {
+  font-size: smaller;
+}
+
 @media (min-width: 2100px) {
   .container {
     max-width: 1920px;
@@ -48,6 +53,7 @@ figure {
   .progress,
   .progress>div {
     height: 30px;
+    font-size: large;
   }
 }
 
