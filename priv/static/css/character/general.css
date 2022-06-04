@@ -67,6 +67,14 @@ h4 {
     }
 }
 
+/*for boostrap md*/
+@media only screen and (min-width: 768px) {
+    .stat-section-container {
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 0 10px;
+    }
+}
+
 #characterModel {
     position: relative;
     top: -4rem !important;
@@ -75,6 +83,18 @@ h4 {
     height: 65vh;
 }
 
+@media only screen and (min-width: 2500px) {
+    #characterModel {
+        height: 50vh;
+    }
+}
+
 #characterModel:hover {
     cursor: grab;
+}
+
+hr {
+    border: 0;
+    border-top: 0.1rem solid #000000;
+    margin: 0 0 20px 0;
 }

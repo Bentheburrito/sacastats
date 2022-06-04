@@ -16,13 +16,13 @@
   </div>
 </nav>
 <main role="main" class="container">
-  <h1 class="text-center text-sm-left" id="characterName"><%= @character_info["name"]["first"] %></h1>
-  <div class="d-none d-sm-flex float-sm-right">
+  <h1 class="text-center text-md-left" id="characterName"><%= @character_info["name"]["first"] %></h1>
+  <div class="d-none d-md-flex float-md-right">
     <img src={Routes.static_path(@conn, "/images/character/" <> @online_status <> ".ico")} alt={@online_status} width="30">
     <p class="d-inline my-auto"><%=String.capitalize(@online_status) %></p>
   </div>
   <p id="characterId"><%= @character_info["character_id"] %></p>
-  <div class="d-sm-none d-flex justify-content-center pb-3">
+  <div class="d-md-none d-flex justify-content-center pb-3">
     <img src={Routes.static_path(@conn, "/images/character/" <> @online_status <> ".ico")} alt={@online_status} width="30">
     <p class="d-inline my-auto"><%=String.capitalize(@online_status) %></p>
   </div>
