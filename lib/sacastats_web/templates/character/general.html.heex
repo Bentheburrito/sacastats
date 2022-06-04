@@ -1,14 +1,31 @@
 <link rel="stylesheet" href={Routes.static_path(@conn, "/css/character/general.css")}/>
 
 <div id="characterGeneral" class="row">
+    <div class="col-12 d-flex d-md-none flex-column justify-content-center stat-section">
+        <h3 class="text-center">Characteristics</h3>
+        <p class="text-center"><%= String.capitalize(@character_characteristics["ethnicity"])  <> " " <> String.capitalize(@character_characteristics["sex"]) %></p>
+    </div>
+    <div class="col-12 d-flex d-md-none flex-column justify-content-center stat-section">
+        <h3 class="text-center">Last Seen As A(n)</h3>
+        <p class="text-center"><%= @character_info["profile"]["profile_type_description"] %></p>
+    </div>
     <div id="characterModelHolder" class="col-md-4 d-none d-md-flex">
+        <div class="class-icon-holder float-left d-flex flex-wrap align-items-center">
+            <img src={Routes.static_path(@conn, "/images/character/icons/class/" <> String.replace(@character_info["profile"]["profile_type_description"], " ", "") <> "_Icon.png")} 
+                alt={"#{@character_info["profile"]["profile_type_description"]}"} width="32" height="32" class="class-icon">
+        </div>
+        <div class={"characteristic-icon-holder float-right d-flex flex-wrap align-items-center #{@character_characteristics["ethnicity"]}-skin-tone"}>
+            <img src={"#{Routes.static_path(@conn, "/images/character/icons/sex/" <> @character_characteristics["sex"] <> ".png")}"} 
+                alt={"#{String.capitalize(@character_characteristics["ethnicity"])  <> " " <> String.capitalize(@character_characteristics["sex"])}"} 
+                width="32" height="32" class="characteristic-icon">
+        </div>
         <figure id="characterModel"></figure>
     </div>
     <div class="col-md-8 col-12">
         <div class="stat-section">
             <h3 class="text-center">Battle Rank</h3>
             <div class="progress">
-                <div id="brProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow={"#{@character_info["battle_rank"]["percent_to_next"]}"} aria-valuemin="0" aria-valuemax="100"  style="width: 0;"}>
+                <div id="brProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow={"#{@character_info["battle_rank"]["percent_to_next"]}"} aria-valuemin="0" aria-valuemax="100"  style="width: 0;">
                     <%= @character_info["battle_rank"]["percent_to_next"] %>%
                 </div>
             </div>

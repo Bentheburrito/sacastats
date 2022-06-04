@@ -100,6 +100,26 @@ defmodule SacaStatsWeb.CharacterController do
     ]
   end
 
+  defp build_assigns(info, status, "general") do
+    faction = SacaStats.Utils.maybe_to_int(info["faction_id"])
+    head = SacaStats.Utils.maybe_to_int(info["head_id"])
+
+    ethnicity = get_character_ethnicity(faction, head)
+    sex = get_character_sex(faction, head)
+
+    character_characteristics =
+      ["ethnicity", ethnicity, "sex", sex]
+      |> Enum.chunk_every(2)
+      |> Map.new(fn [k, v] -> {k, v} end)
+
+    [
+      character_info: info,
+      online_status: status,
+      stat_page: "general.html",
+      character_characteristics: character_characteristics
+    ]
+  end
+
   defp build_assigns(info, status, stat_type) do
     [
       character_info: info,
@@ -219,4 +239,28 @@ defmodule SacaStatsWeb.CharacterController do
 
   def get_kills_to_next_medal(total_kills),
     do: 10 - total_kills
+
+  def get_character_sex(faction_id, _head_id) when faction_id == 0 or faction_id == 4,
+    do: "robot"
+
+  def get_character_sex(_faction_id, head_id) when head_id <= 4,
+    do: "male"
+
+  def get_character_sex(_faction_id, head_id) when head_id > 4,
+    do: "female"
+
+  def get_character_ethnicity(faction_id, _head_id) when faction_id == 0 or faction_id == 4,
+    do: "robot"
+
+  def get_character_ethnicity(_faction_id, head_id) when head_id == 1 or head_id == 5,
+    do: "caucasian"
+
+  def get_character_ethnicity(_faction_id, head_id) when head_id == 2 or head_id == 6,
+    do: "african"
+
+  def get_character_ethnicity(_faction_id, head_id) when head_id == 3 or head_id == 7,
+    do: "asian"
+
+  def get_character_ethnicity(_faction_id, head_id) when head_id == 4 or head_id == 8,
+    do: "hispanic"
 end
