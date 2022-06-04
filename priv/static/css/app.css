@@ -533,10 +533,6 @@ h6 {
   line-height: 1.4
 }
 
-img {
-  max-width: 100%
-}
-
 .clearfix:after {
   clear: both;
   content: ' ';
