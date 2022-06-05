@@ -515,7 +515,7 @@
                     <%=SacaStats.Utils.maybe_to_int(weapon["weapon_damage_taken_by"]["value_tr"])%>
                 </td>
                 <td class="text-center seconds-to-readable"><%=SacaStats.Utils.maybe_to_int(weapon["weapon_play_time"])%></td>
-                <td class="number text-center"><%=SacaStatsWeb.CharacterController.get_cert_count(weapon["weapon_score"])%></td>
+                <td data-mobile-title="Certs Earned" class="number text-center"><%=SacaStatsWeb.CharacterController.get_cert_count(weapon["weapon_score"])%></td>
                 <td data-mobile-title="Certs Per Minute" class="text-center">
                     <%=SacaStats.Utils.safe_divide(SacaStatsWeb.CharacterController.get_cert_count(weapon["weapon_score"]), trunc(SacaStats.Utils.safe_divide(SacaStats.Utils.maybe_to_int(weapon["weapon_play_time"]), 60, 0)), 2)%>
                 </td>
