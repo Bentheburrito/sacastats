@@ -7,7 +7,6 @@ defmodule SacaStatsWeb.PollLive.View do
 
   alias Ecto.Multi
   alias SacaStats.{Poll, Repo}
-  alias SacaStats.Poll.Item
   alias SacaStats.Poll.Item.Vote
 
   import SacaStatsWeb.PollLive
@@ -22,9 +21,6 @@ defmodule SacaStatsWeb.PollLive.View do
     %Poll{} = poll = get_poll(id)
 
     voter_id = get_voter_id(session)
-
-    IO.inspect voter_id, label: "voter id"
-  IO.inspect poll.owner_discord_id, label: "owner discord id"
 
     if voter_id == poll.owner_discord_id do
       {:ok, redirect(socket, to: "/outfit/poll/#{poll.id}/results")}
@@ -41,11 +37,6 @@ defmodule SacaStatsWeb.PollLive.View do
       |> assign(:user, session["user"])
       |> assign(:_csrf_token, session["_csrf_token"])}
     end
-  end
-
-  # for when owner is viewing and wants to see votes come in live
-  def handle_info({:poll_vote, user_id}, socket) do
-    {:noreply, socket}
   end
 
   def handle_event("field_change", %{"vote" => params}, socket) do
@@ -66,11 +57,10 @@ defmodule SacaStatsWeb.PollLive.View do
     case Repo.transaction(transaction) do
       {:ok, _changes} ->
         poll_id = socket.assigns.poll.id
-        IO.inspect("poll_vote:#{poll_id}", label: "YES WE INSERTED VOTE")
         Phoenix.PubSub.broadcast(SacaStats.PubSub, "poll_vote:#{poll_id}", {:poll_vote, get_voter_id(socket.assigns)})
         {:noreply, redirect(socket, to: "/outfit/poll/#{poll_id}/results")}
 
-      {:error, failed_name, failed_value, changes_so_far} ->
+      {:error, failed_name, failed_value, _changes_so_far} ->
         Logger.info("Poll vote failed on #{failed_name}: #{inspect failed_value}")
 
         {:noreply,
@@ -80,7 +70,7 @@ defmodule SacaStatsWeb.PollLive.View do
     end
   end
 
-  def encode_poll_item_vote(assigns, %Phoenix.HTML.Form{data: %Vote{} = vote} = vote_form, item) do
+  def encode_poll_item_vote(assigns, %Phoenix.HTML.Form{data: %Vote{}} = vote_form, item) do
     voter_id = get_voter_id(assigns)
     choices = Repo.preload(item, :choices).choices
 
