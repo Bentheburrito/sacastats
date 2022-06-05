@@ -55,6 +55,7 @@
 <%# <script type="text/javascript" src={Routes.static_path(@conn, "/js/character/general.js")}></script> %>
 <script type="module">
     import init from "<%= Routes.static_path(@conn, "/js/character/model.js") %>";
-    init("#characterModel");
+    init("#characterModel", "<%= SacaStatsWeb.CharacterController.get_faction_alias(SacaStats.Utils.maybe_to_int(@character_info["faction_id"])) %>", 
+        "<%= @character_info["head_id"] %>", "<%= @character_info["profile"]["profile_type_description"] %>");
 </script>
 

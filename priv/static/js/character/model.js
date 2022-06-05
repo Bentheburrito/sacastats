@@ -23,17 +23,132 @@ let directionalLight;
 let controls;
 let renderer;
 let scene;
-let MODEL_PATH = "/js/assets/models/";
+const MODEL_FILE_TYPE = ".glb";
+const ASSETS_MODELS_PATH = "/js/assets/models/infantry/";
+let basePath = ASSETS_MODELS_PATH;
+let armorPath = ASSETS_MODELS_PATH;
+let weaponPath = ASSETS_MODELS_PATH;
+const HEAD_PATH = ASSETS_MODELS_PATH + "heads/";
 let highQuality = false; //true: constantly re-renders; false: only re-renders when camera angle changes
 
 const mixers = [];
 const clock = new Clock();
 
+//initialize variables
+let characterFactionAlias;
+let characterWeapon;
+let characterArmor;
+let characterHead;
+let characterHeadID;
+let characterSex;
+let characterClass;
+let characterClassID;
+let generalPrefix;
+let modelBase;
+const CHARACTER_CLASS_MAP = new Map([
+    ["Infiltrator", 0],
+    ["Light Assault", 1],
+    ["Combat Medic", 2],
+    ["Engineer", 3],
+    ["Heavy Assault", 4],
+    ["MAX", 5]
+]);
+const CHARACTER_HEADID_TO_HEAD_MAP = new Map([
+    [0, "Head_Male_NSO"],
+    [1, "Head_Male_Caucasian"],
+    [2, "Head_Male_African"],
+    [3, "Head_Male_Asian"],
+    [4, "Head_Male_Hispanic"],
+    [5, "Head_Female_Caucasian"],
+    [6, "Head_Female_African"],
+    [7, "Head_Female_Asian"],
+    [8, "Head_Female_Hispanic"]
+]);
+const CHARACTER_WEAPON_MAP = new Map([
+    ["Infiltrator", "Sniper"],
+    ["Light Assault", "Carbine"],
+    ["Combat Medic", "AssaultRifle"],
+    ["Engineer", "Carbine"],
+    ["Heavy Assault", "LMG"],
+    ["MAX", "MAX"]
+]);
+
+function setCharacterVariables(factionAlias, headID, characterClass) {
+    setCharacterFaction(factionAlias);
+    setCharacterClassInfo(characterClass);
+    setCharacterHead(headID);
+    setCharacterSex(headID);
+}
+
+function setCharacterWeapon() {
+    characterWeapon = characterFactionAlias + "_" + CHARACTER_WEAPON_MAP.get(characterClass) + "_Weapon";
+}
+
+function setCharacterArmor() {
+    characterArmor = generalPrefix + characterClass.replaceAll(" ", "") + "_Armor";
+}
+
+function setModelBase() {
+    modelBase = generalPrefix + ((characterClassID == 0 && characterFactionAlias != "NSO") ? "Stealth_" : "") + ((characterClassID == 5) ? "Max_" : "") + "Base";
+}
+
+function setCharacterHead(headID) {
+    if (characterClassID == 5) {
+        characterHead = "Head_" + characterFactionAlias + "_MAX";
+    } else if (characterFactionAlias != "NSO") {
+        characterHead = CHARACTER_HEADID_TO_HEAD_MAP.get(+headID);
+    } else {
+        characterHead = CHARACTER_HEADID_TO_HEAD_MAP.get(0);
+    }
+    characterHeadID = headID;
+}
+
+function getNonNullCharacterVariables(factionAlias, headID, characterClass) {
+    if (factionAlias == "" || factionAlias == undefined) {
+        factionAlias = "VS";
+    }
+    if (headID == "" || headID == undefined) {
+        headID = 1;
+    }
+    if (characterClass == "" || characterClass == undefined) {
+        characterClass = "Engineer";
+    }
+
+    return [factionAlias, headID, characterClass];
+}
+
+function setCharacterFaction(factionAlias) {
+    if (factionAlias == "NS") {
+        factionAlias = "NSO";
+    }
+    characterFactionAlias = factionAlias;
+    basePath = basePath + factionAlias + "/base/";
+    armorPath = armorPath + factionAlias + "/armor/";
+    weaponPath = weaponPath + factionAlias + "/weapons/";
+}
+
+function setGeneralPrefix() {
+    generalPrefix = characterFactionAlias + "_" + ((characterClassID == 5) ? "" : (characterSex + "_"));
+}
+
+function setCharacterClassInfo(clazz) {
+    characterClass = clazz;
+    characterClassID = CHARACTER_CLASS_MAP.get(clazz);
+}
+
+function setCharacterSex(headID) {
+    if (headID > 4) {
+        characterSex = "Female"
+    } else {
+        characterSex = "Male"
+    }
+}
+
 function createCamera() {
     //initialize camera
     camera = new PerspectiveCamera(
         20,
-        container.clientWidth / container.clientHeight + .3,
+        container.clientWidth / container.clientHeight + .45,
         1,
         1000
     );
@@ -119,29 +234,33 @@ function loadModels() {
     };
 
     //add model pieces
-    loader.load(
-        MODEL_PATH + "VS_Sniper.glb",
-        (gltf) => onLoad(gltf, modelPosition, true),
-        null,
-        null
-    );
+    if (!(characterClassID == 5 && characterFactionAlias == "NSO")) {
+        loader.load(
+            weaponPath + characterWeapon + MODEL_FILE_TYPE,
+            (gltf) => onLoad(gltf, modelPosition, true),
+            null,
+            null
+        );
+    }
 
     loader.load(
-        MODEL_PATH + "VS_Stealth_Base.glb",
+        basePath + modelBase + MODEL_FILE_TYPE,
         (gltf) => onLoad(gltf, modelPosition, false),
         null,
         null
     );
 
-    loader.load(
-        MODEL_PATH + "VS_Infil_Armor.glb",
-        (gltf) => onLoad(gltf, modelPosition, true),
-        null,
-        null
-    );
+    if (!(characterClassID == 5 && characterFactionAlias == "NSO")) {
+        loader.load(
+            armorPath + characterArmor + MODEL_FILE_TYPE,
+            (gltf) => onLoad(gltf, modelPosition, true),
+            null,
+            null
+        );
+    }
 
     loader.load(
-        MODEL_PATH + "caucasianFemaleHead.glb",
+        HEAD_PATH + characterHead + MODEL_FILE_TYPE,
         (gltf) => onLoad(gltf, modelPosition, false),
         null,
         null
@@ -162,7 +281,7 @@ function createRenderer() {
         antialias: true,
         alpha: true //transparent background
     });
-    renderer.setSize(container.clientWidth + 230, container.clientHeight + 30, false); //give a bit more room on the height and width to allow for larger guns
+    renderer.setSize(container.clientWidth + 330, container.clientHeight + 30, false); //give a bit more room on the height and width to allow for larger guns
 
     renderer.physicallyCorrectLights = true;
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -198,19 +317,19 @@ function updateLightPosition() {
 
 function onWindowResize() {
     //maintain aspect ratio
-    camera.aspect = container.clientWidth / container.clientHeight + .3;
+    camera.aspect = container.clientWidth / container.clientHeight + .45;
 
     // update the camera's frustum
     camera.updateProjectionMatrix();
 
     //resize the canvas
-    renderer.setSize(container.clientWidth + 230, container.clientHeight + 30);
+    renderer.setSize(container.clientWidth + 330, container.clientHeight + 30);
 
     //re-render
     render();
 }
 
-export default function init(containerID) {
+export default function init(containerID, factionAlias, headID, clazz) {
     //get the container div
     container = document.querySelector(containerID);
 
@@ -221,6 +340,21 @@ export default function init(containerID) {
     createCamera();
     createControls();
     createLights();
+
+    //make sure the variables are non nulls
+    let adjustedVars = getNonNullCharacterVariables(factionAlias, headID, clazz);
+    factionAlias = adjustedVars[0];
+    headID = adjustedVars[1];
+    clazz = adjustedVars[2];
+
+    //set character variables and objects
+    setCharacterVariables(factionAlias, headID, clazz);
+    setGeneralPrefix();
+    setModelBase();
+    setCharacterArmor();
+    setCharacterWeapon();
+
+    //load and render model
     loadModels();
     createRenderer();
 
