@@ -11,7 +11,13 @@
                 alt={"#{String.capitalize(@character_characteristics["ethnicity"])  <> " " <> String.capitalize(@character_characteristics["sex"])}"} 
                 width="32" height="32" class="characteristic-icon">
         </div>
-        <figure id="characterModel"></figure>
+        <figure id="characterModel">
+            <div class="d-flex justify-content-center align-items-center w-100 h-100" id="character-spinner-container">
+                <div class="spinner-border text-primary" id="character-spinner" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </figure>
     </div>
     
     <div class="col-md-8 col-12 stat-section-container">

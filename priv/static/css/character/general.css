@@ -83,6 +83,17 @@ h4 {
     height: 65vh;
 }
 
+#character-spinner-container {
+    position: absolute;
+    top: -5rem !important;
+    left: 16rem !important;
+}
+
+#character-spinner {
+    width: 6rem;
+    height: 6rem;
+}
+
 @media only screen and (min-width: 2500px) {
     #characterModel {
         height: 50vh;

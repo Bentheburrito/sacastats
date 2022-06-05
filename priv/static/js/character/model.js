@@ -289,8 +289,13 @@ function createRenderer() {
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = PCFSoftShadowMap;
 
-    // add the automatically created <canvas> element to the page
-    container.appendChild(renderer.domElement);
+    // add the automatically created <canvas> element to the page after fading out the loading spinner
+    $(container).fadeOut(300);
+    setTimeout(function () {
+        container.appendChild(renderer.domElement);
+        $(container).children().not(renderer.domElement).remove();
+        $(container).fadeIn(1000);
+    }, 250);
 }
 
 function update() {
