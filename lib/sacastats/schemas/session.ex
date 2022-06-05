@@ -307,7 +307,7 @@ defmodule SacaStats.Session do
     {:ok, %QueryResult{data: character_info}} =
       Query.new(collection: "character")
       |> term(term, String.downcase(character_id_or_name))
-      |> resolve(["outfit(alias,id,name)"])
+      |> resolve(["outfit(alias,id,name,leader_character_id)"])
       |> show(["character_id", "name", "faction_id", "outfit(alias,id,name)"])
       |> PS2.API.query_one(SacaStats.sid())
 

@@ -25,7 +25,7 @@ defmodule SacaStats.CensusCache.Fallbacks do
       |> term(term, val)
       |> resolve([
         "online_status",
-        "outfit(alias,id,name)",
+        "outfit(alias,id,name,leader_character_id)",
         "weapon_stat",
         "weapon_stat_by_faction",
         "profile(profile_type_description)"

@@ -17,14 +17,20 @@
 </nav>
 <main role="main" class="container">
   <div class="row">
-    <div class="col-12 col-md-1">
-      <img class="float-md-left" src={Map.get(SacaStats.factions, SacaStats.Utils.maybe_to_int(@character_info["faction_id"]))[:image]} alt={@online_status} width="70">
+    <div class="col-12 col-md-1 text-center">
+      <img class="float-md-left float-none" data-toggle="tooltip" 
+        title={@character_info["name"]["first"] <> " plays on the " <> Map.get(SacaStats.factions, SacaStats.Utils.maybe_to_int(@character_info["faction_id"]))[:name]} 
+        src={Map.get(SacaStats.factions, SacaStats.Utils.maybe_to_int(@character_info["faction_id"]))[:image]} 
+        alt={@online_status} width="70">
     </div>
     <div class="col-12 col-md-11">
-      <%= if(Map.has_key?(@character_info, "outfit")) do %>
-        <h1 class="text-center text-md-left d-inline" data-toggle="tooltip" title={@character_info["outfit"]["name"]} id="characterOutfit"><%= "[" <> @character_info["outfit"]["alias"] <> "] " %></h1>
-      <% end %>
-      <h1 class="text-center text-md-left d-inline" id="characterName"><%= @character_info["name"]["first"] %></h1>
+        <%= if(Map.has_key?(@character_info, "outfit")) do %>
+          <h1 class="text-center text-md-left d-block d-md-inline mx-auto" data-toggle="tooltip" title={@character_info["outfit"]["name"]} id="characterOutfit"><%= "[" <> @character_info["outfit"]["alias"] <> "] " %></h1>
+        <% end %>
+        <h1 class="text-center text-md-left d-block d-md-inline" id="characterName"><%= @character_info["name"]["first"] %></h1>
+        <%= if(Map.has_key?(@character_info, "outfit") && SacaStats.Utils.maybe_to_int(@character_info["outfit"]["leader_character_id"]) === SacaStats.Utils.maybe_to_int(@character_info["character_id"]) ) do %>
+          <p data-toggle="tooltip" title={@character_info["outfit"]["name"] <> "'s outfit leader"} class="d-block d-md-inline align-top text-center text-md-left">&#11088;</p>
+        <% end %>
       <div class="d-none d-md-flex float-md-right align-items-center h-100">
         <img src={Routes.static_path(@conn, "/images/character/" <> @online_status <> ".ico")} alt={@online_status} width="30">
         <p class="d-inline my-auto"><%=String.capitalize(@online_status) %></p>
@@ -36,6 +42,7 @@
     <img src={Routes.static_path(@conn, "/images/character/" <> @online_status <> ".ico")} alt={@online_status} width="30">
     <p class="d-inline my-auto"><%=String.capitalize(@online_status) %></p>
   </div>
+  <hr class="d-md-none">
   <%= render SacaStatsWeb.CharacterView, @stat_page, assigns %>
 </main>
 <footer>
