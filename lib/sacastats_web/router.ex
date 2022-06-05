@@ -40,6 +40,7 @@ defmodule SacaStatsWeb.Router do
     pipe_through :browser
 
     live "/poll/create", PollLive.Create
+    live "/poll/:id/results", PollLive.Results
     live "/poll/:id", PollLive.View
   end
 

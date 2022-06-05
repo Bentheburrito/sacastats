@@ -9,6 +9,7 @@ defmodule SacaStats.Repo.Migrations.AddPollSchema do
 
     create table(:poll_items) do
       add :description, :string
+      add :position, :integer
       add :poll_id, references("polls")
     end
 

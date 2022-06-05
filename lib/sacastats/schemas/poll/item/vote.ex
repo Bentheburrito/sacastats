@@ -1,6 +1,8 @@
-defmodule SacaStats.Poll.Vote do
+defmodule SacaStats.Poll.Item.Vote do
   @moduledoc """
   Ecto schema for outfit poll votes.
+
+  A `voter_discord_id` of 0 is considered an anonymous voter (they haven't logged in with Discord).
   """
 
   use Ecto.Schema
@@ -17,7 +19,7 @@ defmodule SacaStats.Poll.Vote do
 
   def changeset(vote, params \\ %{}) do
     vote
-    |> cast(params, [:voter_discord_id, :content])
-    |> validate_required([:voter_discord_id, :content])
+    |> cast(params, [:voter_discord_id, :content, :item_id])
+    |> validate_required([:content, :item_id])
   end
 end

@@ -5,12 +5,15 @@ defmodule SacaStats.Poll.Item do
 
   use Ecto.Schema
   import Ecto.Changeset
+  @primary_key {:id, :id, autogenerate: true}
 
   alias SacaStats.Poll
-  alias SacaStats.Poll.{Item, Vote}
+  alias SacaStats.Poll.Item
+  alias SacaStats.Poll.Item.Vote
 
   schema "poll_items" do
     field :description, :string
+    field :position, :integer
     has_many :choices, Item.Choice
     has_many :votes, Vote
     belongs_to :poll, Poll

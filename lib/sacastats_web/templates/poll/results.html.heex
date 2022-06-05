@@ -1,0 +1,22 @@
+<section class="m-4">
+  <h2><%= @poll.title %></h2>
+  <div class="poll-item">
+    <%= for item <- @poll.items do %>
+      <b><%= item.description %></b>:
+      <%= if length(item.choices) > 0 do %>
+        <% votes_by_choice = Enum.frequencies_by(item.votes, fn vote -> vote.content end) %>
+        <ul>
+          <%= for choice <- item.choices do %>
+            <li><%= choice.description %>: <%= Map.get(votes_by_choice, choice.description, 0) %></li>
+          <% end %>
+        </ul>
+      <% else %>
+        <%= for vote <- item.votes do %>
+          <br>
+          "<%= String.trim(vote.content) %>" -<%= vote.voter_discord_id %>
+        <% end %>
+      <% end %>
+      <br>
+    <% end %>
+  </div>
+</section>

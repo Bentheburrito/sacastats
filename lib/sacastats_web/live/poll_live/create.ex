@@ -5,7 +5,7 @@ defmodule SacaStatsWeb.PollLive.Create do
   use SacaStatsWeb, :live_view
   use Phoenix.HTML
 
-  alias SacaStats.{Poll, Repo, Utils}
+  alias SacaStats.{Poll, Repo}
 
   def render(assigns) do
     Phoenix.View.render(SacaStatsWeb.PollView, "create.html", assigns)
@@ -45,7 +45,10 @@ defmodule SacaStatsWeb.PollLive.Create do
         socket.assigns.prev_params,
         "items",
         %{"0" => %{}},
-        &Map.put(&1, to_string(map_size(socket.assigns.prev_params["items"])), %{})
+        fn items ->
+          next_position = to_string(map_size(socket.assigns.prev_params["items"]))
+          Map.put(items, next_position, %{"position" => next_position})
+        end
       )
 
     changeset = Poll.changeset(%Poll{}, params)
@@ -65,7 +68,9 @@ defmodule SacaStatsWeb.PollLive.Create do
         ["items", item_index, "choices"],
         fn
           nil -> %{"0" => %{}}
-          choices -> Map.put(choices, to_string(map_size(choices)), %{})
+          choices ->
+            next_position = to_string(map_size(choices))
+            Map.put(choices, next_position, %{"position" => next_position})
         end
       )
 
