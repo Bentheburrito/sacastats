@@ -54,7 +54,8 @@ figure {
 
 /*Padding*/
 .pb-26 {
-  padding-bottom: 26rem !important;
+  padding-bottom: 19rem !important;
+  /*padding-bottom: 26rem !important; Will need to be this when we have more main navigation.*/
 }
 
 @media only screen and (max-width: 767px) {
