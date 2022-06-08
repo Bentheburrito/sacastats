@@ -207,7 +207,7 @@
                             <p class="d-inline"><u>KD</u>:</p>
                         </div>
                         <div class="col-5 col-md-4">
-                            <p class="d-inline"><%= SacaStatsWeb.CharacterController.get_percent_ratio(SacaStatsWeb.CharacterController.get_stat_value(@character_info["stats"]["stat_history"], "kills"), SacaStatsWeb.CharacterController.get_stat_value(@character_info["stats"]["stat_history"], "deaths"))%></p>
+                            <p class="d-inline"><%= SacaStats.Utils.safe_divide(SacaStatsWeb.CharacterController.get_percent_ratio(SacaStatsWeb.CharacterController.get_stat_value(@character_info["stats"]["stat_history"], "kills"), SacaStatsWeb.CharacterController.get_stat_value(@character_info["stats"]["stat_history"], "deaths")), 100, 4)%></p>
                         </div>
                         <div class="offset-0 col-7 offset-sm-2 col-sm-5 offset-md-3 col-md-3">
                             <p class="d-inline"><u>Score</u>:</p>
