@@ -74,7 +74,7 @@ function findSortedVisibleFields() {
             }
         }
     });
-    console.log(tempFields);
+
     return tempFields;
 }
 
