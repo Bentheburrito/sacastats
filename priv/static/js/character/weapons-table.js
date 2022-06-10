@@ -4,7 +4,9 @@ import * as bootstrapSelection from "/js/flex-bootstrap-table-selection.js";
 
 window.addEventListener('load', (event) => {
     if (window.innerWidth >= 768) {
-        $("input.search-input:first").focus();
+        setTimeout(function () {
+            $("input.search-input:first").focus();
+        }, 100);
     }
 
     //TODO edit dataset based on cached persistent data
