@@ -16,9 +16,9 @@ defmodule SacaStatsWeb.PollLive.Create do
 
     if is_nil(user) do
       {:ok,
-      socket
-      |> put_flash(:error, "You need to be logged in to create polls.")
-      |> redirect(to: "/")}
+       socket
+       |> put_flash(:error, "You need to be logged in to create polls.")
+       |> redirect(to: "/")}
     else
       changeset = Poll.changeset(%Poll{}, %{})
 
@@ -60,14 +60,14 @@ defmodule SacaStatsWeb.PollLive.Create do
   end
 
   def handle_event("add_choice:" <> item_index, _params, socket) do
-    IO.inspect socket.assigns.prev_params, label: "prev params add choice"
-    IO.inspect socket.assigns.changeset, label: "changeset add choice"
     params =
       update_in(
         socket.assigns.prev_params,
         ["items", item_index, "choices"],
         fn
-          nil -> %{"0" => %{}}
+          nil ->
+            %{"0" => %{}}
+
           choices ->
             next_position = to_string(map_size(choices))
             Map.put(choices, next_position, %{"position" => next_position})
@@ -102,16 +102,13 @@ defmodule SacaStatsWeb.PollLive.Create do
   def handle_event("remove_choice:" <> indexes, _params, socket) do
     [item_index, choice_index] = String.split(indexes, ":")
 
-    IO.inspect socket.assigns.prev_params, label: "prev params"
-    IO.inspect item_index, label: "item index"
-
     params =
       update_in(
         socket.assigns.prev_params,
         ["items", item_index, "choices"],
         &remove_at(&1, choice_index)
       )
-    IO.inspect params, label: "PARAMS"
+
     changeset = Poll.changeset(%Poll{}, params)
 
     {:noreply,
@@ -121,7 +118,6 @@ defmodule SacaStatsWeb.PollLive.Create do
   end
 
   def handle_event("form_submit", _params, socket) do
-    IO.inspect socket.assigns.changeset, label: "on submit changeset"
     case Repo.insert(socket.assigns.changeset) do
       {:ok, %Poll{id: id}} ->
         {:noreply, redirect(socket, to: "/outfit/poll/#{id}")}
@@ -136,7 +132,7 @@ defmodule SacaStatsWeb.PollLive.Create do
 
   def encode_poll_items(form, assigns) do
     items = inputs_for(form, :items)
-    IO.inspect(items, label: "inputs for items encode")
+
     ~H"""
     <%= for {item, index} <- Enum.with_index(items) do %>
       <div class="poll-item">
@@ -188,9 +184,14 @@ defmodule SacaStatsWeb.PollLive.Create do
 
   defp remove_at(map, to_remove_index) do
     Enum.reduce(map, %{}, fn
-     {index, item}, acc when index < to_remove_index -> Map.put(acc, index, item)
-     {index, _item}, acc when index == to_remove_index -> acc
-     {index, item}, acc when index > to_remove_index -> Map.put(acc, to_string(String.to_integer(index) - 1), item)
+      {index, item}, acc when index < to_remove_index ->
+        Map.put(acc, index, item)
+
+      {index, _item}, acc when index == to_remove_index ->
+        acc
+
+      {index, item}, acc when index > to_remove_index ->
+        Map.put(acc, to_string(String.to_integer(index) - 1), item)
     end)
   end
 end

@@ -23,9 +23,9 @@ defmodule SacaStatsWeb.PollLive.Results do
     Phoenix.PubSub.subscribe(SacaStats.PubSub, "poll_vote:#{poll.id}")
 
     {:ok,
-    socket
-    |> assign(:poll, poll)
-    |> assign(:voter_id, voter_id)}
+     socket
+     |> assign(:poll, poll)
+     |> assign(:voter_id, voter_id)}
   end
 
   # handle new votes as they come in.

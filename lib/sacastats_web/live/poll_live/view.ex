@@ -25,17 +25,20 @@ defmodule SacaStatsWeb.PollLive.View do
     if voter_id == poll.owner_discord_id do
       {:ok, redirect(socket, to: "/outfit/poll/#{poll.id}/results")}
     else
-      vote_changesets = for item <- poll.items, into: %{} do
-        changeset = Vote.changeset(%Vote{}, %{"voter_discord_id" => voter_id, "item_id" => item.id})
-        {item.id, changeset}
-      end
+      vote_changesets =
+        for item <- poll.items, into: %{} do
+          changeset =
+            Vote.changeset(%Vote{}, %{"voter_discord_id" => voter_id, "item_id" => item.id})
+
+          {item.id, changeset}
+        end
 
       {:ok,
-      socket
-      |> assign(:poll, poll)
-      |> assign(:vote_changesets, vote_changesets)
-      |> assign(:user, session["user"])
-      |> assign(:_csrf_token, session["_csrf_token"])}
+       socket
+       |> assign(:poll, poll)
+       |> assign(:vote_changesets, vote_changesets)
+       |> assign(:user, session["user"])
+       |> assign(:_csrf_token, session["_csrf_token"])}
     end
   end
 
@@ -57,11 +60,17 @@ defmodule SacaStatsWeb.PollLive.View do
     case Repo.transaction(transaction) do
       {:ok, _changes} ->
         poll_id = socket.assigns.poll.id
-        Phoenix.PubSub.broadcast(SacaStats.PubSub, "poll_vote:#{poll_id}", {:poll_vote, get_voter_id(socket.assigns)})
+
+        Phoenix.PubSub.broadcast(
+          SacaStats.PubSub,
+          "poll_vote:#{poll_id}",
+          {:poll_vote, get_voter_id(socket.assigns)}
+        )
+
         {:noreply, redirect(socket, to: "/outfit/poll/#{poll_id}/results")}
 
       {:error, failed_name, failed_value, _changes_so_far} ->
-        Logger.info("Poll vote failed on #{failed_name}: #{inspect failed_value}")
+        Logger.info("Poll vote failed on #{failed_name}: #{inspect(failed_value)}")
 
         {:noreply,
          socket

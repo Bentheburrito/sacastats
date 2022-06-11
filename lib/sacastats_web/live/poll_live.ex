@@ -8,10 +8,11 @@ defmodule SacaStatsWeb.PollLive do
   def get_poll(id) do
     Poll
     |> Repo.get(id)
-    |> Repo.preload([items: [:choices, :votes]])
+    |> Repo.preload(items: [:choices, :votes])
   end
 
   def get_voter_id(%{user: %{"id" => user_id}}), do: SacaStats.Utils.maybe_to_int(user_id)
   def get_voter_id(%{"user" => %{"id" => user_id}}), do: SacaStats.Utils.maybe_to_int(user_id)
-  def get_voter_id(_assigns), do: 0 # anonymous voter
+  # anonymous voter
+  def get_voter_id(_assigns), do: 0
 end
