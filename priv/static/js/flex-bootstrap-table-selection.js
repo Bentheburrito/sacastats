@@ -27,44 +27,48 @@ function addRightClickTable() {
     //add special Right click on table menu
     $(tableID).on('contextmenu', function (e) {
         //get the row
-        let row = $(e.target).closest("tr")[0];
+        if (!document.querySelector("thead.sticky-header").contains(e.target)) {
+            let row = $(e.target).closest("tr")[0];
 
-        if (!isMobileScreen()) {
-            //initialize special menu location
-            let isFireFox = navigator.userAgent.indexOf("Firefox") != -1;
-            let yAdj = (e.clientY + $(contextMenuID).height() > $(window).height()) ? (e.clientY - $(contextMenuID).height() - (isFireFox ? 0 : 5)) : e.clientY; //adjust height to show all of menu
-            let xAdj = (e.clientX + $(contextMenuID).width() > $(window).width()) ? (e.clientX - $(contextMenuID).width() - (isFireFox ? 0 : 2)) : e.clientX; //adjust width to show all of menu
-            var top = ((yAdj / $(window).height()) * 100) + "%";
-            var left = ((xAdj / $(window).width()) * 100) + "%";
+            if (!isMobileScreen()) {
+                //initialize special menu location
+                let isFireFox = navigator.userAgent.indexOf("Firefox") != -1;
+                let yAdj = (e.clientY + $(contextMenuID).height() > $(window).height()) ? (e.clientY - $(contextMenuID).height() - (isFireFox ? 0 : 5)) : e.clientY; //adjust height to show all of menu
+                let xAdj = (e.clientX + $(contextMenuID).width() > $(window).width()) ? (e.clientX - $(contextMenuID).width() - (isFireFox ? 0 : 2)) : e.clientX; //adjust width to show all of menu
+                var top = ((yAdj / $(window).height()) * 100) + "%";
+                var left = ((xAdj / $(window).width()) * 100) + "%";
 
-            //show special menu at the bottom right of the mouse
-            $(contextMenuID).css({
-                display: "block",
-                position: "fixed",
-                top: top,
-                left: left
-            }).addClass("show");
+                //show special menu at the bottom right of the mouse
+                $(contextMenuID).css({
+                    display: "block",
+                    position: "fixed",
+                    top: top,
+                    left: left
+                }).addClass("show");
 
-            //if it's not selected and the control key wasn't pressed reset the selection
-            if (!row.classList.contains(selectionClass) && !e.ctrlKey) {
-                resetCopyRowSelection();
+                //if it's not selected and the control key wasn't pressed reset the selection
+                if (!row.classList.contains(selectionClass) && !e.ctrlKey) {
+                    resetCopyRowSelection();
 
-                //if the shift key was pressed, select start index to recently clicked index
-                if (e.shiftKey) {
-                    selectStartToCurrent(getRowArrayIndex(row));
+                    //if the shift key was pressed, select start index to recently clicked index
+                    if (e.shiftKey) {
+                        selectStartToCurrent(getRowArrayIndex(row));
+                    }
                 }
+
+                //if it's a mobile screen and the row is already selected, delete it and return false to block default right click menu
+            } else if (copyRows.has(row)) {
+                deleteRowFromSelection(row);
+                return false;
             }
 
-            //if it's a mobile screen and the row is already selected, delete it and return false to block default right click menu
-        } else if (copyRows.has(row)) {
-            deleteRowFromSelection(row);
-            return false;
+            //add current row to selection
+            addRowToSelection(row, e);
+
+            return false; //blocks default Webbrowser right click menu
+        } else {
+            return;
         }
-
-        //add current row to selection
-        addRowToSelection(row, e);
-
-        return false; //blocks default Webbrowser right click menu
     });
 
     //update selections
