@@ -1,0 +1,13 @@
+@import "login.css";
+
+@media only screen and (max-width: 767px) {
+
+    /*for boostrap xs*/
+    .welcome-message {
+        font-size: x-large;
+    }
+
+    .account-container {
+        text-align: center;
+    }
+}

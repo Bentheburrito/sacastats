@@ -82,3 +82,23 @@ tbody tr.selection.main-selected>td {
 .selection-mobile-menu-bottom {
     bottom: 170px;
 }
+
+@media only screen and (min-width: 768px) {
+
+    /*for boostrap > xs*/
+    .table tr.selected td:first-child {
+        background-color: #ffffff;
+    }
+
+    tbody tr:not(tr.selection):hover>td {
+        background-color: #dddddd !important;
+    }
+
+    tr.selection:hover {
+        background-color: rgba(0, 0, 0, 0) !important;
+    }
+
+    tr.selection {
+        background-color: rgba(0, 0, 0, 0) !important;
+    }
+}

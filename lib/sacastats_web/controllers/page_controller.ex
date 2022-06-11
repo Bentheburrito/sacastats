@@ -9,6 +9,14 @@ defmodule SacaStatsWeb.PageController do
     render(conn, "index.html")
   end
 
+  def account(conn, _params) when conn.assigns.user in [false, nil] do
+    redirect(conn, to: "/login")
+  end
+
+  def account(conn, _params) do
+    render(conn, "account.html")
+  end
+
   def login(conn, _params) do
     render(conn, "login.html")
   end
@@ -31,7 +39,7 @@ defmodule SacaStatsWeb.PageController do
       |> put_session(:client, client)
       |> put_flash(
         :info,
-        "Successfully logged in - welcome #{user["username"]}##{user["discriminator"]}"
+        "Successfully logged in - Welcome #{user["username"]}##{user["discriminator"]}!"
       )
       |> redirect(to: "/")
     else
@@ -41,7 +49,7 @@ defmodule SacaStatsWeb.PageController do
         )
 
         conn
-        |> put_flash(:error, "failed to fetch user info. Please try again soon.")
+        |> put_flash(:error, "Failed to fetch user info. Please try again soon.")
         |> redirect(to: "/login")
 
       real_state ->

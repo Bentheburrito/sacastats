@@ -78,6 +78,36 @@ defmodule SacaStatsWeb do
     end
   end
 
+  def generate_page_title(endpoint) do
+    site_name = "Saca Stats"
+    separator = " - "
+    postfix = separator <> site_name
+    endpoint_arr = String.split(endpoint, "/", trim: true)
+
+    if endpoint_arr == [] do
+      site_name
+    else
+      generate_subpage_title(endpoint_arr, separator) <> postfix
+    end
+  end
+
+  def generate_subpage_title(["character" | _rest] = endpoint_arr, separator)
+      when length(endpoint_arr) > 1,
+      do: generate_character_title(endpoint_arr, separator)
+
+  def generate_subpage_title(endpoint_arr, separator) do
+    Enum.map_join(endpoint_arr, separator, &String.capitalize(&1))
+  end
+
+  def generate_character_title([_first | rest], separator) do
+    [char_name | rest] = rest
+
+    rest
+    |> Enum.map(&String.capitalize(&1))
+    |> then(&[char_name | &1])
+    |> Enum.join(separator)
+  end
+
   defp view_helpers do
     quote do
       # Use all HTML functionality (forms, tags, etc)
