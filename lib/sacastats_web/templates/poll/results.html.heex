@@ -13,7 +13,8 @@
       <% else %>
         <%= for vote <- item.votes do %>
           <br>
-          "<%= String.trim(vote.content) %>" -<%= vote.voter_discord_id %>
+          "<%= String.trim(vote.content) %>" 
+          <%= if @voter_id == @poll.owner_discord_id, do: "-#{get_discord_username(vote.voter_discord_id)}", else: "" %>
         <% end %>
       <% end %>
       <br>

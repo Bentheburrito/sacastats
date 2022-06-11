@@ -58,7 +58,9 @@ defmodule SacaStatsWeb.DiscordAuth do
   def get_user(client) do
     with {:ok, res} <- Client.get(client, "/users/@me"),
          url <- get_avatar_url(res.body["id"], res.body["avatar"]) do
-      {:ok, Map.put(res.body, "avatar_url", url)}
+      user = Map.put(res.body, "avatar_url", url)
+      SacaStats.CensusCache.put(SacaStats.DiscordClientCache, user["id"], {client, user})
+      {:ok, user}
     else
       {:error, %OAuth2.Response{status_code: 401} = res} ->
         case Client.refresh_token(client) do

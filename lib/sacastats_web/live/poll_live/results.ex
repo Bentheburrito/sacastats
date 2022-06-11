@@ -15,12 +15,17 @@ defmodule SacaStatsWeb.PollLive.Results do
     Phoenix.View.render(SacaStatsWeb.PollView, "results.html", assigns)
   end
 
-  def mount(%{"id" => id}, _session, socket) do
+  def mount(%{"id" => id}, session, socket) do
     %Poll{} = poll = get_poll(id)
+
+    voter_id = get_voter_id(session)
 
     Phoenix.PubSub.subscribe(SacaStats.PubSub, "poll_vote:#{poll.id}")
 
-    {:ok, assign(socket, :poll, poll)}
+    {:ok,
+    socket
+    |> assign(:poll, poll)
+    |> assign(:voter_id, voter_id)}
   end
 
   # handle new votes as they come in.

@@ -38,6 +38,11 @@ defmodule SacaStats.Application do
          [name: SacaStats.OnlineStatusCache, fallback_fn: &Fallbacks.online_status/1]},
         id: :online_status_cache
       ),
+      Supervisor.child_spec(
+        {SacaStats.CensusCache,
+         [name: SacaStats.DiscordClientCache, fallback_fn: fn _ -> :not_found end]},
+        id: :discord_cache
+      ),
       # Start the ESS Websocket
       {PS2.Socket, ess_opts}
     ]
