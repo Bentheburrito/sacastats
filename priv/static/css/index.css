@@ -1,0 +1,13 @@
+nav {
+    background-color: #fff;
+}
+
+header {
+    border-bottom-width: 0;
+}
+
+@media screen and (max-width: 767px) {
+    #model-image {
+        height: 300px;
+    }
+}

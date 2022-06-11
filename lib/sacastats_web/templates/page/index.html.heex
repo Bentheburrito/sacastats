@@ -1,3 +1,5 @@
+<link rel="stylesheet" href={Routes.static_path(@conn, "/css/index.css")} />
+
 <div class="jumbotron jumbotron-fluid w-100 d-flex align-items-center" id="welcome-banner">
   <div class="container text-center p-5 col-10 col-sm-8 col-md-6 col-xl-3" id="welcome-text-container">
     <h1>Welcome to Saca Stats!</h1>
@@ -42,7 +44,7 @@
   <div class="feature-container">
     <div class="row">
       <div class="col-12 col-md-6">
-        <img src={Routes.static_path(@conn, "/images/home/character.png")} height="400px" class="d-inline" alt="3D Model">
+        <img src={Routes.static_path(@conn, "/images/home/character.png")} height="400px" id="model-image" class="d-inline" alt="3D Model">
       </div>
       <div class="col-12 col-md-6">
         <div class="feature-description-container float-right">
@@ -101,7 +103,7 @@
             You can either answer a poll signed in as your discord user or answer anonymously.
             <br/>
             <br/>
-
+            <strong>Outfit Polls will be coming soon!</strong>
           </p>
         </div>
       </div>
@@ -114,7 +116,7 @@
   <h1>Change Logs</h1>
   <div class="row" id="change-log-container">
     <div class="col-12 col-md-2">
-      <p>June 6th, 2022</p>
+      <p>June 15th, 2022</p>
     </div>
     <div class="col-12 col-md-10">
       <p>Initial launch of the website!</p>
