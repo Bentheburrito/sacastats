@@ -107,10 +107,10 @@ defmodule SacaStatsWeb.CharacterController do
     ethnicity = get_character_ethnicity(faction, head)
     sex = get_character_sex(faction, head)
 
-    character_characteristics =
-      ["ethnicity", ethnicity, "sex", sex]
-      |> Enum.chunk_every(2)
-      |> Map.new(fn [k, v] -> {k, v} end)
+    character_characteristics = %{
+      "ethnicity" => ethnicity,
+      "sex" => sex,
+    }
 
     [
       character_info: info,
