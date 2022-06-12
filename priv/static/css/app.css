@@ -380,7 +380,7 @@ input[type='radio'] {
   align-self: center
 }
 
-@media (min-width: 40rem) {
+@media (min-width: 768px) {
   .row {
     flex-direction: row;
     margin-left: -1.0rem;
@@ -531,10 +531,6 @@ h6 {
   font-size: 1.6rem;
   letter-spacing: 0;
   line-height: 1.4
-}
-
-img {
-  max-width: 100%
 }
 
 .clearfix:after {

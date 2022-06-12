@@ -2,13 +2,37 @@
 
 <div id="characterGeneral" class="row">
     <div id="characterModelHolder" class="col-md-4 d-none d-md-flex">
-        <figure id="characterModel"></figure>
+        <div class="class-icon-holder float-left d-flex flex-wrap align-items-center">
+            <img src={Routes.static_path(@conn, "/images/character/icons/class/" <> String.replace(@character_info["profile"]["profile_type_description"], " ", "") <> "_Icon.png")} 
+                alt={"#{@character_info["profile"]["profile_type_description"]}"} width="32" height="32" class="class-icon">
+        </div>
+        <div class={"characteristic-icon-holder float-right d-flex flex-wrap align-items-center #{@character_characteristics["ethnicity"]}-skin-tone"}>
+            <img src={"#{Routes.static_path(@conn, "/images/character/icons/sex/" <> @character_characteristics["sex"] <> ".png")}"} 
+                alt={"#{String.capitalize(@character_characteristics["ethnicity"])  <> " " <> String.capitalize(@character_characteristics["sex"])}"} 
+                width="32" height="32" class="characteristic-icon">
+        </div>
+        <figure id="characterModel">
+            <div class="d-flex justify-content-center align-items-center w-100 h-100" id="character-spinner-container">
+                <div class="spinner-border text-primary" id="character-spinner" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </figure>
     </div>
-    <div class="col-md-8 col-12">
+    
+    <div class="col-md-8 col-12 stat-section-container">
+        <div class="d-flex d-md-none flex-column justify-content-center stat-section">
+            <h3 class="text-center">Characteristics</h3>
+            <p class="text-center"><%= String.capitalize(@character_characteristics["ethnicity"])  <> " " <> String.capitalize(@character_characteristics["sex"]) %></p>
+        </div>
+        <div class="d-flex d-md-none flex-column justify-content-center stat-section">
+            <h3 class="text-center">Last Seen As A(n)</h3>
+            <p class="text-center"><%= @character_info["profile"]["profile_type_description"] %></p>
+        </div>
         <div class="stat-section">
             <h3 class="text-center">Battle Rank</h3>
             <div class="progress">
-                <div id="brProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow={"#{@character_info["battle_rank"]["percent_to_next"]}"} aria-valuemin="0" aria-valuemax="100"  style="width: 0;"}>
+                <div id="brProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow={"#{@character_info["battle_rank"]["percent_to_next"]}"} aria-valuemin="0" aria-valuemax="100"  style="width: 0;">
                     <%= @character_info["battle_rank"]["percent_to_next"] %>%
                 </div>
             </div>
@@ -33,12 +57,14 @@
             <div class="row w-100 mx-auto">
                 <div class="col-12">
                     <h3 class="text-center">Times in Local Time Zone</h3>
+                    <hr />
                 </div>
                 <div class="col-12 col-md-6">
                     <div class="h-50 d-flex justify-content-center align-items-end">
                         <h4 class="">Last Online On</h4>
                     </div>
                     <p class="text-center date-time"><%= @character_info["times"]["last_save_date"] %></p>
+                    <br />
                 </div>
                 <div class="col-12 col-md-6">
                     <div class="h-50 d-flex justify-content-center align-items-end">
