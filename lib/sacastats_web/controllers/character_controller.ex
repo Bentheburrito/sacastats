@@ -240,7 +240,7 @@ defmodule SacaStatsWeb.CharacterController do
   def get_kills_to_next_medal(total_kills),
     do: 10 - total_kills
 
-  def get_character_sex(faction_id, _head_id) when faction_id == 0 or faction_id == 4,
+  def get_character_sex(faction_id, _head_id) when faction_id in [0, 4]
     do: "robot"
 
   def get_character_sex(_faction_id, head_id) when head_id <= 4,
