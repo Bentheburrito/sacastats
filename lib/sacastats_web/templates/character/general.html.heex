@@ -161,7 +161,7 @@
                         </div>
                     </div>
                 <% else %>
-                    <%= if @character_info["all_medal_counts"]["Auraxium"] > 0 do %>
+                    <%= if SacaStats.Utils.maybe_to_int(@character_info["all_medal_counts"]["Auraxium"]) > 0 do %>
                         <div class="col-auto">
                             <div class="mx-auto w-auto">
                                 <h4 class="d-inline"><u>Auraxium</u>:</h4>
@@ -170,7 +170,7 @@
                             </div>
                         </div>
                     <% end %>
-                    <%= if @character_info["all_medal_counts"]["Gold"] > 0 do %>
+                    <%= if SacaStats.Utils.maybe_to_int(@character_info["all_medal_counts"]["Gold"]) > 0 do %>
                         <div class="col-auto">
                             <div class="mx-auto w-auto">
                                 <h4 class="d-inline"><u>Gold</u>:</h4>
@@ -179,7 +179,7 @@
                             </div>
                         </div>
                     <% end %>
-                    <%= if @character_info["all_medal_counts"]["Silver"] > 0 do %>
+                    <%= if SacaStats.Utils.maybe_to_int(@character_info["all_medal_counts"]["Silver"]) > 0 do %>
                         <div class="col-auto">
                             <div class="mx-auto w-auto">
                                 <h4 class="d-inline"><u>Silver</u>:</h4>
@@ -188,7 +188,7 @@
                             </div>
                         </div>
                     <% end %>
-                    <%= if @character_info["all_medal_counts"]["Bronze"] > 0 do %>
+                    <%= if SacaStats.Utils.maybe_to_int(@character_info["all_medal_counts"]["Bronze"]) > 0 do %>
                         <div class="col-auto">
                             <div class="mx-auto w-auto">
                                 <h4 class="d-inline"><u>Bronze</u>:</h4>
