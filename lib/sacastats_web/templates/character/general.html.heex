@@ -154,34 +154,50 @@
                     <h3 class="text-center">Current Weapon Medals</h3>
                     <hr />
                 </div>
-                <div class="col-auto">
-                    <div class="mx-auto w-auto">
-                        <h4 class="d-inline"><u>Auraxium</u>:</h4>
-                        <p class="d-inline number"><%= @character_info["all_medal_counts"]["Auraxium"] %></p>
-                        <img src={"https://census.daybreakgames.com/files/ps2/images/static/3068.png"} alt="Auraxium Medal" class="medal" width="30px"/>
+                <%= if @character_info["all_medal_counts"] == %{} do %>
+                    <div class="col-auto">
+                        <div class="mx-auto w-auto">
+                            <h4 class="d-inline">There are no current weapon medals yet.</h4>
+                        </div>
                     </div>
-                </div>
-                <div class="col-auto">
-                    <div class="mx-auto w-auto">
-                        <h4 class="d-inline"><u>Gold</u>:</h4>
-                        <p class="d-inline number"><%= @character_info["all_medal_counts"]["Gold"] %></p>
-                        <img src={"https://census.daybreakgames.com/files/ps2/images/static/3075.png"} alt="Gold Medal" class="medal" width="30px"/>
-                    </div>
-                </div>
-                <div class="col-auto">
-                    <div class="mx-auto w-auto">
-                        <h4 class="d-inline"><u>Silver</u>:</h4>
-                        <p class="d-inline number"><%= @character_info["all_medal_counts"]["Silver"] %></p>
-                        <img src={"https://census.daybreakgames.com/files/ps2/images/static/3079.png"} alt="Silver Medal" class="medal" width="30px"/>
-                    </div>
-                </div>
-                <div class="col-auto">
-                    <div class="mx-auto w-auto">
-                        <h4 class="d-inline"><u>Bronze</u>:</h4>
-                        <p class="d-inline number"><%= @character_info["all_medal_counts"]["Bronze"] %></p>
-                        <img src={"https://census.daybreakgames.com/files/ps2/images/static/3072.png"} alt="Auraxium Bronze" class="medal" width="30px"/>
-                    </div>
-                </div>
+                <% else %>
+                    <%= if @character_info["all_medal_counts"]["Auraxium"] > 0 do %>
+                        <div class="col-auto">
+                            <div class="mx-auto w-auto">
+                                <h4 class="d-inline"><u>Auraxium</u>:</h4>
+                                <p class="d-inline number"><%= @character_info["all_medal_counts"]["Auraxium"] %></p>
+                                <img src={"https://census.daybreakgames.com/files/ps2/images/static/3068.png"} alt="Auraxium Medal" class="medal" width="30px"/>
+                            </div>
+                        </div>
+                    <% end %>
+                    <%= if @character_info["all_medal_counts"]["Gold"] > 0 do %>
+                        <div class="col-auto">
+                            <div class="mx-auto w-auto">
+                                <h4 class="d-inline"><u>Gold</u>:</h4>
+                                <p class="d-inline number"><%= @character_info["all_medal_counts"]["Gold"] %></p>
+                                <img src={"https://census.daybreakgames.com/files/ps2/images/static/3075.png"} alt="Gold Medal" class="medal" width="30px"/>
+                            </div>
+                        </div>
+                    <% end %>
+                    <%= if @character_info["all_medal_counts"]["Silver"] > 0 do %>
+                        <div class="col-auto">
+                            <div class="mx-auto w-auto">
+                                <h4 class="d-inline"><u>Silver</u>:</h4>
+                                <p class="d-inline number"><%= @character_info["all_medal_counts"]["Silver"] %></p>
+                                <img src={"https://census.daybreakgames.com/files/ps2/images/static/3079.png"} alt="Silver Medal" class="medal" width="30px"/>
+                            </div>
+                        </div>
+                    <% end %>
+                    <%= if @character_info["all_medal_counts"]["Bronze"] > 0 do %>
+                        <div class="col-auto">
+                            <div class="mx-auto w-auto">
+                                <h4 class="d-inline"><u>Bronze</u>:</h4>
+                                <p class="d-inline number"><%= @character_info["all_medal_counts"]["Bronze"] %></p>
+                                <img src={"https://census.daybreakgames.com/files/ps2/images/static/3072.png"} alt="Auraxium Bronze" class="medal" width="30px"/>
+                            </div>
+                        </div>
+                    <% end %>
+                <% end %>
             </div> 
         </div>
 
