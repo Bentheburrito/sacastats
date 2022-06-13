@@ -79,8 +79,8 @@
         </div>
       </div>
       <div class="col-12 col-md-6">
-        <img src={Routes.static_path(@conn, "/images/home/session.png")} height="200px" class="d-inline float-right" alt="Session">
-        <img src={Routes.static_path(@conn, "/images/home/sessions.png")} height="200px" class="d-inline float-right" alt="Sessions">
+        <img src={Routes.static_path(@conn, "/images/home/session.png")} height="200px" id="session-img" class="d-inline float-right" alt="Session">
+        <img src={Routes.static_path(@conn, "/images/home/sessions.png")} height="200px" id="sessions-img" class="d-inline float-right" alt="Sessions">
       </div>
     </div>
   </div>
@@ -91,7 +91,7 @@
   <div class="feature-container">
     <div class="row">
       <div class="col-12 col-md-6">
-        <img src={Routes.static_path(@conn, "/images/home/polls.png")} height="400px" class="d-inline" alt="3D Model">
+        <img src={Routes.static_path(@conn, "/images/home/polls.png")} height="400px" id="outfit-polls-img" class="d-inline" alt="Outfit Polls">
       </div>
       <div class="col-12 col-md-6">
         <div class="feature-description-container float-right">
@@ -101,9 +101,6 @@
             <br/>
             <br/>
             You can either answer a poll signed in as your discord user or answer anonymously.
-            <br/>
-            <br/>
-            <strong>Outfit Polls will be coming soon!</strong>
           </p>
         </div>
       </div>
