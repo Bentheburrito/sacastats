@@ -9,25 +9,28 @@ window.addEventListener('load', () => {
 
 function handleScreenWidthChange() {
     swapToLightPlusOnMobile();
-    window.onresize = swapToLightPlusOnMobile;
+    window.addEventListener("resize", swapToLightPlusOnMobile);
 }
 
 function swapToLightPlusOnMobile() {
     let img = document.getElementById("create-new-plus-img");
     let isDesktop = window.innerWidth >= 768;
-    if (isDesktop) {
+    if (isDesktop && img.src != "/images/outfit/plus-sign.png") {
         img.src = "/images/outfit/plus-sign.png";
-    } else {
+    } else if (img.src != "/images/outfit/plus-sign-light.png") {
         img.src = "/images/outfit/plus-sign-light.png";
     }
 }
 
 function handleHover() {
     let img = document.getElementById("create-new-plus-img");
+    let isDesktop = window.innerWidth >= 768;
     $("#create-new-poll-div").hover(function () {
         img.src = "/images/outfit/plus-sign-light.png";
     }, function () {
-        img.src = "/images/outfit/plus-sign.png";
+        if (isDesktop) {
+            img.src = "/images/outfit/plus-sign.png";
+        }
     });
 }
 
