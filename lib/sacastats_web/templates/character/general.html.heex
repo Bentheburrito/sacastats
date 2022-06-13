@@ -23,10 +23,10 @@
     <div class="col-md-8 col-12 stat-section-container">
         <div class="d-flex d-md-none flex-column justify-content-center stat-section">
             <h3 class="text-center">Characteristics</h3>
-            <p class="text-center"><%= String.capitalize(@character_characteristics["ethnicity"])  <> " " <> String.capitalize(@character_characteristics["sex"]) %></p>
+            <p class="text-center"><%= if(@character_characteristics["ethnicity"] === "robot") do "" else String.capitalize(@character_characteristics["ethnicity"]) end <> " " <> String.capitalize(@character_characteristics["sex"]) %></p>
         </div>
         <div class="d-flex d-md-none flex-column justify-content-center stat-section">
-            <h3 class="text-center">Last Seen As A(n)</h3>
+            <h3 class="text-center">Last Seen As A<%=if(String.starts_with?(@character_info["profile"]["profile_type_description"], ["E", "I"]), do: "n") %></h3>
             <p class="text-center"><%= @character_info["profile"]["profile_type_description"] %></p>
         </div>
         <div class="stat-section">
@@ -53,7 +53,7 @@
             <p class="move-up-4 text-center number">(Total Earned: <%= elem(Integer.parse(@character_info["certs"]["earned_points"]), 0) + elem(Integer.parse(@character_info["certs"]["gifted_points"]), 0)%>)</p>
         </div>
         
-        <div class="stat-section">
+        <div class="stat-section pb-5">
             <div class="row w-100 mx-auto">
                 <div class="col-12">
                     <h3 class="text-center">Times in Local Time Zone</h3>
@@ -61,20 +61,176 @@
                 </div>
                 <div class="col-12 col-md-6">
                     <div class="h-50 d-flex justify-content-center align-items-end">
-                        <h4 class="">Last Online On</h4>
+                        <h4 class=""><u>Last Online On</u></h4>
                     </div>
                     <p class="text-center date-time"><%= @character_info["times"]["last_save_date"] %></p>
                     <br />
                 </div>
                 <div class="col-12 col-md-6">
                     <div class="h-50 d-flex justify-content-center align-items-end">
-                        <h4 class="text-center">Created On</h4>
+                        <h4 class=""><u>Created On</u></h4>
                     </div>
-                    <p class="text-center date-time "><%= @character_info["times"]["creation_date"] %></p>
+                    <p class="text-center date-time"><%= @character_info["times"]["creation_date"] %></p>
                 </div>
             </div>    
         </div>
         
+        <div class="stat-section pb-5">
+            <div class="row w-100 mx-auto">
+                <div class="col-12">
+                    <h3 class="text-center">Outfit</h3>
+                    <hr />
+                </div>
+                <%= if(Map.has_key?(@character_info, "outfit")) do %>
+                    <div class="col-12 col-md-6">
+                        <div class="h-50 d-flex justify-content-center align-items-end">
+                            <h4 class=""><u>Name</u></h4>
+                        </div>
+                        <p class="text-center"><%= "[" <> @character_info["outfit"]["alias"] <> "] " <> @character_info["outfit"]["name"]%></p>
+                        <br />
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="h-50 d-flex justify-content-center align-items-end">
+                            <h4 class="text-center"><u>Joined</u></h4>
+                        </div>
+                        <p class="text-center date-time"><%= @character_info["outfit"]["member_since_date"] %></p>
+                        <br />
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="h-50 d-flex justify-content-center align-items-end">
+                            <h4 class="text-center"><u>Leader</u></h4>
+                        </div>
+                        <p class="text-center"><a href={"/character/#{@character_info["outfit_leader_name"]}/general"}><%= @character_info["outfit_leader_name"] %></a></p>
+                        <br />
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="h-50 d-flex justify-content-center align-items-end">
+                            <h4 class="text-center"><u>Created</u></h4>
+                        </div>
+                        <p class="text-center date-time"><%= @character_info["outfit"]["member_since_date"] %></p>
+                    </div>
+                <% else %>
+                    <div class="col-12 py-3">
+                        <div class="h-50 d-flex justify-content-center align-items-end">
+                            <h4 class="">Not currently in one.</h4>
+                        </div>
+                    </div>
+                <% end %>
+            </div> 
+        </div>
+        
+        <div class="stat-section">
+            <div class="row w-100 mx-auto">
+                <div class="col-12">
+                    <h3 class="text-center">Best Weapons</h3>
+                    <hr />
+                </div>
+                <%= for {stat_name, weapon} <- @best_weapons do %>
+                    <div class="col-12 col-md-6 pb-5">
+                        <div class="d-flex justify-content-center align-items-end">
+                            <h4 class="text-center"><u><%= stat_name %></u></h4>
+                        </div>
+                        <div class="weapon-image-container w-100">
+                            <img src={"https://census.daybreakgames.com" <> Map.get(weapon, "image_path", "/files/ps2/images/static/3.png")} 
+                                onerror={"this.onerror=null; this.src='" <> 
+                                    (if weapon["vehicle_weapon?"], 
+                                        do: Routes.static_path(@conn, "/images/character/unknownVehicleWeapon.png"), 
+                                        else: Routes.static_path(@conn, "/images/character/unknownInfantryWeapon.png"))
+                                    <> "'"} 
+                                alt={Map.get(weapon, "name", "N/A")} class="weapon-image mx-auto d-block"/>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-center d-inline font-weight-bold"><%= weapon["name"] <> ": "%></p><p class={"text-center d-inline font-weight-bold #{weapon["type"]}"}><%= weapon["value"] %></p>
+                        </div>
+                        <p class="text-center"><%= "(" <> weapon["weapon_type"] <> ")"%></p>
+                    </div>
+                <% end %>
+            </div>
+        </div>   
+    
+        <div class="stat-section pb-5">
+            <div class="row w-100 mx-auto justify-content-center flex-row">
+                <div class="col-12">
+                    <h3 class="text-center">Current Weapon Medals</h3>
+                    <hr />
+                </div>
+                <div class="col-auto">
+                    <div class="mx-auto w-auto">
+                        <h4 class="d-inline"><u>Auraxium</u>:</h4>
+                        <p class="d-inline number"><%= @character_info["all_medal_counts"]["Auraxium"] %></p>
+                        <img src={"https://census.daybreakgames.com/files/ps2/images/static/3068.png"} alt="Auraxium Medal" class="medal" width="30px"/>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <div class="mx-auto w-auto">
+                        <h4 class="d-inline"><u>Gold</u>:</h4>
+                        <p class="d-inline number"><%= @character_info["all_medal_counts"]["Gold"] %></p>
+                        <img src={"https://census.daybreakgames.com/files/ps2/images/static/3075.png"} alt="Gold Medal" class="medal" width="30px"/>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <div class="mx-auto w-auto">
+                        <h4 class="d-inline"><u>Silver</u>:</h4>
+                        <p class="d-inline number"><%= @character_info["all_medal_counts"]["Silver"] %></p>
+                        <img src={"https://census.daybreakgames.com/files/ps2/images/static/3079.png"} alt="Silver Medal" class="medal" width="30px"/>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <div class="mx-auto w-auto">
+                        <h4 class="d-inline"><u>Bronze</u>:</h4>
+                        <p class="d-inline number"><%= @character_info["all_medal_counts"]["Bronze"] %></p>
+                        <img src={"https://census.daybreakgames.com/files/ps2/images/static/3072.png"} alt="Auraxium Bronze" class="medal" width="30px"/>
+                    </div>
+                </div>
+            </div> 
+        </div>
+
+        <div class="stat-section pb-5">
+            <div class="col-12">
+                <h3 class="text-center">General Stats</h3>
+                <hr />
+                <div class="">
+                    <div class="row justify-content-center flex-row">
+                        <div class="offset-0 col-7 offset-sm-2 col-sm-5 offset-md-3 col-md-3">
+                            <p class="d-inline"><u>Kills</u>:</p>
+                        </div>
+                        <div class="col-5 col-md-4">
+                            <p class="d-inline number"><%= SacaStatsWeb.CharacterController.get_stat_value(@character_info["stats"]["stat_history"], "kills") %></p>
+                        </div>
+                        <div class="offset-0 col-7 offset-sm-2 col-sm-5 offset-md-3 col-md-3">
+                            <p class="d-inline"><u>Deaths</u>:</p>
+                        </div>
+                        <div class="col-5 col-md-4">
+                            <p class="d-inline number"><%= SacaStatsWeb.CharacterController.get_stat_value(@character_info["stats"]["stat_history"], "deaths") %></p>
+                        </div>
+                        <div class="offset-0 col-7 offset-sm-2 col-sm-5 offset-md-3 col-md-3">
+                            <p class="d-inline"><u>K/D Ratio</u>:</p>
+                        </div>
+                        <div class="col-5 col-md-4">
+                            <p class="d-inline"><%= SacaStats.Utils.safe_divide(SacaStatsWeb.CharacterController.get_percent_ratio(SacaStatsWeb.CharacterController.get_stat_value(@character_info["stats"]["stat_history"], "kills"), SacaStatsWeb.CharacterController.get_stat_value(@character_info["stats"]["stat_history"], "deaths")), 100, 4)%></p>
+                        </div>
+                        <div class="offset-0 col-7 offset-sm-2 col-sm-5 offset-md-3 col-md-3">
+                            <p class="d-inline"><u>Score</u>:</p>
+                        </div>
+                        <div class="col-5 col-md-4">
+                            <p class="d-inline number"><%= SacaStatsWeb.CharacterController.get_stat_value(@character_info["stats"]["stat_history"], "score") %></p>
+                        </div>
+                        <div class="offset-0 col-7 offset-sm-2 col-sm-5 offset-md-3 col-md-3">
+                            <p class="d-inline"><u>Time Played</u>:</p>
+                        </div>
+                        <div class="col-5 col-md-4">
+                            <p class="d-inline seconds-to-readable"><%= SacaStatsWeb.CharacterController.get_stat_value(@character_info["stats"]["stat_history"], "time") %></p>
+                        </div>
+                        <div class="offset-0 col-7 offset-sm-2 col-sm-5 offset-md-3 col-md-3">
+                            <p class="d-inline"><u>Total Medals</u>:</p>
+                        </div>
+                        <div class="col-5 col-md-4">
+                            <p class="d-inline number"><%= SacaStatsWeb.CharacterController.get_stat_value(@character_info["stats"]["stat_history"], "medals") %></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
