@@ -48,7 +48,14 @@
   <%= render SacaStatsWeb.CharacterView, @stat_page, assigns %>
   <%= if Map.has_key?(@character_info, "times") do %>
     <div class="text-center py-3">
-      <p class="d-inline">Stats last updated on: </p><strong><p class="d-inline date-time"><%= @character_info["times"]["last_save_date"] %></p></strong>
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-auto pr-0">
+          <p class="d-inline">Stats last updated on: </p>
+        </div>
+        <div class="col-12 col-md-auto pl-3">
+          <strong><p class="d-inline date-time"><%= @character_info["times"]["last_save_date"] %></p></strong>
+        </div>
+      </div>
     </div>
   <% end %>
 </main>
