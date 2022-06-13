@@ -2,6 +2,7 @@ import { addFormatsToPage, addAnimationToProgressBars } from "/js/formats.js";
 import { showHideNextAuraxButton } from "/js/character/weapons-table.js";
 import * as bootstrapTableFilter from "/js/flex-bootstrap-table-filter.js";
 import * as bootstrapSelection from "/js/flex-bootstrap-table-selection.js";
+import * as bootstrapColumn from "/js/flex-bootstrap-table-column.js";
 
 let table;
 
@@ -10,6 +11,7 @@ export function setupFlexTables() {
     document.querySelectorAll('.table-responsive-stack').forEach(table => {
         bootstrapTableFilter.init(table.id);
         bootstrapSelection.init(table.id);
+        bootstrapColumn.init(table.id);
         init();
     });
 
@@ -147,7 +149,7 @@ export function setupFlexTables() {
         window.scrollBy(0, 1);
     }
 
-    function documentMouseUpEventHandler() {
+    function documentMouseUpEventHandler(e) {
         setTimeout(function () {
             if (!didTableRecieveStyleUpdate()) {
                 setMobileHeaderTexts(table.id);
@@ -156,8 +158,20 @@ export function setupFlexTables() {
 
                 setTimeout(function () {
                     setStickyHeaderWidths();
+
+                    let clickInDropdownMenu = false;
+                    document.querySelectorAll("div.dropdown-menu").forEach(menu => {
+                        if (menu.contains(e.target)) {
+                            clickInDropdownMenu = true;
+                        }
+                    });
+
+                    if (!clickInDropdownMenu) {
+                        bootstrapColumn.fixColumnDropDown();
+                    }
                 }, 100);
             }
+            bootstrapColumn.updateColumns();
         }, 100);
     }
 

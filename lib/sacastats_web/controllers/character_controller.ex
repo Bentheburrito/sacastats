@@ -152,24 +152,18 @@ defmodule SacaStatsWeb.CharacterController do
               "value_forever_tr" => maybe_to_int(stat["value_forever_tr"])
             },
             fn map ->
-              map =
-                Map.update(
-                  map,
-                  "value_forever_vs",
-                  0,
-                  &(&1 + maybe_to_int(stat["value_forever_vs"]))
-                )
-
-              map =
-                Map.update(
-                  map,
-                  "value_forever_nc",
-                  0,
-                  &(&1 + maybe_to_int(stat["value_forever_nc"]))
-                )
-
-              Map.update(
-                map,
+              map
+              |> Map.update(
+                "value_forever_vs",
+                0,
+                &(&1 + maybe_to_int(stat["value_forever_vs"]))
+              )
+              |> Map.update(
+                "value_forever_nc",
+                0,
+                &(&1 + maybe_to_int(stat["value_forever_nc"]))
+              )
+              |> Map.update(
                 "value_forever_tr",
                 maybe_to_int(stat["value_forever_tr"]),
                 &(&1 + maybe_to_int(stat["value_forever_tr"]))
@@ -293,18 +287,13 @@ defmodule SacaStatsWeb.CharacterController do
     }
   end
 
-  def get_highest_rank_weapon(weapons, rank_on)
-      when is_map(weapons) and rank_on === "weapon_play_time" do
-    weapon_list =
-      for {_weapon_id, weapon} <- Map.to_list(weapons) do
-        if weapon["category"] === "Knife" do
-          Map.put(weapon, rank_on, 0)
-        else
-          weapon
-        end
-      end
-
-    Enum.max_by(weapon_list, fn map -> get_total_values(map[rank_on]) end)
+  def get_highest_rank_weapon(weapons, "weapon_play_time") when is_map(weapons) do
+    weapons
+    |> Stream.map(fn
+      {_weapon_id, %{"category" => "Knife"} = weapon} -> Map.put(weapon, "weapon_play_time", 0)
+      {_weapon_id, weapon} -> weapon
+    end)
+    |> Enum.max_by(fn map -> get_total_values(map["weapon_play_time"]) end)
   end
 
   def get_highest_rank_weapon(weapons, rank_on) when is_map(weapons) do
@@ -533,7 +522,7 @@ defmodule SacaStatsWeb.CharacterController do
   def get_kills_to_next_medal(total_kills),
     do: 10 - total_kills
 
-  def get_character_sex(faction_id, _head_id) when faction_id == 0 or faction_id == 4,
+  def get_character_sex(faction_id, _head_id) when faction_id in [0, 4],
     do: "robot"
 
   def get_character_sex(_faction_id, head_id) when head_id <= 4,
