@@ -403,7 +403,7 @@
                             SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character_info["faction_id"]))|> Integer.to_string()) <>".png"} alt="medal" class="medal float-left position-absolute" width="30px"/>
                     <% end %>
                     <div class="weapon-image-container w-100">
-                        <img src={"https://census.daybreakgames.com" <> Map.get(weapon, "image_path", "/files/ps2/images/static/3.png")} 
+                        <img src={"https://census.daybreakgames.com" <> Map.get(weapon, "image_path", "/files/ps2/images/static/-1.png")} 
                             onerror={"this.onerror=null; this.src='" <> 
                                 (if weapon["vehicle_weapon?"], 
                                     do: Routes.static_path(@conn, "/images/character/unknownVehicleWeapon.png"), 
