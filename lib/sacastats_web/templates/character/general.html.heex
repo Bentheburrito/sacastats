@@ -66,7 +66,6 @@
                     <p class="text-center date-time"><%= @character_info["times"]["last_save_date"] %></p>
                     <br />
                 </div>
-                <br />
                 <div class="col-12 col-md-6">
                     <div class="h-50 d-flex justify-content-center align-items-end">
                         <h4 class=""><u>Created On</u></h4>
@@ -88,22 +87,22 @@
                             <h4 class=""><u>Name</u></h4>
                         </div>
                         <p class="text-center"><%= "[" <> @character_info["outfit"]["alias"] <> "] " <> @character_info["outfit"]["name"]%></p>
+                        <br />
                     </div>
-                    <br />
                     <div class="col-12 col-md-6">
                         <div class="h-50 d-flex justify-content-center align-items-end">
                             <h4 class="text-center"><u>Joined</u></h4>
                         </div>
                         <p class="text-center date-time"><%= @character_info["outfit"]["member_since_date"] %></p>
+                        <br />
                     </div>
-                    <br />
                     <div class="col-12 col-md-6">
                         <div class="h-50 d-flex justify-content-center align-items-end">
                             <h4 class="text-center"><u>Leader</u></h4>
                         </div>
                         <p class="text-center"><a href={"/character/#{@character_info["outfit_leader_name"]}/general"}><%= @character_info["outfit_leader_name"] %></a></p>
+                        <br />
                     </div>
-                    <br />
                     <div class="col-12 col-md-6">
                         <div class="h-50 d-flex justify-content-center align-items-end">
                             <h4 class="text-center"><u>Created</u></h4>
