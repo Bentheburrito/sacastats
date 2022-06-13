@@ -593,9 +593,41 @@ function copySelectedRows(e) {
     }
 
     //copy the new url to clipboard and reset selection
-    navigator.clipboard.writeText(copyString);
+    copyTextToClipboard(copyString);
     resetCopyRowSelection(e);
     showHideSelectionMobileMenu();
+}
+
+function fallbackCopyTextToClipboard(text) {
+    var textArea = document.createElement("textarea");
+    textArea.value = text;
+
+    // Avoid scrolling to bottom
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.position = "fixed";
+
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+        var successful = document.execCommand('copy');
+        if (!successful) {
+            console.log('Failed to copy text.');
+        }
+    } catch (err) {
+        console.error('Failed to copy text.', err);
+    }
+
+    document.body.removeChild(textArea);
+}
+function copyTextToClipboard(text) {
+    if (!navigator.clipboard) {
+        fallbackCopyTextToClipboard(text);
+        return;
+    }
+    navigator.clipboard.writeText(text);
 }
 
 export function getSelectedRows() {
