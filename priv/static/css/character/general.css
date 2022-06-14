@@ -15,6 +15,49 @@ h4 {
     margin-bottom: 1rem !important;
 }
 
+.class-icon-holder {
+    background: radial-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0) 70%);
+    padding: 10px;
+    width: 64px;
+    height: 64px;
+}
+
+.characteristic-icon-holder {
+    border-radius: 15px;
+    border: black 1px solid;
+    padding: 10px;
+    height: 64px;
+    width: 64px;
+}
+
+.robot-skin-tone {
+    background-color: #938f86;
+}
+
+.caucasian-skin-tone {
+    background-color: #E6BCA1;
+}
+
+.african-skin-tone {
+    background-color: #532D20;
+}
+
+.asian-skin-tone {
+    background-color: #E8B987;
+}
+
+.hispanic-skin-tone {
+    background-color: #A9684C;
+}
+
+.stat-section-container {
+    padding: 0;
+}
+
+.stat-section {
+    margin-bottom: 20px;
+}
+
 .move-up-4 {
     position: relative;
     top: -4rem !important;
@@ -28,6 +71,22 @@ h4 {
     }
 }
 
+/*for boostrap md*/
+@media only screen and (min-width: 768px) {
+    .stat-section-container {
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 0 10px;
+    }
+}
+
+#characterModelHolder {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 220px;
+    /* Fixes position sticky not working in a flex container */
+    align-self: flex-start;
+}
+
 #characterModel {
     position: relative;
     top: -4rem !important;
@@ -36,6 +95,39 @@ h4 {
     height: 65vh;
 }
 
+#character-spinner-container {
+    position: absolute;
+    top: -5rem !important;
+    left: 16rem !important;
+}
+
+#character-spinner {
+    width: 6rem;
+    height: 6rem;
+}
+
+@media only screen and (min-width: 2500px) {
+    #characterModel {
+        height: 50vh;
+    }
+}
+
 #characterModel:hover {
     cursor: grab;
+}
+
+hr {
+    width: 100%;
+    border: 0;
+    border-top: 0.1rem solid #000000;
+    margin: 0 0 20px 0;
+}
+
+.weapon-image {
+    height: 75px;
+    width: auto;
+}
+
+.medal {
+    background: radial-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0) 70%);
 }

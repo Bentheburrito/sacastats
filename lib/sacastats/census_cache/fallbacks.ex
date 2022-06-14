@@ -25,10 +25,13 @@ defmodule SacaStats.CensusCache.Fallbacks do
       |> term(term, val)
       |> resolve([
         "online_status",
-        "outfit(alias,id,name)",
+        "outfit(alias,id,name,leader_character_id,time_created_date)",
         "weapon_stat",
         "weapon_stat_by_faction",
-        "profile(profile_type_description)"
+        "profile(profile_type_description)",
+        "stat_history(stat_name,all_time)"
+        # "stat(stat_name,value_forever)",
+        # "stat_by_faction(stat_name,value_forever_vs,value_forever_nc,value_forever_tr)"
       ])
       |> join(
         Join.new(collection: "item_profile")

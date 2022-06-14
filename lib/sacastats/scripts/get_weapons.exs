@@ -10,7 +10,8 @@ res =
 import PS2.API.QueryBuilder
 alias PS2.API.{Query, Tree, QueryResult}
 
-default_image_info = %{"image_id" => 3, "image_path" => "/files/ps2/images/static/3.png"}
+# default to an id/path that doesn't exist, so the `onerror` attribute in the template can take over
+default_image_info = %{"image_id" => -1, "image_path" => ""}
 
 weapon_image_infos =
   lines

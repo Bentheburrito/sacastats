@@ -16,6 +16,12 @@ figure {
   margin-bottom: 0 !important;
 }
 
+@media screen and (max-width: 767px) {
+  .container {
+    width: 100%;
+  }
+}
+
 #back-to-top {
   position: fixed;
   bottom: 20px;
@@ -41,6 +47,11 @@ figure {
   }
 }
 
+.progress,
+.progress>div {
+  font-size: smaller;
+}
+
 @media (min-width: 2100px) {
   .container {
     max-width: 1920px;
@@ -49,6 +60,7 @@ figure {
   .progress,
   .progress>div {
     height: 30px;
+    font-size: large;
   }
 }
 
