@@ -36,3 +36,6 @@ npm-debug.log
 .elixir_ls/
 .DS_Store
 .env
+
+# phoenix release overlays
+rel/
