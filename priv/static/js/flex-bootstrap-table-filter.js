@@ -67,7 +67,10 @@ function updateSelections() {
     for (let [_, filterOptions] of filters) {
         //loop through each filter option and update their checked selections
         filterOptions.forEach((filter) => {
-            document.getElementById(filter.filterID).checked = filter.checked;
+            let filterElement = document.getElementById(filter.filterID);
+            if (filterElement != undefined) {
+                filterElement.checked = filter.checked;
+            }
         });
     }
 }

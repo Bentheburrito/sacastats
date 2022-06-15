@@ -286,10 +286,13 @@ export function setMobileHeaderTexts(tableID) {
     //append each header text to the front of the corresponding data element and hide it
     $('#' + tableID).find("th").each(function (i) {
         let tds = '#' + tableID + ' td:nth-child(' + (i + 1) + ')';
-        $(tds).prepend(getMobileHeader(hasMobileHeader($(tds).html()) ? ""
-            : getMobileHeader((document.querySelector(tds).hasAttribute('data-mobile-title')) ? document.querySelector(tds).getAttribute('data-mobile-title') : $(this).text())));
-        if (window.innerWidth > 767) {
-            $('.table-responsive-stack-thead').hide();
+        let tdsExist = (document.querySelector(tds) != undefined) ? true : false;
+        if (tdsExist) {
+            $(tds).prepend(getMobileHeader(hasMobileHeader($(tds).html()) ? ""
+                : getMobileHeader((document.querySelector(tds).hasAttribute('data-mobile-title')) ? document.querySelector(tds).getAttribute('data-mobile-title') : $(this).text())));
+            if (window.innerWidth > 767) {
+                $('.table-responsive-stack-thead').hide();
+            }
         }
     });
 }
