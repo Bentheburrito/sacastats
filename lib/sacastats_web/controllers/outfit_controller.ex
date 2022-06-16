@@ -8,6 +8,6 @@ defmodule SacaStatsWeb.OutfitController do
   end
 
   def poll_lookup(conn, %{}) do
-    render(conn, "poll-lookup.html")
+    render(conn, "poll_lookup.html")
   end
 end
