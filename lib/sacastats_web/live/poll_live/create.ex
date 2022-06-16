@@ -120,7 +120,15 @@ defmodule SacaStatsWeb.PollLive.Create do
   def handle_event("form_submit", _params, socket) do
     case Repo.insert(socket.assigns.changeset) do
       {:ok, %Poll{id: id}} ->
-        {:noreply, redirect(socket, to: "/outfit/poll/#{id}")}
+        poll_path = "/outfit/poll/#{id}"
+
+        {:noreply,
+         socket
+         |> put_flash(
+           :info,
+           "Success! You can share this poll with others by sharing this link: sacastats.com#{poll_path}"
+         )
+         |> redirect(to: poll_path)}
 
       {:error, changeset} ->
         {:noreply,
