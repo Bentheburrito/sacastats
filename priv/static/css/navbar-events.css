@@ -93,3 +93,9 @@ ul.navbar-nav li:hover:nth-child(4n+4)>a {
     border-bottom: 3px solid #716857;
     color: #716857 !important;
 }
+
+/*Padding*/
+.pb-26 {
+    padding-bottom: 24rem !important;
+    /*padding-bottom: 26rem !important; Will need to be this when we have more main navigation.*/
+}

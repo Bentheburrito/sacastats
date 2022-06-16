@@ -1,5 +1,7 @@
 <%= if length(@sessions) == 0 do %>
-  No sessions for this character
+  <div class="w-100 text-center">
+    No recent sessions for this character.
+  </div>
 <% else %>
   <%= for %SacaStats.Session{} = session <- @sessions do %>
     <%= link to: Routes.character_path(@conn, :session, session.name, session.login.timestamp) do %>

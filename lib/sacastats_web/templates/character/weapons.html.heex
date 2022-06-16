@@ -403,7 +403,7 @@
                             SacaStatsWeb.CharacterController.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character_info["faction_id"]))|> Integer.to_string()) <>".png"} alt="medal" class="medal float-left position-absolute" width="30px"/>
                     <% end %>
                     <div class="weapon-image-container w-100">
-                        <img src={"https://census.daybreakgames.com" <> Map.get(weapon, "image_path", "/files/ps2/images/static/3.png")} 
+                        <img src={"https://census.daybreakgames.com" <> Map.get(weapon, "image_path", "/files/ps2/images/static/-1.png")} 
                             onerror={"this.onerror=null; this.src='" <> 
                                 (if weapon["vehicle_weapon?"], 
                                     do: Routes.static_path(@conn, "/images/character/unknownVehicleWeapon.png"), 
@@ -514,7 +514,7 @@
                 <td data-mobile-title="TR Damage Taken" class="number text-center">
                     <%=SacaStats.Utils.maybe_to_int(weapon["weapon_damage_taken_by"]["value_tr"])%>
                 </td>
-                <td class="text-center seconds-to-readable"><%=SacaStats.Utils.maybe_to_int(weapon["weapon_play_time"])%></td>
+                <td class="text-center"><p class="seconds-to-readable mb-0 d-inline"><%=SacaStats.Utils.maybe_to_int(weapon["weapon_play_time"])%></p></td>
                 <td data-mobile-title="Certs Earned" class="number text-center"><%=SacaStatsWeb.CharacterController.get_cert_count(weapon["weapon_score"])%></td>
                 <td data-mobile-title="Certs Per Minute" class="text-center">
                     <%=SacaStats.Utils.safe_divide(SacaStatsWeb.CharacterController.get_cert_count(weapon["weapon_score"]), trunc(SacaStats.Utils.safe_divide(SacaStats.Utils.maybe_to_int(weapon["weapon_play_time"]), 60, 0)), 2)%>

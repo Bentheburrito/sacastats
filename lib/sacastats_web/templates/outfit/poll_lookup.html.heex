@@ -1,0 +1,34 @@
+<link rel="stylesheet" href={Routes.static_path(@conn, "/css/outfit/poll-lookup.css")}/>
+
+<div class="row" id="poll-menu-div">
+    <div class="col-12 col-md-6 align-self-center" id="create-new-poll-div">
+        <div class="row justify-content-center my-auto">
+            <div class="col-12">
+                <img id="create-new-plus-img" src={Routes.static_path(@conn, "/images/outfit/plus-sign.png")} alt="Create New" width="30px" class="mx-auto d-block pb-3">
+            </div>
+            <div class="col-12">
+                <h2 class="text-center">Create New</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 d-block d-md-none h-25">
+        <hr class=""/>
+    </div>
+    <div class="col-12 col-md-6 align-self-center">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-xl-5">
+                <form id="pollSearchForm" action="" method="">
+                    <div class="form-group">
+                        <label>Search for poll ID</label>
+                        <input required type="text" id="poll-search-input" name="poll-id" autofocus>
+                    </div>
+                    <div class="form-group d-flex flex-row-reverse">
+                        <input type="button" id="poll-search-button" value="Search" class="btn btn-primary">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module" src={Routes.static_path(@conn, "/js/outfit/poll-lookup.js")}></script>

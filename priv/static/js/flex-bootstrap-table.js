@@ -35,6 +35,23 @@ export function setupFlexTables() {
         });
     }
 
+
+    window.addEventListener('load', (event) => {
+        handleScreenWidthChange();
+    });
+
+    function handleScreenWidthChange() {
+        fixHeaderVisibilities();
+        window.addEventListener("resize", fixHeaderVisibilities);
+    }
+
+    function fixHeaderVisibilities() {
+        let isDesktop = window.innerWidth >= 768;
+        if (!isDesktop) {
+            refreshByScroll();
+        }
+    }
+
     function setNextAuraxVisibilities() {
         setTimeout(function () {
             showHideNextAuraxButton();
@@ -150,6 +167,11 @@ export function setupFlexTables() {
     }
 
     function documentMouseUpEventHandler(e) {
+        let columnDropdown = document.querySelector("button[title='Columns']");
+        if (columnDropdown == e.target) {
+            bootstrapColumn.fixColumnDropDown();
+        }
+
         setTimeout(function () {
             if (!didTableRecieveStyleUpdate()) {
                 setMobileHeaderTexts(table.id);
@@ -158,17 +180,6 @@ export function setupFlexTables() {
 
                 setTimeout(function () {
                     setStickyHeaderWidths();
-
-                    let clickInDropdownMenu = false;
-                    document.querySelectorAll("div.dropdown-menu").forEach(menu => {
-                        if (menu.contains(e.target)) {
-                            clickInDropdownMenu = true;
-                        }
-                    });
-
-                    if (!clickInDropdownMenu) {
-                        bootstrapColumn.fixColumnDropDown();
-                    }
                 }, 100);
             }
             bootstrapColumn.updateColumns();
@@ -275,10 +286,13 @@ export function setMobileHeaderTexts(tableID) {
     //append each header text to the front of the corresponding data element and hide it
     $('#' + tableID).find("th").each(function (i) {
         let tds = '#' + tableID + ' td:nth-child(' + (i + 1) + ')';
-        $(tds).prepend(getMobileHeader(hasMobileHeader($(tds).html()) ? ""
-            : getMobileHeader((document.querySelector(tds).hasAttribute('data-mobile-title')) ? document.querySelector(tds).getAttribute('data-mobile-title') : $(this).text())));
-        if (window.innerWidth > 767) {
-            $('.table-responsive-stack-thead').hide();
+        let tdsExist = (document.querySelector(tds) != undefined) ? true : false;
+        if (tdsExist) {
+            $(tds).prepend(getMobileHeader(hasMobileHeader($(tds).html()) ? ""
+                : getMobileHeader((document.querySelector(tds).hasAttribute('data-mobile-title')) ? document.querySelector(tds).getAttribute('data-mobile-title') : $(this).text())));
+            if (window.innerWidth > 767) {
+                $('.table-responsive-stack-thead').hide();
+            }
         }
     });
 }

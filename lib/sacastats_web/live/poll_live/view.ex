@@ -14,16 +14,25 @@ defmodule SacaStatsWeb.PollLive.View do
   end
 
   def mount(%{"id" => id}, session, socket) do
-    %Poll{} = poll = Repo.get(Poll, id) |> Repo.preload([:text_items, :multi_choice_items])
+    case Repo.get(Poll, id) do
+      nil ->
+        {:ok,
+         socket
+         |> put_flash(:error, "The poll ID \"#{id}\" does not exist.")
+         |> redirect(to: "/outfit/poll")}
 
-    changeset = Poll.new_vote_changeset(poll, %{})
+      poll ->
+        poll = Repo.preload(poll, [:text_items, :multi_choice_items])
 
-    {:ok,
-     socket
-     |> assign(:poll, poll)
-     |> assign(:changeset, changeset)
-     |> assign(:user, session["user"])
-     |> assign(:_csrf_token, session["_csrf_token"])}
+        changeset = Poll.new_vote_changeset(poll, %{})
+
+        {:ok,
+         socket
+         |> assign(:poll, poll)
+         |> assign(:changeset, changeset)
+         |> assign(:user, session["user"])
+         |> assign(:_csrf_token, session["_csrf_token"])}
+    end
   end
 
   # for when owner is viewing and wants to see votes come in live

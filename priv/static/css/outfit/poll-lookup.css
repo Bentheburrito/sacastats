@@ -1,0 +1,32 @@
+#create-new-poll-div {
+    margin: 15px 15px 0 15px;
+    padding: 20px;
+    width: auto;
+    background-color: rgb(155, 132, 238);
+    color: rgb(255, 255, 255);
+}
+
+@media only screen and (min-width: 768px) {
+
+    /*for boostrap < xs*/
+    #create-new-poll-div {
+        margin: 0;
+        width: 100%;
+        border-right: black 1px solid;
+        min-height: 60vh;
+        padding: 0;
+        background-color: rgba(155, 132, 238, 0);
+        padding-top: 25vh;
+        color: rgb(0, 0, 0);
+    }
+}
+
+#create-new-poll-div:hover {
+    cursor: pointer;
+    background-color: rgb(155, 132, 238);
+    color: rgb(255, 255, 255);
+}
+
+#poll-menu-div {
+    min-height: 70vh;
+}

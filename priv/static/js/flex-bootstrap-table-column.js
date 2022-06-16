@@ -3,17 +3,15 @@ let table;
 let globalIndexOrder;
 let globalColumns;
 
-window.addEventListener('load', (event) => {
-    fixColumnDropDown();
-});
-
 export function fixColumnDropDown() {
     //fix column dropdown offset and bugs
     let columnDropDown = document.querySelector("button[title='Columns']");
-    columnDropDown.parentElement.lastChild.style.width = "20rem";
+    if (columnDropDown != undefined) {
+        columnDropDown.parentElement.lastChild.style.width = "20rem";
 
-    columnDropDown.click();
-    columnDropDown.click();
+        columnDropDown.click();
+        columnDropDown.click();
+    }
 }
 
 function getSortedField() {
