@@ -22,24 +22,20 @@ defmodule SacaStatsWeb.PollLive.View do
 
     voter_id = get_voter_id(session)
 
-    if voter_id == poll.owner_discord_id do
-      {:ok, redirect(socket, to: "/outfit/poll/#{poll.id}/results")}
-    else
-      vote_changesets =
-        for item <- poll.items, into: %{} do
-          changeset =
-            Vote.changeset(%Vote{}, %{"voter_discord_id" => voter_id, "item_id" => item.id})
+    vote_changesets =
+      for item <- poll.items, into: %{} do
+        changeset =
+          Vote.changeset(%Vote{}, %{"voter_discord_id" => voter_id, "item_id" => item.id})
 
-          {item.id, changeset}
-        end
+        {item.id, changeset}
+      end
 
-      {:ok,
-       socket
-       |> assign(:poll, poll)
-       |> assign(:vote_changesets, vote_changesets)
-       |> assign(:user, session["user"])
-       |> assign(:_csrf_token, session["_csrf_token"])}
-    end
+    {:ok,
+     socket
+     |> assign(:poll, poll)
+     |> assign(:vote_changesets, vote_changesets)
+     |> assign(:user, session["user"])
+     |> assign(:_csrf_token, session["_csrf_token"])}
   end
 
   def handle_event("field_change", %{"vote" => params}, socket) do
