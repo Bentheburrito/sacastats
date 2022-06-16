@@ -18,24 +18,30 @@ defmodule SacaStatsWeb.PollLive.View do
   end
 
   def mount(%{"id" => id}, session, socket) do
-    %Poll{} = poll = get_poll(id)
+    case get_poll(id) do
+      nil ->
+        {:ok,
+         socket
+         |> put_flash(:error, "The poll ID \"#{id}\" does not exist.")
+         |> redirect(to: "/outfit/poll")}
+    
+      poll ->
+        voter_id = get_voter_id(session)
 
-    voter_id = get_voter_id(session)
+        vote_changesets =
+          for item <- poll.items, into: %{} do
+            changeset =
+              Vote.changeset(%Vote{}, %{"voter_discord_id" => voter_id, "item_id" => item.id})
 
-    vote_changesets =
-      for item <- poll.items, into: %{} do
-        changeset =
-          Vote.changeset(%Vote{}, %{"voter_discord_id" => voter_id, "item_id" => item.id})
+            {item.id, changeset}
+          end
 
-        {item.id, changeset}
-      end
-
-    {:ok,
-     socket
-     |> assign(:poll, poll)
-     |> assign(:vote_changesets, vote_changesets)
-     |> assign(:user, session["user"])
-     |> assign(:_csrf_token, session["_csrf_token"])}
+        {:ok,
+         socket
+         |> assign(:poll, poll)
+         |> assign(:vote_changesets, vote_changesets)
+         |> assign(:user, session["user"])
+         |> assign(:_csrf_token, session["_csrf_token"])}
   end
 
   def handle_event("field_change", %{"vote" => params}, socket) do

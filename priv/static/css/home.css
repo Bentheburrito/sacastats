@@ -1,0 +1,27 @@
+#welcome-banner {
+    background-image: url("/images/home/banner.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: bottom center;
+}
+
+#welcome-text-container {
+    background-color: #9b84eeba;
+    color: white;
+    border-radius: 20px;
+}
+
+#change-log-container {
+    padding-bottom: 300px;
+}
+
+@media screen and (min-width: 1919px) {
+    #welcome-banner {
+        background-image: url("/images/home/bannerLarge.png");
+        min-height: 600px;
+    }
+
+    #welcome-text-container {
+        background-color: #9b84eef1;
+    }
+}

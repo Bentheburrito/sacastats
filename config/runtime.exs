@@ -37,14 +37,16 @@ if config_env() == :prod do
       """
 
   config :sacastats, SacaStatsWeb.Endpoint,
+    server: System.get_env("PHX_SERVER") && System.get_env("RELEASE_NAME"),
     http: [
       # Enable IPv6 and bind on all interfaces.
       # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.
       # See the documentation on https://hexdocs.pm/plug_cowboy/Plug.Cowboy.html
       # for details about using IPv6 vs IPv4 and loopback vs public addresses.
-      ip: {0, 0, 0, 0, 0, 0, 0, 0},
-      port: String.to_integer(System.get_env("PORT") || "4000")
+      # ip: {0, 0, 0, 0, 0, 0, 0, 0},
+      # port: String.to_integer(System.get_env("PORT") || "4000"),
     ],
+    url: [host: "sacastats.com", port: String.to_integer(System.get_env("PORT") || "4000")],
     secret_key_base: secret_key_base
 
   # ## Using releases

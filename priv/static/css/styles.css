@@ -1,6 +1,7 @@
 @import "flex-bootstrap-table.css";
 @import "navbar-events.css";
 @import "account.css";
+@import "home.css";
 
 /*General*/
 footer {
@@ -13,6 +14,12 @@ footer {
 
 figure {
   margin-bottom: 0 !important;
+}
+
+@media screen and (max-width: 767px) {
+  .container {
+    width: 100%;
+  }
 }
 
 #back-to-top {
@@ -40,6 +47,11 @@ figure {
   }
 }
 
+.progress,
+.progress>div {
+  font-size: smaller;
+}
+
 @media (min-width: 2100px) {
   .container {
     max-width: 1920px;
@@ -48,14 +60,11 @@ figure {
   .progress,
   .progress>div {
     height: 30px;
+    font-size: large;
   }
 }
 
 /*Padding*/
-.pb-26 {
-  padding-bottom: 26rem !important;
-}
-
 @media only screen and (max-width: 767px) {
 
   /*for boostrap xs*/

@@ -39,6 +39,8 @@ defmodule SacaStatsWeb.Router do
   scope "/outfit", SacaStatsWeb do
     pipe_through :browser
 
+    get "/", OutfitController, :general
+    get "/poll", OutfitController, :poll_lookup
     live "/poll/create", PollLive.Create
     live "/poll/:id/results", PollLive.Results
     live "/poll/:id", PollLive.View

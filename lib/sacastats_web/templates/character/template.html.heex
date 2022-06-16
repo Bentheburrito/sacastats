@@ -7,13 +7,7 @@
         <a class="moving-nav-link nav-link" href={"/character/#{@character_info["name"]["first"]}/general"}>General</a>
       </li>
       <li class="moving-nav-link-container nav-item h-100 my-auto subpage-nav">
-        <a class="moving-nav-link nav-link" href={"/character/#{@character_info["name"]["first"]}/stats"}>Stats</a>
-      </li>
-      <li class="moving-nav-link-container nav-item h-100 my-auto subpage-nav">
         <a class="moving-nav-link nav-link" href={"/character/#{@character_info["name"]["first"]}/sessions"}>Sessions</a>
-      </li>
-      <li class="moving-nav-link-container nav-item h-100 my-auto subpage-nav">
-        <a class="moving-nav-link nav-link" href={"/character/#{@character_info["name"]["first"]}/directives"}>Directives</a>
       </li>
       <li class="moving-nav-link-container nav-item h-100 my-auto subpage-nav">
         <a class="moving-nav-link nav-link" href={"/character/#{@character_info["name"]["first"]}/weapons"}>Weapons</a>
@@ -21,35 +15,59 @@
     </ul>
   </div>
 </nav>
-<main role="main" class="container">
-  <h1 class="text-center text-sm-left" id="characterName"><%= @character_info["name"]["first"] %></h1>
-  <div class="d-none d-sm-flex float-sm-right">
+<main role="main" class="container pt-4 pt-md-3">
+  <div class="row">
+    <div class="col-12 col-md-1 text-center">
+      <img class="float-md-left float-none" data-toggle="tooltip" 
+        title={@character_info["name"]["first"] <> " plays on the " <> Map.get(SacaStats.factions, SacaStats.Utils.maybe_to_int(@character_info["faction_id"]))[:name]} 
+        src={Map.get(SacaStats.factions, SacaStats.Utils.maybe_to_int(@character_info["faction_id"]))[:image]} 
+        alt={@online_status} width="70">
+    </div>
+    <div class="col-12 col-md-11">
+      <div class="pl-0 pl-md-5 pl-lg-2 pl-xl-0">
+        <%= if(Map.has_key?(@character_info, "outfit")) do %>
+          <h1 class="text-center text-md-left d-block d-md-inline mx-auto" data-toggle="tooltip" title={@character_info["outfit"]["name"]} id="characterOutfit"><%= "[" <> @character_info["outfit"]["alias"] <> "] " %></h1>
+        <% end %>
+        <h1 class="text-center text-md-left d-block d-md-inline" id="characterName"><%= @character_info["name"]["first"] %></h1>
+        <%= if(Map.has_key?(@character_info, "outfit") && SacaStats.Utils.maybe_to_int(@character_info["outfit"]["leader_character_id"]) === SacaStats.Utils.maybe_to_int(@character_info["character_id"]) ) do %>
+          <p data-toggle="tooltip" title={@character_info["outfit"]["name"] <> "'s outfit leader"} class="d-block d-md-inline align-top text-center text-md-left">&#11088;</p>
+        <% end %>
+        <div class="d-none d-md-flex float-md-right align-items-center h-100">
+          <img src={Routes.static_path(@conn, "/images/character/" <> @online_status <> ".ico")} alt={@online_status} width="30">
+          <p class="d-inline my-auto"><%=String.capitalize(@online_status) %></p>
+        </div>
+        <p id="characterId"><%= @character_info["character_id"] %></p>
+      </div>
+    </div>
+  </div>
+  <div class="d-md-none d-flex justify-content-center pb-3">
     <img src={Routes.static_path(@conn, "/images/character/" <> @online_status <> ".ico")} alt={@online_status} width="30">
     <p class="d-inline my-auto"><%=String.capitalize(@online_status) %></p>
   </div>
-  <p id="characterId"><%= @character_info["character_id"] %></p>
-  <div class="d-sm-none d-flex justify-content-center pb-3">
-    <img src={Routes.static_path(@conn, "/images/character/" <> @online_status <> ".ico")} alt={@online_status} width="30">
-    <p class="d-inline my-auto"><%=String.capitalize(@online_status) %></p>
-  </div>
+  <hr class="d-md-none">
   <%= render SacaStatsWeb.CharacterView, @stat_page, assigns %>
+  <%= if Map.has_key?(@character_info, "times") do %>
+    <div class="text-center py-3">
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-auto pr-0">
+          <p class="d-inline">Stats last updated on: </p>
+        </div>
+        <div class="col-12 col-md-auto pl-3">
+          <strong><p class="d-inline date-time"><%= @character_info["times"]["last_save_date"] %></p></strong>
+        </div>
+      </div>
+    </div>
+  <% end %>
 </main>
 <footer>
   <nav class="navbar navbar-expand-md navbar-light bg-light d-md-none fixed-bottom top-bottom-nav pb-10">
-
     <div class="bottom-navbar collapse navbar-collapse collapse_bottom_subnav_target" id="collapse_character_nav_bottom_target">
       <ul class="navbar-nav">
         <li class="nav-item subpage-nav">
           <a class="static-nav-link nav-link" href={"/character/#{@character_info["name"]["first"]}/general"}>General</a>
         </li>
         <li class="nav-item subpage-nav">
-          <a class="static-nav-link nav-link" href={"/character/#{@character_info["name"]["first"]}/stats"}>Stats</a>
-        </li>
-        <li class="nav-item subpage-nav">
           <a class="static-nav-link nav-link" href={"/character/#{@character_info["name"]["first"]}/sessions"}>Sessions</a>
-        </li>
-        <li class="nav-item subpage-nav">
-          <a class="static-nav-link nav-link" href={"/character/#{@character_info["name"]["first"]}/directives"}>Directives</a>
         </li>
         <li class="nav-item subpage-nav">
           <a class="static-nav-link nav-link" href={"/character/#{@character_info["name"]["first"]}/weapons"}>Weapons</a>

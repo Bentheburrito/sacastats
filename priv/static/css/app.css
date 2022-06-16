@@ -380,7 +380,7 @@ input[type='radio'] {
   align-self: center
 }
 
-@media (min-width: 40rem) {
+@media (min-width: 768px) {
   .row {
     flex-direction: row;
     margin-left: -1.0rem;
@@ -533,10 +533,6 @@ h6 {
   line-height: 1.4
 }
 
-img {
-  max-width: 100%
-}
-
 .clearfix:after {
   clear: both;
   content: ' ';
@@ -634,6 +630,14 @@ header {
   background: #fdfdfd;
   border-bottom: 1px solid #eaeaea;
   margin-bottom: 2rem;
+}
+
+@media only screen and (max-width: 767px) {
+
+  /*for boostrap < xs*/
+  header {
+    border-bottom-width: 0;
+  }
 }
 
 header section {

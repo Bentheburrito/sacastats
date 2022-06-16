@@ -80,7 +80,15 @@ tbody tr.selection.main-selected>td {
 }
 
 .selection-mobile-menu-bottom {
-    bottom: 170px;
+    bottom: 138px;
+}
+
+#table-copy-toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, 0);
+    z-index: 9999;
 }
 
 @media only screen and (min-width: 768px) {

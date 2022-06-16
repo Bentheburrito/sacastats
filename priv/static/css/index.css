@@ -1,0 +1,24 @@
+nav {
+    background-color: #fff;
+}
+
+@media screen and (max-width: 767px) {
+    #model-image {
+        height: 300px;
+    }
+
+    #outfit-polls-img {
+        height: 250px;
+    }
+
+    #session-img {
+        width: 250px;
+        height: auto;
+        padding-bottom: 15px;
+    }
+
+    #sessions-img {
+        width: 250px;
+        height: auto;
+    }
+}

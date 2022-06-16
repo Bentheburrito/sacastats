@@ -2,6 +2,7 @@ import { addFormatsToPage, addAnimationToProgressBars } from "/js/formats.js";
 import { showHideNextAuraxButton } from "/js/character/weapons-table.js";
 import * as bootstrapTableFilter from "/js/flex-bootstrap-table-filter.js";
 import * as bootstrapSelection from "/js/flex-bootstrap-table-selection.js";
+import * as bootstrapColumn from "/js/flex-bootstrap-table-column.js";
 
 let table;
 
@@ -10,6 +11,7 @@ export function setupFlexTables() {
     document.querySelectorAll('.table-responsive-stack').forEach(table => {
         bootstrapTableFilter.init(table.id);
         bootstrapSelection.init(table.id);
+        bootstrapColumn.init(table.id);
         init();
     });
 
@@ -31,6 +33,23 @@ export function setupFlexTables() {
             addOnDocumentMouseUp();
             showHideNextAuraxButton();
         });
+    }
+
+
+    window.addEventListener('load', (event) => {
+        handleScreenWidthChange();
+    });
+
+    function handleScreenWidthChange() {
+        fixHeaderVisibilities();
+        window.addEventListener("resize", fixHeaderVisibilities);
+    }
+
+    function fixHeaderVisibilities() {
+        let isDesktop = window.innerWidth >= 768;
+        if (!isDesktop) {
+            refreshByScroll();
+        }
     }
 
     function setNextAuraxVisibilities() {
@@ -147,7 +166,12 @@ export function setupFlexTables() {
         window.scrollBy(0, 1);
     }
 
-    function documentMouseUpEventHandler() {
+    function documentMouseUpEventHandler(e) {
+        let columnDropdown = document.querySelector("button[title='Columns']");
+        if (columnDropdown == e.target) {
+            bootstrapColumn.fixColumnDropDown();
+        }
+
         setTimeout(function () {
             if (!didTableRecieveStyleUpdate()) {
                 setMobileHeaderTexts(table.id);
@@ -158,6 +182,7 @@ export function setupFlexTables() {
                     setStickyHeaderWidths();
                 }, 100);
             }
+            bootstrapColumn.updateColumns();
         }, 100);
     }
 
@@ -261,10 +286,13 @@ export function setMobileHeaderTexts(tableID) {
     //append each header text to the front of the corresponding data element and hide it
     $('#' + tableID).find("th").each(function (i) {
         let tds = '#' + tableID + ' td:nth-child(' + (i + 1) + ')';
-        $(tds).prepend(getMobileHeader(hasMobileHeader($(tds).html()) ? ""
-            : getMobileHeader((document.querySelector(tds).hasAttribute('data-mobile-title')) ? document.querySelector(tds).getAttribute('data-mobile-title') : $(this).text())));
-        if (window.innerWidth > 767) {
-            $('.table-responsive-stack-thead').hide();
+        let tdsExist = (document.querySelector(tds) != undefined) ? true : false;
+        if (tdsExist) {
+            $(tds).prepend(getMobileHeader(hasMobileHeader($(tds).html()) ? ""
+                : getMobileHeader((document.querySelector(tds).hasAttribute('data-mobile-title')) ? document.querySelector(tds).getAttribute('data-mobile-title') : $(this).text())));
+            if (window.innerWidth > 767) {
+                $('.table-responsive-stack-thead').hide();
+            }
         }
     });
 }

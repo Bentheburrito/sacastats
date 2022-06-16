@@ -1,41 +1,123 @@
-<section class="phx-hero">
-  <h1><%= gettext "Welcome to %{name}!", name: "Phoenix" %></h1>
-  <p>Peace of mind from prototype to production</p>
-</section>
+<link rel="stylesheet" href={Routes.static_path(@conn, "/css/index.css")} />
 
-<section class="row">
-  <article class="column">
-    <h2>Resources</h2>
-    <ul>
-      <li>
-        <a href="https://hexdocs.pm/phoenix/overview.html">Guides &amp; Docs</a>
-      </li>
-      <li>
-        <a href="https://github.com/phoenixframework/phoenix">Source</a>
-      </li>
-      <li>
-        <a href="https://github.com/phoenixframework/phoenix/blob/v1.6/CHANGELOG.md">v1.6 Changelog</a>
-      </li>
-    </ul>
-  </article>
-  <article class="column">
-    <h2>Help</h2>
-    <ul>
-      <li>
-        <a href="https://elixirforum.com/c/phoenix-forum">Forum</a>
-      </li>
-      <li>
-        <a href="https://web.libera.chat/#elixir">#elixir on Libera Chat (IRC)</a>
-      </li>
-      <li>
-        <a href="https://twitter.com/elixirphoenix">Twitter @elixirphoenix</a>
-      </li>
-      <li>
-        <a href="https://elixir-slackin.herokuapp.com/">Elixir on Slack</a>
-      </li>
-      <li>
-        <a href="https://discord.gg/elixir">Elixir on Discord</a>
-      </li>
-    </ul>
-  </article>
-</section>
+<div class="jumbotron jumbotron-fluid w-100 d-flex align-items-center" id="welcome-banner">
+  <div class="container text-center p-5 col-10 col-sm-8 col-md-6 col-xl-3" id="welcome-text-container">
+    <h1>Welcome to Saca Stats!</h1>
+    <p class="lead"><strong>A Planetside 2 Stat Site</strong></p>
+  </div>
+</div>
+
+<div class="container">
+  <h1>Under Construction</h1>
+  <p>This site is in its alpha version. Let us know if you find any issues or have any suggestions, and we will try to get to them as soon as possible.</p>
+  <hr/>
+  <h1>Current Features</h1>
+
+  <div class="feature-container">
+    <div class="row">
+      <div class="col-12 col-md-6">
+        <div class="feature-description-container">
+          <h2>Advanced Tabeling</h2>
+          <p>
+            Check out the weapons table of your character. You can modify the columns you want, what order they are in, and how the table will be sorted. 
+            Choose from any of our 49 columns to see the data that <strong>YOU</strong> want (<strong>With mobile and persistent support comming soon!</strong>). 
+            <br/>
+            <br/>
+            Filter out any data you don't want to see with 6 different sections of filter options to choose from. And when you come back to that page we 
+            will keep that filter for you.
+            <br/>
+            <br/>
+            Select the weapons you are most proud of and share them with either a link to your character's weapon page or the text version of your weapons' stats.
+            (<strong>Mobile support included by pressing and holding!</strong>).
+          </p>
+        </div>
+      </div>
+      <div class="col-12 col-md-6">
+        <img src={Routes.static_path(@conn, "/images/home/tableMobileSelect.png")} height="400px" class="d-inline float-right" alt="Mobile Selecting">
+      </div>
+    </div>
+  </div>
+
+  <br/>
+  <br/>
+
+  <div class="feature-container">
+    <div class="row">
+      <div class="col-12 col-md-6">
+        <img src={Routes.static_path(@conn, "/images/home/character.png")} height="400px" id="model-image" class="d-inline" alt="3D Model">
+      </div>
+      <div class="col-12 col-md-6">
+        <div class="feature-description-container float-right">
+          <h2>3D Model</h2>
+          <p>
+            See what your character looks like in game and interact with them too!
+            <br/>
+            <br/>
+            Your model will come loaded in with the class that you were last seen in.
+            (<strong>Model customization will come in later updates.</strong>).
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <br/>
+  <br/>
+
+  <div class="feature-container">
+    <div class="row">
+      <div class="col-12 col-md-6">
+        <div class="feature-description-container">
+          <h2>Sessions</h2>
+          <p>
+            Checkout your most recent play sessions that your character had. See all character related data including a full event log!
+            <br/>
+            <br/>
+            You can save your favorite session to keep forever!
+            
+          </p>
+        </div>
+      </div>
+      <div class="col-12 col-md-6">
+        <img src={Routes.static_path(@conn, "/images/home/session.png")} height="200px" id="session-img" class="d-inline float-right" alt="Session">
+        <img src={Routes.static_path(@conn, "/images/home/sessions.png")} height="200px" id="sessions-img" class="d-inline float-right" alt="Sessions">
+      </div>
+    </div>
+  </div>
+
+  <br/>
+  <br/>
+
+  <div class="feature-container">
+    <div class="row">
+      <div class="col-12 col-md-6">
+        <img src={Routes.static_path(@conn, "/images/home/polls.png")} height="400px" id="outfit-polls-img" class="d-inline" alt="Outfit Polls">
+      </div>
+      <div class="col-12 col-md-6">
+        <div class="feature-description-container float-right">
+          <h2>Outfit Polls</h2>
+          <p>
+            Sign in using Discord OAuth and create polls for your members to vote on. You can also create private polls so that only certain Discord members can join.
+            <br/>
+            <br/>
+            You can either answer a poll signed in as your discord user or answer anonymously.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <br/>
+  <hr/>
+
+  <h1>Change Logs</h1>
+  <div class="row" id="change-log-container">
+    <div class="col-12 col-md-3 text-center text-md-right">
+      <p>June 15th, 2022</p>
+    </div>
+    <div class="col-12 col-md-9 text-center text-md-left">
+      <p>Initial launch of the website!</p>
+    </div>
+  </div>
+  
+</div>

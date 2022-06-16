@@ -5220,7 +5220,7 @@ tbody.collapse.show {
 }
 
 .page-item.active .page-link {
-  z-index: 1;
+  z-index: 0;
   color: #fff;
   background-color: #9B84EE;
   border-color: #9B84EE;
@@ -9944,5 +9944,3 @@ a.text-dark:focus {
     border: 1px solid #ddd !important;
   }
 }
-
-/*# sourceMappingURL=bootstrap.css.map */
