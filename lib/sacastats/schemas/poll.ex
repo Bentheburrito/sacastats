@@ -7,30 +7,20 @@ defmodule SacaStats.Poll do
   import Ecto.Changeset
   @primary_key {:id, :id, autogenerate: true}
 
-  alias SacaStats.PollItem.{MultiChoice, Text}
+  alias SacaStats.Poll.Item
 
   schema "polls" do
     field :owner_discord_id, :integer
     field :title, :string
-    has_many :text_items, SacaStats.PollItem.Text
-    has_many :multi_choice_items, SacaStats.PollItem.MultiChoice
+    has_many :items, Item
   end
 
   def changeset(poll, params \\ %{}) do
     poll
     |> cast(params, [:owner_discord_id, :title])
     |> validate_required([:owner_discord_id, :title])
-    |> cast_assoc(:text_items, with: &Text.changeset/2)
-    |> cast_assoc(:multi_choice_items, with: &MultiChoice.changeset/2)
-    |> validate_items()
-  end
-
-  def new_vote_changeset(poll, params) do
-    poll
-    |> cast(params, [:owner_discord_id, :title])
-    |> cast_assoc(:text_items, with: &Text.new_vote_changeset/2)
-    |> cast_assoc(:multi_choice_items, with: &MultiChoice.new_vote_changeset/2)
-    |> validate_items()
+    |> cast_assoc(:items, with: &Item.changeset/2)
+    |> validate_length(:items, min: 1)
   end
 
   defp validate_items(%Ecto.Changeset{changes: changes} = changeset) do

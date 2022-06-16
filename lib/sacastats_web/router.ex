@@ -42,6 +42,7 @@ defmodule SacaStatsWeb.Router do
     get "/", OutfitController, :general
     get "/poll", OutfitController, :poll_lookup
     live "/poll/create", PollLive.Create
+    live "/poll/:id/results", PollLive.Results
     live "/poll/:id", PollLive.View
   end
 
