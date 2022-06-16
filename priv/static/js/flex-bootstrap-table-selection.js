@@ -566,7 +566,11 @@ function overARow(row) {
 }
 
 function copySelectedRows(e) {
+    $(copyToastID).removeClass("d-none");
     $(copyToastID).toast('show');
+    setTimeout(function () {
+        $(copyToastID).addClass("d-none");
+    }, 1000);
     hideContextMenu();
     let copyString = "";
     if (customCopyFunction != undefined || secondCustomCopyFunction != undefined) {
