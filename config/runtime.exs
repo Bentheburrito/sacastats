@@ -37,7 +37,7 @@ if config_env() == :prod do
       """
 
   config :sacastats, SacaStatsWeb.Endpoint,
-    server: true,
+    server: System.get_env("PHX_SERVER") && System.get_env("RELEASE_NAME"),
     http: [
       # Enable IPv6 and bind on all interfaces.
       # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.
