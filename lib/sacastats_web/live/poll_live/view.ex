@@ -24,7 +24,7 @@ defmodule SacaStatsWeb.PollLive.View do
          socket
          |> put_flash(:error, "The poll ID \"#{id}\" does not exist.")
          |> redirect(to: "/outfit/poll")}
-    
+
       poll ->
         voter_id = get_voter_id(session)
 
@@ -42,6 +42,7 @@ defmodule SacaStatsWeb.PollLive.View do
          |> assign(:vote_changesets, vote_changesets)
          |> assign(:user, session["user"])
          |> assign(:_csrf_token, session["_csrf_token"])}
+    end
   end
 
   def handle_event("field_change", %{"vote" => params}, socket) do
