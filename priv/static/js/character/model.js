@@ -89,7 +89,7 @@ function setCharacterArmor() {
 }
 
 function setModelBase() {
-    modelBase = generalPrefix + ((characterClassID == 0 && characterFactionAlias != "NSO") ? "Stealth_" : "") + ((characterClassID == 5) ? "Max_" : "") + "Base";
+    modelBase = generalPrefix + ((characterClassID == 0 && characterFactionAlias != "NSO") ? "Stealth_" : "") + ((characterClassID == 5) ? "MAX_" : "") + "Base";
 }
 
 function setCharacterHead(headID) {
