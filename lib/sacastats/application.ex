@@ -15,9 +15,6 @@ defmodule SacaStats.Application do
       service_id: SacaStats.sid()
     ]
 
-    # Start session ETS table.
-    :ets.new(:session, [:named_table, :public, read_concurrency: true])
-
     children = [
       # Start the Ecto repository
       SacaStats.Repo,
