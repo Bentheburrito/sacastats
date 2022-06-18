@@ -268,6 +268,7 @@ function loadModels() {
 
     //when all the pieces are loaded, update and render the canvas
     manager.onLoad = function () {
+        createRenderer();
         update();
         render();
     };
@@ -292,8 +293,7 @@ function createRenderer() {
     // add the automatically created <canvas> element to the page after fading out the loading spinner
     $(container).fadeOut(300);
     setTimeout(function () {
-        container.appendChild(renderer.domElement);
-        $(container).children().not(renderer.domElement).remove();
+        $(container).children().not(renderer.domElement).replaceWith(renderer.domElement);
         $(container).fadeIn(1000);
     }, 250);
 }
@@ -361,7 +361,6 @@ export default function init(containerID, factionAlias, headID, clazz) {
 
     //load and render model
     loadModels();
-    createRenderer();
 
     //if it's high quality, create an animation loop
     if (highQuality) {
