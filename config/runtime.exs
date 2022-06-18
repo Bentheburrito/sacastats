@@ -37,7 +37,7 @@ if config_env() == :prod do
       """
 
   config :sacastats, SacaStatsWeb.Endpoint,
-    server: System.get_env("PHX_SERVER") && System.get_env("RELEASE_NAME"),
+    server: (System.get_env("PHX_SERVER") && System.get_env("RELEASE_NAME") && true) || false,
     http: [
       # Enable IPv6 and bind on all interfaces.
       # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.
@@ -46,7 +46,8 @@ if config_env() == :prod do
       # ip: {0, 0, 0, 0, 0, 0, 0, 0},
       # port: String.to_integer(System.get_env("PORT") || "4000"),
     ],
-    url: [host: "sacastats.com", port: String.to_integer(System.get_env("PORT") || "4000")],
+    check_origin: ["//*.sacastats.com"],
+    url: [host: "www.sacastats.com", port: String.to_integer(System.get_env("PORT") || "4000")],
     secret_key_base: secret_key_base
 
   # ## Using releases
