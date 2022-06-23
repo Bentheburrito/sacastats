@@ -126,7 +126,7 @@ defmodule SacaStatsWeb.PollLive.Create do
          socket
          |> put_flash(
            :info,
-           "Success! You can share this poll with others by sharing this link: sacastats.com#{poll_path}"
+           "Success! You can share this poll with others by sharing this link: https://www.sacastats.com#{poll_path}"
          )
          |> redirect(to: poll_path)}
 
