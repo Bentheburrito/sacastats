@@ -17,8 +17,8 @@ export function addNavbarEventListeners() {
 
     function initializeVariables() {
         bottomNavbars = document.querySelectorAll(".bottom-navbar");
-        oldPadding = "pb-10";
-        newPadding = "pb-26";
+        oldPadding = "mb-7";
+        newPadding = "mb-27";
         isBottomTopNavbarShown = false;
         isBottomBottomNavbarShown = false;
     }

@@ -1,7 +1,3 @@
-nav {
-    background-color: #fff;
-}
-
 @media screen and (max-width: 767px) {
     #model-image {
         height: 300px;
