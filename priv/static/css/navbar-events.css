@@ -38,7 +38,7 @@ nav {
 }
 
 .top-bottom-nav {
-    transition: .4s;
+    transition: .3s;
 }
 
 .sticky-top {
@@ -95,11 +95,11 @@ ul.navbar-nav li:hover:nth-child(4n+4)>a {
     color: #716857 !important;
 }
 
-/*Margins*/
-.mb-27 {
-    margin-bottom: 27rem !important;
+/*Padding*/
+.pb-27 {
+    padding-bottom: 27rem !important;
 }
 
-.mb-7 {
-    margin-bottom: 7.5rem !important;
+.pb-7 {
+    padding-bottom: 7.5rem !important;
 }
