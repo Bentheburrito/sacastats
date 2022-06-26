@@ -200,29 +200,31 @@ function updateEachOptionAvailability(filterCategory, filterOptions) {
         let newArraySize = originalArraySize;
         let input = document.getElementById(filter.filterID);
 
-        //if the option is not a show all
-        if (filter.filterName != "showall") {
-            //if the filter name category is a custom filter apply the custom filter
-            if (customFilterFunctions.hasOwnProperty(filterCategory)) {
-                newArraySize = customFilterFunctions[filterCategory](filter.filterName, dataArray).length;
-            } else {
-                //otherwise apply the default filter
-                newArraySize = dataArray.filter(option => option[filterCategory] == filter.filterName).length;
+        if (input != undefined) {
+            //if the option is not a show all
+            if (filter.filterName != "showall") {
+                //if the filter name category is a custom filter apply the custom filter
+                if (customFilterFunctions.hasOwnProperty(filterCategory)) {
+                    newArraySize = customFilterFunctions[filterCategory](filter.filterName, dataArray).length;
+                } else {
+                    //otherwise apply the default filter
+                    newArraySize = dataArray.filter(option => option[filterCategory] == filter.filterName).length;
+                }
             }
-        }
 
-        //if the filtered array is empty and the filter is not checked, add disabled class and disable it
-        if (newArraySize == 0 && !filter.checked) {
-            input.parentElement.classList.add("contains-disabled-input");
-            input.disabled = true;
-        } else {
-            //otherwise remove disabled class and enable it
-            input.parentElement.classList.remove("contains-disabled-input");
-            input.disabled = false;
-        }
+            //if the filtered array is empty and the filter is not checked, add disabled class and disable it
+            if (newArraySize == 0 && !filter.checked) {
+                input.parentElement.classList.add("contains-disabled-input");
+                input.disabled = true;
+            } else {
+                //otherwise remove disabled class and enable it
+                input.parentElement.classList.remove("contains-disabled-input");
+                input.disabled = false;
+            }
 
-        //update the availability count element
-        input.parentElement.querySelector("span").querySelector(".filter-option-contains").innerHTML = "(" + newArraySize + ")";
+            //update the availability count element
+            input.parentElement.querySelector("span").querySelector(".filter-option-contains").innerHTML = "(" + newArraySize + ")";
+        }
     });
 }
 
