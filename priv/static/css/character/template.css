@@ -11,10 +11,6 @@
     padding-bottom: 0px;
 }
 
-.pb-10 {
-    padding-bottom: 7rem !important;
-}
-
 @media only screen and (max-width: 767px) {
 
     /*for boostrap xs*/
