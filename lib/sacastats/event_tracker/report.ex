@@ -5,7 +5,7 @@ defmodule SacaStats.EventTracker.Report do
   """
   alias SacaStats.EventTracker.Report
 
-  defstruct event_counts: %{}, event_tracker_pid: nil
+  defstruct event_counts: %{}, event_tracker_pid: nil, service_id: ""
 
   @type t() :: %__MODULE__{
           event_counts: map(),

@@ -4,6 +4,8 @@ defmodule SacaStats.EventTracker.Manager do
   """
   use GenServer
 
+  require Logger
+
   alias SacaStats.EventTracker
   alias SacaStats.EventTracker.{Manager, Report}
 
@@ -25,13 +27,13 @@ defmodule SacaStats.EventTracker.Manager do
     }
   }
 
-  defstruct supervisor: SacaStats.EventTracker.Supervisor, event_trackers: []
+  defstruct supervisor: SacaStats.EventTracker.Supervisor, began?: false
 
   ### API
 
   def start_link(opts) when is_list(opts) do
     name = Keyword.get(opts, :name, __MODULE__)
-    GenServer.start_link(__MODULE__, %{}, name: name)
+    GenServer.start_link(__MODULE__, %__MODULE__{}, name: name)
   end
 
   @doc """
@@ -39,7 +41,7 @@ defmodule SacaStats.EventTracker.Manager do
   """
   @spec begin(et_supervisor :: pid() | atom(), manager :: pid() | atom()) :: :ok | :already_began
   def begin(et_supervisor, manager \\ __MODULE__) do
-    GenServer.call(manager, {:begin, et_supervisor})
+    GenServer.cast(manager, {:begin, et_supervisor})
   end
 
   ### Impl
@@ -51,26 +53,17 @@ defmodule SacaStats.EventTracker.Manager do
   end
 
   @impl GenServer
-  def handle_call({:begin, _supervisor}, _from, %Manager{event_trackers: ets} = state)
-      when length(ets) > 0 do
+  def handle_call({:begin, _supervisor}, _from, %Manager{began?: true} = state) do
     {:reply, :already_began, state}
   end
 
   @impl GenServer
-  def handle_call({:begin, supervisor}, _from, %Manager{} = state) do
-    num_ets = String.to_integer(System.get_env("NUM_EVENT_TRACKERS"))
+  def handle_cast({:begin, supervisor}, %Manager{} = state) do
+    num_ets = String.to_integer(System.get_env("NUM_EVENT_TRACKERS") || "2")
 
-    # child_spec =
-    #   {PS2.Socket,
-    #    [
-    #      subscriptions: SacaStats.ess_subscriptions(),
-    #      clients: [EventTracker],
-    #      service_id: SacaStats.sid()
-    #    ]}
+    _event_trackers = spawn_ets(supervisor, num_ets)
 
-    event_trackers = spawn_ets(supervisor, num_ets)
-
-    {:reply, :ok, %Manager{state | supervisor: supervisor, event_trackers: event_trackers}}
+    {:noreply, %Manager{state | supervisor: supervisor, began?: true}}
   end
 
   @impl GenServer
@@ -82,9 +75,10 @@ defmodule SacaStats.EventTracker.Manager do
 
     failing_reports = Report.evaluate_many(reports, @margins_of_error)
 
-    Enum.each(failing_reports, fn %Report{event_tracker_pid: pid} ->
-      # Does this actually restart the child or just terminate it?
-      DynamicSupervisor.terminate_child(supervisor, pid)
+    Enum.each(failing_reports, fn {%Report{} = report, event, failed_by} ->
+      Logger.warning(ess_conn_restart_message(report, event, failed_by, report.service_id))
+      DynamicSupervisor.terminate_child(supervisor, report.event_tracker_pid)
+      spawn_ets(supervisor, 1)
     end)
 
     Process.send_after(self(), :gather_reports, @report_interval_ms)
@@ -99,7 +93,7 @@ defmodule SacaStats.EventTracker.Manager do
 
   defp spawn_ets(supervisor, num_to_spawn, et_list) do
     new_et_list =
-      case DynamicSupervisor.start_child(supervisor, {EventTracker, name: Ecto.UUID.generate()}) do
+      case DynamicSupervisor.start_child(supervisor, {EventTracker, []}) do
         {:ok, et} ->
           [et | et_list]
 
@@ -111,5 +105,14 @@ defmodule SacaStats.EventTracker.Manager do
       end
 
     spawn_ets(supervisor, num_to_spawn - 1, new_et_list)
+  end
+
+  defp ess_conn_restart_message(%Report{} = failing_report, event, failed_by, service_id) do
+    redacted_sid = String.first(service_id) <> ".........." <> String.slice(service_id, -2..-1)
+
+    """
+    Terminating #{inspect(failing_report.event_tracker_pid)}
+    Event count for #{event} failed by #{failed_by} with SID: #{redacted_sid}
+    """
   end
 end

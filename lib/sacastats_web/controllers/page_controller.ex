@@ -53,7 +53,7 @@ defmodule SacaStatsWeb.PageController do
         |> redirect(to: "/login")
 
       real_state ->
-        Logger.warn(
+        Logger.warning(
           "Login with Discord attempt failed.\nDiscord gave state #{state}, client had #{real_state}"
         )
 

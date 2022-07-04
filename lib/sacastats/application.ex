@@ -6,15 +6,10 @@ defmodule SacaStats.Application do
   use Application
 
   alias SacaStats.CensusCache.Fallbacks
+  alias SacaStats.EventTracker
 
   @impl true
   def start(_type, _args) do
-    ess_opts = [
-      subscriptions: SacaStats.ess_subscriptions(),
-      clients: [SacaStats.EventTracker],
-      service_id: SacaStats.sid()
-    ]
-
     children = [
       # Start the Ecto repository
       SacaStats.Repo,
@@ -24,6 +19,8 @@ defmodule SacaStats.Application do
       {Phoenix.PubSub, name: SacaStats.PubSub},
       # Start the Endpoint (http/https)
       SacaStatsWeb.Endpoint,
+      # Start the SID manager
+      SacaStats.SIDs,
       # Start caches
       Supervisor.child_spec(
         {SacaStats.CensusCache,
@@ -40,8 +37,12 @@ defmodule SacaStats.Application do
          [name: SacaStats.DiscordClientCache, fallback_fn: fn _ -> :not_found end]},
         id: :discord_cache
       ),
-      # Start the ESS Websocket
-      {PS2.Socket, ess_opts}
+      # Start the EventTracker Deduplicator
+      {EventTracker.Deduper, []},
+      # Start the EventTracker Manager
+      {EventTracker.Manager, []},
+      # Start the EventTracker Supervisor
+      {EventTracker.Supervisor, []}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
