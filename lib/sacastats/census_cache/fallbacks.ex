@@ -57,7 +57,7 @@ defmodule SacaStats.CensusCache.Fallbacks do
         data
 
       {:error, e} ->
-        Logger.warn("CharacterCache query returned error (#{attempt}/3): #{inspect(e)}")
+        Logger.warning("CharacterCache query returned error (#{attempt}/3): #{inspect(e)}")
         character(val, attempt + 1)
     end
   end
@@ -75,7 +75,7 @@ defmodule SacaStats.CensusCache.Fallbacks do
         (data["online_status"] == "0" && "offline") || "online"
 
       {:error, e} ->
-        Logger.warn("OnlineStatusCache query returned error: #{inspect(e)}")
+        Logger.warning("OnlineStatusCache query returned error: #{inspect(e)}")
         :not_found
     end
   end
