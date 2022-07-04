@@ -1,4 +1,7 @@
 defmodule SacaStats.SIDs do
+  @moduledoc """
+  This module is responsible for distributing SIDs.
+  """
   use GenServer
 
   alias SacaStats.SIDs
@@ -11,11 +14,11 @@ defmodule SacaStats.SIDs do
     GenServer.start_link(__MODULE__, %SIDs{sids: fetch_sids(), used: []}, name: __MODULE__)
   end
 
-  def refresh() do
+  def refresh do
     GenServer.cast(__MODULE__, :refresh)
   end
 
-  def next() do
+  def next do
     GenServer.call(__MODULE__, :next)
   end
 
@@ -38,7 +41,7 @@ defmodule SacaStats.SIDs do
     handle_call(:next, from, %SIDs{used: [], sids: sids})
   end
 
-  defp fetch_sids() do
+  defp fetch_sids do
     "SERVICE_ID_LIST"
     |> System.get_env(SacaStats.sid())
     |> parse_sids()
