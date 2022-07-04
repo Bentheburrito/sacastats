@@ -4,8 +4,12 @@ defmodule SacaStats.CensusCacheTest do
   alias PS2.API.Query
   alias SacaStats.CensusCache
 
-  setup_all do
-    %{cache: start_supervised!({CensusCache, [fallback_fn: &census_char_fallback/1]})}
+  @entry_expiration_time 300
+
+  setup do
+    %{
+      cache: start_supervised!({CensusCache, [entry_expiration_ms: @entry_expiration_time]})
+    }
   end
 
   describe "CensusCache" do
@@ -16,14 +20,31 @@ defmodule SacaStats.CensusCacheTest do
     end
 
     test "can get values", %{cache: cache} do
-      assert {:error, :not_found} = CensusCache.get(cache, "fake_key")
+      assert {:error, :not_found} = CensusCache.get(cache, 123)
 
       value = %{"faction_id" => "2"}
       CensusCache.put(cache, 123, value)
 
       assert {:ok, ^value} = CensusCache.get(cache, 123)
       assert {:error, :not_found} = CensusCache.get(cache, 321)
-      assert {:ok, ^value} = CensusCache.get(cache, 5_428_713_425_545_165_425)
+    end
+
+    test "entries expire after the given `entry_expiration_ms` milliseconds have passed since entry's been put",
+         %{cache: cache} do
+      assert {:error, :not_found} = CensusCache.get(cache, 123)
+
+      value = %{"faction_id" => "2"}
+      CensusCache.put(cache, 123, value)
+
+      assert {:ok, ^value} = CensusCache.get(cache, 123)
+
+      # this is a bit hacky, but we wait for the entry to expire, then prompt the CensusCache to remove expired
+      # entries, then wait another 100ms for the Task to complete before making a :not_found assertion
+      Process.sleep(@entry_expiration_time + 50)
+      send(cache, :remove_expired)
+      Process.sleep(100)
+
+      assert {:error, :not_found} = CensusCache.get(cache, 123)
     end
   end
 

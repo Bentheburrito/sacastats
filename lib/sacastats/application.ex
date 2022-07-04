@@ -27,17 +27,24 @@ defmodule SacaStats.Application do
       # Start caches
       Supervisor.child_spec(
         {SacaStats.CensusCache,
-         [name: SacaStats.CharacterCache, fallback_fn: &Fallbacks.character/1]},
+         [
+           name: SacaStats.CharacterCache,
+           fallback_fn: &Fallbacks.character/1,
+           entry_expiration_ms: 60 * 60 * 1000
+         ]},
         id: :character_cache
       ),
       Supervisor.child_spec(
         {SacaStats.CensusCache,
-         [name: SacaStats.OnlineStatusCache, fallback_fn: &Fallbacks.online_status/1]},
+         [
+           name: SacaStats.OnlineStatusCache,
+           fallback_fn: &Fallbacks.online_status/1,
+           entry_expiration_ms: 12 * 60 * 60 * 1000
+         ]},
         id: :online_status_cache
       ),
       Supervisor.child_spec(
-        {SacaStats.CensusCache,
-         [name: SacaStats.DiscordClientCache, fallback_fn: fn _ -> :not_found end]},
+        {SacaStats.CensusCache, [name: SacaStats.DiscordClientCache]},
         id: :discord_cache
       ),
       # Start the ESS Websocket
