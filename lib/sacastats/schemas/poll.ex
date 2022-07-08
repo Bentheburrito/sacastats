@@ -22,16 +22,4 @@ defmodule SacaStats.Poll do
     |> cast_assoc(:items, with: &Item.changeset/2)
     |> validate_length(:items, min: 1)
   end
-
-  defp validate_items(%Ecto.Changeset{changes: changes} = changeset) do
-    total_len =
-      Enum.count(Map.get(changes, :text_items, %{})) +
-        Enum.count(Map.get(changes, :multi_choice_items, %{}))
-
-    if total_len >= 1 do
-      changeset
-    else
-      Ecto.Changeset.add_error(changeset, :items, "a poll must have at least one item to vote on")
-    end
-  end
 end

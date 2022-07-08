@@ -1,92 +1,138 @@
 defmodule SacaStatsWeb.DiscordAuth do
-  @moduledoc false
-  use OAuth2.Strategy
+  @moduledoc """
+  Custom Discord OAuth2 solution.
 
-  alias OAuth2.Client
-  alias OAuth2.Strategy.AuthCode
+  https://discord.com/developers/docs/topics/oauth2
+  """
 
-  def new do
-    Client.new(
-      strategy: __MODULE__,
-      client_id: System.get_env("DISCORD_CLIENT_ID"),
-      client_secret: System.get_env("DISCORD_CLIENT_SECRET"),
-      redirect_uri: System.get_env("OAUTH_REDIRECT_URI"),
-      site: "https://discord.com/api",
-      authorize_url: "https://discord.com/api/oauth2/authorize",
-      token_url: "https://discord.com/api/oauth2/token",
-      params: %{state: gen_state()}
-    )
-    |> Client.put_serializer("application/json", Jason)
+  require Logger
+
+  alias SacaStats.{DiscordUser, Repo}
+
+  @discord_api "https://discord.com/api"
+  @authorize_url "https://discord.com/api/v10/oauth2/authorize"
+  @token_url "https://discord.com/api/v10/oauth2/token"
+  @revoke_url "https://discord.com/api/v10/oauth2/token/revoke"
+
+  def gen_state do
+    32
+    |> :crypto.strong_rand_bytes()
+    |> Base.encode64()
   end
 
-  def authorize_url!(%Client{} = client \\ new(), params \\ []) do
-    scope = Keyword.get(params, :scope, "identify")
-    Client.authorize_url!(client, scope: scope, state: client.params.state)
-  end
+  def authorize_url(state, scopes \\ "identify") do
+    scopes = URI.encode(scopes)
+    client_id = URI.encode(System.get_env("DISCORD_CLIENT_ID"))
+    redirect_uri = URI.encode(System.get_env("OAUTH_REDIRECT_URI"))
 
-  @spec get_token!(Client.t(), list(), list(), list()) :: Client.t()
-  def get_token!(%Client{} = client \\ new(), params \\ [], headers \\ [], opts \\ []) do
-    Client.get_token!(client, Keyword.put(params, :state, client.params.state), headers, opts)
-  end
-
-  def authorize_url(client, params) do
-    AuthCode.authorize_url(client, params)
-  end
-
-  def get_token(client, params, headers) do
-    AuthCode.get_token(client, params, headers)
-  end
-
-  @spec revoke_token(OAuth2.Client.t(), :access | :refresh) :: :ok | :error
-  def revoke_token(client, token_type \\ :access) when token_type in [:access, :refresh] do
-    body = %{
-      token: Map.get(client.token, :"#{token_type}_token")
+    params = %{
+      response_type: "code",
+      client_id: client_id,
+      scope: scopes,
+      state: state,
+      redirect_uri: redirect_uri,
+      prompt: "consent"
     }
 
-    Client.post(client, "https://discord.com/api/oauth2/token/revoke", Jason.encode!(body))
-    |> elem(0)
+    @authorize_url <> "?" <> URI.encode_query(params, :rfc3986)
+  end
+
+  def get_access_token(auth_code) do
+    body =
+      %{
+        client_id: System.get_env("DISCORD_CLIENT_ID"),
+        client_secret: System.get_env("DISCORD_CLIENT_SECRET"),
+        grant_type: "authorization_code",
+        code: auth_code,
+        redirect_uri: System.get_env("OAUTH_REDIRECT_URI")
+      }
+      |> URI.encode_query()
+
+    headers = [{"Content-Type", "application/x-www-form-urlencoded"}]
+
+    case HTTPoison.post(@token_url, body, headers) do
+      {:ok, %HTTPoison.Response{body: token_body}} ->
+        {:ok, Jason.decode!(token_body)}
+
+      {:error, error} ->
+        Logger.error("Error getting access token: #{inspect(error)}")
+        {:error, error}
+    end
+  end
+
+  def refresh_access_token(refresh_token) do
+    body =
+      %{
+        client_id: System.get_env("DISCORD_CLIENT_ID"),
+        client_secret: System.get_env("DISCORD_CLIENT_SECRET"),
+        grant_type: "refresh_token",
+        refresh_token: refresh_token
+      }
+      |> URI.encode_query()
+
+    headers = [{"Content-Type", "application/x-www-form-urlencoded"}]
+
+    case HTTPoison.post(@token_url, body, headers) do
+      {:ok, %HTTPoison.Response{body: token_body}} ->
+        {:ok, Jason.decode!(token_body)}
+
+      {:error, error} ->
+        Logger.error("Error getting access token: #{inspect(error)}")
+        {:error, error}
+    end
+  end
+
+  def revoke_token(token) do
+    body =
+      %{
+        token: token
+      }
+      |> URI.encode_query()
+
+    case HTTPoison.post(@revoke_url, body) do
+      {:ok, %HTTPoison.Response{body: token_body}} ->
+        {:ok, Jason.decode!(token_body)}
+
+      {:error, error} ->
+        Logger.error("Error getting access token: #{inspect(error)}")
+        {:error, error}
+    end
   end
 
   @doc """
   Fetch user attributes exposed by the `identify` scope.
 
-  Will automatically try to refresh the token if a 401 status code is returned, and retry the API request.
+  Returns {:ok, user} on success, {:error, HTTPoison.Error.t()} on HTTPoison error, and {:error, :nil_token} if token is
+  nil.
   """
-  def get_user(%Client{token: nil}),
-    do: {:error, %OAuth2.Error{reason: "No token on the provided client."}}
+  def get_user(nil) do
+    {:error, :nil_token}
+  end
 
-  def get_user(client) do
-    with {:ok, res} <- Client.get(client, "/users/@me"),
-         url <- get_avatar_url(res.body["id"], res.body["avatar"]) do
-      user = Map.put(res.body, "avatar_url", url)
-      SacaStats.CensusCache.put(SacaStats.DiscordClientCache, user["id"], {client, user})
+  def get_user(access_token) do
+    headers = [{"Authorization", "Bearer #{access_token}"}]
+
+    insert_opts = [
+      on_conflict: {:replace_all_except, DiscordUser.non_updatable_fields()},
+      conflict_target: :id
+    ]
+
+    with {:ok, user_response} <- HTTPoison.get(@discord_api <> "/users/@me", headers),
+         {:ok, user_attrs} <- Jason.decode(user_response.body),
+         changeset <- DiscordUser.changeset(%DiscordUser{}, user_attrs),
+         {:ok, user} <- Repo.insert(changeset, insert_opts) do
       {:ok, user}
     else
-      {:error, %OAuth2.Response{status_code: 401} = res} ->
-        case Client.refresh_token(client) do
-          {:ok, client} -> get_user(client)
-          {:error, _} -> {:error, res.body}
-        end
+      {:error, %Ecto.Changeset{} = changeset} ->
+        Logger.error("Could not insert user: #{inspect(changeset)}")
+        {:error, changeset}
 
-      {:error, %OAuth2.Response{} = res} ->
-        {:error, res.body}
+      {:ok, %HTTPoison.Response{status_code: 401}} ->
+        {:error, :access_token_expired}
 
       error ->
+        Logger.error("Error fetching user with access token: #{inspect(error)}")
         error
     end
-  end
-
-  defp get_avatar_url(user_id, "a_" <> _rest = avatar_hash) do
-    "https://cdn.discordapp.com/avatars/#{user_id}/#{avatar_hash}.gif"
-  end
-
-  defp get_avatar_url(user_id, avatar_hash) do
-    "https://cdn.discordapp.com/avatars/#{user_id}/#{avatar_hash}.png"
-  end
-
-  defp gen_state do
-    32
-    |> :crypto.strong_rand_bytes()
-    |> Base.encode64()
   end
 end
