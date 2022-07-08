@@ -5,8 +5,6 @@ defmodule SacaStatsWeb.PollView do
   def get_discord_username(0), do: "Anonymous"
 
   def get_discord_username(discord_id) do
-    IO.inspect(discord_id)
-
     case SacaStats.Repo.get(SacaStats.DiscordUser, discord_id) do
       %SacaStats.DiscordUser{} = user ->
         user.username
