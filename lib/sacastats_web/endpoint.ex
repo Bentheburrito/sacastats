@@ -7,7 +7,8 @@ defmodule SacaStatsWeb.Endpoint do
   @session_options [
     store: :cookie,
     key: "_sacastats_key",
-    signing_salt: "cl4MUJRp"
+    signing_salt: "cl4MUJRp",
+    encryption_salt: "Ay3kjEMl"
   ]
 
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
