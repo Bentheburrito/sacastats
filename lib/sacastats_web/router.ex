@@ -30,7 +30,7 @@ defmodule SacaStatsWeb.Router do
   scope "/character", SacaStatsWeb do
     pipe_through :browser
 
-    get "/", CharacterController, :search
+    live "/", CharacterLive.Search
     get "/:character_name", CharacterController, :general
     get "/:character_name/:stat_type", CharacterController, :character
     get "/:character_name/sessions/:login_timestamp", CharacterController, :session
