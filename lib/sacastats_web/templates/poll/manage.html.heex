@@ -1,0 +1,46 @@
+<section class="m-4">
+  <h2><%= @poll.title %></h2>
+  <div class="poll-item">
+    <h3 class="text-center">Poll Stats</h3>
+    <table>
+      <th>Item</th>
+      <th>Vote Distributions</th>
+      <th>Total Votes</th>
+      <th>Response Rate</th>
+      <th>Optional?</th>
+
+      <%= for %{item: item} = summary <- summarize_poll(@poll, map_size(@vote_table_values)) do %>
+        <tr>
+          <td><%= item.description %></td>
+          <td><%= summary.vote_distributions %></td>
+          <td><%= length(item.votes) %></td>
+          <td><%= summary.response_rate %>%</td>
+          <td><%= item.optional %></td>
+        </tr>
+      <% end %>
+    </table>
+
+    <h3 class="text-center">Voters</h3>
+    <table>
+      <th>Voter</th>
+      <%= for item <- @poll.items do %>
+        <th><%= item.description %></th>
+      <% end %>
+
+      <%= for voter_id <- Map.keys(@vote_table_values) do %>
+        <% vote_map = Map.get(@vote_table_values, voter_id) %>
+        <tr>
+          <td><%= get_discord_username(voter_id) %></td>
+          <%= for item <- @poll.items do %>
+            <% vote = Map.get(vote_map, item.id) %>
+            <%= if is_nil(vote) do %>
+              <td>N/A</td>
+            <% else %>
+              <td><%= vote.content %></td>
+            <% end %>
+          <% end %>
+        </tr>
+      <% end %>
+    </table>
+  </div>
+</section>

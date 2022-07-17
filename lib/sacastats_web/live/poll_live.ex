@@ -37,4 +37,6 @@ defmodule SacaStatsWeb.PollLive do
       end)
     end)
   end
+
+  def poll_owner?(user_id, %Poll{owner_discord_id: owner_id}), do: user_id == owner_id
 end

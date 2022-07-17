@@ -1,5 +1,8 @@
 <section class="m-4">
   <h2><%= @poll.title %></h2>
+  <%= if SacaStatsWeb.PollLive.poll_owner?(@voter_id, @poll) do %>
+    <%= link "Manage Poll", to: "/outfit/poll/#{@poll.id}/manage" %>
+  <% end %>
   <div class="poll-item">
     <%= for item <- @poll.items do %>
       <b><%= item.description %></b>:
