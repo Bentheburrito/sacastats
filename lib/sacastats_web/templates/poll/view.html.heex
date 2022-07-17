@@ -2,7 +2,7 @@
   <h2><%= @poll.title %></h2>
     <%= for item <- @poll.items do %>
       <div class="poll-item" phx-change={"field_change:#{item.id}"}>
-        <.form let={form} for={Map.get(@vote_changesets, item.id)} phx-change="field_change">
+        <.form let={form} for={Map.get(@vote_changesets, item.id)} phx-change="field_change" phx-submit="form_submit">
           <%= error_tag form, :items %>
           <div id="poll-item-list" class="container text-left">
             <%= SacaStatsWeb.PollLive.View.encode_poll_item_vote(assigns, form, item) %>
@@ -11,6 +11,6 @@
       </div>
     <% end %>
   <form phx-submit="form_submit">
-    <%= submit "Cast Vote", class: "btn-primary", "phx-submit": "form_submit" %>
+    <%= submit "Cast Vote", class: "btn-primary" %>
   </form>
 </section>

@@ -18,8 +18,8 @@ defmodule SacaStats.Poll do
   def changeset(poll, params \\ %{}) do
     poll
     |> cast(params, [:owner_discord_id, :title])
-    |> validate_required([:owner_discord_id, :title])
-    |> cast_assoc(:items, with: &Item.changeset/2)
+    |> validate_required([:owner_discord_id, :title, :items])
+    |> cast_assoc(:items, with: &Item.changeset/2, required: true)
     |> validate_length(:items, min: 1)
   end
 end

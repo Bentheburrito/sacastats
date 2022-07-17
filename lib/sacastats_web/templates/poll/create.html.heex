@@ -7,8 +7,9 @@
       <div class="poll-item" phx-change="field_change:0">
         <label>Poll Title: <%= text_input form, :title %></label>
         <%= error_tag form, :title %>
-        <%= error_tag form, :items %>
       </div>
+      <label class="text-center">Poll Items</label>
+      <%= error_tag form, :items %>
       
       <%= SacaStatsWeb.PollLive.Create.encode_poll_items(form, @socket.assigns) %>
     </div>

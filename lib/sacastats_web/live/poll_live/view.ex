@@ -7,11 +7,14 @@ defmodule SacaStatsWeb.PollLive.View do
 
   alias Ecto.Multi
   alias SacaStats.{Poll, Repo}
+  alias SacaStats.Poll.Item
   alias SacaStats.Poll.Item.Vote
 
   import SacaStatsWeb.PollLive
 
   require Logger
+
+  @content_cant_be_blank [content: {"can't be blank", [validation: :required]}]
 
   def render(assigns) do
     Phoenix.View.render(SacaStatsWeb.PollView, "view.html", assigns)
@@ -25,29 +28,41 @@ defmodule SacaStatsWeb.PollLive.View do
          |> put_flash(:error, "The poll ID \"#{id}\" does not exist.")
          |> redirect(to: "/outfit/poll")}
 
-      poll ->
+      %Poll{} = poll ->
         voter_id = get_voter_id(session)
 
-        vote_changesets =
-          for item <- poll.items, into: %{} do
-            changeset =
-              Vote.changeset(%Vote{}, %{"voter_discord_id" => voter_id, "item_id" => item.id})
+        if has_voted?(voter_id, poll) do
+          {:ok, redirect(socket, to: "/outfit/poll/#{id}/results")}
+        else
+          vote_changesets =
+            for %Item{} = item <- poll.items, into: %{} do
+              changeset =
+                Vote.changeset(%Vote{}, %{
+                  "voter_discord_id" => voter_id,
+                  "item_id" => item.id
+                })
 
-            {item.id, changeset}
-          end
+              {item.id, changeset}
+            end
 
-        {:ok,
-         socket
-         |> assign(:poll, poll)
-         |> assign(:vote_changesets, vote_changesets)
-         |> assign(:user, session["user"] || session[:user])
-         |> assign(:_csrf_token, session["_csrf_token"])}
+          item_map = Map.new(poll.items, &{&1.id, &1})
+
+          {:ok,
+           socket
+           |> assign(:poll, poll)
+           |> assign(:vote_changesets, vote_changesets)
+           |> assign(:item_map, item_map)
+           |> assign(:user, session["user"] || session[:user])
+           |> assign(:_csrf_token, session["_csrf_token"])}
+        end
     end
   end
 
   def handle_event("field_change", %{"vote" => params}, socket) do
     item_id = SacaStats.Utils.maybe_to_int(params["item_id"])
+
     changeset = Vote.changeset(%Vote{}, params)
+
     vote_changesets = Map.put(socket.assigns.vote_changesets, item_id, changeset)
     {:noreply, assign(socket, :vote_changesets, vote_changesets)}
   end
@@ -56,8 +71,14 @@ defmodule SacaStatsWeb.PollLive.View do
     transaction =
       socket.assigns.vote_changesets
       |> Stream.with_index()
-      |> Enum.reduce(Multi.new(), fn {{_item_id, changeset}, index}, multi ->
-        Multi.insert(multi, "vote_#{index}", changeset)
+      |> Enum.reduce(Multi.new(), fn {{item_id, changeset}, index}, multi ->
+        is_optional? = socket.assigns.item_map[item_id].optional == true
+
+        if is_optional? and Map.get(changeset.changes, :content) in [nil, ""] do
+          multi
+        else
+          Multi.insert(multi, "vote_#{index}", changeset)
+        end
       end)
 
     case Repo.transaction(transaction) do
@@ -72,12 +93,21 @@ defmodule SacaStatsWeb.PollLive.View do
 
         {:noreply, redirect(socket, to: "/outfit/poll/#{poll_id}/results")}
 
+      {:error, _failed_name, %Ecto.Changeset{errors: @content_cant_be_blank}, _changes_so_far} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "Fields marked with * are required.")
+         |> assign(:vote_changesets, socket.assigns.vote_changesets)}
+
       {:error, failed_name, failed_value, _changes_so_far} ->
         Logger.info("Poll vote failed on #{failed_name}: #{inspect(failed_value)}")
 
         {:noreply,
          socket
-         |> put_flash(:error, "There are problems with the poll. See the fields below.")
+         |> put_flash(
+           :error,
+           "There are problems with the poll. Please double check everything and try again."
+         )
          |> assign(:vote_changesets, socket.assigns.vote_changesets)}
     end
   end
@@ -87,7 +117,12 @@ defmodule SacaStatsWeb.PollLive.View do
     choices = Repo.preload(item, :choices).choices
 
     ~H"""
-    <h4><%= item.description %></h4>
+    <h4>
+      <%= unless item.optional do %>
+        <b class="text-danger">*</b>
+      <% end %>
+      <%= item.description %>
+    </h4>
 
     <%= if length(choices) > 0 do %>
       <%= for choice <- choices do %>
@@ -99,8 +134,8 @@ defmodule SacaStatsWeb.PollLive.View do
       <% end %>
     <% else %>
       <%= text_input vote_form, :content %>
-      <%= error_tag vote_form, :content %>
     <% end %>
+    <%= error_tag vote_form, :content %>
 
     <%= hidden_input vote_form, :voter_discord_id, value: voter_id %>
     <%= hidden_input vote_form, :item_id, value: item.id %>
