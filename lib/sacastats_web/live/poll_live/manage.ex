@@ -42,6 +42,8 @@ defmodule SacaStatsWeb.PollLive.Manage do
                 )
             end
 
+          Phoenix.PubSub.subscribe(SacaStats.PubSub, "poll_vote:#{poll.id}")
+
           {:ok,
            socket
            |> assign(:poll, poll)
@@ -55,5 +57,11 @@ defmodule SacaStatsWeb.PollLive.Manage do
            |> redirect(to: "/outfit/poll/#{id}")}
         end
     end
+  end
+
+  # handle new votes as they come in.
+  def handle_info({:poll_vote, _user_id}, socket) do
+    %Poll{} = poll = get_poll(socket.assigns.poll.id)
+    {:noreply, assign(socket, :poll, poll)}
   end
 end

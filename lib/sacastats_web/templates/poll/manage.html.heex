@@ -1,5 +1,5 @@
 <section class="m-4">
-  <h2><%= @poll.title %></h2>
+  <h2 class="text-center"><%= @poll.title %></h2>
   <div class="poll-item">
     <h3 class="text-center">Poll Stats</h3>
     <table>
@@ -8,6 +8,7 @@
       <th>Total Votes</th>
       <th>Response Rate</th>
       <th>Optional?</th>
+      <th>Chart</th>
 
       <%= for %{item: item} = summary <- summarize_poll(@poll, map_size(@vote_table_values)) do %>
         <tr>
@@ -16,10 +17,13 @@
           <td><%= length(item.votes) %></td>
           <td><%= summary.response_rate %>%</td>
           <td><%= item.optional %></td>
+          <td><%= summary.pie_chart %></td>
         </tr>
       <% end %>
     </table>
+  </div>
 
+  <div class="poll-item">
     <h3 class="text-center">Voters</h3>
     <table>
       <th>Voter</th>
