@@ -64,4 +64,8 @@ defmodule SacaStatsWeb.PollLive.Manage do
     %Poll{} = poll = get_poll(socket.assigns.poll.id)
     {:noreply, assign(socket, :poll, poll)}
   end
+
+  def handle_info(_message, socket) do
+    {:noreply, socket}
+  end
 end

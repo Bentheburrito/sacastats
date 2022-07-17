@@ -27,13 +27,31 @@ defmodule SacaStatsWeb.PollView do
     end
   end
 
+  def get_vote_distributions_svg(distributions) do
+    opts = [
+      mapping: %{category_col: "Choice", value_col: "Percentage"},
+      colour_palette: ["fbb4ae", "b3cde3", "ccebc5"],
+      legend_setting: :legend_right,
+      # data_labels: true,
+      title: "Vote Distributions"
+    ]
+
+    distributions
+    |> Contex.Dataset.new(["Choice", "Percentage"])
+    |> Contex.Plot.new(Contex.PieChart, 450, 250, opts)
+    |> Contex.Plot.to_svg()
+  end
+
+  def get_vote_distributions(%Item{} = item) do
+    for {choice, count} <- vote_frequencies_with_defaults(item) do
+      {choice, Float.round(count / length(item.votes) * 100, 2)}
+    end
+  end
+
   defp multi_choice_summary(item) do
     cond do
       length(item.choices) > 0 and length(item.votes) > 0 ->
-        vote_distributions =
-          for {choice, count} <- vote_frequencies_with_defaults(item) do
-            {choice, Float.round(count / length(item.votes) * 100, 2)}
-          end
+        vote_distributions = get_vote_distributions(item)
 
         friendly_vote_distributions =
           Enum.map_join(vote_distributions, ", ", fn {choice, percentage} ->
@@ -65,20 +83,5 @@ defmodule SacaStatsWeb.PollView do
     item.choices
     |> Map.new(&{&1.description, 0})
     |> Map.merge(frequencies)
-  end
-
-  defp get_vote_distributions_svg(distributions) do
-    opts = [
-      mapping: %{category_col: "Choice", value_col: "Percentage"},
-      colour_palette: ["fbb4ae", "b3cde3", "ccebc5"],
-      legend_setting: :legend_right,
-      # data_labels: true,
-      title: "Vote Distributions"
-    ]
-
-    distributions
-    |> Contex.Dataset.new(["Choice", "Percentage"])
-    |> Contex.Plot.new(Contex.PieChart, 450, 250, opts)
-    |> Contex.Plot.to_svg()
   end
 end
