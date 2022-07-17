@@ -28,11 +28,11 @@ defmodule SacaStats.DiscordUser do
   @required_fields [
     :id,
     :username,
-    :discriminator,
-    :avatar
+    :discriminator
   ]
 
   @optional_fields [
+    :avatar,
     :bot,
     :system,
     :mfa_enabled,
