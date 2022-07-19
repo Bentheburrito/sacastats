@@ -4,7 +4,7 @@
     <%= link "Manage Poll", to: "/outfit/poll/#{@poll.id}/manage" %>
   <% end %>
   <div class="poll-item">
-    <%= for item <- @poll.items do %>
+    <%= for item <- @poll.items, item.visible_results do %>
       <h5><b><%= item.description %></b></h5>
       <%= if length(item.choices) > 0 do %>
         <%= item |> get_vote_distributions() |> get_vote_distributions_svg() %>

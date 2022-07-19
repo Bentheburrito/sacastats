@@ -15,6 +15,7 @@ defmodule SacaStats.Poll.Item do
     field :description, :string
     field :position, :integer
     field :optional, :boolean, default: false
+    field :visible_results, :boolean, default: true
     has_many :choices, Item.Choice
     has_many :votes, Vote
     belongs_to :poll, Poll
@@ -22,7 +23,7 @@ defmodule SacaStats.Poll.Item do
 
   def changeset(item, params \\ %{}) do
     item
-    |> cast(params, [:description, :optional])
+    |> cast(params, [:description, :optional, :visible_results])
     |> validate_required([:description])
     |> cast_assoc(:choices, with: &Item.Choice.changeset/2)
     |> cast_assoc(:votes, with: &Vote.changeset/2)

@@ -157,14 +157,21 @@ defmodule SacaStatsWeb.PollLive.Create do
 
   defp encode_poll_item(assigns, %Phoenix.HTML.Form{} = item, item_index) do
     choices = inputs_for(item, :choices)
+    num_choices = length(choices)
 
     ~H"""
-    <h4><%= length(choices) == 0 && "Text" || "Multiple-Choice" %> Field</h4>
+    <h4><%= num_choices == 0 && "Text" || "Multiple-Choice" %> Field</h4>
 
     <%= label do %>
       Optional
       <%= checkbox item, :optional %>
       <%= error_tag item, :optional %>
+    <% end %>
+
+    <%= label do %>
+      Show Results to Voters
+      <%= checkbox item, :visible_results %>
+      <%= error_tag item, :visible_results %>
     <% end %>
 
     <%= label item, :description %>
