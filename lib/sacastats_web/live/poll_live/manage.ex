@@ -5,7 +5,7 @@ defmodule SacaStatsWeb.PollLive.Manage do
   use SacaStatsWeb, :live_view
   use Phoenix.HTML
 
-  alias SacaStats.Poll
+  alias SacaStats.{Poll, Repo}
   alias Poll.Item
   alias Item.Vote
 
@@ -47,6 +47,7 @@ defmodule SacaStatsWeb.PollLive.Manage do
           {:ok,
            socket
            |> assign(:poll, poll)
+           |> assign(:item_map, Map.new(poll.items, &{&1.id, &1}))
            |> assign(:vote_table_values, vote_table_values)
            |> assign(:user, session["user"] || session[:user])
            |> assign(:_csrf_token, session["_csrf_token"])}
@@ -56,6 +57,27 @@ defmodule SacaStatsWeb.PollLive.Manage do
            |> put_flash(:error, "You do not have permission to view that page.")
            |> redirect(to: "/outfit/poll/#{id}")}
         end
+    end
+  end
+
+  def handle_event("update-item", %{"item" => params}, socket) do
+    item_id = String.to_integer(params["id"])
+    item = Map.get(socket.assigns.item_map, item_id)
+    changeset = Item.update_changeset(item, params)
+
+    case Repo.update(changeset) do
+      {:ok, item} ->
+        item_map = Map.put(socket.assigns.item_map, item.id, item)
+
+        {:noreply, assign(socket, :item_map, item_map)}
+
+      {:error, _changeset} ->
+        {:noreply,
+         put_flash(
+           socket,
+           :error,
+           "Oops, something went wrong when saving your changes. Please try again soon."
+         )}
     end
   end
 

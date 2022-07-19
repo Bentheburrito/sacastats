@@ -8,15 +8,31 @@
       <th>Total Votes</th>
       <th>Response Rate</th>
       <th>Optional?</th>
+      <th>Show Results to Voters</th>
       <th>Chart</th>
 
-      <%= for %{item: item} = summary <- summarize_poll(@poll, map_size(@vote_table_values)) do %>
+      <%= for %{item_id: item_id} = summary <- summarize_poll(@poll, map_size(@vote_table_values)) do %>
+        <% item = Map.get(@item_map, item_id) %>
         <tr>
           <td><%= item.description %></td>
           <td><%= summary.vote_distributions %></td>
           <td><%= length(item.votes) %></td>
           <td><%= summary.response_rate %>%</td>
-          <td><%= item.optional %></td>
+          <.form let={item_form} for={SacaStats.Poll.Item.update_changeset(item, %{})} phx-change="update-item">
+            <%= hidden_input item_form, :id, value: item.id %>
+            <td>
+              <%= label do %>
+                <%= checkbox item_form, :optional %>
+                <%= error_tag item_form, :optional %>
+              <% end %>
+            </td>
+            <td>
+              <%= label do %>
+                <%= checkbox item_form, :visible_results %>
+                <%= error_tag item_form, :visible_results %>
+              <% end %>
+            </td>
+          </.form>
           <td><%= summary.pie_chart %></td>
         </tr>
       <% end %>

@@ -28,4 +28,8 @@ defmodule SacaStats.Poll.Item do
     |> cast_assoc(:choices, with: &Item.Choice.changeset/2)
     |> cast_assoc(:votes, with: &Vote.changeset/2)
   end
+
+  def update_changeset(item, params \\ %{}) do
+    cast(item, params, [:description, :optional, :visible_results])
+  end
 end

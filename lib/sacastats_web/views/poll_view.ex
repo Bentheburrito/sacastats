@@ -20,7 +20,7 @@ defmodule SacaStatsWeb.PollView do
   def summarize_poll(%Poll{} = poll, total_num_voters) do
     for %Item{} = item <- poll.items do
       %{
-        item: item,
+        item_id: item.id,
         response_rate: Float.round(length(item.votes) / total_num_voters * 100, 2)
       }
       |> Map.merge(multi_choice_summary(item))
