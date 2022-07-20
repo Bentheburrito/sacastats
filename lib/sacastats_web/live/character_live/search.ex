@@ -5,6 +5,9 @@ defmodule SacaStatsWeb.CharacterLive.Search do
   use SacaStatsWeb, :live_view
   use Phoenix.HTML
 
+  import PS2.API.QueryBuilder
+  alias PS2.API.{Query, QueryResult}
+
   # alias SacaStats.{Poll, Repo}
 
   def render(assigns) do
@@ -12,6 +15,16 @@ defmodule SacaStatsWeb.CharacterLive.Search do
   end
 
   def mount(_params, session, socket) do
+    # {:ok, %QueryResult{data: %{"name" => %{"first" => leader_name}}}} =
+    #   Query.new(collection: "character")
+    #   |> term("character_id", leader)
+    #   |> show(["name"])
+    #   |> PS2.API.query_one(SacaStats.sid())
+    # with {:ok, info} <- CensusCache.get(SacaStats.CharacterCache, name),
+    #      {:ok, status} <- CensusCache.get(SacaStats.OnlineStatusCache, info["character_id"]) do
+    #   assigns = build_assigns(info, status, stat_type)
+    #   render(conn, "template.html", assigns)
+
     user = session["user"]
 
     {:ok,
