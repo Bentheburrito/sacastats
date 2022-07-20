@@ -1,3 +1,53 @@
 .form-control {
     font-size: 14;
 }
+
+.favorite-character-status-contains {
+    color: rgb(110, 110, 110);
+    font-size: smaller;
+    padding-left: 4px;
+}
+
+.vs-character-status-card {
+    background-image: linear-gradient(to right, #B035F2, rgba(255, 255, 255, 0));
+    border-color: #B035F2 !important;
+}
+
+.tr-character-status-card {
+    background-image: linear-gradient(to right, #E52D2D, rgba(255, 255, 255, 0));
+    border-color: #E52D2D !important;
+}
+
+.nc-character-status-card {
+    background-image: linear-gradient(to right, #2A94F7, rgba(255, 255, 255, 0));
+    border-color: #2A94F7 !important;
+}
+
+.ns-character-status-card {
+    background-image: linear-gradient(to right, #575757, rgba(255, 255, 255, 0));
+    border-color: #575757 !important;
+}
+
+.vs-character-status-card:hover {
+    background-image: linear-gradient(to right, #ba51f3, rgba(255, 255, 255, 0));
+    border-color: #ba51f3 !important;
+}
+
+.tr-character-status-card:hover {
+    background-image: linear-gradient(to right, #e85959, rgba(255, 255, 255, 0));
+    border-color: #e85959 !important;
+}
+
+.nc-character-status-card:hover {
+    background-image: linear-gradient(to right, #2aa8f7, rgba(255, 255, 255, 0));
+    border-color: #2aa8f7 !important;
+}
+
+.ns-character-status-card:hover {
+    background-image: linear-gradient(to right, #6f6f6f, rgba(255, 255, 255, 0));
+    border-color: #6f6f6f !important;
+}
+
+.character-status-card:hover {
+    cursor: pointer;
+}
