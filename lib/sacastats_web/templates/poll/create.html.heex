@@ -8,8 +8,10 @@
         <label>Poll Title: <%= text_input form, :title %></label>
         <%= error_tag form, :title %>
       </div>
-      <label class="text-center">Poll Items</label>
-      <%= error_tag form, :items %>
+      <div class="text-center">
+        <label>Poll Items</label>
+        <%= error_tag form, :items %>
+      </div>
       
       <%= SacaStatsWeb.PollLive.Create.encode_poll_items(form, @socket.assigns) %>
     </div>

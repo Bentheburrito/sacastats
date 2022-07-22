@@ -10,8 +10,13 @@ defmodule SacaStatsWeb.PollLive do
   alias Item.Vote
 
   def get_poll(id) do
+    items_query =
+      Item
+      |> preload([:choices, :votes])
+      |> order_by(:id)
+
     Poll
-    |> preload(items: [:choices, :votes])
+    |> preload(items: ^items_query)
     |> Repo.get(id)
   end
 

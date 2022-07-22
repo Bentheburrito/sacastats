@@ -15,6 +15,8 @@ defmodule SacaStats.Poll.Item.Vote do
     field :voter_discord_id, :integer
     field :content, :string
     belongs_to :item, Item
+
+    timestamps()
   end
 
   def changeset(vote, params \\ %{}) do

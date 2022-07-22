@@ -19,6 +19,8 @@ defmodule SacaStats.Poll.Item do
     has_many :choices, Item.Choice
     has_many :votes, Vote
     belongs_to :poll, Poll
+
+    timestamps()
   end
 
   def changeset(item, params \\ %{}) do

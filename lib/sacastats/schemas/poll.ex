@@ -13,6 +13,8 @@ defmodule SacaStats.Poll do
     field :owner_discord_id, :integer
     field :title, :string
     has_many :items, Item
+
+    timestamps()
   end
 
   def changeset(poll, params \\ %{}) do
