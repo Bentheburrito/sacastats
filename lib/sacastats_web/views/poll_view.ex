@@ -27,6 +27,10 @@ defmodule SacaStatsWeb.PollView do
     end
   end
 
+  def get_vote_distributions_svg([]) do
+    Phoenix.HTML.raw("<p>A chart will appear here when there are votes for this item</p>")
+  end
+
   def get_vote_distributions_svg(distributions) do
     opts = [
       mapping: %{category_col: "Choice", value_col: "Percentage"},
@@ -40,6 +44,10 @@ defmodule SacaStatsWeb.PollView do
     |> Contex.Dataset.new(["Choice", "Percentage"])
     |> Contex.Plot.new(Contex.PieChart, 450, 250, opts)
     |> Contex.Plot.to_svg()
+  end
+
+  def get_vote_distributions(%Item{votes: votes}) when length(votes) == 0 do
+    []
   end
 
   def get_vote_distributions(%Item{} = item) do
