@@ -24,8 +24,8 @@
 }
 
 .ns-character-status-card {
-    background-image: linear-gradient(to right, #575757, rgba(255, 255, 255, 0));
-    border-color: #575757 !important;
+    background-image: linear-gradient(to right, #908567, rgba(255, 255, 255, 0));
+    border-color: #908567 !important;
 }
 
 .vs-character-status-card:hover {
@@ -44,8 +44,8 @@
 }
 
 .ns-character-status-card:hover {
-    background-image: linear-gradient(to right, #6f6f6f, rgba(255, 255, 255, 0));
-    border-color: #6f6f6f !important;
+    background-image: linear-gradient(to right, #939087, rgba(255, 255, 255, 0));
+    border-color: #939087 !important;
 }
 
 .character-status-card:hover {
