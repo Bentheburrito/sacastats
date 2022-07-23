@@ -1,6 +1,6 @@
 defmodule SacaStatsWeb.PollLive.Manage do
   @moduledoc """
-  LiveView for viewing polls as voters.
+  LiveView for managing polls.
   """
   use SacaStatsWeb, :live_view
   use Phoenix.HTML
@@ -132,8 +132,6 @@ defmodule SacaStatsWeb.PollLive.Manage do
          |> assign(:poll_changeset, Poll.update_changeset(poll))}
 
       {:error, changeset} ->
-        IO.inspect(changeset)
-
         {:noreply,
          socket
          |> put_flash(:error, @failed_to_save_message)

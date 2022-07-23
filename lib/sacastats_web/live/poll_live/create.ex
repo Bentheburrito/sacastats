@@ -117,6 +117,19 @@ defmodule SacaStatsWeb.PollLive.Create do
      |> assign(:prev_params, params)}
   end
 
+  def handle_event("delete-allowed-voter", %{"id" => voter_id}, socket) do
+    new_allowed_voters = List.delete(socket.assigns.prev_params["allowed_voters"], voter_id)
+
+    params = Map.merge(socket.assigns.prev_params, %{"allowed_voters" => new_allowed_voters})
+
+    changeset = Poll.changeset(%Poll{}, params)
+
+    {:noreply,
+     socket
+     |> assign(:changeset, changeset)
+     |> assign(:prev_params, params)}
+  end
+
   def handle_event("form_submit", _params, socket) do
     case Repo.insert(socket.assigns.changeset) do
       {:ok, %Poll{id: id}} ->

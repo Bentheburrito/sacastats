@@ -34,7 +34,7 @@
 
         <input name="poll[allowed_voters][]">
 
-        <%= label poll_form, :close_poll_at, "Close Poll at" %>
+        <%= label poll_form, :close_poll_at, "Close Poll at (UTC)" %>
         <%= datetime_local_input poll_form, :close_poll_at %>
         <%= error_tag poll_form, :close_poll_at %>
         

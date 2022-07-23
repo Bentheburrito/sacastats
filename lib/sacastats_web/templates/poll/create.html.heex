@@ -2,6 +2,42 @@
   <h2>Create a new poll</h2>
 
   <.form let={form} for={@changeset} phx-change="field_change" phx-submit="form_submit">
+    <div class="poll-item text-left">
+      <h3 class="text-center">Poll Options</h3>
+      <%= label do %>
+        Show Results to Voters
+        <%= checkbox form, :visible_results %>
+        <%= error_tag form, :visible_results %>
+      <% end %>
+
+      <%= label do %>
+        Allow Anonymous Voters
+        <%= checkbox form, :allow_anonymous_voters %>
+        <%= error_tag form, :allow_anonymous_voters %>
+      <% end %>
+
+      <%= label form, :allowed_voters, "Allowed Voters (paste Discord IDs, leave blank to allow any voters)" %>
+      <%= error_tag form, :allowed_voters %>
+
+      <%= for voter_id <- Map.get(SacaStats.Poll.parse_allowed_voters_form_input(form.params), "allowed_voters", []) do %> 
+        <input value={voter_id} disabled>
+        <input type="hidden" name="poll[allowed_voters][]" value={voter_id}>
+        <%= link "X", 
+          to: "#",
+          type: "button",
+          class: "btn btn-danger",
+          phx_click: "delete-allowed-voter", 
+          phx_value_id: voter_id 
+        %>
+        <br>
+      <% end %>
+
+      <input name="poll[allowed_voters][]">
+
+      <%= label form, :close_poll_at, "Close Poll at (UTC)" %>
+      <%= datetime_local_input form, :close_poll_at %>
+      <%= error_tag form, :close_poll_at %>
+    </div>
     <%= hidden_input form, :owner_discord_id, value: @owner_discord_id %>
     <div id="poll-item-list" class="container text-left">
       <div class="poll-item" phx-change="field_change:0">

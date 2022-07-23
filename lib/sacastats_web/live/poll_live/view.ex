@@ -32,7 +32,8 @@ defmodule SacaStatsWeb.PollLive.View do
         voter_id = get_voter_id(session)
 
         cond do
-          not is_nil(poll.close_poll_at) and DateTime.utc_now() > poll.close_poll_at ->
+          not is_nil(poll.close_poll_at) and
+              DateTime.compare(DateTime.utc_now(), poll.close_poll_at) == :gt ->
             {:ok,
              socket
              |> put_flash(:info, "This poll is no longer taking votes.")
