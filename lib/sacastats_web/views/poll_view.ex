@@ -17,6 +17,8 @@ defmodule SacaStatsWeb.PollView do
     end
   end
 
+  def summarize_poll(%Poll{} = poll, 0), do: summarize_poll(poll, 1)
+
   def summarize_poll(%Poll{} = poll, total_num_voters) do
     for %Item{} = item <- poll.items do
       %{

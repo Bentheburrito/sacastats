@@ -13,6 +13,8 @@ defmodule SacaStatsWeb.PollLive.Manage do
 
   require Logger
 
+  @failed_to_save_message "Oops, something went wrong when saving your changes. Please try again soon."
+
   def render(assigns) do
     Phoenix.View.render(SacaStatsWeb.PollView, "manage.html", assigns)
   end
@@ -47,6 +49,7 @@ defmodule SacaStatsWeb.PollLive.Manage do
           {:ok,
            socket
            |> assign(:poll, poll)
+           |> assign(:poll_changeset, Poll.update_changeset(poll))
            |> assign(:item_map, Map.new(poll.items, &{&1.id, &1}))
            |> assign(:vote_table_values, vote_table_values)
            |> assign(:user, session["user"] || session[:user])
@@ -58,6 +61,33 @@ defmodule SacaStatsWeb.PollLive.Manage do
            |> redirect(to: "/outfit/poll/#{id}")}
         end
     end
+  end
+
+  def handle_event("update-poll", %{"poll" => params}, socket) do
+    update_poll(params, socket)
+  end
+
+  def handle_event("delete-poll", _params, socket) do
+    case Repo.delete(socket.assigns.poll) do
+      {:ok, _poll} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Successfully deleted poll.")
+         |> redirect(to: "/outfit/poll")}
+
+      {:error, changeset} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, @failed_to_save_message)
+         |> assign(:poll_changeset, changeset)}
+    end
+  end
+
+  def handle_event("delete-allowed-voter", %{"id" => voter_id}, socket) do
+    voter_id = String.to_integer(voter_id)
+    new_allowed_voters = List.delete(socket.assigns.poll.allowed_voters, voter_id)
+
+    update_poll(%{"allowed_voters" => new_allowed_voters}, socket)
   end
 
   def handle_event("update-item", %{"item" => params}, socket) do
@@ -76,7 +106,7 @@ defmodule SacaStatsWeb.PollLive.Manage do
          put_flash(
            socket,
            :error,
-           "Oops, something went wrong when saving your changes. Please try again soon."
+           @failed_to_save_message
          )}
     end
   end
@@ -89,5 +119,25 @@ defmodule SacaStatsWeb.PollLive.Manage do
 
   def handle_info(_message, socket) do
     {:noreply, socket}
+  end
+
+  defp update_poll(attrs, socket) do
+    changeset = Poll.update_changeset(socket.assigns.poll, attrs)
+
+    case Repo.update(changeset) do
+      {:ok, poll} ->
+        {:noreply,
+         socket
+         |> assign(:poll, poll)
+         |> assign(:poll_changeset, Poll.update_changeset(poll))}
+
+      {:error, changeset} ->
+        IO.inspect(changeset)
+
+        {:noreply,
+         socket
+         |> put_flash(:error, @failed_to_save_message)
+         |> assign(:poll_changeset, changeset)}
+    end
   end
 end

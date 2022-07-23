@@ -31,29 +31,40 @@ defmodule SacaStatsWeb.PollLive.View do
       %Poll{} = poll ->
         voter_id = get_voter_id(session)
 
-        if has_voted?(voter_id, poll) do
-          {:ok, redirect(socket, to: "/outfit/poll/#{id}/results")}
-        else
-          vote_changesets =
-            for %Item{} = item <- poll.items, into: %{} do
-              changeset =
-                Vote.changeset(%Vote{}, %{
-                  "voter_discord_id" => voter_id,
-                  "item_id" => item.id
-                })
+        cond do
+          not allowed_voter?(voter_id, poll) and not poll_owner?(voter_id, poll) ->
+            {:ok,
+             socket
+             |> put_flash(
+               :error,
+               "You are not allowed to vote in this poll. If you believe this is a mistake, contact the owner of the poll."
+             )
+             |> redirect(to: "/outfit/poll")}
 
-              {item.id, changeset}
-            end
+          has_voted?(voter_id, poll) ->
+            {:ok, redirect(socket, to: "/outfit/poll/#{id}/results")}
 
-          item_map = Map.new(poll.items, &{&1.id, &1})
+          :else ->
+            vote_changesets =
+              for %Item{} = item <- poll.items, into: %{} do
+                changeset =
+                  Vote.changeset(%Vote{}, %{
+                    "voter_discord_id" => voter_id,
+                    "item_id" => item.id
+                  })
 
-          {:ok,
-           socket
-           |> assign(:poll, poll)
-           |> assign(:vote_changesets, vote_changesets)
-           |> assign(:item_map, item_map)
-           |> assign(:user, session["user"] || session[:user])
-           |> assign(:_csrf_token, session["_csrf_token"])}
+                {item.id, changeset}
+              end
+
+            item_map = Map.new(poll.items, &{&1.id, &1})
+
+            {:ok,
+             socket
+             |> assign(:poll, poll)
+             |> assign(:vote_changesets, vote_changesets)
+             |> assign(:item_map, item_map)
+             |> assign(:user, session["user"] || session[:user])
+             |> assign(:_csrf_token, session["_csrf_token"])}
         end
     end
   end

@@ -43,5 +43,10 @@ defmodule SacaStatsWeb.PollLive do
     end)
   end
 
+  def allowed_voter?(_voter_id, %Poll{allowed_voters: []}), do: true
+
+  def allowed_voter?(voter_id, %Poll{allowed_voters: allowed_voters}),
+    do: voter_id in allowed_voters
+
   def poll_owner?(user_id, %Poll{owner_discord_id: owner_id}), do: user_id == owner_id
 end

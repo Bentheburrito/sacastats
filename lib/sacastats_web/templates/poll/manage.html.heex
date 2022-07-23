@@ -1,7 +1,56 @@
 <section class="m-4">
   <h2 class="text-center"><%= @poll.title %></h2>
+
   <div class="poll-item">
-    <h3 class="text-center">Poll Stats</h3>
+    <h3 class="text-center">Poll Options</h3>
+      <.form let={poll_form} for={@poll_changeset} phx-change="update-poll">
+        <%= label do %>
+          Show Results to Voters
+          <%= checkbox poll_form, :visible_results %>
+          <%= error_tag poll_form, :visible_results %>
+        <% end %>
+
+        <%= label do %>
+          Allow Anonymous Voters
+          <%= checkbox poll_form, :allow_anonymous_voters %>
+          <%= error_tag poll_form, :allow_anonymous_voters %>
+        <% end %>
+
+        <%= label poll_form, :allowed_voters, "Allowed Voters (paste Discord IDs, leave blank to allow any voters)" %>
+        <%= error_tag poll_form, :allowed_voters %>
+
+        <%= for voter_id <- @poll.allowed_voters do %> 
+          <input value={voter_id} disabled>
+          <input type="hidden" name="poll[allowed_voters][]" value={voter_id}>
+          <%= link "X", 
+            to: "#",
+            type: "button",
+            class: "btn btn-danger",
+            phx_click: "delete-allowed-voter", 
+            phx_value_id: voter_id 
+          %>
+          <br>
+        <% end %>
+
+        <input name="poll[allowed_voters][]">
+
+        <%= label poll_form, :close_poll_at, "Close Poll at" %>
+        <%= datetime_local_input poll_form, :close_poll_at %>
+        <%= error_tag poll_form, :close_poll_at %>
+        
+        <%= link "Delete Poll", 
+          to: "#",
+          type: "button",
+          class: "btn btn-danger",
+          phx_click: "delete-poll", 
+          phx_value_id: @poll.id, 
+          data: [confirm: "Are you sure you want to delete this poll? This cannot be undone."] 
+        %>
+      </.form>
+  </div>
+
+  <div class="poll-item">
+    <h3 class="text-center">Poll Item Stats and Options</h3>
     <table>
       <th>Item</th>
       <th>Vote Distributions</th>
