@@ -5,9 +5,9 @@ defmodule SacaStatsWeb.PollLive.Manage do
   use SacaStatsWeb, :live_view
   use Phoenix.HTML
 
+  alias SacaStats.Poll.Item
+  alias SacaStats.Poll.Item.Vote
   alias SacaStats.{Poll, Repo}
-  alias Poll.Item
-  alias Item.Vote
 
   import SacaStatsWeb.PollLive
 

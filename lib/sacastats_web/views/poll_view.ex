@@ -3,7 +3,7 @@ defmodule SacaStatsWeb.PollView do
   import Phoenix.LiveView.Helpers
 
   alias SacaStats.Poll
-  alias Poll.Item
+  alias SacaStats.Poll.Item
 
   def get_discord_username(0), do: "Anonymous"
 
@@ -48,7 +48,7 @@ defmodule SacaStatsWeb.PollView do
     |> Contex.Plot.to_svg()
   end
 
-  def get_vote_distributions(%Item{votes: votes}) when length(votes) == 0 do
+  def get_vote_distributions(%Item{votes: []}) do
     []
   end
 

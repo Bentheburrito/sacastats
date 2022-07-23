@@ -5,9 +5,9 @@ defmodule SacaStatsWeb.PollLive do
 
   import Ecto.Query
 
+  alias SacaStats.Poll.Item
+  alias SacaStats.Poll.Item.Vote
   alias SacaStats.{DiscordUser, Poll, Repo}
-  alias Poll.Item
-  alias Item.Vote
 
   def get_poll(id) do
     items_query =
