@@ -4,7 +4,7 @@ defmodule SacaStats.Session do
   this module to build session structs for given character IDs and timestamps.
   """
 
-  alias SacaStats.{Events, Repo, Session}
+  alias SacaStats.{CensusCache, Events, Repo, Session}
 
   import Ecto.Query
   import PS2.API.QueryBuilder
@@ -59,7 +59,9 @@ defmodule SacaStats.Session do
   for seeing session durations and start/end times at a glance, when specific session data is not needed yet.
   """
   def get_summary(character_id_or_name) do
-    %{"character_id" => character_id} = character_info = get_character_info(character_id_or_name)
+    {:ok, %{"character_id" => character_id} = character_info} =
+      CensusCache.get(SacaStats.CharacterCache, character_id_or_name)
+
     character_id = SacaStats.Utils.maybe_to_int(character_id, 0)
 
     logins =
@@ -113,7 +115,9 @@ defmodule SacaStats.Session do
   end
 
   def get_all(character_id_or_name) do
-    %{"character_id" => character_id} = character_info = get_character_info(character_id_or_name)
+    {:ok, %{"character_id" => character_id} = character_info} =
+      CensusCache.get(SacaStats.CharacterCache, character_id_or_name)
+
     character_id = SacaStats.Utils.maybe_to_int(character_id, 0)
 
     where_clause = [character_id: character_id]
@@ -216,7 +220,9 @@ defmodule SacaStats.Session do
   end
 
   def get(character_id_or_name, login_timestamp) do
-    %{"character_id" => character_id} = character_info = get_character_info(character_id_or_name)
+    {:ok, %{"character_id" => character_id} = character_info} =
+      CensusCache.get(SacaStats.CharacterCache, character_id_or_name)
+
     character_id = SacaStats.Utils.maybe_to_int(character_id, 0)
 
     logout_timestamp = get_logout_timestamp(character_id, login_timestamp)
@@ -294,24 +300,6 @@ defmodule SacaStats.Session do
       login: login,
       logout: logout
     }
-  end
-
-  defp get_character_info(character_id_or_name) do
-    term =
-      if is_binary(character_id_or_name) do
-        "name.first_lower"
-      else
-        "character_id"
-      end
-
-    {:ok, %QueryResult{data: character_info}} =
-      Query.new(collection: "character")
-      |> term(term, String.downcase(character_id_or_name))
-      |> resolve("outfit(alias,id,name,leader_character_id)")
-      |> show(["character_id", "name", "faction_id", "outfit(alias,id,name)"])
-      |> PS2.API.query_one(SacaStats.sid())
-
-    character_info
   end
 
   defp get_logout_timestamp(character_id, login_timestamp) do

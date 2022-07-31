@@ -27,6 +27,9 @@ config :sacastats, SacaStatsWeb.Endpoint,
 # at the `config/runtime.exs`.
 config :sacastats, SacaStats.Mailer, adapter: Swoosh.Adapters.Local
 
+# By default, ignore :info and :debug level messages from :planetside_api
+Logger.put_module_level(PS2.Socket, :warning)
+
 # Swoosh API client is needed for adapters other than SMTP.
 config :swoosh, :api_client, false
 
