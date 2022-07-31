@@ -60,7 +60,7 @@ defmodule SacaStats.Session do
   """
   def get_summary(character_id_or_name) do
     %{"character_id" => character_id} = character_info = get_character_info(character_id_or_name)
-    character_id = SacaStats.Utils.maybe_to_int(character_id)
+    character_id = SacaStats.Utils.maybe_to_int(character_id, 0)
 
     logins =
       Repo.all(
@@ -103,7 +103,7 @@ defmodule SacaStats.Session do
     |> Stream.map(fn {login, logout} ->
       %Session{
         character_id: character_id,
-        faction_id: SacaStats.Utils.maybe_to_int(character_info["faction_id"]),
+        faction_id: SacaStats.Utils.maybe_to_int(character_info["faction_id"], 0),
         name: character_info["name"]["first"],
         login: login,
         logout: logout
@@ -114,7 +114,7 @@ defmodule SacaStats.Session do
 
   def get_all(character_id_or_name) do
     %{"character_id" => character_id} = character_info = get_character_info(character_id_or_name)
-    character_id = SacaStats.Utils.maybe_to_int(character_id)
+    character_id = SacaStats.Utils.maybe_to_int(character_id, 0)
 
     where_clause = [character_id: character_id]
 
@@ -185,7 +185,7 @@ defmodule SacaStats.Session do
 
       %Session{
         character_id: character_id,
-        faction_id: SacaStats.Utils.maybe_to_int(character_info["faction_id"]),
+        faction_id: SacaStats.Utils.maybe_to_int(character_info["faction_id"], 0),
         name: character_info["name"]["first"],
         kill_count: aggregations.kill_count,
         kill_hs_count: aggregations.kill_hs_count,
@@ -217,7 +217,7 @@ defmodule SacaStats.Session do
 
   def get(character_id_or_name, login_timestamp) do
     %{"character_id" => character_id} = character_info = get_character_info(character_id_or_name)
-    character_id = SacaStats.Utils.maybe_to_int(character_id)
+    character_id = SacaStats.Utils.maybe_to_int(character_id, 0)
 
     logout_timestamp = get_logout_timestamp(character_id, login_timestamp)
 
@@ -271,7 +271,7 @@ defmodule SacaStats.Session do
 
     %Session{
       character_id: character_id,
-      faction_id: SacaStats.Utils.maybe_to_int(character_info["faction_id"]),
+      faction_id: SacaStats.Utils.maybe_to_int(character_info["faction_id"], 0),
       name: character_info["name"]["first"],
       outfit: character_info["outfit"],
       kill_count: aggregations.kill_count,

@@ -15,6 +15,8 @@ defmodule SacaStats.CensusCache do
 
   @type cache_result :: {:ok, value :: any()} | {:error, :not_found}
 
+  @type cache_many_result :: {:ok, %{(key :: any()) => value :: any() | :not_found}}
+
   @type fallback_fn :: (key :: any() -> value :: any() | :not_found)
 
   ### API
@@ -54,6 +56,16 @@ defmodule SacaStats.CensusCache do
   @spec get(cache :: pid() | atom(), key :: any()) :: cache_result()
   def get(cache, key) when is_pid(cache) or is_atom(cache) do
     GenServer.call(cache, {:get, key})
+  end
+
+  @doc """
+  Get values for a list of keys. This function returns a map whose keys are `keys`, and whose values are either
+  `{:ok, value}` (where `value` is the value in the cache corresponding to the key), or `{:error, :not_found}` if no
+  entry could be found in the cache, nor by the fallback.
+  """
+  @spec get_many(cache :: pid() | atom(), keys :: [any()]) :: cache_many_result()
+  def get_many(cache, keys) when is_pid(cache) or is_atom(cache) do
+    GenServer.call(cache, {:get_many, keys}, 25000)
   end
 
   @doc """
@@ -99,6 +111,41 @@ defmodule SacaStats.CensusCache do
 
         {:reply, {:ok, value}, state}
     end
+  end
+
+  @impl GenServer
+  def handle_call({:get_many, keys}, _from, %CensusCache{data: data} = state) do
+    {result_map, fallbackables} =
+      Enum.reduce(keys, {_result_map = %{}, _fallbackables = []}, fn
+        key, {result_map, fallbackables} when is_map_key(data, key) ->
+          value = Map.get(data, key)
+          {Map.put(result_map, key, value), fallbackables}
+
+        key, {result_map, fallbackables} ->
+          {Map.put(result_map, key, :not_found), [key | fallbackables]}
+      end)
+
+    result_map =
+      with [_not_empty | _] <- fallbackables,
+           %{} = fallback_results <- state.fallback_fn.(fallbackables) do
+        Map.merge(result_map, fallback_results)
+      else
+        _ -> result_map
+      end
+
+    entries_expiration = System.os_time(:millisecond) + state.entry_expiration_ms
+
+    state = %CensusCache{
+      state
+      | data: Map.merge(data, result_map),
+        data_expirations:
+          Map.merge(
+            state.data_expirations,
+            Map.new(result_map, fn {key, _value} -> {key, entries_expiration} end)
+          )
+    }
+
+    {:reply, {:ok, result_map}, state}
   end
 
   @impl GenServer
