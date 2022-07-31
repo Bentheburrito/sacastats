@@ -65,7 +65,7 @@ defmodule SacaStats.CensusCache do
   """
   @spec get_many(cache :: pid() | atom(), keys :: [any()]) :: cache_many_result()
   def get_many(cache, keys) when is_pid(cache) or is_atom(cache) do
-    GenServer.call(cache, {:get_many, keys}, 25000)
+    GenServer.call(cache, {:get_many, keys}, 25_000)
   end
 
   @doc """

@@ -127,12 +127,12 @@ defmodule SacaStats.Weapons do
 
       # AOE weapons tend to have high accuracy, so we filter them out
       accuracy =
-        unless weapon["category"] in ["Explosive", "Grenade"] do
+        if weapon["category"] in ["Explosive", "Grenade"] do
+          0
+        else
           hit_count = get_total_values(weapon["weapon_hit_count"])
           fire_count = get_total_values(weapon["weapon_fire_count"])
           to_percent(hit_count, fire_count)
-        else
-          0
         end
 
       %{

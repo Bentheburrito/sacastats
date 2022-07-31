@@ -52,19 +52,21 @@ defmodule SacaStatsWeb.CharacterController do
   end
 
   defp build_assigns(info, status, "weapons") do
-    with {:ok, stats} <- CensusCache.get(SacaStats.CharacterStatsCache, info["character_id"]),
-         complete_weapons = Weapons.compile_stats(stats["stats"]),
-         type_set = Weapons.get_sorted_set_of_items("category", complete_weapons),
-         category_set = Weapons.get_sorted_set_of_items("sanction", complete_weapons) do
-      [
-        character_info: info,
-        online_status: status,
-        stat_page: "weapons.html",
-        weapons: complete_weapons,
-        types: type_set,
-        categories: category_set
-      ]
-    else
+    case CensusCache.get(SacaStats.CharacterStatsCache, info["character_id"]) do
+      {:ok, stats} ->
+        complete_weapons = Weapons.compile_stats(stats["stats"])
+        type_set = Weapons.get_sorted_set_of_items("category", complete_weapons)
+        category_set = Weapons.get_sorted_set_of_items("sanction", complete_weapons)
+
+        [
+          character_info: info,
+          online_status: status,
+          stat_page: "weapons.html",
+          weapons: complete_weapons,
+          types: type_set,
+          categories: category_set
+        ]
+
       {:error, :not_found} ->
         [
           character_info: info,
@@ -98,13 +100,19 @@ defmodule SacaStatsWeb.CharacterController do
       "sex" => sex
     }
 
+    leader_id = get_in(info, ["outfit", "leader_character_id"])
+
     info =
-      with leader_id_path = ["outfit", "leader_character_id"],
-           leader_id when not is_nil(leader_id) <- get_in(info, leader_id_path),
-           {:ok, character} <- CensusCache.get(SacaStats.CharacterCache, leader_id) do
-        Map.put(info, "outfit_leader_name", character["name"]["first_lower"])
+      if is_nil(leader_id) do
+        info
       else
-        _ -> info
+        case CensusCache.get(SacaStats.CharacterCache, leader_id) do
+          {:ok, character} ->
+            Map.put(info, "outfit_leader_name", character["name"]["first_lower"])
+
+          _ ->
+            info
+        end
       end
 
     [
