@@ -8,11 +8,13 @@ window.addEventListener('load', (event) => {
 function searchCharacter() {
     let btn = document.getElementById("searchButton");
     let form = document.getElementById("characterSearchForm");
-    let characterName = document.getElementById("character").value;
+    let characterName;
     form.addEventListener('submit', function (event) {
+        characterName = document.getElementById("character").value;
         swapURL(event, characterName);
     });
     btn.addEventListener("click", function (event) {
+        characterName = document.getElementById("character").value;
         swapURL(event, characterName);
     });
 }
