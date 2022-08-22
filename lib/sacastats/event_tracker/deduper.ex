@@ -18,6 +18,7 @@ defmodule SacaStats.EventTracker.Deduper do
 
   use GenServer
 
+  alias Phoenix.PubSub
   alias SacaStats.EventTracker.Deduper
   alias SacaStats.Repo
 
@@ -109,7 +110,7 @@ defmodule SacaStats.EventTracker.Deduper do
   """
   @spec put_new_event(t(), any(), any()) :: t()
   def put_new_event(%Deduper{buffering?: false} = state, hash, event) do
-    %Deduper{state | event_map: Map.put_new(state.event_map, hash, event)}
+    %Deduper{state | event_map: put_new_and_broadcast(state.event_map, hash, event)}
   end
 
   # buffering?: true from now on
@@ -118,6 +119,23 @@ defmodule SacaStats.EventTracker.Deduper do
   end
 
   def put_new_event(%Deduper{} = state, hash, event) do
-    %Deduper{state | buffer: Map.put_new(state.buffer, hash, event)}
+    %Deduper{state | buffer: put_new_and_broadcast(state.buffer, hash, event)}
+  end
+
+  defp put_new_and_broadcast(map, hash, event) do
+    if is_map_key(map, hash) do
+      map
+    else
+      case Map.fetch(event.changes, :character_id) do
+        {:ok, character_id} ->
+          PubSub.broadcast(SacaStats.PubSub, "game_event:#{character_id}", event)
+        :error -> nil
+      end
+      case Map.fetch(event.changes, :attacker_character_id) do
+        {:ok, attacker_character_id} -> PubSub.broadcast(SacaStats.PubSub, "game_event:#{attacker_character_id}", event)
+        :error -> nil
+      end
+      Map.put(map, hash, event)
+    end
   end
 end

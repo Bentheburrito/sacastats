@@ -9,7 +9,6 @@ defmodule SacaStats.EventTracker do
 
   require Logger
 
-  alias Phoenix.PubSub
   alias SacaStats.Events
   alias SacaStats.EventTracker.{Deduper, Report}
 
@@ -17,7 +16,6 @@ defmodule SacaStats.EventTracker do
   def handle_event({event_name, payload}, event_tracker_pid: pid) do
     {:ok, event_changeset} = Events.cast_event(event_name, payload)
 
-    PubSub.broadcast(SacaStats.PubSub, "game_event:#{payload["character_id"]}", event_changeset)
     Deduper.handle_event(event_changeset)
     log_event(pid, event_name)
   end

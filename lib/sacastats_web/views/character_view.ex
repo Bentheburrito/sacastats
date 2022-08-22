@@ -1,6 +1,8 @@
 defmodule SacaStatsWeb.CharacterView do
   use SacaStatsWeb, :view
 
+  import SacaStats, only: [is_assist_xp: 1]
+
   alias SacaStats.{CensusCache, Events, Session}
 
   alias SacaStats.Events.{
@@ -8,7 +10,10 @@ defmodule SacaStatsWeb.CharacterView do
     PlayerFacilityCapture,
     PlayerFacilityDefend,
     Death,
-    VehicleDestroy
+    VehicleDestroy,
+    GainExperience,
+    PlayerLogin,
+    PlayerLogout
   }
 
   require Logger
@@ -64,31 +69,10 @@ defmodule SacaStatsWeb.CharacterView do
   end
 
   def build_event_log(assigns, %Session{} = session) do
-    events =
-      (session.battle_rank_ups ++
-         session.player_facility_captures ++
-         session.player_facility_defends ++
-         session.vehicle_destroys ++
-         session.deaths)
-      |> Enum.sort_by(fn event -> event.timestamp end, :desc)
-
-    all_character_ids =
-      Enum.reduce(events, MapSet.new(), fn
-        %{character_id: id, attacker_character_id: a_id}, mapset ->
-          mapset
-          |> MapSet.put(id)
-          |> MapSet.put(a_id)
-
-        %{character_id: id}, mapset ->
-          MapSet.put(mapset, id)
-      end)
-
-    {:ok, character_map} = CensusCache.get_many(SacaStats.CharacterCache, all_character_ids)
-
     ~H"""
     <ul>
-      <%= for e <- events do %>
-        <%= build_event_log_item(assigns, e, session, character_map) %>
+      <%= for e <- assigns.events do %>
+        <%= build_event_log_item(assigns, e, session, assigns.character_map) %>
       <% end %>
     </ul>
     """
@@ -104,8 +88,8 @@ defmodule SacaStatsWeb.CharacterView do
   end
 
   defp build_event_log_item(assigns, %Death{} = death, %Session{}, character_map) do
-    character_identifier = get_character_name(character_map, death.character_id)
-    attacker_identifier = get_character_name(character_map, death.attacker_character_id)
+    character_identifier = get_character_name(assigns, character_map, death.character_id)
+    attacker_identifier = get_character_name(assigns, character_map, death.attacker_character_id)
 
     ~H"""
     <li>
@@ -137,8 +121,8 @@ defmodule SacaStatsWeb.CharacterView do
   end
 
   defp build_event_log_item(assigns, %VehicleDestroy{} = vd, %Session{}, character_map) do
-    character_identifier = get_character_name(character_map, vd.character_id)
-    attacker_identifier = get_character_name(character_map, vd.attacker_character_id)
+    character_identifier = get_character_name(assigns, character_map, vd.character_id)
+    attacker_identifier = get_character_name(assigns, character_map, vd.attacker_character_id)
 
     ~H"""
     <li>
@@ -151,13 +135,48 @@ defmodule SacaStatsWeb.CharacterView do
     """
   end
 
-  defp get_character_name(character_map, character_id) do
+  defp build_event_log_item(
+         assigns,
+         %GainExperience{experience_id: id, character_id: character_id} = ge,
+         %Session{character_id: character_id},
+         character_map
+       )
+       when is_assist_xp(id) do
+    other_identifier = get_character_name(assigns, character_map, ge.other_id)
+    character_identifier = get_character_name(assigns, character_map, character_id)
+
+    ~H"""
+    <li>
+      <%= character_identifier %> assisted in killing <%= other_identifier %> (<%= ge.amount %>%)
+      -
+      <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, ge.timestamp) %>
+    </li>
+    """
+  end
+
+  defp build_event_log_item(assigns, %PlayerLogin{}, %Session{name: name}, _character_map) do
+    ~H"""
+    <%= name %> logged in.
+    """
+  end
+
+  defp build_event_log_item(assigns, %PlayerLogout{}, %Session{name: name}, _character_map) do
+    ~H"""
+    <%= name %> logged out.
+    """
+  end
+
+  defp build_event_log_item(_, _, _, _), do: ""
+
+  defp get_character_name(assigns, character_map, character_id) do
     case character_map do
       %{^character_id => %{"name" => %{"first" => name}}} ->
-        name
+        ~H"""
+        <a href={"/character/#{name}"}><%= name %></a>
+        """
 
       _ ->
-        "somebody (#{character_id})"
+        ~H"somebody (<%= character_id %>)"
     end
   end
 end

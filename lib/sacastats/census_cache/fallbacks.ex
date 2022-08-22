@@ -46,7 +46,12 @@ defmodule SacaStats.CensusCache.Fallbacks do
             String.to_integer(data["character_id"])
 
         CensusCache.put(SacaStats.CharacterCache, other_key, data)
-        data
+
+        unless is_list(character_id_or_name) do
+          data
+        else
+          %{String.to_integer(data["character_id"]) => data}
+        end
 
       {:ok, %PS2.API.QueryResult{data: data}} ->
         for character <- data, into: %{} do
