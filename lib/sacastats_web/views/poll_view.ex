@@ -54,7 +54,7 @@ defmodule SacaStatsWeb.PollView do
 
   def get_vote_distributions(%Item{} = item) do
     for {choice, count} <- vote_frequencies_with_defaults(item) do
-      {choice, Float.round(count / length(item.votes) * 100, 2)}
+      {choice, SacaStats.Utils.to_percent(count, item.votes)}
     end
   end
 
