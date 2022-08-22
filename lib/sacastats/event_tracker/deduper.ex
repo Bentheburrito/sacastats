@@ -122,19 +122,26 @@ defmodule SacaStats.EventTracker.Deduper do
     %Deduper{state | buffer: put_new_and_broadcast(state.buffer, hash, event)}
   end
 
-  defp put_new_and_broadcast(map, hash, event) do
+  defp put_new_and_broadcast(map, hash, %Ecto.Changeset{} = event) do
     if is_map_key(map, hash) do
       map
     else
       case Map.fetch(event.changes, :character_id) do
         {:ok, character_id} ->
           PubSub.broadcast(SacaStats.PubSub, "game_event:#{character_id}", event)
-        :error -> nil
+
+        :error ->
+          nil
       end
+
       case Map.fetch(event.changes, :attacker_character_id) do
-        {:ok, attacker_character_id} -> PubSub.broadcast(SacaStats.PubSub, "game_event:#{attacker_character_id}", event)
-        :error -> nil
+        {:ok, attacker_character_id} ->
+          PubSub.broadcast(SacaStats.PubSub, "game_event:#{attacker_character_id}", event)
+
+        :error ->
+          nil
       end
+
       Map.put(map, hash, event)
     end
   end

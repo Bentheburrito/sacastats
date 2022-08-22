@@ -3,17 +3,17 @@ defmodule SacaStatsWeb.CharacterView do
 
   import SacaStats, only: [is_assist_xp: 1]
 
-  alias SacaStats.{CensusCache, Events, Session}
+  alias SacaStats.Session
 
   alias SacaStats.Events.{
     BattleRankUp,
+    Death,
+    GainExperience,
     PlayerFacilityCapture,
     PlayerFacilityDefend,
-    Death,
-    VehicleDestroy,
-    GainExperience,
     PlayerLogin,
-    PlayerLogout
+    PlayerLogout,
+    VehicleDestroy
   }
 
   require Logger

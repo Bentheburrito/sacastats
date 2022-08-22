@@ -7,8 +7,6 @@ defmodule SacaStats.Session do
   alias SacaStats.{CensusCache, Events, Repo, Session}
 
   import Ecto.Query
-  import PS2.API.QueryBuilder
-  alias PS2.API.{Query, QueryResult}
   import SacaStats.Utils, only: [typedstruct: 1, bool_to_int: 1]
 
   typedstruct do

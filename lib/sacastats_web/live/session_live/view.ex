@@ -8,17 +8,6 @@ defmodule SacaStatsWeb.SessionLive.View do
   alias Phoenix.PubSub
   alias SacaStats.{CensusCache, Session}
 
-  alias SacaStats.Events.{
-    BattleRankUp,
-    Death,
-    GainExperience,
-    PlayerFacilityCapture,
-    PlayerFacilityDefend,
-    PlayerLogin,
-    PlayerLogout,
-    VehicleDestroy
-  }
-
   require Logger
 
   def render(assigns) do
