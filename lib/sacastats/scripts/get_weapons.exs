@@ -31,7 +31,7 @@ weapon_image_infos =
   |> Enum.reduce(&Map.merge(&1, &2))
   |> Stream.filter(fn {_key, value} -> value != "-" end)
   |> Stream.map(fn {item_id, images} ->
-    {item_id, Map.update!(images, "image_id", &SacaStats.Utils.StaticData.maybe_to_int(&1))}
+    {item_id, Map.update!(images, "image_id", &SacaStats.Utils.maybe_to_int(&1))}
   end)
   |> Enum.into(%{})
 
@@ -52,7 +52,7 @@ weapon_map =
       "category" => category,
       "vehicle_weapon?" => is_vehicle_weapon == "1",
       "name" => item_name,
-      "faction_id" => (String.length(faction_id) > 0 && String.to_integer(faction_id)) || nil,
+      "faction_id" => (String.length(faction_id) > 0 && String.to_integer(faction_id)) || 0,
       "sanction" => sanction
     }
 
