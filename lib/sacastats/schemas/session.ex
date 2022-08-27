@@ -92,7 +92,7 @@ defmodule SacaStats.Session do
         # way, mark the latest logout as an active session.
         (not is_nil(latest_login) and is_nil(latest_logout)) or
             latest_login.timestamp > latest_logout.timestamp ->
-          [%{timestamp: :current_session} | logouts]
+          [%{timestamp: :current_session, character_id: character_id} | logouts]
 
         :else ->
           logouts
@@ -165,7 +165,7 @@ defmodule SacaStats.Session do
           logouts
 
         latest_login.timestamp > latest_logout.timestamp ->
-          [%{timestamp: :current_session} | logouts]
+          [%{timestamp: :current_session, character_id: character_id} | logouts]
 
         :else ->
           logouts
@@ -264,7 +264,7 @@ defmodule SacaStats.Session do
 
     logout =
       if logout_timestamp == :current_session do
-        %{timestamp: :current_session}
+        %{timestamp: :current_session, character_id: character_id}
       else
         Repo.one!(
           from event in Events.PlayerLogout,
