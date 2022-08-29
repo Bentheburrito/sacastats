@@ -143,7 +143,10 @@ function addFilterListeners() {
     for (let [_, filterOptions] of filters) {
         //loop through each filter option and add a change event listener to update the filtration
         filterOptions.forEach((filter) => {
-            document.getElementById(filter.filterID).addEventListener('change', updateTableFiltration);
+            let filterElement = document.getElementById(filter.filterID);
+            if (filterElement != undefined) {
+                filterElement.addEventListener('change', updateTableFiltration);
+            }
         });
     }
 
