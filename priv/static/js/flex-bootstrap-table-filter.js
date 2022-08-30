@@ -1,4 +1,4 @@
-import { setMobileHeaderTexts, updateSearchParam, setStickyHeaderWidths } from "/js/flex-bootstrap-table.js";
+import { setMobileHeaderTexts, updateSearchParam, setStickyHeaderWidths, scrollToTopOfTable } from "/js/flex-bootstrap-table.js";
 import { addFormatsToPage, addAnimationToProgressBars } from "/js/formats.js";
 import { showHideNextAuraxButton } from "/js/character/weapons-table.js";
 
@@ -450,7 +450,9 @@ export function updateTableFiltration() {
     //reset pagination clicks
     addPaginationClick();
 }
+
 function tablePaginationClickEventHandler(e) {
+    scrollToTopOfTable(e);
     setNextAuraxVisibilities();
     setTimeout(function () {
         addPaginationClick();
