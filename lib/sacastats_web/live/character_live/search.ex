@@ -4,11 +4,14 @@ defmodule SacaStatsWeb.CharacterLive.Search do
   """
   use SacaStatsWeb, :live_view
   use Phoenix.HTML
+  import Ecto.Query
 
   import PS2.API.QueryBuilder
   alias PS2.API.{Query, QueryResult}
+  alias SacaStats.{CensusCache, OnlineStatusCache, Session}
 
-  # alias SacaStats.{Poll, Repo}
+  alias SacaStats.Repo
+  alias SacaStats.Character.Favorite
 
   def render(assigns) do
     Phoenix.View.render(SacaStatsWeb.CharacterView, "lookup.html", assigns)
@@ -25,183 +28,208 @@ defmodule SacaStatsWeb.CharacterLive.Search do
     #   assigns = build_assigns(info, status, stat_type)
     #   render(conn, "template.html", assigns)
 
-    user = session["user"]
+    user = session["user"] || session[:user]
+
+    favorite_characters = get_favorite_users(user)
 
     {:ok,
      socket
-     |> assign(:owner_discord_id, user["id"])}
+     |> assign(:favorite_characters, favorite_characters)
+     |> assign(:user, session["user"] || session[:user])}
   end
 
-  # def handle_event("field_change", %{"poll" => params}, socket) do
-  #   changeset = Poll.changeset(%Poll{}, params)
+  defp get_favorite_users(user) do
+    # if is_nil(user) || is_nil(user["id"]) do
+    #   []
+    # else
+    #   # cs = SacaStats.Character.Favorite.changeset(%SacaStats.Character.Favorite{}, %{"discord_id" => 206091499706908673, "character_id" => 5429281854933028721, "last_known_name" => "HeartBrain"})
 
-  #   {:noreply,
-  #    socket
-  #    |> assign(:changeset, changeset)
-  #    |> assign(:prev_params, params)}
-  # end
+    #   case Ecto.Query.from(f in Favorite, select: f, where: f.discord_id == ^user["id"])
+    #        |> Repo.all() do
+    #     nil ->
+    #       []
 
-  # def handle_event("add_item", _params, socket) do
-  #   params =
-  #     Map.update(
-  #       socket.assigns.prev_params,
-  #       "items",
-  #       %{"0" => %{}},
-  #       fn items ->
-  #         next_position = to_string(map_size(socket.assigns.prev_params["items"]))
-  #         Map.put(items, next_position, %{"position" => next_position})
-  #       end
-  #     )
+    #     [head | tail] ->
+    #       characters = [head | tail]
 
-  #   changeset = Poll.changeset(%Poll{}, params)
+    #       characters
+    #       |> Stream.map(fn %Favorite{character_id: id} ->
+    #         {CensusCache.get(OnlineStatusCache, id), id}
+    #       end)
+    #       |> Enum.group_by(
+    #         fn {{:ok, online_status}, _id} -> online_status end,
+    #         fn {_online_status, id} -> id end
+    #       )
+    #       |> Stream.map(fn {online_status, ids} -> {online_status, Enum.sort(ids)} end)
+    #       |> Enum.into(%{})
+    #   end
+    # end
 
-  #   {:noreply,
-  #    socket
-  #    |> assign(:changeset, changeset)
-  #    |> assign(:prev_params, params)}
-  # end
+    %{
+      "online" => [
+        %{
+          "name" => "dndmackey",
+          "id" => "5428085256239782129",
+          "outfit" => "The Sacagaweas",
+          "rank" => "ASP 2 BR 72",
+          "faction_id" => 1
+        },
+        %{
+          "name" => "RedCoats24",
+          "id" => "5428123302640594129",
+          "outfit" => "The Hakagaweas",
+          "rank" => "ASP 2 BR 20",
+          "faction_id" => 3
+        }
+      ],
+      "offline" => [
+        %{
+          "name" => "NSmackey",
+          "id" => "5429150307164952145",
+          "outfit" => "",
+          "rank" => "BR 46",
+          "faction_id" => 4
+        },
+        %{
+          "name" => "Snowful ",
+          "id" => "5428713425545165425",
+          "outfit" => "Cerulean Unicorns",
+          "rank" => "ASP 1 BR 95",
+          "faction_id" => 2
+        },
+        %{
+          "name" => "Snowful ",
+          "id" => "5428713425545165425",
+          "outfit" => "Cerulean Unicorns",
+          "rank" => "ASP 1 BR 95",
+          "faction_id" => 2
+        },
+        %{
+          "name" => "Snowful ",
+          "id" => "5428713425545165425",
+          "outfit" => "Cerulean Unicorns",
+          "rank" => "ASP 1 BR 95",
+          "faction_id" => 2
+        },
+        %{
+          "name" => "Snowful ",
+          "id" => "5428713425545165425",
+          "outfit" => "Cerulean Unicorns",
+          "rank" => "ASP 1 BR 95",
+          "faction_id" => 2
+        },
+        %{
+          "name" => "Snowful ",
+          "id" => "5428713425545165425",
+          "outfit" => "Cerulean Unicorns",
+          "rank" => "ASP 1 BR 95",
+          "faction_id" => 2
+        },
+        %{
+          "name" => "Snowful ",
+          "id" => "5428713425545165425",
+          "outfit" => "Cerulean Unicorns",
+          "rank" => "ASP 1 BR 95",
+          "faction_id" => 2
+        }
+      ]
+    }
+  end
 
-  # def handle_event("add_choice:" <> item_index, _params, socket) do
-  #   params =
-  #     update_in(
-  #       socket.assigns.prev_params,
-  #       ["items", item_index, "choices"],
-  #       fn
-  #         nil ->
-  #           %{"0" => %{}}
+  def create_character_status_cards(assigns, characters) do
+    online_characters = Map.get(characters, "online")
+    offline_characters = Map.get(characters, "offline")
 
-  #         choices ->
-  #           next_position = to_string(map_size(choices))
-  #           Map.put(choices, next_position, %{"position" => next_position})
-  #       end
-  #     )
+    ~H"""
+      <%= if(online_characters != nil && length(online_characters) > 0) do %>
+        <h2 class="d-inline">Online</h2><p class="favorite-character-status-contains d-inline">(<%= length(online_characters) %>)</p>
+        <hr/>
+        <div class="row justify-content-center mb-5">
+          <%= for character <- online_characters do %>
+            <%= encode_character_card(assigns, character, "online") %>
+          <% end %>
+        </div>
+      <% end %>
+      <%= if(offline_characters != nil && length(offline_characters) > 0) do %>
+        <h2 class="d-inline">Offline</h2><p class="favorite-character-status-contains d-inline">(<%= length(offline_characters) %>)</p>
+        <hr/>
+        <div class="row justify-content-center pb-5">
+          <%= for character <- offline_characters do %>
+            <%= encode_character_card(assigns, character, "offline") %>
+          <% end %>
+        </div>
+        <% end %>
+    """
+  end
 
-  #   changeset = Poll.changeset(%Poll{}, params)
+  defp encode_character_card(assigns, character, online_status) do
+    name = Map.get(character, "name")
+    id = Map.get(character, "id")
+    outfit = Map.get(character, "outfit", "")
+    rank = Map.get(character, "rank")
+    faction_id = Map.get(character, "faction_id")
 
-  #   {:noreply,
-  #    socket
-  #    |> assign(:changeset, changeset)
-  #    |> assign(:prev_params, params)}
-  # end
+    ~H"""
+      <div id={name <> "-character-status-card"}
+          class={"col-12 col-md-6 col-lg-4 col-xl-3 border rounded py-3 px-0 mx-0 mx-md-3 my-2 " <> (Map.get(SacaStats.factions, SacaStats.Utils.maybe_to_int(faction_id))[:alias] |> String.downcase()) <> "-character-status-card character-status-card"}>
+        <%= encode_character_remove_button(assigns, id, name) %>
+        <div class="row flex-row h-100">
+          <%= encode_character_faction_image(assigns, name , faction_id) %>
+          <%= encode_character_characteristics(assigns, name, outfit, rank) %>
+          <%= encode_character_online_status(assigns, online_status) %>
+        </div>
+      </div>
+    """
+  end
 
-  # def handle_event("remove_item:" <> to_remove_index, _params, socket) do
-  #   params =
-  #     Map.update(
-  #       socket.assigns.prev_params,
-  #       "items",
-  #       %{},
-  #       &remove_at(&1, to_remove_index)
-  #     )
+  defp encode_character_remove_button(assigns, id, name) do
+    ~H"""
+      <button id={id <> "-character-status-card-removal-button"}
+            class="btn btn-danger my-0 py-1 px-3 ml-5 d-none character-status-card-removal-button"
+            title={"Remove " <> name <> " from favorites"}>
+        <i class="fas fa-trash"></i>
+      </button>
+    """
+  end
 
-  #   changeset = Poll.changeset(%Poll{}, params)
+  defp encode_character_faction_image(assigns, name, faction_id) do
+    ~H"""
+      <div class="col-2 d-flex align-items-center">
+        <img class="float-md-left float-none" data-toggle="tooltip"
+            title={name <> " plays on the " <> Map.get(SacaStats.factions, SacaStats.Utils.maybe_to_int(faction_id))[:name]}
+            src={Map.get(SacaStats.factions, SacaStats.Utils.maybe_to_int(faction_id))[:image]}
+            alt={Map.get(SacaStats.factions, SacaStats.Utils.maybe_to_int(faction_id))[:name] <> "'s banner"} width="60">
+      </div>
+    """
+  end
 
-  #   {:noreply,
-  #    socket
-  #    |> assign(:changeset, changeset)
-  #    |> assign(:prev_params, params)}
-  # end
+  defp encode_character_characteristics(assigns, name, outfit, rank) do
+    ~H"""
+      <div class="col-8 pl-5">
+        <div class="row pl-3">
+          <div class="col-12 px-0">
+            <h2 class="mb-0"><%= name %></h2>
+          </div>
+        </div>
+        <div class="row pl-3">
+          <div class="col-12 px-0">
+            <p class="mb-0 small"><%= outfit %></p>
+          </div>
+        </div>
+        <div class="row pl-3">
+          <div class="col-12 px-0">
+            <h4 class="mb-0"><%= rank %></h4>
+          </div>
+        </div>
+      </div>
+    """
+  end
 
-  # def handle_event("remove_choice:" <> indexes, _params, socket) do
-  #   [item_index, choice_index] = String.split(indexes, ":")
-
-  #   params =
-  #     update_in(
-  #       socket.assigns.prev_params,
-  #       ["items", item_index, "choices"],
-  #       &remove_at(&1, choice_index)
-  #     )
-
-  #   changeset = Poll.changeset(%Poll{}, params)
-
-  #   {:noreply,
-  #    socket
-  #    |> assign(:changeset, changeset)
-  #    |> assign(:prev_params, params)}
-  # end
-
-  # def handle_event("form_submit", _params, socket) do
-  #   case Repo.insert(socket.assigns.changeset) do
-  #     {:ok, %Poll{id: id}} ->
-  #       poll_path = "/outfit/poll/#{id}"
-
-  #       {:noreply,
-  #        socket
-  #        |> put_flash(
-  #          :info,
-  #          "Success! You can share this poll with others by sharing this link: https://www.sacastats.com#{poll_path}"
-  #        )
-  #        |> redirect(to: poll_path)}
-
-  #     {:error, changeset} ->
-  #       {:noreply,
-  #        socket
-  #        |> put_flash(:error, "There are problems with the poll. See the fields below.")
-  #        |> assign(:changeset, changeset)}
-  #   end
-  # end
-
-  # def encode_poll_items(form, assigns) do
-  #   items = inputs_for(form, :items)
-
-  #   ~H"""
-  #   <%= for {item, index} <- Enum.with_index(items) do %>
-  #     <div class="poll-item">
-  #       <button type="button"
-  #         phx-click={"remove_item:#{index}"}
-  #         class="btn-danger btn-sm remove-item-button">
-  #         Remove Field
-  #       </button>
-  #       <%= encode_poll_item(assigns, item, index) %>
-  #     </div>
-  #   <% end %>
-  #   """
-  # end
-
-  # defp encode_poll_item(assigns, %Phoenix.HTML.Form{} = item, item_index) do
-  #   choices = inputs_for(item, :choices)
-
-  #   ~H"""
-  #   <h4><%= length(choices) == 0 && "Text" || "Multiple-Choice" %> Field</h4>
-
-  #   <%= label item, :description %>
-  #   <%= text_input item, :description %>
-  #   <%= error_tag item, :description %>
-  #   <ul>
-  #     <%= for {choice, choice_index} <- Enum.with_index(choices) do %>
-  #       <button type="button"
-  #         phx-click={"remove_choice:#{item_index}:#{choice_index}"}
-  #         class="btn-danger btn-sm remove-item-button">
-  #         Remove Choice
-  #       </button>
-  #       <%= encode_poll_item_choice(assigns, choice) %>
-  #     <% end %>
-  #   </ul>
-  #   <button type="button" phx-click={"add_choice:#{item_index}"} class="btn-info">Add Multiple-Choice Option</button>
-  #   """
-  # end
-
-  # defp encode_poll_item_choice(assigns, %Phoenix.HTML.Form{} = choice) do
-  #   ~H"""
-  #   <li>
-  #   <div class="d-inline">
-  #     <%= label choice, :description, "Choice Description", class: "d-inline" %>
-  #     <%= text_input choice, :description, class: "d-inline" %>
-  #     <%= error_tag choice, :description %>
-  #     </div>
-  #   </li>
-  #   """
-  # end
-
-  # defp remove_at(map, to_remove_index) do
-  #   Enum.reduce(map, %{}, fn
-  #     {index, item}, acc when index < to_remove_index ->
-  #       Map.put(acc, index, item)
-
-  #     {index, _item}, acc when index == to_remove_index ->
-  #       acc
-
-  #     {index, item}, acc when index > to_remove_index ->
-  #       Map.put(acc, to_string(String.to_integer(index) - 1), item)
-  #   end)
-  # end
+  defp encode_character_online_status(assigns, online_status) do
+    ~H"""
+      <div class="col-1 d-flex align-items-center">
+        <img src={"/images/character/" <> online_status <> ".ico"} alt={online_status} width="30">
+      </div>
+    """
+  end
 end

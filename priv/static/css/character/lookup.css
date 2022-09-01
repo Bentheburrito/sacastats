@@ -23,6 +23,7 @@
     border-color: #2A94F7 !important;
 }
 
+.nso-character-status-card,
 .ns-character-status-card {
     background-image: linear-gradient(to right, #908567, rgba(255, 255, 255, 0));
     border-color: #908567 !important;
@@ -43,6 +44,7 @@
     border-color: #2aa8f7 !important;
 }
 
+.nso-character-status-card:hover,
 .ns-character-status-card:hover {
     background-image: linear-gradient(to right, #939087, rgba(255, 255, 255, 0));
     border-color: #939087 !important;
@@ -50,4 +52,15 @@
 
 .character-status-card:hover {
     cursor: pointer;
+}
+
+.character-status-card:hover .character-status-card-removal-button {
+    display: inline !important;
+}
+
+.character-status-card-removal-button {
+    position: absolute;
+    top: 3px !important;
+    right: 3px;
+    z-index: 1;
 }

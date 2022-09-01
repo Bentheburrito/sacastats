@@ -66,7 +66,7 @@ defmodule SacaStats do
         name: "No Faction",
         alias: "NS",
         color: 0x575757,
-        image: "https://i.imgur.com/9nHbnUh.jpg"
+        image: "/images/faction/NSO.png"
       },
       1 => %{
         name: "Vanu Sovereignty",
@@ -90,7 +90,7 @@ defmodule SacaStats do
         name: "Nanite Systems",
         alias: "NSO",
         color: 0xE5E5E5,
-        image: "https://i.imgur.com/9nHbnUh.jpg"
+        image: "/images/faction/NSO.png"
       }
     }
 
