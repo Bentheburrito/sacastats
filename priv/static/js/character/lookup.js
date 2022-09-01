@@ -11,25 +11,70 @@ function searchCharacter() {
     let characterName;
     form.addEventListener('submit', function (event) {
         characterName = document.getElementById("character").value;
-        swapURL(event, characterName);
+        swapURL(event, characterName, false);
     });
     btn.addEventListener("click", function (event) {
         characterName = document.getElementById("character").value;
-        swapURL(event, characterName);
+        swapURL(event, characterName, false);
     });
 }
 
-function swapURL(event, characterName) {
-    showLoadingScreen();
+function swapURL(event, characterName, newTab) {
     event.preventDefault();
-    location.href = document.URL + "/" + characterName;
+    if (newTab) {
+        window.open(
+            (document.URL + "/" + characterName), "_blank");
+    } else {
+        showLoadingScreen();
+        location.href = document.URL + "/" + characterName;
+    }
+}
+
+function characterCardLeftMouseClick(event) {
+    characterCardClickEvent(event, false);
+}
+
+function characterCardMiddleMouseClick(event) {
+    if (event.button === 1) {
+        event.preventDefault();
+        characterCardClickEvent(event, true);
+    }
+}
+
+function characterCardMiddleMouseClickPreventDefault(event) {
+    if (event.which === 2) {
+        event.preventDefault();
+    }
+}
+
+function characterCardClickEvent(event, isMiddleClick) {
+    let card = $(event.target).closest(".character-status-card")[0];
+    if (card != undefined && card.id != undefined) {
+        let characterName = card.id.split("-")[0];
+        let newTab = event.ctrlKey || isMiddleClick;
+        swapURL(event, characterName, newTab);
+    }
+}
+
+function characterCardRightMouseClick(event) {
+
+    return false; //blocks default Webbrowser right click menu
 }
 
 function addCharacterCardClick() {
     document.querySelectorAll(".character-status-card").forEach(card => {
-        card.addEventListener('click', function (event) {
-            let characterName = card.id.split("-")[0];
-            swapURL(event, characterName);
-        });
+        //remove and add LEFT mouse click handler
+        card.removeEventListener('click', characterCardLeftMouseClick);
+        card.addEventListener('click', characterCardLeftMouseClick);
+
+        //remove and add MIDDLE mouse click handler
+        $(card).off('auxclick', characterCardMiddleMouseClick);
+        $(card).on('auxclick', characterCardMiddleMouseClick);
+        $(card).off('mousedown', characterCardMiddleMouseClickPreventDefault);
+        $(card).on('mousedown', characterCardMiddleMouseClickPreventDefault);
+
+        //remove and add RIGHT mouse click handler
+        $(card).off('contextmenu', characterCardRightMouseClick);
+        $(card).on('contextmenu', characterCardRightMouseClick);
     });
 }
