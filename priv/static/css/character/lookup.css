@@ -29,21 +29,26 @@
     border-color: #908567 !important;
 }
 
+.vs-character-status-card.character-card-selected,
 .vs-character-status-card:hover {
     background-image: linear-gradient(to right, #ba51f3, rgba(255, 255, 255, 0));
     border-color: #ba51f3 !important;
 }
 
+.tr-character-status-card.character-card-selected,
 .tr-character-status-card:hover {
     background-image: linear-gradient(to right, #e85959, rgba(255, 255, 255, 0));
     border-color: #e85959 !important;
 }
 
+.nc-character-status-card.character-card-selected,
 .nc-character-status-card:hover {
     background-image: linear-gradient(to right, #2aa8f7, rgba(255, 255, 255, 0));
     border-color: #2aa8f7 !important;
 }
 
+.nso-character-status-card.character-card-selected,
+.ns-character-status-card.character-card-selected,
 .nso-character-status-card:hover,
 .ns-character-status-card:hover {
     background-image: linear-gradient(to right, #939087, rgba(255, 255, 255, 0));
@@ -54,6 +59,7 @@
     cursor: pointer;
 }
 
+.character-status-card.character-card-selected .character-status-card-removal-button,
 .character-status-card:hover .character-status-card-removal-button {
     display: inline !important;
 }
