@@ -172,12 +172,24 @@ defmodule SacaStatsWeb.CharacterLive.Search do
     ~H"""
       <div id={name <> "-character-status-card"}
           class={"col-12 col-md-6 col-lg-4 col-xl-3 border rounded py-3 px-0 mx-0 mx-md-3 my-2 " <> (Map.get(SacaStats.factions, SacaStats.Utils.maybe_to_int(faction_id))[:alias] |> String.downcase()) <> "-character-status-card character-status-card"}>
+        <%= encode_character_remove_button_mobile(assigns, id, name) %>
         <%= encode_character_remove_button(assigns, id, name) %>
         <div class="row flex-row h-100">
           <%= encode_character_faction_image(assigns, name , faction_id) %>
           <%= encode_character_characteristics(assigns, name, outfit, rank) %>
           <%= encode_character_online_status(assigns, online_status) %>
         </div>
+      </div>
+    """
+  end
+
+  defp encode_character_remove_button_mobile(assigns, id, name) do
+    ~H"""
+      <div class="character-status-card-removal-button-mobile-container w-100 h-100 d-none">
+        <button id={id <> "-character-status-card-removal-button-mobile"}
+              class="btn btn-danger character-status-card-removal-button-mobile">
+          <i class="fas fa-trash"></i> Remove
+        </button>
       </div>
     """
   end

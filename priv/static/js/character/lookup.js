@@ -1,7 +1,8 @@
 import { show as showLoadingScreen } from "/js/loading-screen.js";
 
 let contextMenuID = "#character-card-context-menu";
-let characterName;
+let selectedCharacterName;
+let selectedCard;
 
 window.addEventListener('load', (event) => {
     searchCharacter();
@@ -62,7 +63,7 @@ function characterCardMiddleMouseClickPreventDefault(event) {
 
 function characterCardClickEvent(event, isMiddleClick) {
     let card = $(event.target).closest(".character-status-card")[0];
-    if (card != undefined && card.id != undefined) {
+    if (card != undefined && card.id != undefined && (!isMobileScreen() || selectedCard != card)) {
         let characterName = card.id.split("-")[0];
         let newTab = event.ctrlKey || isMiddleClick;
         swapURL(event, characterName, newTab);
@@ -70,34 +71,36 @@ function characterCardClickEvent(event, isMiddleClick) {
 }
 
 function characterCardRightMouseClick(e) {
-    if (!isMobileScreen()) {
-        //initialize special menu location
-        let isFireFox = navigator.userAgent.indexOf("Firefox") != -1;
-        let yAdj = (e.clientY + $(contextMenuID).height() > $(window).height()) ? (e.clientY - $(contextMenuID).height() - (isFireFox ? 0 : 5)) : e.clientY; //adjust height to show all of menu
-        let xAdj = (e.clientX + $(contextMenuID).width() > $(window).width()) ? (e.clientX - $(contextMenuID).width() - (isFireFox ? 0 : 2)) : e.clientX; //adjust width to show all of menu
-        var top = ((yAdj / $(window).height()) * 100) + "%";
-        var left = ((xAdj / $(window).width()) * 100) + "%";
+    //get card selected
+    let card = $(e.target).closest(".character-status-card")[0];
+    if (card != undefined && card.id != undefined) {
+        //get character name from card and make it "selected"
+        selectedCharacterName = card.id.split("-")[0];
+        updateMobileSelectionCard();
+        selectedCard = card;
+        card.classList.add("character-card-selected");
+        if (!isMobileScreen()) {
+            //initialize special menu location
+            let isFireFox = navigator.userAgent.indexOf("Firefox") != -1;
+            let yAdj = (e.clientY + $(contextMenuID).height() > $(window).height()) ? (e.clientY - $(contextMenuID).height() - (isFireFox ? 0 : 5)) : e.clientY; //adjust height to show all of menu
+            let xAdj = (e.clientX + $(contextMenuID).width() > $(window).width()) ? (e.clientX - $(contextMenuID).width() - (isFireFox ? 0 : 2)) : e.clientX; //adjust width to show all of menu
+            var top = ((yAdj / $(window).height()) * 100) + "%";
+            var left = ((xAdj / $(window).width()) * 100) + "%";
 
-        //show special menu at the bottom right of the mouse
-        $(contextMenuID).css({
-            display: "block",
-            position: "fixed",
-            top: top,
-            left: left
-        }).addClass("show");
+            //show special menu at the bottom right of the mouse
+            $(contextMenuID).css({
+                display: "block",
+                position: "fixed",
+                top: top,
+                left: left
+            }).addClass("show");
 
-        //get card selected
-        let card = $(e.target).closest(".character-status-card")[0];
-        if (card != undefined && card.id != undefined) {
-            //get character name from card and make it "selected"
-            characterName = card.id.split("-")[0];
-            card.classList.add("character-card-selected");
+            //if it's a mobile screen, show remove character option
+        } else {
+            card.querySelector(".character-status-card-removal-button-mobile-container").classList.remove("d-none");
         }
-        //if it's a mobile screen, show remove character option
-    } else {
-
+        return false; //blocks default Webbrowser right click menu
     }
-    return false; //blocks default Webbrowser right click menu
 }
 
 function addCharacterCardClick() {
@@ -125,24 +128,35 @@ function addDocumentClickEvents() {
             card.classList.remove("character-card-selected");
         });
     });
+    $(document).on("click", updateMobileSelectionCard);
 }
 
 function hideContextMenu() {
     $(contextMenuID).removeClass("show").hide();
 }
 
+function updateMobileSelectionCard() {
+    if (selectedCard != undefined) {
+        let mobileRemoval = selectedCard.querySelector(".character-status-card-removal-button-mobile-container");
+        if (mobileRemoval != undefined && !mobileRemoval.classList.contains("d-none")) {
+            mobileRemoval.classList.add("d-none");
+        }
+        selectedCard = undefined;
+    }
+}
+
 function addContextMenuOptionEventHandlers() {
     document.getElementById("character-card-open-stat-link-row").addEventListener("mousedown", function (event) {
-        swapURL(event, characterName, false);
+        swapURL(event, selectedCharacterName, false);
     });
     document.getElementById("character-card-open-stat-link-new-tab-row").addEventListener("mousedown", function (event) {
-        swapURL(event, characterName, true);
+        swapURL(event, selectedCharacterName, true);
     });
     document.getElementById("character-card-open-stat-link-new-window-row").addEventListener("mousedown", function (event) {
-        openURL(event, characterName);
+        openURL(event, selectedCharacterName);
     });
     document.getElementById("remove-favorite-character-row").addEventListener("mousedown", function (event) {
-        removeCharacterFromFavorites(characterName);
+        removeCharacterFromFavorites(selectedCharacterName);
     });
 }
 

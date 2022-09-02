@@ -8,6 +8,14 @@
     padding-left: 4px;
 }
 
+.character-status-card {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
 .vs-character-status-card {
     background-image: linear-gradient(to right, #B035F2, rgba(255, 255, 255, 0));
     border-color: #B035F2 !important;
@@ -59,9 +67,13 @@
     cursor: pointer;
 }
 
-.character-status-card.character-card-selected .character-status-card-removal-button,
-.character-status-card:hover .character-status-card-removal-button {
-    display: inline !important;
+@media screen and (min-width: 768px) {
+    /* only for desktop */
+
+    .character-status-card.character-card-selected .character-status-card-removal-button,
+    .character-status-card:hover .character-status-card-removal-button {
+        display: inline !important;
+    }
 }
 
 .character-status-card-removal-button {
@@ -69,4 +81,21 @@
     top: 3px !important;
     right: 3px;
     z-index: 1;
+}
+
+.character-status-card-removal-button-mobile-container {
+    background-color: rgba(0, 0, 0, 0.5);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    color: black;
+    z-index: 1;
+    text-align: center;
+}
+
+.character-status-card-removal-button-mobile {
+    margin: auto;
+    transform: translateY(100%);
 }
