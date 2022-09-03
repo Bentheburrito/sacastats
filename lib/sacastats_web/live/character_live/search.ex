@@ -136,6 +136,38 @@ defmodule SacaStatsWeb.CharacterLive.Search do
     }
   end
 
+  def handle_event("add_favorite_character", %{"id" => id, "name" => name}, socket) do
+    user = socket.assigns.user
+
+    if is_nil(user) || is_nil(user["id"]) do
+      []
+    else
+      # cs = SacaStats.Character.Favorite.changeset(%SacaStats.Character.Favorite{}, %{"discord_id" => 206091499706908673, "character_id" => 5429281854933028721, "last_known_name" => "HeartBrain"})
+
+      case Ecto.Query.from(f in Favorite, select: f, where: f.discord_id == ^user["id"])
+           |> Repo.all() do
+        nil ->
+          changeset =
+            Favorite.changeset(%Favorite{}, %{
+              :discord_id => user,
+              :character_id => id,
+              :last_known_name => name
+            })
+
+          Repo.insert(changeset)
+
+        [_head | _tail] ->
+          :no_reply
+      end
+    end
+  end
+
+  def handle_event("remove_favorite_character", %{"id" => id}, socket) do
+    user = socket.assigns.user
+
+    Repo.delete(from(f in Favorite, where: f.discord_id == ^user and f.character_id == ^id))
+  end
+
   def create_character_status_cards(assigns, characters) do
     online_characters = Map.get(characters, "online")
     offline_characters = Map.get(characters, "offline")
@@ -186,7 +218,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
   defp encode_character_remove_button_mobile(assigns, id, name) do
     ~H"""
       <div class="character-status-card-removal-button-mobile-container w-100 h-100 d-none">
-        <button id={id <> "-character-status-card-removal-button-mobile"}
+        <button id={id <> "-character-status-card-removal-button-mobile"} phx-click="remove_favorite_character" phx-value-id={id}
               class="btn btn-danger character-status-card-removal-button-mobile">
           <i class="fas fa-trash"></i> Remove
         </button>
@@ -196,7 +228,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
 
   defp encode_character_remove_button(assigns, id, name) do
     ~H"""
-      <button id={id <> "-character-status-card-removal-button"}
+      <button id={id <> "-character-status-card-removal-button"} phx-value-id={id}
             class="btn btn-danger my-0 py-1 px-3 ml-5 d-none character-status-card-removal-button"
             title={"Remove " <> name <> " from favorites"}>
         <i class="fas fa-trash"></i>
