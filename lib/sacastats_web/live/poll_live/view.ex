@@ -40,7 +40,7 @@ defmodule SacaStatsWeb.PollLive.View do
          socket
          |> assign(:poll, poll)
          |> assign(:vote_changesets, vote_changesets)
-         |> assign(:user, session["user"])
+         |> assign(:user, session["user"] || session[:user])
          |> assign(:_csrf_token, session["_csrf_token"])}
     end
   end

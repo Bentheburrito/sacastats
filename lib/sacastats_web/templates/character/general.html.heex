@@ -125,7 +125,7 @@
                     <h3 class="text-center">Best Weapons</h3>
                     <hr />
                 </div>
-                <%= for {stat_name, weapon} <- @best_weapons do %>
+                <%= for {stat_name, weapon} <- @best_weapons, weapon != :no_weapon do %>
                     <div class="col-12 col-md-6 pb-5">
                         <div class="d-flex justify-content-center align-items-end">
                             <h4 class="text-center"><u><%= stat_name %></u></h4>
@@ -161,7 +161,7 @@
                         </div>
                     </div>
                 <% else %>
-                    <%= if SacaStats.Utils.maybe_to_int(@character_info["all_medal_counts"]["Auraxium"]) > 0 do %>
+                    <%= if SacaStats.Utils.maybe_to_int(@character_info["all_medal_counts"]["Auraxium"], 0) > 0 do %>
                         <div class="col-auto">
                             <div class="mx-auto w-auto">
                                 <h4 class="d-inline"><u>Auraxium</u>:</h4>
@@ -170,7 +170,7 @@
                             </div>
                         </div>
                     <% end %>
-                    <%= if SacaStats.Utils.maybe_to_int(@character_info["all_medal_counts"]["Gold"]) > 0 do %>
+                    <%= if SacaStats.Utils.maybe_to_int(@character_info["all_medal_counts"]["Gold"], 0) > 0 do %>
                         <div class="col-auto">
                             <div class="mx-auto w-auto">
                                 <h4 class="d-inline"><u>Gold</u>:</h4>
@@ -179,7 +179,7 @@
                             </div>
                         </div>
                     <% end %>
-                    <%= if SacaStats.Utils.maybe_to_int(@character_info["all_medal_counts"]["Silver"]) > 0 do %>
+                    <%= if SacaStats.Utils.maybe_to_int(@character_info["all_medal_counts"]["Silver"], 0) > 0 do %>
                         <div class="col-auto">
                             <div class="mx-auto w-auto">
                                 <h4 class="d-inline"><u>Silver</u>:</h4>
@@ -188,7 +188,7 @@
                             </div>
                         </div>
                     <% end %>
-                    <%= if SacaStats.Utils.maybe_to_int(@character_info["all_medal_counts"]["Bronze"]) > 0 do %>
+                    <%= if SacaStats.Utils.maybe_to_int(@character_info["all_medal_counts"]["Bronze"], 0) > 0 do %>
                         <div class="col-auto">
                             <div class="mx-auto w-auto">
                                 <h4 class="d-inline"><u>Bronze</u>:</h4>
@@ -211,37 +211,37 @@
                             <p class="d-inline"><u>Kills</u>:</p>
                         </div>
                         <div class="col-5 col-md-4">
-                            <p class="d-inline number"><%= SacaStatsWeb.CharacterController.get_stat_value(@character_info["stats"]["stat_history"], "kills") %></p>
+                            <p class="d-inline number"><%= SacaStats.Characters.get_stat_by_name(@character_stats["stats"]["stat_history"], "kills") %></p>
                         </div>
                         <div class="offset-0 col-7 offset-sm-2 col-sm-5 offset-md-3 col-md-3">
                             <p class="d-inline"><u>Deaths</u>:</p>
                         </div>
                         <div class="col-5 col-md-4">
-                            <p class="d-inline number"><%= SacaStatsWeb.CharacterController.get_stat_value(@character_info["stats"]["stat_history"], "deaths") %></p>
+                            <p class="d-inline number"><%= SacaStats.Characters.get_stat_by_name(@character_stats["stats"]["stat_history"], "deaths") %></p>
                         </div>
                         <div class="offset-0 col-7 offset-sm-2 col-sm-5 offset-md-3 col-md-3">
                             <p class="d-inline"><u>K/D Ratio</u>:</p>
                         </div>
                         <div class="col-5 col-md-4">
-                            <p class="d-inline"><%= SacaStats.Utils.safe_divide(SacaStatsWeb.CharacterController.get_percent_ratio(SacaStatsWeb.CharacterController.get_stat_value(@character_info["stats"]["stat_history"], "kills"), SacaStatsWeb.CharacterController.get_stat_value(@character_info["stats"]["stat_history"], "deaths")), 100, 4)%></p>
+                            <p class="d-inline"><%= SacaStats.Utils.safe_divide(SacaStats.Characters.get_stat_by_name(@character_stats["stats"]["stat_history"], "kills"), SacaStats.Characters.get_stat_by_name(@character_stats["stats"]["stat_history"], "deaths"), 4)%></p>
                         </div>
                         <div class="offset-0 col-7 offset-sm-2 col-sm-5 offset-md-3 col-md-3">
                             <p class="d-inline"><u>Score</u>:</p>
                         </div>
                         <div class="col-5 col-md-4">
-                            <p class="d-inline number"><%= SacaStatsWeb.CharacterController.get_stat_value(@character_info["stats"]["stat_history"], "score") %></p>
+                            <p class="d-inline number"><%= SacaStats.Characters.get_stat_by_name(@character_stats["stats"]["stat_history"], "score") %></p>
                         </div>
                         <div class="offset-0 col-7 offset-sm-2 col-sm-5 offset-md-3 col-md-3">
                             <p class="d-inline"><u>Time Played</u>:</p>
                         </div>
                         <div class="col-5 col-md-4">
-                            <p class="d-inline seconds-to-readable"><%= SacaStatsWeb.CharacterController.get_stat_value(@character_info["stats"]["stat_history"], "time") %></p>
+                            <p class="d-inline seconds-to-readable"><%= SacaStats.Characters.get_stat_by_name(@character_stats["stats"]["stat_history"], "time") %></p>
                         </div>
                         <div class="offset-0 col-7 offset-sm-2 col-sm-5 offset-md-3 col-md-3">
                             <p class="d-inline"><u>Total Medals</u>:</p>
                         </div>
                         <div class="col-5 col-md-4">
-                            <p class="d-inline number"><%= SacaStatsWeb.CharacterController.get_stat_value(@character_info["stats"]["stat_history"], "medals") %></p>
+                            <p class="d-inline number"><%= SacaStats.Characters.get_stat_by_name(@character_stats["stats"]["stat_history"], "medals") %></p>
                         </div>
                     </div>
                 </div>
@@ -253,7 +253,7 @@
 <%# <script type="text/javascript" src={Routes.static_path(@conn, "/js/character/general.js")}></script> %>
 <script type="module">
     import init from "<%= Routes.static_path(@conn, "/js/character/model.js") %>";
-    init("#characterModel", "<%= SacaStatsWeb.CharacterController.get_faction_alias(SacaStats.Utils.maybe_to_int(@character_info["faction_id"])) %>", 
+    init("#characterModel", "<%= Map.get(SacaStats.factions, SacaStats.Utils.maybe_to_int(@character_info["faction_id"], 0)).alias %>", 
         "<%= @character_info["head_id"] %>", "<%= @character_info["profile"]["profile_type_description"] %>");
 </script>
 

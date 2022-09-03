@@ -74,16 +74,16 @@
         <%= if @user do %>
           <div class="btn-group account-login-menu">
             <a href="#" id="account-dropdown-btn" data-toggle="dropdown">
-              <img src={@user["avatar_url"]} alt="Profile Picture" class="profile-picture" width="48" onerror={"this.onerror=null; this.src='" <> 
+              <img src={SacaStats.DiscordUser.get_avatar_url(@user)} alt="Profile Picture" class="profile-picture" width="48" onerror={"this.onerror=null; this.src='" <> 
                                 Routes.static_path(@conn, "/images/user/defaultUserProfilePicture.png")
                                 <> "'"}>
             </a>
             <div id="account-dropdown" class="dropdown-menu dropdown-menu-right">
-              <img src={@user["avatar_url"]} alt="Profile Picture" class="profile-picture my-auto" width="32" onerror={"this.onerror=null; this.src='" <> 
+              <img src={SacaStats.DiscordUser.get_avatar_url(@user)} alt="Profile Picture" class="profile-picture my-auto" width="32" onerror={"this.onerror=null; this.src='" <> 
                                 Routes.static_path(@conn, "/images/user/defaultUserProfilePicture.png")
                                 <> "'"}>
-              <h3 class="d-inline align-middle"><%= @user["username"] %></h3>
-              <h3 class="d-inline align-middle discriminator"><%="##{@user["discriminator"]}" %></h3>
+              <h3 class="d-inline align-middle"><%= @user.username %></h3>
+              <h3 class="d-inline align-middle discriminator"><%="##{@user.discriminator}" %></h3>
               <div class="dropdown-divider"></div>
               <button class="dropdown-item account" type="button" onclick={"location.href='/account'"}>Account</button>
               <button class="dropdown-item" type="button" onclick={"location.href='/logout?redirect_to=" <> @conn.request_path <> "'"}>Logout</button>
