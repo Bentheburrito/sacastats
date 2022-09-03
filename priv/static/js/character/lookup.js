@@ -62,12 +62,23 @@ function characterCardMiddleMouseClickPreventDefault(event) {
 }
 
 function characterCardClickEvent(event, isMiddleClick) {
+    //make sure it's not a removal
+    if (isEventTargetADeleteButtonClick(event)) {
+        return
+    }
     let card = $(event.target).closest(".character-status-card")[0];
     if (card != undefined && card.id != undefined && (!isMobileScreen() || selectedCard != card)) {
         let characterName = card.id.split("-")[0];
         let newTab = event.ctrlKey || isMiddleClick;
         swapURL(event, characterName, newTab);
     }
+}
+
+function isEventTargetADeleteButtonClick(event) {
+    let classList = event.target.classList;
+    return classList.contains("character-status-card-removal-button-mobile")
+        || classList.contains("character-status-card-removal-button")
+        || classList.contains("fa-trash");
 }
 
 function characterCardRightMouseClick(e) {
