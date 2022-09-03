@@ -10,8 +10,8 @@ defmodule SacaStatsWeb.CharacterLive.Search do
   alias PS2.API.{Query, QueryResult}
   alias SacaStats.{CensusCache, OnlineStatusCache, Session}
 
-  alias SacaStats.Repo
   alias SacaStats.Character.Favorite
+  alias SacaStats.Repo
 
   def render(assigns) do
     Phoenix.View.render(SacaStatsWeb.CharacterView, "lookup.html", assigns)
@@ -42,7 +42,12 @@ defmodule SacaStatsWeb.CharacterLive.Search do
     # if is_nil(user) || is_nil(user["id"]) do
     #   []
     # else
-    #   # cs = SacaStats.Character.Favorite.changeset(%SacaStats.Character.Favorite{}, %{"discord_id" => 206091499706908673, "character_id" => 5429281854933028721, "last_known_name" => "HeartBrain"})
+    # cs =
+    #   SacaStats.Character.Favorite.changeset(%SacaStats.Character.Favorite{}, %{
+    #     "discord_id" => 206091499706908673,
+    #     "character_id" => 5429281854933028721,
+    #     "last_known_name" => "HeartBrain"
+    #   })
 
     #   case Ecto.Query.from(f in Favorite, select: f, where: f.discord_id == ^user["id"])
     #        |> Repo.all() do
@@ -142,7 +147,12 @@ defmodule SacaStatsWeb.CharacterLive.Search do
     if is_nil(user) || is_nil(user["id"]) do
       []
     else
-      # cs = SacaStats.Character.Favorite.changeset(%SacaStats.Character.Favorite{}, %{"discord_id" => 206091499706908673, "character_id" => 5429281854933028721, "last_known_name" => "HeartBrain"})
+      # cs =
+      #   SacaStats.Character.Favorite.changeset(%SacaStats.Character.Favorite{}, %{
+      #     "discord_id" => 206091499706908673,
+      #     "character_id" => 5429281854933028721,
+      #     "last_known_name" => "HeartBrain"
+      #   })
 
       case Ecto.Query.from(f in Favorite, select: f, where: f.discord_id == ^user["id"])
            |> Repo.all() do
@@ -204,7 +214,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
     ~H"""
       <div id={name <> "-character-status-card"}
           class={"col-12 col-md-6 col-lg-4 col-xl-3 border rounded py-3 px-0 mx-0 mx-md-3 my-2 " <> (Map.get(SacaStats.factions, SacaStats.Utils.maybe_to_int(faction_id))[:alias] |> String.downcase()) <> "-character-status-card character-status-card"}>
-        <%= encode_character_remove_button_mobile(assigns, id, name) %>
+        <%= encode_character_remove_button_mobile(assigns, id) %>
         <%= encode_character_remove_button(assigns, id, name) %>
         <div class="row flex-row h-100">
           <%= encode_character_faction_image(assigns, name , faction_id) %>
@@ -215,7 +225,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
     """
   end
 
-  defp encode_character_remove_button_mobile(assigns, id, name) do
+  defp encode_character_remove_button_mobile(assigns, id) do
     ~H"""
       <div class="character-status-card-removal-button-mobile-container w-100 h-100 d-none">
         <button id={id <> "-character-status-card-removal-button-mobile"} phx-click="remove_favorite_character" phx-value-id={id}
