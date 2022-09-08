@@ -124,4 +124,12 @@ defmodule SacaStats.Utils do
       enforced?: enforced?
     }
   end
+
+  def get_rank_string(battle_rank, prestige) do
+    if maybe_to_int(prestige, 0) > 0 do
+      "ASP " <> prestige <> " BR " <> battle_rank
+    else
+      "BR " <> battle_rank
+    end
+  end
 end
