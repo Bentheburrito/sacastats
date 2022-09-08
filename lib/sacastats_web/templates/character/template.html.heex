@@ -36,25 +36,33 @@
         <%= if(Map.has_key?(@character_info, "outfit") && SacaStats.Utils.maybe_to_int(@character_info["outfit"]["leader_character_id"], 0) === SacaStats.Utils.maybe_to_int(@character_info["character_id"], 0) ) do %>
           <p data-toggle="tooltip" title={@character_info["outfit"]["name"] <> "'s outfit leader"} class="d-block d-md-inline align-top text-center text-md-left">&#11088;</p>
         <% end %>
-        <div class="d-none d-md-inline-block">
-          <.form let={form} for={@changeset} class="mb-0" action={if @is_favorite, do: "#{@conn.request_path}/unfavorite", else: "#{@conn.request_path}/favorite"}>
-            <%= hidden_input form, :discord_id, value: @user.id %>
-            <%= hidden_input form, :character_id, value: @character_info["character_id"] %>
-            <%= hidden_input form, :last_known_name, value: @character_info["name"]["first"] %>
-            
-            <button class={"btn " <> (if @is_favorite, do: "btn-secondary", else: "btn-primary") <> " ml-3 character-favorite-btn px-3 py-3"} type="submit">
+        
+        <%= if is_nil(@user) do %>
+          <div class="d-none d-md-inline-block">
+            <button class={"btn " <> (if @is_favorite, do: "btn-secondary", else: "btn-primary") <> " ml-3 character-favorite-btn px-3 py-3"} data-toggle="dropdown" aria-expanded="false" type="button">
               <%= HtmlEntities.decode(if @is_favorite, do: "&#9829;	Unfavorite", else: "&#9825;	Favorite") %>
             </button>
-          </.form>
-        </div>
-        <%= if is_nil(@user) do %>
-          Modal things
+            <div class="dropdown-menu px-2 not-logged-in-dropdown">
+              <h3>Looks like you are not logged in...</h3>
+              <p><%= "Log in to add '#{@character_info["name"]["first"]}' to your favorite's list."%></p>
+              <hr/>
+              <a href="/login">Log in</a>
+            </div>
+          </div>
         <% else %>
-        <%# if @is_favorite, do: Routes.character_path(@conn, :remove_favorite), else: Routes.character_path(@conn, :add_favorite) %>
-         <%# action={Routes.character_path(@conn, :add_favorite, @character_info["name"]["first"])} %>
-         <%# <.form let={form} for={@changeset} class="mb-0" method="POST" action={if @is_favorite, do: "#{@conn.request_path}/unfavorite", else: "#{@conn.request_path}/favorite"} > %>
-          
+          <div class="d-none d-md-inline-block">
+            <.form let={form} for={@changeset} class="mb-0" action={if @is_favorite, do: "#{@conn.request_path}/unfavorite", else: "#{@conn.request_path}/favorite"}>
+              <%= hidden_input form, :discord_id, value: @user && @user.id || nil %>
+              <%= hidden_input form, :character_id, value: @character_info["character_id"] %>
+              <%= hidden_input form, :last_known_name, value: @character_info["name"]["first"] %>
+              
+              <button class={"btn " <> (if @is_favorite, do: "btn-secondary", else: "btn-primary") <> " ml-3 character-favorite-btn px-3 py-3"} type="submit">
+                <%= HtmlEntities.decode(if @is_favorite, do: "&#9829;	Unfavorite", else: "&#9825;	Favorite") %>
+              </button>
+            </.form>
+          </div>
         <% end %>
+
         <div class="d-none d-md-flex float-md-right align-items-center h-100">
           <img src={Routes.static_path(@conn, "/images/character/" <> @online_status <> ".ico")} alt={@online_status} width="30">
           <p class="d-inline my-auto"><%=String.capitalize(@online_status) %></p>
