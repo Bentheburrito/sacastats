@@ -36,18 +36,16 @@
         <%= if(Map.has_key?(@character_info, "outfit") && SacaStats.Utils.maybe_to_int(@character_info["outfit"]["leader_character_id"], 0) === SacaStats.Utils.maybe_to_int(@character_info["character_id"], 0) ) do %>
           <p data-toggle="tooltip" title={@character_info["outfit"]["name"] <> "'s outfit leader"} class="d-block d-md-inline align-top text-center text-md-left">&#11088;</p>
         <% end %>
-        <div class="d-none d-md-inline">
-          <div class={"btn " <> if @is_favorite, do: "btn-secondary", else: "btn-primary" <> " ml-3"}>
-            <.form let={form} for={@changeset} class="mb-0" action={if @is_favorite, do: "#{@conn.request_path}/unfavorite", else: "#{@conn.request_path}/favorite"}>
-              <%= hidden_input form, :discord_id, value: @user.id %>
-              <%= hidden_input form, :character_id, value: @character_info["character_id"] %>
-              <%= hidden_input form, :last_known_name, value: @character_info["name"]["first"] %>
-              
-              <button class={"btn " <> (if @is_favorite, do: "btn-secondary", else: "btn-primary") <> " ml-3 character-favorite-btn"} type="submit">
-                <%= HtmlEntities.decode(if @is_favorite, do: "&#9829;	Unfavorite", else: "&#9825;	Favorite") %>
-              </button>
-            </.form>
-          </div>
+        <div class="d-none d-md-inline-block">
+          <.form let={form} for={@changeset} class="mb-0" action={if @is_favorite, do: "#{@conn.request_path}/unfavorite", else: "#{@conn.request_path}/favorite"}>
+            <%= hidden_input form, :discord_id, value: @user.id %>
+            <%= hidden_input form, :character_id, value: @character_info["character_id"] %>
+            <%= hidden_input form, :last_known_name, value: @character_info["name"]["first"] %>
+            
+            <button class={"btn " <> (if @is_favorite, do: "btn-secondary", else: "btn-primary") <> " ml-3 character-favorite-btn px-3 py-3"} type="submit">
+              <%= HtmlEntities.decode(if @is_favorite, do: "&#9829;	Unfavorite", else: "&#9825;	Favorite") %>
+            </button>
+          </.form>
         </div>
         <%= if is_nil(@user) do %>
           Modal things
