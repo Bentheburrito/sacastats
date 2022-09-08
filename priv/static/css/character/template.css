@@ -32,6 +32,9 @@
     font-size: large;
     padding: 3px;
     margin: 0 !important;
+    height: auto;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 @media only screen and (max-width: 767px) {

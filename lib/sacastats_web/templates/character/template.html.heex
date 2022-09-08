@@ -43,7 +43,7 @@
               <%= hidden_input form, :character_id, value: @character_info["character_id"] %>
               <%= hidden_input form, :last_known_name, value: @character_info["name"]["first"] %>
               
-              <button class="character-favorite-btn" type="submit">
+              <button class={"btn " <> (if @is_favorite, do: "btn-secondary", else: "btn-primary") <> " ml-3 character-favorite-btn"} type="submit">
                 <%= HtmlEntities.decode(if @is_favorite, do: "&#9829;	Unfavorite", else: "&#9825;	Favorite") %>
               </button>
             </.form>
