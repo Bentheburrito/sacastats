@@ -90,7 +90,7 @@
             </div>
           </div>
         <% else %>
-          <%= link "Login", to: "/login", class: "btn btn-primary account-login-menu", id: "login-nav-btn" %>
+          <%= link "Log in", to: "/login", class: "btn btn-primary account-login-menu", id: "login-nav-btn" %>
         <% end %>
       </nav>
     </header>
@@ -106,7 +106,7 @@
               <%= if @user do %>
                 <a class="account d-block" href="/account">Account</a>
               <% else %>
-                <%= link "Login", to: "/login", class: "account d-block"%>
+                <%= link "Log in", to: "/login", class: "account d-block"%>
               <% end %>
             </li>
             <li class="nav-item page-nav">
