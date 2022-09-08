@@ -22,7 +22,7 @@ defmodule SacaStatsWeb.CharacterController do
 
     return_path = Regex.replace(~r{/[^/]+$}, conn.request_path, "")
 
-    if is_favorite?(character_id, discord_id) do
+    if discord_id not in [nil, ""] && is_favorite?(character_id, discord_id) do
       conn
       |> put_flash(:error, "#{name} has already been favorited.")
       |> redirect(to: return_path)
@@ -53,7 +53,7 @@ defmodule SacaStatsWeb.CharacterController do
 
     return_path = Regex.replace(~r{/[^/]+$}, conn.request_path, "")
 
-    if is_favorite?(id, user_id) do
+    if user_id not in [nil, ""] && is_favorite?(id, user_id) do
       # Remove from DB.
       Repo.delete_all(
         from(f in Favorite, where: f.discord_id == ^user_id and f.character_id == ^id)
