@@ -34,6 +34,12 @@ defmodule SacaStatsWeb.Router do
     get "/:character_name", CharacterController, :base
     get "/:character_name/:stat_type", CharacterController, :character
     get "/:character_name/sessions/:login_timestamp", CharacterController, :session
+    post "/:character_name/:stat_type", CharacterController, :character_post
+    post "/:character_name/:stat_type/favorite", CharacterController, :add_favorite
+    post "/:character_name/:stat_type/unfavorite", CharacterController, :remove_favorite
+    post "/:character_name/:stat_type/:optional", CharacterController, :character_optional_post
+    post "/:character_name/:stat_type/:optional/favorite", CharacterController, :add_favorite
+    post "/:character_name/:stat_type/:optional/unfavorite", CharacterController, :remove_favorite
   end
 
   scope "/outfit", SacaStatsWeb do

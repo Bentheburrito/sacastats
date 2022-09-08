@@ -28,6 +28,12 @@
     padding-left: 15px;
 }
 
+.character-favorite-btn {
+    font-size: large;
+    padding: 3px;
+    margin: 0 !important;
+}
+
 @media only screen and (max-width: 767px) {
 
     /*for boostrap xs*/
