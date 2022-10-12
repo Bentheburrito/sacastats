@@ -69,11 +69,15 @@
         </div>
         <p id="characterId"><%= @character_info["character_id"] %></p>
         <div class="w-100 d-flex d-md-none mb-3">
-          <div class={"btn " <> if @is_favorite, do: "btn-secondary", else: "btn-primary" <> " mx-auto"}>
-            <p class="character-favorite-btn">
+          <.form let={form} for={@changeset} class="mx-auto" action={if @is_favorite, do: "#{@conn.request_path}/unfavorite", else: "#{@conn.request_path}/favorite"}>
+            <%= hidden_input form, :discord_id, value: @user && @user.id || nil %>
+            <%= hidden_input form, :character_id, value: @character_info["character_id"] %>
+            <%= hidden_input form, :last_known_name, value: @character_info["name"]["first"] %>
+            
+            <button class={"btn " <> (if @is_favorite, do: "btn-secondary", else: "btn-primary") <> " ml-3 character-favorite-btn px-3 py-3"} type="submit">
               <%= HtmlEntities.decode(if @is_favorite, do: "&#9829;	Unfavorite", else: "&#9825;	Favorite") %>
-            </p>
-          </div>
+            </button>
+          </.form>
         </div>
       </div>
     </div>
