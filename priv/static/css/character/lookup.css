@@ -1,3 +1,19 @@
+.collapse.show {
+    display: flex !important;
+}
+
+.flip {
+    -moz-transition: all .2s linear;
+    -webkit-transition: all .2s linear;
+    transition: all .2s linear;
+}
+
+.flip.down {
+    -moz-transform: rotate(180deg);
+    -webkit-transform: rotate(180deg);
+    transform: rotate(180deg);
+}
+
 .form-control {
     font-size: 14;
 }
@@ -31,10 +47,14 @@
     border-color: #2A94F7 !important;
 }
 
-.nso-character-status-card,
-.ns-character-status-card {
+.nso-character-status-card {
     background-image: linear-gradient(to right, #908567, rgba(255, 255, 255, 0));
     border-color: #908567 !important;
+}
+
+.ns-character-status-card {
+    background-image: linear-gradient(to right, #737373, rgba(255, 255, 255, 0));
+    border-color: #737373 !important;
 }
 
 .vs-character-status-card.character-card-selected,
@@ -56,11 +76,15 @@
 }
 
 .nso-character-status-card.character-card-selected,
-.ns-character-status-card.character-card-selected,
-.nso-character-status-card:hover,
-.ns-character-status-card:hover {
+.nso-character-status-card:hover {
     background-image: linear-gradient(to right, #939087, rgba(255, 255, 255, 0));
     border-color: #939087 !important;
+}
+
+.ns-character-status-card.character-card-selected,
+.ns-character-status-card:hover {
+    background-image: linear-gradient(to right, #8b8b8b, rgba(255, 255, 255, 0));
+    border-color: #8b8b8b !important;
 }
 
 .character-status-card:hover {

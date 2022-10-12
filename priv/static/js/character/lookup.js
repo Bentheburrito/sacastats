@@ -130,6 +130,13 @@ function addCharacterCardClick() {
         $(card).off('contextmenu', characterCardRightMouseClick);
         $(card).on('contextmenu', characterCardRightMouseClick);
     });
+
+    document.querySelectorAll(".status-card-section-header").forEach(header => {
+        header.addEventListener('click', () => {
+            let chevron = header.querySelector(".fa-chevron-up");
+            $(chevron).toggleClass("down");
+        });
+    });
 }
 
 function addDocumentClickEvents() {
