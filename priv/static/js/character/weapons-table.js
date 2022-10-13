@@ -121,7 +121,9 @@ function addCustomCopyFunction() {
                 if (i > 1) {
                     copyString = copyString + ", ";
                 }
-                copyString = copyString + (isMobileScreen() ? "" : (headerArray[i].innerText + ": ")) + dataArray[i].innerText;
+                let desktopTitle = ((dataArray[i].hasAttribute('data-mobile-title') && dataArray[i].getAttribute('data-mobile-title')) ?
+                    dataArray[i].getAttribute('data-mobile-title') : headerArray[i].innerText) + ": ";
+                copyString = copyString + (isMobileScreen() ? "" : desktopTitle) + dataArray[i].innerText;
             }
 
             //create new line space between each weapon stat

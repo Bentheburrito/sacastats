@@ -584,9 +584,14 @@ function copySelectedRows(e) {
         let index = 0;
         copyRows.forEach(row => {
             let dataArray = $(row).find('td');
-            copyString = copyString + (isMobileScreen() ? "" : (headerArray[0].innerText + ": ")) + dataArray[0].innerText;
-            for (let i = 1; i < dataArray.length; i++) {
-                copyString = copyString + ", " + (isMobileScreen() ? "" : (headerArray[i].innerText + ": ")) + dataArray[i].innerText;
+
+            for (let i = 0; i < dataArray.length; i++) {
+                if (i > 0) {
+                    copyString = copyString + ", ";
+                }
+                let desktopTitle = ((dataArray[i].hasAttribute('data-mobile-title') && dataArray[i].getAttribute('data-mobile-title')) ?
+                    dataArray[i].getAttribute('data-mobile-title') : headerArray[i].innerText) + ": ";
+                copyString = copyString + (isMobileScreen() ? "" : desktopTitle) + dataArray[i].innerText;
             }
             if (index < copyRows.size - 1) {
                 copyString = copyString + "\n\n";
