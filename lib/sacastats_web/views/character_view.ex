@@ -90,11 +90,12 @@ defmodule SacaStatsWeb.CharacterView do
   defp build_event_log_item(assigns, %Death{} = death, %Session{}, character_map) do
     character_identifier = get_character_name(assigns, character_map, death.character_id)
     attacker_identifier = get_character_name(assigns, character_map, death.attacker_character_id)
+    attacker_weapon_identifier = get_weapon_name(assigns, death.attacker_weapon_id)
 
     ~H"""
     <li>
       <%= attacker_identifier %> killed <%= character_identifier %>
-      with <%= SacaStats.weapons()[death.attacker_weapon_id]["name"] %> (<%= death.attacker_weapon_id %>)
+      with <%= attacker_weapon_identifier %>
       <%= death.is_headshot && "(headshot)" || "" %>
       -
       <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, death.timestamp) %>
@@ -123,11 +124,12 @@ defmodule SacaStatsWeb.CharacterView do
   defp build_event_log_item(assigns, %VehicleDestroy{} = vd, %Session{}, character_map) do
     character_identifier = get_character_name(assigns, character_map, vd.character_id)
     attacker_identifier = get_character_name(assigns, character_map, vd.attacker_character_id)
+    attacker_weapon_identifier = get_weapon_name(assigns, vd.attacker_weapon_id)
 
     ~H"""
     <li>
       <%= attacker_identifier %> destroyed <%= character_identifier %>'s <%= SacaStats.vehicles()[vd.vehicle_id]["name"] %>
-      with <%= SacaStats.weapons()[vd.attacker_weapon_id]["name"] %> (<%= vd.attacker_weapon_id %>)
+      with <%= attacker_weapon_identifier %>
       <%= vd.attacker_vehicle_id != 0 && " while in a #{SacaStats.vehicles()[vd.attacker_vehicle_id]["name"]}" || "" %>
       -
       <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, vd.timestamp) %>
@@ -168,6 +170,12 @@ defmodule SacaStatsWeb.CharacterView do
 
   defp build_event_log_item(_, _, _, _), do: ""
 
+  defp get_character_name(assigns, _character_map, 0) do
+    ~H"""
+    [Unknown Character]
+    """
+  end
+
   defp get_character_name(assigns, character_map, character_id) do
     case character_map do
       %{^character_id => %{"name" => %{"first" => name}}} ->
@@ -176,7 +184,19 @@ defmodule SacaStatsWeb.CharacterView do
         """
 
       _ ->
-        ~H"somebody (<%= character_id %>)"
+        ~H"""
+        <a href={"/character/#{character_id}"}><%= character_id %></a> (Character Search Failed)
+        """
     end
+  end
+
+  defp get_weapon_name(assigns, 0) do
+    ~H"[Unknown Weapon]"
+  end
+
+  defp get_weapon_name(assigns, weapon_id) do
+    ~H"""
+    <%= SacaStats.weapons()[weapon_id]["name"] %> (<%= weapon_id %>)
+    """
   end
 end
