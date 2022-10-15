@@ -28,6 +28,10 @@ defmodule SacaStats.Utils do
 
   def bool_to_int(expression), do: (expression && 1) || 0
 
+  def to_percent(numerator, denominator, to_round \\ :no_rounding) do
+    safe_divide(numerator * 100, denominator, to_round)
+  end
+
   # via https://dorgan.netlify.app/posts/2021/04/the_elixir_ast_typedstruct/
   defmacro typedstruct(do: ast) do
     fields_ast =
