@@ -249,20 +249,22 @@ export function setupFlexTables() {
     }
 
     function tablePaginationClickEventHandler(e) {
-        if (e.target.classList.contains("page-link") || e.target.classList.contains("page-item")) {
-            $('html, body').animate({
-                scrollTop: $("#" + table.id).offset().top - ((window.innerWidth >= 768) ? 300 : 60) //- 254 to be at top
-            }, 500);
-        }
-        setTimeout(function () {
-            updateTableFormats(table.id);
-        }, 10);
+        /* NOTE: this does not work after a filtration use flex-bootstrap-table-filter's tablePaginationClickEventHandler for anything after a filtration*/
+        scrollToTopOfTable(e);
     }
     function addPaginationClick() {
         $('a.page-link').off('click', tablePaginationClickEventHandler);
         $('a.dropdown-item').off('click', tablePaginationClickEventHandler);
         $('a.page-link').on('click', tablePaginationClickEventHandler);
         $('a.dropdown-item').on('click', tablePaginationClickEventHandler);
+    }
+}
+
+export function scrollToTopOfTable(e) {
+    if (e.target.classList.contains("page-link") || e.target.classList.contains("page-item")) {
+        $('html, body').animate({
+            scrollTop: $("#" + table.id).offset().top - ((window.innerWidth >= 768) ? 300 : 60) //- 254 to be at top
+        }, 500);
     }
 }
 

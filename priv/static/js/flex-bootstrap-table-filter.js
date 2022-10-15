@@ -1,4 +1,4 @@
-import { setMobileHeaderTexts, updateSearchParam, setStickyHeaderWidths } from "/js/flex-bootstrap-table.js";
+import { setMobileHeaderTexts, updateSearchParam, setStickyHeaderWidths, scrollToTopOfTable } from "/js/flex-bootstrap-table.js";
 import { addFormatsToPage, addAnimationToProgressBars } from "/js/formats.js";
 import { showHideNextAuraxButton } from "/js/character/weapons-table.js";
 
@@ -449,6 +449,23 @@ export function updateTableFiltration() {
 
     //set table data to filtered data
     $(getTableID()).bootstrapTable('load', sortData(filteredTableData));
+
+    //reset pagination clicks
+    addPaginationClick();
+}
+
+function tablePaginationClickEventHandler(e) {
+    scrollToTopOfTable(e);
+    setNextAuraxVisibilities();
+    setTimeout(function () {
+        addPaginationClick();
+    }, 10);
+}
+function addPaginationClick() {
+    $('a.page-link').off('click', tablePaginationClickEventHandler);
+    $('a.dropdown-item').off('click', tablePaginationClickEventHandler);
+    $('a.page-link').on('click', tablePaginationClickEventHandler);
+    $('a.dropdown-item').on('click', tablePaginationClickEventHandler);
 }
 
 export function sortData(filteredTableData) {
