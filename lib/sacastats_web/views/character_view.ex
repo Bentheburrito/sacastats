@@ -149,7 +149,7 @@ defmodule SacaStatsWeb.CharacterView do
 
     ~H"""
     <li>
-      <%= character_identifier %> assisted in killing <%= other_identifier %> (<%= ge.amount %>%)
+      <%= character_identifier %> assisted in killing <%= other_identifier %>
       -
       <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, ge.timestamp) %>
     </li>
