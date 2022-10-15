@@ -21,15 +21,20 @@ defmodule SacaStats.Utils do
   @doc """
   Safely divides numerator by denominator, and returns the result multiplied by 100 to yield a percentage. Automatically
   rounds to 2 decimal points and minimizes the result to `100`. See the `Options` for more details
+
   ### Options
   - `:to_round` - the number of decimal points to round to. Defaults to `2`
   - `:max_at` - If the resulting percentage is greater than `:max_at`, this function returns `:max_at` instead.
   Defaults to 100. Can take `:infinity`
+
   #### Examples:
+
       iex> to_percent(1, 2)
       ...> 50
+
       iex> to_percent(24, 33, to_round: 5)
       ...> 0.72727
+
       # exclude the denominator if you already have a percentage
       iex> to_percent(110, max_at: 99)
       ...> 99

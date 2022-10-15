@@ -2,8 +2,8 @@ let sortedKills;
 let unsortedKills;
 export let nextAuraxElementID;
 
-function initializeSortedWeaponKillCount(kills) {
-    kills = getTrimmedKillNumbers(kills);
+function initializeSortedWeaponKillCount() {
+    let kills = getTrimmedKillNumbers(unsortedKills);
     sortedKills = new Map([...kills.entries()].sort((a, b) => b[1] - a[1]));
     nextAuraxElementID = [...sortedKills.keys()][0];
 }
@@ -18,7 +18,17 @@ function getTrimmedKillNumbers(kills) {
     return killNumbers;
 }
 
-export default function init(kills) {
-    unsortedKills = kills;
-    initializeSortedWeaponKillCount(kills);
+function getDefaultWeaponStats() {
+    if (document.getElementById("weaponTable") != undefined) {
+        let kills = new Map();
+        $('#weaponTable').bootstrapTable('getData', false).forEach(weapon => {
+            kills.set("weapon" + weapon.id + "Row", weapon.kills)
+        });
+        unsortedKills = kills;
+    }
+}
+
+export default function init() {
+    getDefaultWeaponStats();
+    initializeSortedWeaponKillCount();
 }

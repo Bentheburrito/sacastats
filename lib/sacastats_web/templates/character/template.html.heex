@@ -19,8 +19,8 @@
   <div class="row">
     <div class="col-12 col-md-1 text-center">
       <img class="float-md-left float-none" data-toggle="tooltip" 
-        title={@character_info["name"]["first"] <> " plays on the " <> Map.get(SacaStats.factions, SacaStats.Utils.maybe_to_int(@character_info["faction_id"]))[:name]} 
-        src={Map.get(SacaStats.factions, SacaStats.Utils.maybe_to_int(@character_info["faction_id"]))[:image]} 
+        title={@character_info["name"]["first"] <> " plays on the " <> Map.get(SacaStats.factions, SacaStats.Utils.maybe_to_int(@character_info["faction_id"], 0))[:name]} 
+        src={Map.get(SacaStats.factions, SacaStats.Utils.maybe_to_int(@character_info["faction_id"], 0))[:image]} 
         alt={@online_status} width="70">
     </div>
     <div class="col-12 col-md-11">
@@ -29,7 +29,7 @@
           <h1 class="text-center text-md-left d-block d-md-inline mx-auto" data-toggle="tooltip" title={@character_info["outfit"]["name"]} id="characterOutfit"><%= "[" <> @character_info["outfit"]["alias"] <> "] " %></h1>
         <% end %>
         <h1 class="text-center text-md-left d-block d-md-inline" id="characterName"><%= @character_info["name"]["first"] %></h1>
-        <%= if(Map.has_key?(@character_info, "outfit") && SacaStats.Utils.maybe_to_int(@character_info["outfit"]["leader_character_id"]) === SacaStats.Utils.maybe_to_int(@character_info["character_id"]) ) do %>
+        <%= if(Map.has_key?(@character_info, "outfit") && SacaStats.Utils.maybe_to_int(@character_info["outfit"]["leader_character_id"], 0) === SacaStats.Utils.maybe_to_int(@character_info["character_id"], 0) ) do %>
           <p data-toggle="tooltip" title={@character_info["outfit"]["name"] <> "'s outfit leader"} class="d-block d-md-inline align-top text-center text-md-left">&#11088;</p>
         <% end %>
         <div class="d-none d-md-flex float-md-right align-items-center h-100">
