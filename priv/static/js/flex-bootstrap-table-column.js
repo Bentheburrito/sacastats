@@ -122,7 +122,11 @@ function setColumnOrder() {
         });
         $(tableID).bootstrapTable('showColumn', array[fieldIndex]["field"]);
     }
-    //$(tableID).bootstrapTable('orderColumns', orderObject); DOESN'T WORK FOR DATA ONLY HEADERS
+    setTimeout(() => { refreshDragColumns(orderObject) }, 100);
+}
+
+function refreshDragColumns(orderObject) {
+    $(tableID).bootstrapTable('orderColumns', orderObject);
 }
 
 export function updateColumns() {
