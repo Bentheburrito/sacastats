@@ -29,7 +29,7 @@ defmodule SacaStats.SIDs do
   end
 
   def handle_cast(:refresh, _old_sids) do
-    {:noreply, fetch_sids()}
+    {:noreply, %SIDs{sids: fetch_sids(), used: []}}
   end
 
   def handle_call(:next, _from, %SIDs{used: used, sids: [next | sids]}) do

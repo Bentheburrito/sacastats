@@ -13,11 +13,15 @@ defmodule SacaStats.CensusCache do
             fallback_fn: &CensusCache.default_fallback/1,
             entry_expiration_ms: :infinity
 
-  @type cache_result :: {:ok, value :: any()} | {:error, :not_found}
+  @type key :: any()
+  @type keyable :: key | [key]
 
-  @type cache_many_result :: {:ok, %{(key :: any()) => value :: any() | :not_found}}
+  @type value :: any()
 
-  @type fallback_fn :: (key :: any() -> value :: any() | :not_found)
+  @type fallback_return_value :: value | :not_found | %{key => value | :not_found}
+  @type fallback_fn :: (keyable -> fallback_return_value)
+
+  @type cache_result :: {:ok, fallback_return_value} | {:error, :not_found}
 
   ### API
 
@@ -63,7 +67,7 @@ defmodule SacaStats.CensusCache do
   `{:ok, value}` (where `value` is the value in the cache corresponding to the key), or `{:error, :not_found}` if no
   entry could be found in the cache, nor by the fallback.
   """
-  @spec get_many(cache :: pid() | atom(), keys :: [any()]) :: cache_many_result()
+  @spec get_many(cache :: pid() | atom(), keys :: [any()]) :: cache_result()
   def get_many(cache, keys) when is_pid(cache) or is_atom(cache) do
     GenServer.call(cache, {:get_many, keys}, 25_000)
   end
