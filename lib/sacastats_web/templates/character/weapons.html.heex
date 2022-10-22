@@ -376,7 +376,7 @@
             <th data-field="vsdamaget" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="VS damage taken" class="drag-accept">VS-Damage.T</th>
             <th data-field="ncdamaget" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="NC damage taken" class="drag-accept">NC-Damage.T</th>
             <th data-field="trdamaget" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="TR damage taken" class="drag-accept">TR-Damage.T</th>
-            <th data-field="time" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Time used with" class="drag-accept">Time</th>
+            <th data-field="time" data-sortable="true" data-sorter="timeSorter" data-sort-order="desc" data-toggle="tooltip" title="Time used with" class="drag-accept">Time</th>
             <th data-field="certs" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Certs earned with weapon" class="drag-accept">Certs</th>
             <th data-field="cpm" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Certs per minute" class="drag-accept">CPM</th>
             <th data-field="score" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Score earned with weapon" class="drag-accept">Score</th>
@@ -543,6 +543,22 @@
         <% end %>
     </tbody>
 </table>
+
+<script>
+    //initialize weapon sorters
+    function timeSorter(a, b) {
+        var aa = getTimeInSeconds(a);
+        var bb = getTimeInSeconds(b);
+        return aa - bb;
+    }
+
+    function getTimeInSeconds(time) {
+        var div = document.createElement('div');
+        div.innerHTML = time.trim();
+
+        return +div.firstChild.innerHTML;
+    }
+</script>
 
 <script type="module">
     //initialize weapon table
