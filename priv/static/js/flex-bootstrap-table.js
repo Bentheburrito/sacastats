@@ -1,10 +1,11 @@
 import { addFormatsToPage, addAnimationToProgressBars } from "/js/formats.js";
-import { showHideNextAuraxButton } from "/js/character/weapons-table.js";
 import * as bootstrapTableFilter from "/js/flex-bootstrap-table-filter.js";
 import * as bootstrapSelection from "/js/flex-bootstrap-table-selection.js";
 import * as bootstrapColumn from "/js/flex-bootstrap-table-column.js";
 
 let table;
+const TABLE_INITIALIZED_EVENT = "flex-bootstrap-table-initialized";
+const TABLE_FORMATS_UPDATED_EVENT = "flex-bootstrap-table-formats-updated";
 
 export function setupFlexTables() {
 
@@ -31,7 +32,7 @@ export function setupFlexTables() {
             addSearchEnter();
             addPaginationClick();
             addOnDocumentMouseUp();
-            showHideNextAuraxButton();
+            $(table).trigger(TABLE_INITIALIZED_EVENT);
         });
     }
 
@@ -50,12 +51,6 @@ export function setupFlexTables() {
         if (!isDesktop) {
             refreshByScroll();
         }
-    }
-
-    function setNextAuraxVisibilities() {
-        setTimeout(function () {
-            showHideNextAuraxButton();
-        }, 10);
     }
 
     function tableSearchEnterEventHandler(e) {
@@ -230,10 +225,11 @@ export function setupFlexTables() {
             addFormatsToPage();
         }
         setMobileHeaderTexts(tableID);
-        setNextAuraxVisibilities();
         bootstrapTableFilter.showHideClearFilterButtons();
         makeSureTableRecievedStyles();
         setStickyHeaderWidths();
+        addPaginationClick();
+        $(table).trigger(TABLE_FORMATS_UPDATED_EVENT);
     }
 
     function makeSureTableRecievedStyles(tableID) {

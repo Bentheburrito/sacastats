@@ -1,6 +1,5 @@
 import { setMobileHeaderTexts, updateSearchParam, setStickyHeaderWidths } from "/js/flex-bootstrap-table.js";
 import { addFormatsToPage, addAnimationToProgressBars } from "/js/formats.js";
-import { showHideNextAuraxButton } from "/js/character/weapons-table.js";
 
 var originalTableData;
 var tableID;
@@ -11,6 +10,7 @@ var filters = new Map();
 var firstGo = true;
 var hasID = false;
 var idFilteredData;
+const JUST_FILTERED_EVENT = "flex-bootstrap-table-just-filtered";
 
 function createFilterObjects() {
     //reinitialize variables
@@ -419,12 +419,6 @@ export function showHideClearFilterButtons() {
     }
 }
 
-function setNextAuraxVisibilities() {
-    setTimeout(function () {
-        showHideNextAuraxButton();
-    }, 10);
-}
-
 export function updateTableFiltration() {
     //make sure the table data and filtration are initialized
     accountForShowAlls();
@@ -442,10 +436,10 @@ export function updateTableFiltration() {
 
     //show or hide Buttons based on new filter
     showHideClearFilterButtons();
-    setNextAuraxVisibilities();
 
     //set table data to filtered data
     $(getTableID()).bootstrapTable('load', sortData(filteredTableData));
+    $(getTableID()).trigger(JUST_FILTERED_EVENT);
 }
 
 export function sortData(filteredTableData) {

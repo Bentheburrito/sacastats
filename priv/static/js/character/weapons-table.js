@@ -2,6 +2,11 @@ import { nextAuraxElementID } from "/js/character/weapons.js";
 import * as bootstrapTableFilter from "/js/flex-bootstrap-table-filter.js";
 import * as bootstrapSelection from "/js/flex-bootstrap-table-selection.js";
 
+const TABLE_ID = "#weaponTable";
+const JUST_FILTERED_EVENT = "flex-bootstrap-table-just-filtered";
+const TABLE_INITIALIZED_EVENT = "flex-bootstrap-table-initialized";
+const TABLE_FORMATS_UPDATED_EVENT = "flex-bootstrap-table-formats-updated";
+
 window.addEventListener('load', (event) => {
     if (window.innerWidth >= 768) {
         setTimeout(function () {
@@ -160,14 +165,14 @@ function flashElement(elementId) {
     setTimeout(function () {
         window.clearInterval(flashInterval);
         $("#" + elementId).removeClass("flash-border");
-    }, 1000);
+    }, 1500);
 }
 
 function isMobileScreen() {
     return window.innerWidth <= 767;
 }
 
-export function showHideNextAuraxButton() {
+function showHideNextAuraxButton() {
     if (document.getElementById("nextAurax") != undefined) {
         if (document.getElementById(nextAuraxElementID) != undefined) {
             $("#nextAurax").show();
@@ -177,12 +182,29 @@ export function showHideNextAuraxButton() {
     }
 }
 
+function addCustomEventListeners() {
+    $(TABLE_ID).on(JUST_FILTERED_EVENT, function () {
+        setTimeout(function () {
+            showHideNextAuraxButton();
+        }, 10);
+    });
+
+    $(TABLE_ID).on(TABLE_INITIALIZED_EVENT, function () {
+        showHideNextAuraxButton();
+    });
+
+    $(TABLE_ID).on(TABLE_FORMATS_UPDATED_EVENT, function () {
+        showHideNextAuraxButton();
+    });
+}
+
 export default function init() {
-    $('#weaponTable').bootstrapTable({
+    $(TABLE_ID).bootstrapTable({
         dragaccept: '.drag-accept'
     });
 
     initializeButtonEvent();
     addCustomFilters();
     addCustomCopyFunction();
+    addCustomEventListeners();
 }
