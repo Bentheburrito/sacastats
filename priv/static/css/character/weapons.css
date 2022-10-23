@@ -1,5 +1,6 @@
 .aurax-progress {
     background-color: #c29ffa !important;
+    overflow: visible;
 }
 
 .medal {
