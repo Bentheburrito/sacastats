@@ -2,10 +2,12 @@ import { addFormatsToPage, addAnimationToProgressBars } from "/js/formats.js";
 import * as bootstrapTableFilter from "/js/flex-bootstrap-table-filter.js";
 import * as bootstrapSelection from "/js/flex-bootstrap-table-selection.js";
 import * as bootstrapColumn from "/js/flex-bootstrap-table-column.js";
+import * as flexBootstrapTableEvents from "/js/events/flex-bootstrap-table-events.js";
+import * as generalEvents from "/js/events/general-events.js";
 
 let table;
-const TABLE_INITIALIZED_EVENT = "flex-bootstrap-table-initialized";
-const TABLE_FORMATS_UPDATED_EVENT = "flex-bootstrap-table-formats-updated";
+
+let isPageFormatted = false;
 
 export function setupFlexTables() {
 
@@ -27,18 +29,21 @@ export function setupFlexTables() {
             table = responseTable;
             initializeStickyHeaderWidths();
             setMobileHeaderTexts(table.id);
+            setStickyHeaderWidths();
             addOnTHeadClick();
             addToolBarClick();
             addSearchEnter();
             addPaginationClick();
             addOnDocumentMouseUp();
-            $(table).trigger(TABLE_INITIALIZED_EVENT);
+            addTableCustomEventListeners(table.id);
+            $(table).trigger(flexBootstrapTableEvents.initializedEvent);
         });
     }
 
 
     window.addEventListener('load', (event) => {
         handleScreenWidthChange();
+        addCustomEventListeners();
     });
 
     function handleScreenWidthChange() {
@@ -51,6 +56,17 @@ export function setupFlexTables() {
         if (!isDesktop) {
             refreshByScroll();
         }
+    }
+
+    function handleTableColumnReorderEvent() {
+        setTimeout(function () {
+            updateTableFormats(table.id);
+            refreshByScroll();
+        }, 10);
+    }
+    function addTableCustomEventListeners(tableID) {
+        $('#' + tableID).off("reorder-column.bs.table", handleTableColumnReorderEvent);
+        $('#' + tableID).on("reorder-column.bs.table", handleTableColumnReorderEvent);
     }
 
     function tableSearchEnterEventHandler(e) {
@@ -125,12 +141,8 @@ export function setupFlexTables() {
         }
 
         setTimeout(function () {
-            setFlexTableVisibilities();
+            updateTableFormats(table.id);
         }, 10);
-
-        setTimeout(function () {
-            setMobileHeaderTexts(table.id);
-        }, 500);
     }
     function dropDownMenuClickEventHandler(e) {
         let target = e.target;
@@ -157,8 +169,15 @@ export function setupFlexTables() {
     }
 
     function refreshByScroll() {
-        window.scrollBy(0, -1);
-        window.scrollBy(0, 1);
+        let currentScrollPosition = $(window).scrollTop();
+        let maxScrollPosition = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+
+        if (currentScrollPosition == maxScrollPosition) {
+            $(window).scrollTop(currentScrollPosition - 1);
+        } else {
+            $(window).scrollTop(currentScrollPosition + 1);
+            $(window).scrollTop(currentScrollPosition - 1);
+        }
     }
 
     function documentMouseUpEventHandler(e) {
@@ -186,50 +205,40 @@ export function setupFlexTables() {
         $(document).on("mouseup", documentMouseUpEventHandler);
     }
 
-    let prevDate = new Date().getTime();
-    function tableMouseMoveEventHandler(e) {
-        var date = new Date().getTime();
-        if (date - prevDate > 300) {
-            if (!didTableRecieveStyleUpdate()) {
-                addAnimationToProgressBars();
-                addFormatsToPage();
-                refreshByScroll();
-            }
-            prevDate = date;
+    function tableHeaderClickEventHandler(e) {
+        let table = $(e.target).closest("table")[0];
+        if (table != undefined && table.id != undefined) {
+            setTimeout(function () {
+                updateTableFormats(table.id);
+            }, 10);
         }
     }
-    function tableHeaderMouseClickEventHandler() {
+    function tableHeaderMouseDownEventHandler() {
         bootstrapSelection.resetCopyRowSelection(undefined);
-        tableMouseClickEventHandler();
-    }
-    function tableMouseClickEventHandler() {
-        setTimeout(function () {
-            updateTableFormats(table.id);
-            refreshByScroll();
-        }, 1);
     }
     function addOnTHeadClick() {
-        table.removeEventListener('mousemove', tableMouseMoveEventHandler);
-        table.firstElementChild.removeEventListener('click', tableHeaderMouseClickEventHandler);
-        table.addEventListener('mousemove', tableMouseMoveEventHandler);
-        table.firstElementChild.addEventListener('click', tableHeaderMouseClickEventHandler);
-        document.querySelector(".sticky-header-container").removeEventListener('mousemove', tableMouseMoveEventHandler);
-        document.querySelector(".sticky-header-container").removeEventListener('click', tableHeaderMouseClickEventHandler);
-        document.querySelector(".sticky-header-container").addEventListener('mousemove', tableMouseMoveEventHandler);
-        document.querySelector(".sticky-header-container").addEventListener('click', tableHeaderMouseClickEventHandler);
+        table.firstElementChild.removeEventListener('click', tableHeaderClickEventHandler);
+        table.firstElementChild.removeEventListener('mousedown', tableHeaderMouseDownEventHandler);
+        table.firstElementChild.addEventListener('click', tableHeaderClickEventHandler);
+        table.firstElementChild.addEventListener('mousedown', tableHeaderMouseDownEventHandler);
+        document.querySelector(".sticky-header").removeEventListener('click', tableHeaderClickEventHandler);
+        document.querySelector(".sticky-header").removeEventListener('mousedown', tableHeaderMouseDownEventHandler);
+        document.querySelector(".sticky-header").addEventListener('click', tableHeaderClickEventHandler);
+        document.querySelector(".sticky-header").addEventListener('mousedown', tableHeaderMouseDownEventHandler);
     }
 
     function updateTableFormats(tableID) {
-        if (!didTableRecieveStyleUpdate()) {
-            addAnimationToProgressBars();
-            addFormatsToPage();
-        }
+        isPageFormatted = false;
+        addAnimationToProgressBars();
+        addFormatsToPage();
         setMobileHeaderTexts(tableID);
         bootstrapTableFilter.showHideClearFilterButtons();
-        makeSureTableRecievedStyles();
         setStickyHeaderWidths();
         addPaginationClick();
-        $(table).trigger(TABLE_FORMATS_UPDATED_EVENT);
+        $(table).trigger(flexBootstrapTableEvents.formatsUpdatedEvent);
+        setTimeout(function () {
+            makeSureTableRecievedStyles();
+        }, 10);
     }
 
     function makeSureTableRecievedStyles(tableID) {
@@ -263,6 +272,15 @@ export function setupFlexTables() {
         $('a.dropdown-item').off('click', tablePaginationClickEventHandler);
         $('a.page-link').on('click', tablePaginationClickEventHandler);
         $('a.dropdown-item').on('click', tablePaginationClickEventHandler);
+    }
+
+    function addCustomEventListeners() {
+        $(document).on(generalEvents.pageFormattedEvent, function () {
+            isPageFormatted = true;
+        });
+        $(document).on(flexBootstrapTableEvents.filteredEvent, function () {
+            isPageFormatted = false;
+        });
     }
 }
 
@@ -309,24 +327,8 @@ function hasMobileHeader(text) {
     return text != undefined && (text.includes("table-responsive-stack-thead") || text.trim() == "Weapon");
 }
 
-export function didTableRecieveStyleUpdate() {
-    //loop through the rows
-    for (let tableRow of table.querySelector("tbody").querySelectorAll("tr")) {
-        let td = tableRow.querySelector(".weapon");
-        if (td != undefined) {
-            //make sure if it is over 0% that the width of the progress bar is too
-            let progress = td.querySelector(".progress-bar");
-            if (parseInt(progress.innerHTML.replace("%", "")) > 0) {
-                if (progress.style.width.replace("px", "") == "0") {
-                    return false;
-                }
-            }
-            //if it doesn't have a .weapon column just ignore progress bar formats
-        } else {
-            return true;
-        }
-    }
-    return true;
+function didTableRecieveStyleUpdate() {
+    return isPageFormatted;
 }
 
 function initializeStickyHeaderWidths() {

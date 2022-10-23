@@ -1,11 +1,9 @@
 import { nextAuraxElementID } from "/js/character/weapons.js";
 import * as bootstrapTableFilter from "/js/flex-bootstrap-table-filter.js";
 import * as bootstrapSelection from "/js/flex-bootstrap-table-selection.js";
+import * as flexBootstrapTableEvents from "/js/events/flex-bootstrap-table-events.js";
 
 const TABLE_ID = "#weaponTable";
-const JUST_FILTERED_EVENT = "flex-bootstrap-table-just-filtered";
-const TABLE_INITIALIZED_EVENT = "flex-bootstrap-table-initialized";
-const TABLE_FORMATS_UPDATED_EVENT = "flex-bootstrap-table-formats-updated";
 
 window.addEventListener('load', (event) => {
     if (window.innerWidth >= 768) {
@@ -182,18 +180,33 @@ function showHideNextAuraxButton() {
     }
 }
 
+function addCustomSearchFunction() {
+    let customSearchFunction = function (filteredTableData, searchInput) {
+        return filteredTableData.filter(function (option) {
+            //create a template element and set it to the weapon td
+            var template = document.createElement('template');
+            template.innerHTML = option.weapon;
+
+            //get the weapon name and filter based on the search input
+            return template.content.querySelector(".weaponName").innerHTML.toLowerCase().indexOf(searchInput.toLowerCase()) > -1;
+        });
+    };
+
+    bootstrapTableFilter.addCustomSearch(customSearchFunction);
+}
+
 function addCustomEventListeners() {
-    $(TABLE_ID).on(JUST_FILTERED_EVENT, function () {
+    $(TABLE_ID).on(flexBootstrapTableEvents.filteredEvent, function () {
         setTimeout(function () {
             showHideNextAuraxButton();
         }, 10);
     });
 
-    $(TABLE_ID).on(TABLE_INITIALIZED_EVENT, function () {
+    $(TABLE_ID).on(flexBootstrapTableEvents.initializedEvent, function () {
         showHideNextAuraxButton();
     });
 
-    $(TABLE_ID).on(TABLE_FORMATS_UPDATED_EVENT, function () {
+    $(TABLE_ID).on(flexBootstrapTableEvents.formatsUpdatedEvent, function () {
         showHideNextAuraxButton();
     });
 }
@@ -204,6 +217,7 @@ export default function init() {
     });
 
     initializeButtonEvent();
+    addCustomSearchFunction();
     addCustomFilters();
     addCustomCopyFunction();
     addCustomEventListeners();

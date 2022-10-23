@@ -1,7 +1,8 @@
+import * as flexBootstrapTableEvents from "/js/events/flex-bootstrap-table-events.js";
+
 let sortedKills;
 let unsortedKills;
 const TABLE_ID = "#weaponTable";
-const JUST_FILTERED_EVENT = "flex-bootstrap-table-just-filtered";
 export let nextAuraxElementID;
 
 function setSortedWeaponKillCount(kills) {
@@ -26,7 +27,7 @@ function reInit(kills) {
 }
 
 function addCustomEventListeners() {
-    $(TABLE_ID).on(JUST_FILTERED_EVENT, function () {
+    $(TABLE_ID).on(flexBootstrapTableEvents.filteredEvent, function () {
         let kills = new Map();
         $(TABLE_ID).bootstrapTable('getData', false).forEach(weapon => {
             kills.set("weapon" + weapon.id + "Row", weapon.kills)

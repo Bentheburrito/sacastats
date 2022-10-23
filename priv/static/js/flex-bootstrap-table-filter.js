@@ -1,16 +1,17 @@
 import { setMobileHeaderTexts, updateSearchParam, setStickyHeaderWidths } from "/js/flex-bootstrap-table.js";
 import { addFormatsToPage, addAnimationToProgressBars } from "/js/formats.js";
+import * as flexBootstrapTableEvents from "/js/events/flex-bootstrap-table-events.js";
 
 var originalTableData;
 var tableID;
 var clearFilterButtonID;
 var clearAllFilterButtonID;
 var customFilterFunctions = new Object();
+var customSearchFunction;
 var filters = new Map();
 var firstGo = true;
 var hasID = false;
 var idFilteredData;
-const JUST_FILTERED_EVENT = "flex-bootstrap-table-just-filtered";
 
 function createFilterObjects() {
     //reinitialize variables
@@ -129,7 +130,7 @@ function getSearchTextFromSearchQuery(searchQuery) {
 function filterByIds(ids) {
     //filter original data based off of id
     let filteredDataArray = getOriginalTableData().filter(function (row) {
-        return ids.includes(row.id.replaceAll("weapon", "").replaceAll("Row", ""));
+        return ids.includes(row.id.replaceAll(tableID.substring(1), "").replaceAll("Row", ""));
     })
 
     //set the new id and make sure to compensate for the new filtering
@@ -142,8 +143,19 @@ function addFilterListeners() {
     //loop through filter map
     for (let [_, filterOptions] of filters) {
         //loop through each filter option and add a change event listener to update the filtration
+        let filtersToRemove = [];
         filterOptions.forEach((filter) => {
-            document.getElementById(filter.filterID).addEventListener('change', updateTableFiltration);
+            let filterElement = document.getElementById(filter.filterID)
+            if (filterElement != undefined) {
+                filterElement.addEventListener('change', updateTableFiltration);
+            } else {
+                filtersToRemove.add(filter);
+            }
+        });
+
+        //loop through each filter that no longer exists and remove them
+        filtersToRemove.forEach((filter) => {
+            filterOptions.remove(filter);
         });
     }
 
@@ -288,28 +300,18 @@ function isThereInput(text) {
     return (text != undefined || text != null) && text != "";
 }
 
-export function accountForSearch() {
+function accountForSearch() {
     //get the original table data
     var filteredTableData = getOriginalTableData();
 
-    //if there is a weapon table
-    let td = $(tableID).first()[0].querySelector(".weapon");
-    if (td != undefined) {
-        //get the search input
-        var searchInput = $(".form-control.search-input").first().val();
+    //get the search input
+    var searchInput = $(".form-control.search-input").first().val();
 
-        //if there is input, filter the table data based on it
-        if (isThereInput(searchInput)) {
-            filteredTableData = filteredTableData.filter(function (option) {
-                //create a template element and set it to the weapon td
-                var template = document.createElement('template');
-                template.innerHTML = option.weapon;
-
-                //get the weapon name and filter based on the search input
-                return template.content.querySelector(".weaponName").innerHTML.toLowerCase().indexOf(searchInput.toLowerCase()) > -1;
-            });
-        }
+    //if there is a custom search function and there is a search input call it
+    if (customSearchFunction != undefined && isThereInput(searchInput)) {
+        filteredTableData = customSearchFunction(filteredTableData, searchInput);
     }
+
     //return the filtered array
     return filteredTableData;
 }
@@ -439,7 +441,7 @@ export function updateTableFiltration() {
 
     //set table data to filtered data
     $(getTableID()).bootstrapTable('load', sortData(filteredTableData));
-    $(getTableID()).trigger(JUST_FILTERED_EVENT);
+    $(getTableID()).trigger(flexBootstrapTableEvents.filteredEvent);
 }
 
 export function sortData(filteredTableData) {
@@ -533,6 +535,31 @@ function applyFormatsToTable() {
 */
 export function setCustomFilterFunctions(functions) {
     customFilterFunctions = functions;
+}
+
+/*
+    Add a custom search function by setting them here with a function like this:
+
+    //get dependency
+    import * as bootstrapTableFilter from "/js/flex-bootstrap-table-filter.js";
+
+    //set the custom function object
+    let customSearchFunction = function (filteredTableData, searchInput) {
+        return filteredTableData.filter(function (option) {
+            //create a template element and set it to the weapon td
+            var template = document.createElement('template');
+            template.innerHTML = option.weapon;
+
+            //get the weapon name and filter based on the search input
+            return template.content.querySelector(".weaponName").innerHTML.toLowerCase().indexOf(searchInput.toLowerCase()) > -1;
+        });
+    };
+
+    //Add it to the Custom Search function
+    bootstrapTableFilter.addCustomSearch(customSearchFunction);
+*/
+export function addCustomSearch(searchFunction) {
+    customSearchFunction = searchFunction;
 }
 
 export function revertFilteredData() {

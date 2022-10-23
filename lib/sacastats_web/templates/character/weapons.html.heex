@@ -395,7 +395,7 @@
     </thead>
     <tbody>
         <%= for {weapon_id, weapon} <- @weapons do %>
-            <tr id={"weapon#{weapon_id}Row"} class="">
+            <tr id={"weaponTable#{weapon_id}Row"} class="">
                 <td class="weapon p-0">
                     <%= if SacaStats.Conversions.medal_code_by_kill_count(SacaStats.Weapons.get_total_values(Map.get(weapon, "weapon_kills"), @character_info["faction_id"]) + 
                             SacaStats.Weapons.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character_info["faction_id"])) > 0 do%>
