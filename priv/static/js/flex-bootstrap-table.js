@@ -203,6 +203,10 @@ export function setupFlexTables() {
             prevDate = date;
         }
     }
+    function tableHeaderMouseClickEventHandler() {
+        bootstrapSelection.resetCopyRowSelection(undefined);
+        tableMouseClickEventHandler();
+    }
     function tableMouseClickEventHandler() {
         setTimeout(function () {
             updateTableFormats(table.id);
@@ -211,13 +215,13 @@ export function setupFlexTables() {
     }
     function addOnTHeadClick() {
         table.removeEventListener('mousemove', tableMouseMoveEventHandler);
-        table.firstElementChild.removeEventListener('click', tableMouseClickEventHandler);
+        table.firstElementChild.removeEventListener('click', tableHeaderMouseClickEventHandler);
         table.addEventListener('mousemove', tableMouseMoveEventHandler);
-        table.firstElementChild.addEventListener('click', tableMouseClickEventHandler);
+        table.firstElementChild.addEventListener('click', tableHeaderMouseClickEventHandler);
         document.querySelector(".sticky-header-container").removeEventListener('mousemove', tableMouseMoveEventHandler);
-        document.querySelector(".sticky-header-container").removeEventListener('click', tableMouseClickEventHandler);
+        document.querySelector(".sticky-header-container").removeEventListener('click', tableHeaderMouseClickEventHandler);
         document.querySelector(".sticky-header-container").addEventListener('mousemove', tableMouseMoveEventHandler);
-        document.querySelector(".sticky-header-container").addEventListener('click', tableMouseClickEventHandler);
+        document.querySelector(".sticky-header-container").addEventListener('click', tableHeaderMouseClickEventHandler);
     }
 
     function updateTableFormats(tableID) {

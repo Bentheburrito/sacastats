@@ -23,11 +23,11 @@ let copyTextID;
 let contextMenuID;
 let copyToastID;
 
-function addRightClickTable() {
+function addTableClickHandler() {
     //add special Right click on table menu
     $(tableID).on('contextmenu', function (e) {
         //get the row
-        if (!document.querySelector("thead.sticky-header").contains(e.target)) {
+        if (!document.getElementById(tableID.substring(1)).querySelector("thead").contains(e.target)) {
             let row = $(e.target).closest("tr")[0];
 
             if (!isMobileScreen()) {
@@ -254,7 +254,7 @@ function addMobileSelectionMenuClickEvents() {
     copyLinkBtn.addEventListener("click", copyLinkHandler);
 }
 
-function resetCopyRowSelection(e) {
+export function resetCopyRowSelection(e) {
     //remove the selection style from each row and reinit the set
     copyRows.forEach(row => {
         $(row).removeClass(selectionClass).removeClass(mainSelectionClass);
@@ -484,27 +484,29 @@ function deleteRowFromSelection(row) {
 }
 
 function addRowToSelection(row, e) {
-    copyRows.add(row);
-    $(row).addClass(selectionClass);
-    let rowIndex = getRowArrayIndex(row);
+    if (!$(row).parent("thead").is("thead")) {
+        copyRows.add(row);
+        $(row).addClass(selectionClass);
+        let rowIndex = getRowArrayIndex(row);
 
-    if (isCtrlKeyPressedAndChangesStart(rowIndex, e)) {
-        startRowIndex = rowIndex;
-        selectedRowIndex = rowIndex;
-        $('.' + selectionClass).removeClass(mainSelectionClass);
-        $(row).add(mainSelectionClass);
-    } else if (startRowIndex == getRowArrayIndex(row)) {
-        $('.' + selectionClass).add(mainSelectionClass);
-    }
-    if (!isThereAMainSelection()) {
-        mainSelectClosestSelection(getRowArrayIndex(row));
-    }
-    if (isMobileScreen()) {
-        $('.' + selectionClass).removeClass(mainSelectionClass);
-        handleMobileMenu();
-        $("." + mobileSelectionMenu).show();
-        if (copyRows.size == rowArray.length) {
-            document.getElementById(mobileSelectionMenu + "-select-all-btn").checked = true;
+        if (isCtrlKeyPressedAndChangesStart(rowIndex, e)) {
+            startRowIndex = rowIndex;
+            selectedRowIndex = rowIndex;
+            $('.' + selectionClass).removeClass(mainSelectionClass);
+            $(row).add(mainSelectionClass);
+        } else if (startRowIndex == getRowArrayIndex(row)) {
+            $('.' + selectionClass).add(mainSelectionClass);
+        }
+        if (!isThereAMainSelection()) {
+            mainSelectClosestSelection(getRowArrayIndex(row));
+        }
+        if (isMobileScreen()) {
+            $('.' + selectionClass).removeClass(mainSelectionClass);
+            handleMobileMenu();
+            $("." + mobileSelectionMenu).show();
+            if (copyRows.size == rowArray.length) {
+                document.getElementById(mobileSelectionMenu + "-select-all-btn").checked = true;
+            }
         }
     }
 }
@@ -659,7 +661,7 @@ export function init(id) {
     copyToastID = "#table-copy-toast";
     rowArray = [...$(tableID).find("tbody").first()[0].children];
 
-    addRightClickTable();
+    addTableClickHandler();
     showHideSelectionMobileMenu();
     addMobileSelectionMenuClickEvents();
 }
