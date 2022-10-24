@@ -56,19 +56,61 @@ function addCustomFilters() {
             //filter the array based on the filter name category
             switch (filterName) {
                 case "years":
-                    return dataArray.filter(weapon => weapon.time >= YEAR_SECOND);
+                    return dataArray.filter(weapon => {
+                        let div = document.createElement('div');
+                        div.innerHTML = weapon.time.trim();
+                        let time = +div.firstChild.innerHTML;
+
+                        return time >= YEAR_SECOND
+                    });
                 case "weeks":
-                    return dataArray.filter(weapon => weapon.time >= WEEK_SECOND && weapon.time < YEAR_SECOND);
+                    return dataArray.filter(weapon => {
+                        let div = document.createElement('div');
+                        div.innerHTML = weapon.time.trim();
+                        let time = +div.firstChild.innerHTML;
+
+                        return time >= WEEK_SECOND && time < YEAR_SECOND
+                    });
                 case "days":
-                    return dataArray.filter(weapon => weapon.time >= DAY_SECOND && weapon.time < WEEK_SECOND);
+                    return dataArray.filter(weapon => {
+                        let div = document.createElement('div');
+                        div.innerHTML = weapon.time.trim();
+                        let time = +div.firstChild.innerHTML;
+
+                        return time >= DAY_SECOND && time < WEEK_SECOND
+                    });
                 case "hours":
-                    return dataArray.filter(weapon => weapon.time >= HOUR_SECOND && weapon.time < DAY_SECOND);
+                    return dataArray.filter(weapon => {
+                        let div = document.createElement('div');
+                        div.innerHTML = weapon.time.trim();
+                        let time = +div.firstChild.innerHTML;
+
+                        return time >= HOUR_SECOND && time < DAY_SECOND
+                    });
                 case "minutes":
-                    return dataArray.filter(weapon => weapon.time >= MINUTE_SECOND && weapon.time < HOUR_SECOND);
+                    return dataArray.filter(weapon => {
+                        let div = document.createElement('div');
+                        div.innerHTML = weapon.time.trim();
+                        let time = +div.firstChild.innerHTML;
+
+                        return time >= MINUTE_SECOND && time < HOUR_SECOND
+                    });
                 case "seconds":
-                    return dataArray.filter(weapon => weapon.time > 0 && weapon.time < MINUTE_SECOND);
+                    return dataArray.filter(weapon => {
+                        let div = document.createElement('div');
+                        div.innerHTML = weapon.time.trim();
+                        let time = +div.firstChild.innerHTML;
+
+                        return time > 0 && time < MINUTE_SECOND
+                    });
                 case "none":
-                    return dataArray.filter(weapon => weapon.time == 0);
+                    return dataArray.filter(weapon => {
+                        let div = document.createElement('div');
+                        div.innerHTML = weapon.time.trim();
+                        let time = +div.firstChild.innerHTML;
+
+                        return time == 0
+                    });
                 default: return dataArray;
             }
         }
