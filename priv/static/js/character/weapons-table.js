@@ -94,9 +94,9 @@ function addCustomCopyFunction() {
         }
 
         //add each selected id to the id arg separated by ','
-        newURL.search = newURL.search + "id=" + firstCopyElement.id.replaceAll("weapon", "").replaceAll("Row", "");
+        newURL.search = newURL.search + "id=" + firstCopyElement.id.replaceAll(TABLE_ID.substring(1), "").replaceAll("Row", "");
         for (let i = 1; i < copyRows.length; i++) {
-            newURL.search = newURL.search + "," + copyRows[i].id.replaceAll("weapon", "").replaceAll("Row", "");
+            newURL.search = newURL.search + "," + copyRows[i].id.replaceAll(TABLE_ID.substring(1), "").replaceAll("Row", "");
         }
 
         //return the new url
@@ -108,7 +108,7 @@ function addCustomCopyFunction() {
         let copyString = document.getElementById("characterName").innerText + "'s Weapon Stats\n\n";
 
         //initialize variables
-        let headerArray = [...$('#weaponTable').find('thead').first().find('tr').first()[0].children];
+        let headerArray = [...$(TABLE_ID).find('thead').first().find('tr').first()[0].children];
         let index = 0;
         let copyRows = bootstrapSelection.getSelectedRows();
 
@@ -117,7 +117,7 @@ function addCustomCopyFunction() {
             let dataArray = $(row).find('td');
 
             //create a weapon subheader
-            copyString = copyString + dataArray[0].innerText.split("\n")[0] + " (" + row.id.replaceAll("weapon", "").replaceAll("Row", "") + "):\n";
+            copyString = copyString + dataArray[0].innerText.split("\n")[0] + " (" + row.id.replaceAll(TABLE_ID.substring(1), "").replaceAll("Row", "") + "):\n";
 
             //loop through each coloumn and separate them by commas and property values by colons
             for (let i = 1; i < dataArray.length; i++) {

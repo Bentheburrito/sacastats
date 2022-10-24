@@ -30,7 +30,7 @@ function addCustomEventListeners() {
     $(TABLE_ID).on(flexBootstrapTableEvents.filteredEvent, function () {
         let kills = new Map();
         $(TABLE_ID).bootstrapTable('getData', false).forEach(weapon => {
-            kills.set("weapon" + weapon.id + "Row", weapon.kills)
+            kills.set(TABLE_ID.substring(1) + weapon.id + "Row", weapon.kills)
         });
         reInit(kills);
     });
