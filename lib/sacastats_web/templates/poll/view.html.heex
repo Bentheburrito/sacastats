@@ -1,6 +1,6 @@
 <section class="m-4 text-center">
   <h2><%= @poll.title %></h2>
-  <%= if SacaStatsWeb.PollLive.poll_owner?(@user.id, @poll) do %>
+  <%= if not is_nil(@user) and SacaStatsWeb.PollLive.poll_owner?(@user.id, @poll) do %>
     Don't want to vote in your poll? Skip to the
     <%= link "Manage Poll", to: "/outfit/poll/#{@poll.id}/manage" %>
     page
