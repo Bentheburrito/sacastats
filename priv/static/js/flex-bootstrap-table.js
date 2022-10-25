@@ -33,7 +33,6 @@ export function setupFlexTables() {
             addOnTHeadClick();
             addToolBarClick();
             addSearchEnter();
-            addPaginationClick();
             addOnDocumentMouseUp();
             addTableCustomEventListeners(table.id);
             $(table).trigger(flexBootstrapTableEvents.initializedEvent);
@@ -64,9 +63,19 @@ export function setupFlexTables() {
             refreshByScroll();
         }, 10);
     }
+    function handleTablePageChangeEvent() {
+        $('html, body').animate({
+            scrollTop: $("#" + table.id).offset().top - ((window.innerWidth >= 768) ? 300 : 60) //- 254 to be at top
+        }, 500);
+        setTimeout(function () {
+            updateTableFormats(table.id);
+        }, 10);
+    }
     function addTableCustomEventListeners(tableID) {
         $('#' + tableID).off("reorder-column.bs.table", handleTableColumnReorderEvent);
         $('#' + tableID).on("reorder-column.bs.table", handleTableColumnReorderEvent);
+        $('#' + tableID).off("page-change.bs.table", handleTablePageChangeEvent);
+        $('#' + tableID).on("page-change.bs.table", handleTablePageChangeEvent);
     }
 
     function tableSearchEnterEventHandler(e) {
@@ -234,10 +243,9 @@ export function setupFlexTables() {
         setMobileHeaderTexts(tableID);
         bootstrapTableFilter.showHideClearFilterButtons();
         setStickyHeaderWidths();
-        addPaginationClick();
         $(table).trigger(flexBootstrapTableEvents.formatsUpdatedEvent);
         setTimeout(function () {
-            makeSureTableRecievedStyles();
+            makeSureTableRecievedStyles(tableID);
         }, 10);
     }
 
@@ -257,29 +265,9 @@ export function setupFlexTables() {
         }, 10);
     }
 
-    function tablePaginationClickEventHandler(e) {
-        if (e.target.classList.contains("page-link") || e.target.classList.contains("page-item")) {
-            $('html, body').animate({
-                scrollTop: $("#" + table.id).offset().top - ((window.innerWidth >= 768) ? 300 : 60) //- 254 to be at top
-            }, 500);
-        }
-        setTimeout(function () {
-            updateTableFormats(table.id);
-        }, 10);
-    }
-    function addPaginationClick() {
-        $('a.page-link').off('click', tablePaginationClickEventHandler);
-        $('a.dropdown-item').off('click', tablePaginationClickEventHandler);
-        $('a.page-link').on('click', tablePaginationClickEventHandler);
-        $('a.dropdown-item').on('click', tablePaginationClickEventHandler);
-    }
-
     function addCustomEventListeners() {
         $(document).on(generalEvents.pageFormattedEvent, function () {
             isPageFormatted = true;
-        });
-        $(document).on(flexBootstrapTableEvents.filteredEvent, function () {
-            isPageFormatted = false;
         });
     }
 }
