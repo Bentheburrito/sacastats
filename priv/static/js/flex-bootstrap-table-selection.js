@@ -122,22 +122,12 @@ function addTableClickHandler() {
     });
 
     //add pagination events
-    $("a.dropdown-item").on("click", handleAnchorClickEvents);
+    $(tableID).on("page-change.bs.table", handleTablePageChangeEvent);
+    $("a.dropdown-item").on("click", handleTablePageChangeEvent);
 
-    $('a.page-link').on('click', handleAnchorClickEvents);
-
-    function handleAnchorClickEvents() {
+    function handleTablePageChangeEvent() {
         resetCopyRowSelection();
         hideSelectionMobileMenu();
-
-        //make sure the anchor element keeps the listener
-        setTimeout(function () {
-            $("a.dropdown-item").off("click", handleAnchorClickEvents);
-            $("a.dropdown-item").on("click", handleAnchorClickEvents);
-
-            $('a.page-link').off('click', handleAnchorClickEvents);
-            $('a.page-link').on('click', handleAnchorClickEvents);
-        }, 1000);
     }
     // function handlePageLinkClicks() {
     //     setTimeout(function () {
