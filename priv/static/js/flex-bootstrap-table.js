@@ -35,6 +35,7 @@ export function setupFlexTables() {
             addSearchEnter();
             addOnDocumentMouseUp();
             addTableCustomEventListeners(table.id);
+            updateTableFormats(table.id);
             $(table).trigger(flexBootstrapTableEvents.initializedEvent);
         });
     }
