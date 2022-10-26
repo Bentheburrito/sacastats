@@ -58,15 +58,14 @@ export function setupFlexTables() {
     }
 
     function handleTableColumnReorderEvent() {
-        setTimeout(function () {
-            updateTableFormats(table.id);
-            refreshByScroll();
-        }, 10);
+        refreshByScroll();
     }
     function handleTablePageChangeEvent() {
         $('html, body').animate({
             scrollTop: $("#" + table.id).offset().top - ((window.innerWidth >= 768) ? 300 : 60) //- 254 to be at top
         }, 500);
+    }
+    function handleTablePostBodyEvent() {
         setTimeout(function () {
             updateTableFormats(table.id);
         }, 10);
@@ -76,6 +75,8 @@ export function setupFlexTables() {
         $('#' + tableID).on("reorder-column.bs.table", handleTableColumnReorderEvent);
         $('#' + tableID).off("page-change.bs.table", handleTablePageChangeEvent);
         $('#' + tableID).on("page-change.bs.table", handleTablePageChangeEvent);
+        $('#' + tableID).off("post-body.bs.table", handleTablePostBodyEvent);
+        $('#' + tableID).on("post-body.bs.table", handleTablePostBodyEvent);
     }
 
     function tableSearchEnterEventHandler(e) {
@@ -94,7 +95,6 @@ export function setupFlexTables() {
         updateSearchParam();
         setTimeout(function () {
             bootstrapTableFilter.updateTableFiltration();
-            updateTableFormats(table.id);
         }, 10);
 
         if (document.querySelector("input.search-input").value != "" && e.keyCode == 13) {
@@ -148,10 +148,6 @@ export function setupFlexTables() {
                 }
             }, 10);
         }
-
-        setTimeout(function () {
-            updateTableFormats(table.id);
-        }, 10);
     }
     function dropDownMenuClickEventHandler(e) {
         let target = e.target;
@@ -196,43 +192,21 @@ export function setupFlexTables() {
         }
 
         setTimeout(function () {
-            if (!didTableRecieveStyleUpdate()) {
-                setMobileHeaderTexts(table.id);
-                addAnimationToProgressBars();
-                addFormatsToPage();
-
-                setTimeout(function () {
-                    setStickyHeaderWidths();
-                }, 100);
-            }
             bootstrapColumn.updateColumns();
         }, 100);
     }
-
     function addOnDocumentMouseUp() {
         $(document).off("mouseup", documentMouseUpEventHandler);
         $(document).on("mouseup", documentMouseUpEventHandler);
     }
 
-    function tableHeaderClickEventHandler(e) {
-        let table = $(e.target).closest("table")[0];
-        if (table != undefined && table.id != undefined) {
-            setTimeout(function () {
-                updateTableFormats(table.id);
-            }, 10);
-        }
-    }
     function tableHeaderMouseDownEventHandler() {
         bootstrapSelection.resetCopyRowSelection(undefined);
     }
     function addOnTHeadClick() {
-        table.firstElementChild.removeEventListener('click', tableHeaderClickEventHandler);
         table.firstElementChild.removeEventListener('mousedown', tableHeaderMouseDownEventHandler);
-        table.firstElementChild.addEventListener('click', tableHeaderClickEventHandler);
         table.firstElementChild.addEventListener('mousedown', tableHeaderMouseDownEventHandler);
-        document.querySelector(".sticky-header").removeEventListener('click', tableHeaderClickEventHandler);
         document.querySelector(".sticky-header").removeEventListener('mousedown', tableHeaderMouseDownEventHandler);
-        document.querySelector(".sticky-header").addEventListener('click', tableHeaderClickEventHandler);
         document.querySelector(".sticky-header").addEventListener('mousedown', tableHeaderMouseDownEventHandler);
     }
 
