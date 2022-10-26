@@ -58,6 +58,11 @@ export function setupFlexTables() {
 
     function handleTableColumnReorderEvent() {
         refreshByScroll();
+
+        //will need to update formats as reorders take longer
+        setTimeout(function () {
+            updateTableFormats(table.id);
+        }, 10);
     }
     function handleTablePageChangeEvent() {
         $('html, body').animate({
