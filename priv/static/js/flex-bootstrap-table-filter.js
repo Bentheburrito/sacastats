@@ -149,13 +149,13 @@ function addFilterListeners() {
             if (filterElement != undefined) {
                 filterElement.addEventListener('change', updateTableFiltration);
             } else {
-                filtersToRemove.add(filter);
+                filtersToRemove.push(filter);
             }
         });
 
         //loop through each filter that no longer exists and remove them
         filtersToRemove.forEach((filter) => {
-            filterOptions.remove(filter);
+            filterOptions.filter(filterOption => filterOption != filter);
         });
     }
 
