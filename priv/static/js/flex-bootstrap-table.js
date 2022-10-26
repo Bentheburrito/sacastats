@@ -10,6 +10,7 @@ let table;
 let isPageFormatted = false;
 
 export function setupFlexTables() {
+    addCustomDocumentEventListeners();
 
     document.querySelectorAll('.table-responsive-stack').forEach(table => {
         bootstrapTableFilter.init(table.id);
@@ -29,7 +30,6 @@ export function setupFlexTables() {
             table = responseTable;
             initializeStickyHeaderWidths();
             setMobileHeaderTexts(table.id);
-            setStickyHeaderWidths();
             addOnTHeadClick();
             addToolBarClick();
             addSearchEnter();
@@ -42,7 +42,6 @@ export function setupFlexTables() {
 
     window.addEventListener('load', (event) => {
         handleScreenWidthChange();
-        addCustomEventListeners();
     });
 
     function handleScreenWidthChange() {
@@ -66,9 +65,7 @@ export function setupFlexTables() {
         }, 500);
     }
     function handleTablePostBodyEvent() {
-        setTimeout(function () {
-            updateTableFormats(table.id);
-        }, 10);
+        updateTableFormats(table.id);
     }
     function addTableCustomEventListeners(tableID) {
         $('#' + tableID).off("reorder-column.bs.table", handleTableColumnReorderEvent);
@@ -239,10 +236,21 @@ export function setupFlexTables() {
         }, 10);
     }
 
-    function addCustomEventListeners() {
+    function fixHeaderOnPageLoad() {
+        let isDesktop = window.innerWidth >= 768;
+
+        if (isDesktop) {
+            setTimeout(function () {
+                refreshByScroll();
+            }, 100);
+        }
+    }
+
+    function addCustomDocumentEventListeners() {
         $(document).on(generalEvents.pageFormattedEvent, function () {
             isPageFormatted = true;
         });
+        $(document).on(generalEvents.loadingScreenRemovedEvent, fixHeaderOnPageLoad);
     }
 }
 

@@ -1,5 +1,4 @@
-import { setMobileHeaderTexts, updateSearchParam, setStickyHeaderWidths } from "/js/flex-bootstrap-table.js";
-import { addFormatsToPage, addAnimationToProgressBars } from "/js/formats.js";
+import { updateSearchParam } from "/js/flex-bootstrap-table.js";
 import * as flexBootstrapTableEvents from "/js/events/flex-bootstrap-table-events.js";
 
 var originalTableData;
@@ -450,14 +449,11 @@ export function sortData(filteredTableData) {
 
     if (toSortDesc != undefined) {
         let sortOn = toSortDesc.innerText.toLowerCase();
-        applyFormatsToTable();
         return filteredTableData.sort(dynamicsort(sortOn, "desc"));
     } else if (toSortAsc != undefined) {
         let sortOn = toSortAsc.innerText.toLowerCase();
-        applyFormatsToTable();
         return filteredTableData.sort(dynamicsort(sortOn, "asc"));
     } else {
-        applyFormatsToTable();
         return filteredTableData;
     }
 }
@@ -483,15 +479,6 @@ function dynamicsort(property, order) {
             }
         }
     }
-}
-
-function applyFormatsToTable() {
-    setTimeout(function () {
-        addAnimationToProgressBars();
-        addFormatsToPage();
-        setMobileHeaderTexts(getTableID().substring(1));
-        setStickyHeaderWidths();
-    }, 10);
 }
 
 /*
