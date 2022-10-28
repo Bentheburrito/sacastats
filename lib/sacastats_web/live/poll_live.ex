@@ -43,7 +43,10 @@ defmodule SacaStatsWeb.PollLive do
     end)
   end
 
-  def allowed_voter?(_voter_id, %Poll{allowed_voters: []}), do: true
+  def allowed_voter?(_voter_id, %Poll{allowed_voters: [], allow_anonymous_voters: true}), do: true
+
+  def allowed_voter?(voter_id, %Poll{allowed_voters: [], allow_anonymous_voters: false}),
+    do: voter_id != 0
 
   def allowed_voter?(voter_id, %Poll{allowed_voters: allowed_voters}),
     do: voter_id in allowed_voters
