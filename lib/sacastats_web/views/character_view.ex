@@ -1,7 +1,20 @@
 defmodule SacaStatsWeb.CharacterView do
   use SacaStatsWeb, :view
 
-  alias SacaStats.{Events, Session}
+  import SacaStats, only: [is_assist_xp: 1]
+
+  alias SacaStats.Session
+
+  alias SacaStats.Events.{
+    BattleRankUp,
+    Death,
+    GainExperience,
+    PlayerFacilityCapture,
+    PlayerFacilityDefend,
+    PlayerLogin,
+    PlayerLogout,
+    VehicleDestroy
+  }
 
   require Logger
 
@@ -56,24 +69,16 @@ defmodule SacaStatsWeb.CharacterView do
   end
 
   def build_event_log(assigns, %Session{} = session) do
-    events =
-      (session.battle_rank_ups ++
-         session.player_facility_captures ++
-         session.player_facility_defends ++
-         session.vehicle_destroys ++
-         session.deaths)
-      |> Enum.sort_by(fn event -> event.timestamp end, :desc)
-
     ~H"""
     <ul>
-      <%= for e <- events do %>
-        <%= build_event_log_item(assigns, e, session) %>
+      <%= for e <- assigns.events do %>
+        <%= build_event_log_item(assigns, e, session, assigns.character_map) %>
       <% end %>
     </ul>
     """
   end
 
-  defp build_event_log_item(assigns, %Events.BattleRankUp{} = br_up, %Session{} = session) do
+  defp build_event_log_item(assigns, %BattleRankUp{} = br_up, %Session{} = session, _c_map) do
     ~H"""
     <li>
       <%= session.name %> ranked up to <%= br_up.battle_rank %> -
@@ -82,11 +87,15 @@ defmodule SacaStatsWeb.CharacterView do
     """
   end
 
-  defp build_event_log_item(assigns, %Events.Death{} = death, %Session{} = _session) do
+  defp build_event_log_item(assigns, %Death{} = death, %Session{}, character_map) do
+    character_identifier = get_character_name(assigns, character_map, death.character_id)
+    attacker_identifier = get_character_name(assigns, character_map, death.attacker_character_id)
+    attacker_weapon_identifier = get_weapon_name(assigns, death.attacker_weapon_id)
+
     ~H"""
     <li>
-      <%= death.attacker_character_id %> killed <%= death.character_id %>
-      with <%= SacaStats.weapons()[death.attacker_weapon_id]["name"] %> (<%= death.attacker_weapon_id %>)
+      <%= attacker_identifier %> killed <%= character_identifier %>
+      with <%= attacker_weapon_identifier %>
       <%= death.is_headshot && "(headshot)" || "" %>
       -
       <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, death.timestamp) %>
@@ -94,7 +103,7 @@ defmodule SacaStatsWeb.CharacterView do
     """
   end
 
-  defp build_event_log_item(assigns, %Events.PlayerFacilityCapture{} = cap, %Session{} = session) do
+  defp build_event_log_item(assigns, %PlayerFacilityCapture{} = cap, %Session{} = session, _c_map) do
     ~H"""
     <li>
       <%= session.name %> captured <%= cap.facility_id %> (new outfit owner: <%= cap.outfit_id %>) -
@@ -103,7 +112,7 @@ defmodule SacaStatsWeb.CharacterView do
     """
   end
 
-  defp build_event_log_item(assigns, %Events.PlayerFacilityDefend{} = def, %Session{} = session) do
+  defp build_event_log_item(assigns, %PlayerFacilityDefend{} = def, %Session{} = session, _) do
     ~H"""
     <li>
       <%= session.name %> defended <%= def.facility_id %> (outfit owner: <%= def.outfit_id %>) -
@@ -112,15 +121,82 @@ defmodule SacaStatsWeb.CharacterView do
     """
   end
 
-  defp build_event_log_item(assigns, %Events.VehicleDestroy{} = vd, %Session{} = _session) do
+  defp build_event_log_item(assigns, %VehicleDestroy{} = vd, %Session{}, character_map) do
+    character_identifier = get_character_name(assigns, character_map, vd.character_id)
+    attacker_identifier = get_character_name(assigns, character_map, vd.attacker_character_id)
+    attacker_weapon_identifier = get_weapon_name(assigns, vd.attacker_weapon_id)
+
     ~H"""
     <li>
-      <%= vd.attacker_character_id %> destroyed <%= vd.character_id %>'s <%= SacaStats.vehicles()[vd.vehicle_id]["name"] %>
-      with <%= SacaStats.weapons()[vd.attacker_weapon_id]["name"] %> (<%= vd.attacker_weapon_id %>)
+      <%= attacker_identifier %> destroyed <%= character_identifier %>'s <%= SacaStats.vehicles()[vd.vehicle_id]["name"] %>
+      with <%= attacker_weapon_identifier %>
       <%= vd.attacker_vehicle_id != 0 && " while in a #{SacaStats.vehicles()[vd.attacker_vehicle_id]["name"]}" || "" %>
       -
       <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, vd.timestamp) %>
     </li>
+    """
+  end
+
+  defp build_event_log_item(
+         assigns,
+         %GainExperience{experience_id: id, character_id: character_id} = ge,
+         %Session{character_id: character_id},
+         character_map
+       )
+       when is_assist_xp(id) do
+    other_identifier = get_character_name(assigns, character_map, ge.other_id)
+    character_identifier = get_character_name(assigns, character_map, character_id)
+
+    ~H"""
+    <li>
+      <%= character_identifier %> assisted in killing <%= other_identifier %>
+      -
+      <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, ge.timestamp) %>
+    </li>
+    """
+  end
+
+  defp build_event_log_item(assigns, %PlayerLogin{}, %Session{name: name}, _character_map) do
+    ~H"""
+    <%= name %> logged in.
+    """
+  end
+
+  defp build_event_log_item(assigns, %PlayerLogout{}, %Session{name: name}, _character_map) do
+    ~H"""
+    <%= name %> logged out.
+    """
+  end
+
+  defp build_event_log_item(_, _, _, _), do: ""
+
+  defp get_character_name(assigns, _character_map, 0) do
+    ~H"""
+    [Unknown Character]
+    """
+  end
+
+  defp get_character_name(assigns, character_map, character_id) do
+    case character_map do
+      %{^character_id => %{"name" => %{"first" => name}}} ->
+        ~H"""
+        <a href={"/character/#{name}"}><%= name %></a>
+        """
+
+      _ ->
+        ~H"""
+        <a href={"/character/#{character_id}"}><%= character_id %></a> (Character Search Failed)
+        """
+    end
+  end
+
+  defp get_weapon_name(assigns, 0) do
+    ~H"[Unknown Weapon]"
+  end
+
+  defp get_weapon_name(assigns, weapon_id) do
+    ~H"""
+    <%= SacaStats.weapons()[weapon_id]["name"] %> (<%= weapon_id %>)
     """
   end
 end

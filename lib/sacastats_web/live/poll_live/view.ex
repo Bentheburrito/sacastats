@@ -9,6 +9,7 @@ defmodule SacaStatsWeb.PollLive.View do
   alias SacaStats.{Poll, Repo}
   alias SacaStats.Poll.Item
   alias SacaStats.Poll.Item.Vote
+  alias SacaStats.Repo
 
   import SacaStatsWeb.PollLive
 

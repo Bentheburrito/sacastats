@@ -132,24 +132,4 @@ defmodule SacaStatsWeb.CharacterController do
       stat_page: stat_type <> ".html"
     ]
   end
-
-  @spec session(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def session(conn, %{"character_name" => name, "login_timestamp" => login_timestamp}) do
-    session = Session.get(name, login_timestamp)
-    {:ok, status} = CensusCache.get(SacaStats.OnlineStatusCache, session.character_id)
-
-    assigns = [
-      character_info: %{
-        "character_id" => session.character_id,
-        "name" => %{"first" => session.name},
-        "faction_id" => session.faction_id,
-        "outfit" => session.outfit
-      },
-      online_status: status,
-      stat_page: "session.html",
-      session: session
-    ]
-
-    render(conn, "template.html", assigns)
-  end
 end
