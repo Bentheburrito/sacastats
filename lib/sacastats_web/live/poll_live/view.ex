@@ -33,49 +33,56 @@ defmodule SacaStatsWeb.PollLive.View do
   end
 
   def build_poll_assigns_or_redirect(%Poll{id: id} = poll, session, socket) do
-    voter_id = get_voter_id(session)
-
-    cond do
-      not is_nil(poll.close_poll_at) and
-          DateTime.compare(DateTime.utc_now(), poll.close_poll_at) == :gt ->
+    case get_voter_id(session) do
+      :error ->
         {:ok,
          socket
-         |> put_flash(:info, "This poll is no longer taking votes.")
-         |> redirect(to: "/outfit/poll/#{id}/results")}
-
-      not allowed_voter?(voter_id, poll) and not poll_owner?(voter_id, poll) ->
-        {:ok,
-         socket
-         |> put_flash(
-           :error,
-           "You are not allowed to vote in this poll. If you believe this is a mistake, contact the owner of the poll."
-         )
+         |> put_flash(:error, "You must log in to vote on a poll.")
          |> redirect(to: "/outfit/poll")}
 
-      has_voted?(voter_id, poll) ->
-        {:ok, redirect(socket, to: "/outfit/poll/#{id}/results")}
+      {:ok, voter_id} ->
+        cond do
+          not is_nil(poll.close_poll_at) and
+              DateTime.compare(DateTime.utc_now(), poll.close_poll_at) == :gt ->
+            {:ok,
+             socket
+             |> put_flash(:info, "This poll is no longer taking votes.")
+             |> redirect(to: "/outfit/poll/#{id}/results")}
 
-      :else ->
-        vote_changesets =
-          for %Item{} = item <- poll.items, into: %{} do
-            changeset =
-              Vote.changeset(%Vote{}, %{
-                "voter_discord_id" => voter_id,
-                "item_id" => item.id
-              })
+          not allowed_voter?(voter_id, poll) and not poll_owner?(voter_id, poll) ->
+            {:ok,
+             socket
+             |> put_flash(
+               :error,
+               "You are not allowed to vote in this poll. If you believe this is a mistake, contact the owner of the poll."
+             )
+             |> redirect(to: "/outfit/poll")}
 
-            {item.id, changeset}
-          end
+          has_voted?(voter_id, poll) ->
+            {:ok, redirect(socket, to: "/outfit/poll/#{id}/results")}
 
-        item_map = Map.new(poll.items, &{&1.id, &1})
+          :else ->
+            vote_changesets =
+              for %Item{} = item <- poll.items, into: %{} do
+                changeset =
+                  Vote.changeset(%Vote{}, %{
+                    "voter_discord_id" => voter_id,
+                    "item_id" => item.id
+                  })
 
-        {:ok,
-         socket
-         |> assign(:poll, poll)
-         |> assign(:vote_changesets, vote_changesets)
-         |> assign(:item_map, item_map)
-         |> assign(:user, session["user"] || session[:user])
-         |> assign(:_csrf_token, session["_csrf_token"])}
+                {item.id, changeset}
+              end
+
+            item_map = Map.new(poll.items, &{&1.id, &1})
+
+            {:ok,
+             socket
+             |> assign(:poll, poll)
+             |> assign(:vote_changesets, vote_changesets)
+             |> assign(:item_map, item_map)
+             |> assign(:user, session["user"] || session[:user])
+             |> assign(:_csrf_token, session["_csrf_token"])}
+        end
     end
   end
 
@@ -89,19 +96,29 @@ defmodule SacaStatsWeb.PollLive.View do
   end
 
   def handle_event("form_submit", _params, socket) do
-    if DateTime.compare(socket.assigns.poll.close_poll_at, DateTime.utc_now()) == :lt do
-      {:noreply,
-       socket
-       |> put_flash(
-         :error,
-         "The poll has closed. If you think this is a mistake, contact the poll owner about increasing the deadline."
-       )}
-    else
-      submit_form(socket)
+    close_at = socket.assigns.poll.close_poll_at
+
+    case get_voter_id(socket.assigns) do
+      :error ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "You must be logged in to submit a form")}
+
+      {:ok, voter_id} ->
+        if not is_nil(close_at) and DateTime.compare(close_at, DateTime.utc_now()) == :lt do
+          {:noreply,
+           socket
+           |> put_flash(
+             :error,
+             "The poll has closed. If you think this is a mistake, contact the poll owner about increasing the deadline."
+           )}
+        else
+          submit_form(socket, voter_id)
+        end
     end
   end
 
-  def submit_form(socket) do
+  def submit_form(socket, voter_id) do
     transaction =
       socket.assigns.vote_changesets
       |> Stream.with_index()
@@ -122,7 +139,7 @@ defmodule SacaStatsWeb.PollLive.View do
         Phoenix.PubSub.broadcast(
           SacaStats.PubSub,
           "poll_vote:#{poll_id}",
-          {:poll_vote, get_voter_id(socket.assigns)}
+          {:poll_vote, voter_id}
         )
 
         {:noreply, redirect(socket, to: "/outfit/poll/#{poll_id}/results")}
@@ -147,7 +164,7 @@ defmodule SacaStatsWeb.PollLive.View do
   end
 
   def encode_poll_item_vote(assigns, %Phoenix.HTML.Form{data: %Vote{}} = vote_form, item) do
-    voter_id = get_voter_id(assigns)
+    {:ok, voter_id} = get_voter_id(assigns)
     choices = Repo.preload(item, :choices).choices
 
     ~H"""

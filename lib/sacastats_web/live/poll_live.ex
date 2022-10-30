@@ -21,15 +21,14 @@ defmodule SacaStatsWeb.PollLive do
   end
 
   def get_voter_id(%{user: %DiscordUser{id: user_id}}) do
-    SacaStats.Utils.maybe_to_int(user_id)
+    {:ok, SacaStats.Utils.maybe_to_int(user_id)}
   end
 
   def get_voter_id(%{"user" => %DiscordUser{id: user_id}}) do
-    SacaStats.Utils.maybe_to_int(user_id)
+    {:ok, SacaStats.Utils.maybe_to_int(user_id)}
   end
 
-  # anonymous voter
-  def get_voter_id(_assigns), do: 0
+  def get_voter_id(_), do: :error
 
   def has_voted?(%DiscordUser{id: user_id}, %Poll{} = poll) do
     has_voted?(user_id, poll)
@@ -43,10 +42,7 @@ defmodule SacaStatsWeb.PollLive do
     end)
   end
 
-  def allowed_voter?(_voter_id, %Poll{allowed_voters: [], allow_anonymous_voters: true}), do: true
-
-  def allowed_voter?(voter_id, %Poll{allowed_voters: [], allow_anonymous_voters: false}),
-    do: voter_id != 0
+  def allowed_voter?(_voter_id, %Poll{allowed_voters: []}), do: true
 
   def allowed_voter?(voter_id, %Poll{allowed_voters: allowed_voters}),
     do: voter_id in allowed_voters

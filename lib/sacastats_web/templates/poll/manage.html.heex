@@ -10,12 +10,6 @@
           <%= error_tag poll_form, :visible_results %>
         <% end %>
 
-        <%= label do %>
-          Allow Anonymous Voters
-          <%= checkbox poll_form, :allow_anonymous_voters %>
-          <%= error_tag poll_form, :allow_anonymous_voters %>
-        <% end %>
-
         <%= label poll_form, :allowed_voters, "Allowed Voters (paste Discord IDs, leave blank to allow any voters)" %>
         <%= error_tag poll_form, :allowed_voters %>
 

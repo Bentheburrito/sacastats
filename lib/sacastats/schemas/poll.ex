@@ -13,7 +13,6 @@ defmodule SacaStats.Poll do
     field :owner_discord_id, :integer
     field :title, :string
     field :visible_results, :boolean, default: false
-    field :allow_anonymous_voters, :boolean, default: true
     field :allowed_voters, {:array, :integer}, default: []
     field :close_poll_at, :utc_datetime
     has_many :items, Item
@@ -29,7 +28,6 @@ defmodule SacaStats.Poll do
       :owner_discord_id,
       :title,
       :visible_results,
-      :allow_anonymous_voters,
       :allowed_voters,
       :close_poll_at
     ])
@@ -46,7 +44,6 @@ defmodule SacaStats.Poll do
     |> cast(params, [
       :title,
       :visible_results,
-      :allow_anonymous_voters,
       :allowed_voters,
       :close_poll_at
     ])
