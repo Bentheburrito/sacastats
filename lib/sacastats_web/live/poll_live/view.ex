@@ -89,6 +89,19 @@ defmodule SacaStatsWeb.PollLive.View do
   end
 
   def handle_event("form_submit", _params, socket) do
+    if DateTime.compare(socket.assigns.poll.close_poll_at, DateTime.utc_now()) == :lt do
+      {:noreply,
+       socket
+       |> put_flash(
+         :error,
+         "The poll has closed. If you think this is a mistake, contact the poll owner about increasing the deadline."
+       )}
+    else
+      submit_form(socket)
+    end
+  end
+
+  def submit_form(socket) do
     transaction =
       socket.assigns.vote_changesets
       |> Stream.with_index()
