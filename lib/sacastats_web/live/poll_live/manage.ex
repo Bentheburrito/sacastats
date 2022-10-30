@@ -20,52 +20,49 @@ defmodule SacaStatsWeb.PollLive.Manage do
   end
 
   def mount(%{"id" => id}, session, socket) do
-    case get_poll(id) do
+    with %Poll{} = poll <- get_poll(id),
+         {:ok, voter_id} <- get_voter_id(session) do
+      if poll_owner?(voter_id, poll) do
+        vote_table_values =
+          for %Item{} = item <- poll.items,
+              %Vote{} = vote <- item.votes,
+              reduce: %{} do
+            mapped_votes ->
+              Map.update(
+                mapped_votes,
+                vote.voter_discord_id,
+                %{item.id => vote},
+                &Map.put(&1, item.id, vote)
+              )
+          end
+
+        Phoenix.PubSub.subscribe(SacaStats.PubSub, "poll_vote:#{poll.id}")
+
+        {:ok,
+         socket
+         |> assign(:poll, poll)
+         |> assign(:poll_changeset, Poll.update_changeset(poll))
+         |> assign(:item_map, Map.new(poll.items, &{&1.id, &1}))
+         |> assign(:vote_table_values, vote_table_values)
+         |> assign(:user, session["user"] || session[:user])
+         |> assign(:_csrf_token, session["_csrf_token"])}
+      else
+        {:ok,
+         socket
+         |> put_flash(:error, "You do not have permission to view that page.")
+         |> redirect(to: "/outfit/poll/#{id}")}
+      end
+    else
       nil ->
         {:ok,
          socket
          |> put_flash(:error, "The poll ID \"#{id}\" does not exist.")
          |> redirect(to: "/outfit/poll")}
 
-      %Poll{} = poll ->
-        case get_voter_id(session) do
-          :error ->
-            {:ok,
-             socket
-             |> put_flash(:error, "You do not have permission to view that page.")}
-
-          {:ok, voter_id} ->
-            if poll_owner?(voter_id, poll) do
-              vote_table_values =
-                for %Item{} = item <- poll.items,
-                    %Vote{} = vote <- item.votes,
-                    reduce: %{} do
-                  mapped_votes ->
-                    Map.update(
-                      mapped_votes,
-                      vote.voter_discord_id,
-                      %{item.id => vote},
-                      &Map.put(&1, item.id, vote)
-                    )
-                end
-
-              Phoenix.PubSub.subscribe(SacaStats.PubSub, "poll_vote:#{poll.id}")
-
-              {:ok,
-               socket
-               |> assign(:poll, poll)
-               |> assign(:poll_changeset, Poll.update_changeset(poll))
-               |> assign(:item_map, Map.new(poll.items, &{&1.id, &1}))
-               |> assign(:vote_table_values, vote_table_values)
-               |> assign(:user, session["user"] || session[:user])
-               |> assign(:_csrf_token, session["_csrf_token"])}
-            else
-              {:ok,
-               socket
-               |> put_flash(:error, "You do not have permission to view that page.")
-               |> redirect(to: "/outfit/poll/#{id}")}
-            end
-        end
+      :error ->
+        {:ok,
+         socket
+         |> put_flash(:error, "You do not have permission to view that page.")}
     end
   end
 

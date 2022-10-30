@@ -32,7 +32,7 @@ defmodule SacaStatsWeb.PollLive.View do
      |> redirect(to: "/outfit/poll")}
   end
 
-  def build_poll_assigns_or_redirect(%Poll{id: id} = poll, session, socket) do
+  def build_poll_assigns_or_redirect(%Poll{} = poll, session, socket) do
     case get_voter_id(session) do
       :error ->
         {:ok,
@@ -41,48 +41,52 @@ defmodule SacaStatsWeb.PollLive.View do
          |> redirect(to: "/outfit/poll")}
 
       {:ok, voter_id} ->
-        cond do
-          not is_nil(poll.close_poll_at) and
-              DateTime.compare(DateTime.utc_now(), poll.close_poll_at) == :gt ->
-            {:ok,
-             socket
-             |> put_flash(:info, "This poll is no longer taking votes.")
-             |> redirect(to: "/outfit/poll/#{id}/results")}
+        do_build_poll_assigns_or_redirect(poll, session, socket, voter_id)
+    end
+  end
 
-          not allowed_voter?(voter_id, poll) and not poll_owner?(voter_id, poll) ->
-            {:ok,
-             socket
-             |> put_flash(
-               :error,
-               "You are not allowed to vote in this poll. If you believe this is a mistake, contact the owner of the poll."
-             )
-             |> redirect(to: "/outfit/poll")}
+  defp do_build_poll_assigns_or_redirect(poll, session, socket, voter_id) do
+    cond do
+      not is_nil(poll.close_poll_at) and
+          DateTime.compare(DateTime.utc_now(), poll.close_poll_at) == :gt ->
+        {:ok,
+         socket
+         |> put_flash(:info, "This poll is no longer taking votes.")
+         |> redirect(to: "/outfit/poll/#{poll.id}/results")}
 
-          has_voted?(voter_id, poll) ->
-            {:ok, redirect(socket, to: "/outfit/poll/#{id}/results")}
+      not allowed_voter?(voter_id, poll) and not poll_owner?(voter_id, poll) ->
+        {:ok,
+         socket
+         |> put_flash(
+           :error,
+           "You are not allowed to vote in this poll. If you believe this is a mistake, contact the owner of the poll."
+         )
+         |> redirect(to: "/outfit/poll")}
 
-          :else ->
-            vote_changesets =
-              for %Item{} = item <- poll.items, into: %{} do
-                changeset =
-                  Vote.changeset(%Vote{}, %{
-                    "voter_discord_id" => voter_id,
-                    "item_id" => item.id
-                  })
+      has_voted?(voter_id, poll) ->
+        {:ok, redirect(socket, to: "/outfit/poll/#{poll.id}/results")}
 
-                {item.id, changeset}
-              end
+      :else ->
+        vote_changesets =
+          for %Item{} = item <- poll.items, into: %{} do
+            changeset =
+              Vote.changeset(%Vote{}, %{
+                "voter_discord_id" => voter_id,
+                "item_id" => item.id
+              })
 
-            item_map = Map.new(poll.items, &{&1.id, &1})
+            {item.id, changeset}
+          end
 
-            {:ok,
-             socket
-             |> assign(:poll, poll)
-             |> assign(:vote_changesets, vote_changesets)
-             |> assign(:item_map, item_map)
-             |> assign(:user, session["user"] || session[:user])
-             |> assign(:_csrf_token, session["_csrf_token"])}
-        end
+        item_map = Map.new(poll.items, &{&1.id, &1})
+
+        {:ok,
+         socket
+         |> assign(:poll, poll)
+         |> assign(:vote_changesets, vote_changesets)
+         |> assign(:item_map, item_map)
+         |> assign(:user, session["user"] || session[:user])
+         |> assign(:_csrf_token, session["_csrf_token"])}
     end
   end
 
