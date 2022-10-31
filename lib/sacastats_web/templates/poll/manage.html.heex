@@ -1,0 +1,109 @@
+<section class="m-4">
+  <h2 class="text-center"><%= @poll.title %></h2>
+
+  <div class="poll-item">
+    <h3 class="text-center">Poll Options</h3>
+      <.form let={poll_form} for={@poll_changeset} phx-change="update-poll">
+        <%= label do %>
+          Show Results to Voters
+          <%= checkbox poll_form, :visible_results %>
+          <%= error_tag poll_form, :visible_results %>
+        <% end %>
+
+        <%= label poll_form, :allowed_voters, "Allowed Voters (paste Discord IDs, leave blank to allow any voters)" %>
+        <%= error_tag poll_form, :allowed_voters %>
+
+        <%= for voter_id <- @poll.allowed_voters do %> 
+          <input value={voter_id} disabled>
+          <input type="hidden" name="poll[allowed_voters][]" value={voter_id}>
+          <%= link "X", 
+            to: "#",
+            type: "button",
+            class: "btn btn-danger",
+            phx_click: "delete-allowed-voter", 
+            phx_value_id: voter_id 
+          %>
+          <br>
+        <% end %>
+
+        <input name="poll[allowed_voters][]">
+
+        <%= label poll_form, :close_poll_at, "Close Poll at (UTC)" %>
+        <%= datetime_local_input poll_form, :close_poll_at %>
+        <%= error_tag poll_form, :close_poll_at %>
+        
+        <%= link "Delete Poll", 
+          to: "#",
+          type: "button",
+          class: "btn btn-danger",
+          phx_click: "delete-poll", 
+          phx_value_id: @poll.id, 
+          data: [confirm: "Are you sure you want to delete this poll? This cannot be undone."] 
+        %>
+      </.form>
+  </div>
+
+  <div class="poll-item">
+    <h3 class="text-center">Poll Item Stats and Options</h3>
+    <table>
+      <th>Item</th>
+      <th>Vote Distributions</th>
+      <th>Total Votes</th>
+      <th>Response Rate</th>
+      <th>Optional?</th>
+      <th>Show Results to Voters</th>
+      <th>Chart</th>
+
+      <%= for %{item_id: item_id} = summary <- summarize_poll(@poll, map_size(@vote_table_values)) do %>
+        <% item = Map.get(@item_map, item_id) %>
+        <tr>
+          <td><%= item.description %></td>
+          <td><%= summary.vote_distributions %></td>
+          <td><%= length(item.votes) %></td>
+          <td><%= summary.response_rate %>%</td>
+          <.form let={item_form} for={SacaStats.Poll.Item.update_changeset(item, %{})} phx-change="update-item">
+            <%= hidden_input item_form, :id, value: item.id %>
+            <td>
+              <%= label do %>
+                <%= checkbox item_form, :optional %>
+                <%= error_tag item_form, :optional %>
+              <% end %>
+            </td>
+            <td>
+              <%= label do %>
+                <%= checkbox item_form, :visible_results %>
+                <%= error_tag item_form, :visible_results %>
+              <% end %>
+            </td>
+          </.form>
+          <td><%= summary.pie_chart %></td>
+        </tr>
+      <% end %>
+    </table>
+  </div>
+
+  <div class="poll-item">
+    <h3 class="text-center">Voters</h3>
+    <table>
+      <th>Voter</th>
+      <%= for item <- @poll.items do %>
+        <th><%= item.description %></th>
+      <% end %>
+
+      <%= for voter_id <- Map.keys(@vote_table_values) do %>
+        <% vote_map = Map.get(@vote_table_values, voter_id) %>
+        <tr>
+          <td><%= get_discord_username(voter_id) %></td>
+          <%= for item <- @poll.items do %>
+            <% vote = Map.get(vote_map, item.id) %>
+            <%= if is_nil(vote) do %>
+              <td>N/A</td>
+            <% else %>
+              <td><%= vote.content %></td>
+            <% end %>
+          <% end %>
+        </tr>
+      <% end %>
+    </table>
+  </div>
+</section>

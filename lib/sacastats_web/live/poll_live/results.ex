@@ -18,14 +18,21 @@ defmodule SacaStatsWeb.PollLive.Results do
   def mount(%{"id" => id}, session, socket) do
     %Poll{} = poll = get_poll(id)
 
-    voter_id = get_voter_id(session)
+    case get_voter_id(session) do
+      :error ->
+        {:ok,
+         socket
+         |> put_flash(:error, "You must be logged in to view poll results.")
+         |> redirect(to: "/outfit/poll")}
 
-    Phoenix.PubSub.subscribe(SacaStats.PubSub, "poll_vote:#{poll.id}")
+      {:ok, voter_id} ->
+        Phoenix.PubSub.subscribe(SacaStats.PubSub, "poll_vote:#{poll.id}")
 
-    {:ok,
-     socket
-     |> assign(:poll, poll)
-     |> assign(:voter_id, voter_id)}
+        {:ok,
+         socket
+         |> assign(:poll, poll)
+         |> assign(:voter_id, voter_id)}
+    end
   end
 
   # handle new votes as they come in.

@@ -12,7 +12,7 @@ defmodule SacaStatsWeb.PollLive.Create do
   end
 
   def mount(_params, session, socket) do
-    user = session["user"]
+    user = session["user"] || session[:user]
 
     if is_nil(user) do
       {:ok,
@@ -24,7 +24,7 @@ defmodule SacaStatsWeb.PollLive.Create do
 
       {:ok,
        socket
-       |> assign(:owner_discord_id, user["id"])
+       |> assign(:owner_discord_id, user.id)
        |> assign(:changeset, changeset)
        |> assign(:prev_params, %{})}
     end
@@ -117,6 +117,19 @@ defmodule SacaStatsWeb.PollLive.Create do
      |> assign(:prev_params, params)}
   end
 
+  def handle_event("delete-allowed-voter", %{"id" => voter_id}, socket) do
+    new_allowed_voters = List.delete(socket.assigns.prev_params["allowed_voters"], voter_id)
+
+    params = Map.merge(socket.assigns.prev_params, %{"allowed_voters" => new_allowed_voters})
+
+    changeset = Poll.changeset(%Poll{}, params)
+
+    {:noreply,
+     socket
+     |> assign(:changeset, changeset)
+     |> assign(:prev_params, params)}
+  end
+
   def handle_event("form_submit", _params, socket) do
     case Repo.insert(socket.assigns.changeset) do
       {:ok, %Poll{id: id}} ->
@@ -157,9 +170,22 @@ defmodule SacaStatsWeb.PollLive.Create do
 
   defp encode_poll_item(assigns, %Phoenix.HTML.Form{} = item, item_index) do
     choices = inputs_for(item, :choices)
+    num_choices = length(choices)
 
     ~H"""
-    <h4><%= length(choices) == 0 && "Text" || "Multiple-Choice" %> Field</h4>
+    <h4><%= num_choices == 0 && "Text" || "Multiple-Choice" %> Field</h4>
+
+    <%= label do %>
+      Optional
+      <%= checkbox item, :optional %>
+      <%= error_tag item, :optional %>
+    <% end %>
+
+    <%= label do %>
+      Show Results to Voters
+      <%= checkbox item, :visible_results %>
+      <%= error_tag item, :visible_results %>
+    <% end %>
 
     <%= label item, :description %>
     <%= text_input item, :description %>

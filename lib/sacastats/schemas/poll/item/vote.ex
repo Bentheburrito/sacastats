@@ -11,15 +11,20 @@ defmodule SacaStats.Poll.Item.Vote do
 
   alias SacaStats.Poll.Item
 
+  @no_dup_votes_message "you cannot vote twice in a poll. Editing poll votes/responses is currently not supported."
+
   schema "poll_item_votes" do
     field :voter_discord_id, :integer
     field :content, :string
     belongs_to :item, Item
+
+    timestamps()
   end
 
   def changeset(vote, params \\ %{}) do
     vote
     |> cast(params, [:voter_discord_id, :content, :item_id])
     |> validate_required([:content, :item_id])
+    |> unique_constraint([:voter_discord_id, :item_id], message: @no_dup_votes_message)
   end
 end

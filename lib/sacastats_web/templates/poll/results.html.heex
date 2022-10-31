@@ -1,21 +1,16 @@
 <section class="m-4">
   <h2><%= @poll.title %></h2>
+  <%= if SacaStatsWeb.PollLive.poll_owner?(@voter_id, @poll) do %>
+    <%= link "Manage Poll", to: "/outfit/poll/#{@poll.id}/manage" %>
+  <% end %>
   <div class="poll-item">
-    <%= for item <- @poll.items do %>
-      <b><%= item.description %></b>:
+    <%= for item <- @poll.items, item.visible_results do %>
+      <h5><b><%= item.description %></b></h5>
       <%= if length(item.choices) > 0 do %>
-        <% votes_by_choice = Enum.frequencies_by(item.votes, fn vote -> vote.content end) %>
-        <ul>
-          <%= for choice <- item.choices do %>
-            <li><%= choice.description %>: <%= Map.get(votes_by_choice, choice.description, 0) %></li>
-          <% end %>
-        </ul>
+        <%= item |> get_vote_distributions() |> get_vote_distributions_svg() %>
       <% else %>
-        <%= for vote <- item.votes do %>
-          <br>
-          "<%= String.trim(vote.content) %>" 
-          <%= if @voter_id == @poll.owner_discord_id, do: "-#{get_discord_username(vote.voter_discord_id)}", else: "" %>
-        <% end %>
+        <%= length(item.votes) %> respondents
+        <br>
       <% end %>
       <br>
     <% end %>
