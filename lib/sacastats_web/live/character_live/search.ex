@@ -36,6 +36,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
 
     if not is_nil(user) do
       PubSub.subscribe(SacaStats.PubSub, "favorite_event:#{user.id}")
+      PubSub.subscribe(SacaStats.PubSub, "unfavorite_event:#{user.id}")
     end
 
     favorite_characters = get_favorite_users(user)
@@ -230,7 +231,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
     }
 
     updated_char_map =
-      socket.assigns.character_map
+      socket.assigns.favorite_characters
       |> Map.update!("online", fn char_list ->
         [character_info | char_list]
       end)
@@ -241,30 +242,82 @@ defmodule SacaStatsWeb.CharacterLive.Search do
         Enum.reject(char_list, fn char -> char["id"] == character_id end)
       end)
 
-    updated_socket = assign(socket, :character_map, updated_char_map)
+    updated_socket = assign(socket, :favorite_characters, updated_char_map)
 
     {:noreply, updated_socket}
   end
 
   # If someone favorites a character in another window, this is the fn that receives that character to add to the assigns
-  def handle_info(%Ecto.Changeset{} = event_cs, socket) do
-    event = Ecto.Changeset.apply_changes(event_cs)
+  def handle_info(%Favorite{} = favorite, socket) do
+    # {:ok, favorite_character_info} =
+    #   SacaStats.CensusCache.get(SacaStats.CharacterCache, favorite.character_id)
 
-    # events = socket.assigns.events
-    character_map = socket.assigns.character_map
+    # character_info = %{
+    #   "name" => favorite_character_info["name"]["first"],
+    #   "id" => favorite.character_id,
+    #   "outfit" => favorite_character_info["outfit"]["name"],
+    #   "rank" =>
+    #     SacaStats.Utils.get_rank_string(
+    #       favorite_character_info["battle_rank"]["value"],
+    #       favorite_character_info["prestige_level"]
+    #     ),
+    #   "faction_id" => favorite_character_info["faction_id"],
+    #   "online_status" => "online"
+    # }
 
-    user = socket.assigns.user
+    # updated_char_map =
+    #   socket.assigns.favorite_characters
+    #   |> Map.update!("online", fn char_list ->
+    #     Enum.reject(char_list, fn char -> char["id"] == favorite.character_id end)
+    #   end)
+    #   |> Map.update!("offline", fn char_list ->
+    #     Enum.reject(char_list, fn char -> char["id"] == favorite.character_id end)
+    #   end)
+    #   |> Map.update!("unknown", fn char_list ->
+    #     Enum.reject(char_list, fn char -> char["id"] == favorite.character_id end)
+    #   end)
+    updated_char_map = get_favorite_users(socket.assigns.user)
 
-    if not is_nil(user) do
-      PubSub.subscribe(SacaStats.PubSub, "favorite_event:#{user.id}")
-    end
-
-    favorite_characters = get_favorite_users(user)
-
-    {:ok,
+    {:noreply,
      socket
-     |> assign(:favorite_characters, favorite_characters)
-     |> assign(:user, user)}
+     |> assign(:favorite_characters, updated_char_map)}
+  end
+
+  # If someone unfavorites a character in another window, this is the fn that receives that character to remove to the assigns
+  def handle_info(%Favorite{} = favorite, socket) do
+    # {:ok, favorite_character_info} =
+    #   SacaStats.CensusCache.get(SacaStats.CharacterCache, favorite.character_id)
+
+    # character_info = %{
+    #   "name" => favorite_character_info["name"]["first"],
+    #   "id" => favorite.character_id,
+    #   "outfit" => favorite_character_info["outfit"]["name"],
+    #   "rank" =>
+    #     SacaStats.Utils.get_rank_string(
+    #       favorite_character_info["battle_rank"]["value"],
+    #       favorite_character_info["prestige_level"]
+    #     ),
+    #   "faction_id" => favorite_character_info["faction_id"],
+    #   "online_status" => "online"
+    # }
+
+    # updated_char_map =
+    #   socket.assigns.favorite_characters
+    #   |> Map.update!("online", fn char_list ->
+    #     [character_info | char_list]
+    #   end)
+    #   |> Map.update!("offline", fn char_list ->
+    #     Enum.reject(char_list, fn char -> char["id"] == favorite.character_id end)
+    #   end)
+    #   |> Map.update!("unknown", fn char_list ->
+    #     Enum.reject(char_list, fn char -> char["id"] == favorite.character_id end)
+    #   end)
+
+    updated_char_map = get_favorite_users(socket.assigns.user)
+
+    {:noreply,
+     socket
+     |> assign(:favorite_characters, updated_char_map)}
   end
 
   def handle_event("remove_favorite_character", %{"id" => id}, socket) do

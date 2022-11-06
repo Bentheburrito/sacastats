@@ -9,6 +9,8 @@ defmodule SacaStatsWeb.CharacterController do
   alias SacaStats.Character.Favorite
   alias SacaStats.Repo
 
+  alias Phoenix.PubSub
+
   def base(conn, %{"character_name" => _name}) do
     redirect(conn, to: conn.request_path <> "/general")
   end
@@ -35,12 +37,16 @@ defmodule SacaStatsWeb.CharacterController do
           :last_known_name => last_known_name
         })
 
-      Repo.insert(changeset)
+      case Repo.insert(changeset) do
+        {:ok, favorite} ->
+          PubSub.broadcast(SacaStats.PubSub, "favorite_event:#{favorite.discord_id}", favorite)
+          redirect(conn, to: return_path)
 
-      # redir to general stat page for now
-      # character(conn, Map.put(params, "stat_type", "general"))
-
-      redirect(conn, to: return_path)
+        {:error, _changeset} ->
+          conn
+          |> put_flash(:error, "An error occured while adding #{name} to the database.")
+          |> redirect(to: return_path)
+      end
     end
   end
 
@@ -54,10 +60,19 @@ defmodule SacaStatsWeb.CharacterController do
     return_path = Regex.replace(~r{/[^/]+$}, conn.request_path, "")
 
     if user_id not in [nil, ""] && is_favorite?(id, user_id) do
+      query = from(f in Favorite, where: f.discord_id == ^user_id and f.character_id == ^id)
+      favorite = Repo.one!(query)
       # Remove from DB.
-      Repo.delete_all(
-        from(f in Favorite, where: f.discord_id == ^user_id and f.character_id == ^id)
-      )
+      case Repo.delete(favorite) do
+        {:ok, favorite} ->
+          PubSub.broadcast(SacaStats.PubSub, "unfavorite_event:#{favorite.discord_id}", favorite)
+          redirect(conn, to: return_path)
+
+        {:error, _changeset} ->
+          conn
+          |> put_flash(:error, "An error occured while removing #{name} from the database.")
+          |> redirect(to: return_path)
+      end
 
       # redir to general stat page for now
       # character(conn, Map.put(params, "stat_type", "general"))
