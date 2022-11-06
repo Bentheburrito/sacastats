@@ -1,4 +1,4 @@
-<%= link "<- Back to Sessions", to: Routes.character_path(@conn, :character, @session.name, :sessions) %>
+<%= link "<- Back to Sessions", to: Routes.character_path(@socket, :character, @session.name, :sessions) %>
 
 <div class="poll-item">
   Session Summary
@@ -12,7 +12,7 @@
     </li>
     <li class="number">XP Earned: <%= @session.xp_earned %></li>
     <li>Battle Ranks Earned: 
-      <%= length(@session.battle_rank_ups) > 0 && Enum.join(@session.battle_rank_ups.battle_rank, ", ") || "None"%>
+      <%= length(@session.battle_rank_ups) > 0 && Enum.map_join(@session.battle_rank_ups, ", ",  &(&1.battle_rank)) || "None"%>
     </li>
     <li>Facilities Captured: <%= length(@session.player_facility_captures) %></li>
     <li>Facilities Defended: <%= length(@session.player_facility_defends) %></li>

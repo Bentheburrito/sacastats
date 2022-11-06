@@ -34,7 +34,7 @@ defmodule SacaStatsWeb.PollLive.Results do
     {:noreply, assign(socket, :poll, poll)}
   end
 
-  def handle_info(message, socket) do
+  def handle_info(_message, socket) do
     {:noreply, socket}
   end
 end

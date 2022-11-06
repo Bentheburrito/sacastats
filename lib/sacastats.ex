@@ -29,6 +29,14 @@ defmodule SacaStats do
   @xp StaticData.load_static_file(@static_data_path <> "/xp.json")
   def xp, do: @xp
 
+  @assist_xp Stream.filter(@xp, fn {_id, %{"description" => desc}} ->
+               desc
+               |> String.downcase()
+               |> String.contains?("assist")
+             end)
+             |> Enum.map(fn {id, _} -> id end)
+  defguard is_assist_xp(id) when id in @assist_xp
+
   @events StaticData.load_static_file(@static_data_path <> "/events.json")
   def events, do: @events
 

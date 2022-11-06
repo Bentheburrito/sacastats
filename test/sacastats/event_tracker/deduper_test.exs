@@ -2,7 +2,7 @@ defmodule SacaStats.EventTracker.DeduperTest do
   use ExUnit.Case, async: true
 
   alias SacaStats.EventTracker.Deduper
-  alias SacaStats.Events.{GainExperience, VehicleDestroy}
+  alias SacaStats.Events.{GainExperience, PlayerLogin, PlayerLogout, VehicleDestroy}
 
   setup %{} do
     me = self()
@@ -74,36 +74,46 @@ defmodule SacaStats.EventTracker.DeduperTest do
   end
 
   describe "put_new_event/3" do
-    @event_map %{"some_key" => :some_value}
+    @login_cs PlayerLogin.changeset(%PlayerLogin{}, %{
+                character_id: 1234,
+                timestamp: 1234,
+                world_id: 1234
+              })
+    @logout_cs PlayerLogout.changeset(%PlayerLogout{}, %{
+                 character_id: 4321,
+                 timestamp: 4321,
+                 world_id: 4321
+               })
+    @event_map %{"some_key" => @login_cs}
 
     test "will put a value under a new key in event_map when not buffering" do
       deduper_state =
         %Deduper{buffering?: false}
-        |> Deduper.put_new_event("some_key", :some_value)
+        |> Deduper.put_new_event("some_key", @login_cs)
 
       assert %Deduper{event_map: @event_map} = deduper_state
 
       deduper_state_2 =
         deduper_state
-        |> Deduper.put_new_event("another_key", :another_value)
+        |> Deduper.put_new_event("another_key", @logout_cs)
 
       assert %Deduper{
-               event_map: %{"some_key" => :some_value, "another_key" => :another_value}
+               event_map: %{"some_key" => @login_cs, "another_key" => @logout_cs}
              } = deduper_state_2
     end
 
     test "will not put a value under a key in the buffer when buffering and the key exists in the event_map" do
       deduper_state =
         %Deduper{buffering?: true, event_map: @event_map, buffer: %{}}
-        |> Deduper.put_new_event("some_key", :some_value)
+        |> Deduper.put_new_event("some_key", @login_cs)
 
       assert %Deduper{event_map: @event_map, buffer: %{}} = deduper_state
 
-      buffer = %{"another_key" => :another_value}
+      buffer = %{"another_key" => @logout_cs}
 
       deduper_state_2 =
         %Deduper{buffering?: true, event_map: @event_map, buffer: buffer}
-        |> Deduper.put_new_event("some_key", :some_value)
+        |> Deduper.put_new_event("some_key", @login_cs)
 
       assert %Deduper{event_map: @event_map, buffer: ^buffer} = deduper_state_2
     end
@@ -111,9 +121,9 @@ defmodule SacaStats.EventTracker.DeduperTest do
     test "will put a value under a new key in the buffer when buffering and the key does not exist in the event_map" do
       deduper_state =
         %Deduper{buffering?: true, event_map: @event_map, buffer: %{}}
-        |> Deduper.put_new_event("another_key", :another_value)
+        |> Deduper.put_new_event("another_key", @logout_cs)
 
-      target_buffer = %{"another_key" => :another_value}
+      target_buffer = %{"another_key" => @logout_cs}
 
       assert %Deduper{event_map: @event_map, buffer: ^target_buffer} = deduper_state
     end

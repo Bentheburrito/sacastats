@@ -212,7 +212,6 @@ defmodule SacaStatsWeb.CharacterController do
     ]
   end
 
-  # SacaStats.Repo.delete_all(SacaStats.Character.Favorite)
   defp is_favorite?(id, user_id) do
     if is_nil(user_id) do
       false
