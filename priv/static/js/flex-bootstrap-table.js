@@ -220,6 +220,7 @@ export function setupFlexTables() {
         setMobileHeaderTexts(tableID);
         bootstrapTableFilter.showHideClearFilterButtons();
         setStickyHeaderWidths();
+        setFlexTableVisibilities();
         $(table).trigger(flexBootstrapTableEvents.formatsUpdatedEvent);
         setTimeout(function () {
             makeSureTableRecievedStyles(tableID);
