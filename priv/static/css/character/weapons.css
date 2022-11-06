@@ -76,3 +76,8 @@ hr {
 .menu-item {
     padding-left: 20px;
 }
+
+/* Font awesome icon size */
+.svg-inline--fa {
+    height: 1.5em;
+}
