@@ -23,10 +23,15 @@
     margin-bottom: .75rem;
 }
 
+.table-sortable-columns {
+    position: relative;
+}
+
 .sortable-column {
     font-size: 1.6em;
     width: 50%;
     margin: auto;
+    position: relative;
     display: flex;
     -moz-user-select: none;
     -webkit-user-select: none;
@@ -60,10 +65,12 @@
     position: absolute;
     left: 83%;
     top: 38px;
+    z-index: 99;
 }
 
 .table-column-move-down {
     position: absolute;
     left: 13%;
     top: 38px;
+    z-index: 99;
 }

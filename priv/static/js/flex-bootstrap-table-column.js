@@ -6,6 +6,7 @@ let globalIndexOrder;
 let globalColumns;
 let previousColumns;
 let previousSorted;
+let animating = false;
 
 const SortOrder = {
     NONE: undefined,
@@ -187,12 +188,48 @@ function refreshDragColumns(orderObject) {
 }
 
 function moveColumnUp(selectedColumnElement) {
-    $(selectedColumnElement).insertBefore($(selectedColumnElement).prev());
+    let prevCol = $(selectedColumnElement).prev(),
+        distance = $(selectedColumnElement).outerHeight();
+
+    if (prevCol.length) {
+        animating = true;
+        $.when($(selectedColumnElement).animate({
+            top: -distance
+        }, 100),
+            prevCol.animate({
+                top: distance
+            }, 100)).done(function () {
+                prevCol.css('top', '0px');
+                $(selectedColumnElement).css('top', '0px');
+                $(selectedColumnElement).insertBefore(prevCol);
+                animating = false;
+            });
+    }
 }
 function moveColumnDown(selectedColumnElement) {
-    $(selectedColumnElement).insertAfter($(selectedColumnElement).next());
+    let nextCol = $(selectedColumnElement).next(),
+        distance = $(selectedColumnElement).outerHeight();
+
+    if (nextCol.length) {
+        animating = true;
+        $.when($(nextCol).animate({
+            top: -distance
+        }, 100),
+            $(selectedColumnElement).animate({
+                top: distance
+            }, 100)).done(function () {
+                $(selectedColumnElement).css('top', '0px');
+                nextCol.css('top', '0px');
+                $(selectedColumnElement).insertAfter(nextCol);
+                animating = false;
+            });
+    }
 }
 function handleMoveColumnEvent(e) {
+    if (animating) {
+        return;
+    }
+
     //make sure there is a selected column
     let selectedColumnElement = document.getElementById(table.id + "-sortable-columns").querySelector(".selected-sortable-column");
     if (selectedColumnElement == undefined) {
@@ -214,7 +251,7 @@ function handleMoveColumnEvent(e) {
         moveColumnDown(selectedColumnElement);
     }
 
-    refreshSortableColumnSelection(selectedColumnElement);
+    setTimeout(() => { refreshSortableColumnSelection(selectedColumnElement) }, 110);
 }
 
 function createSortableColumn(dataField, text, sortType) {
@@ -295,7 +332,7 @@ function isMobileSortMenuClosed(target) {
 function handleColumnOrderSorted(e) {
     //check if columns should be reordered
     let target;
-    if (e.target.tagName.toLowerCase() == "svg") {
+    if (e.target.tagName.toLowerCase() == "svg" || e.target.tagName.toLowerCase() == "path") {
         target = $(e.target).closest("div")[0];
     } else {
         target = e.target;
@@ -372,7 +409,7 @@ function setMoveArrowsOffsets(topOffset) {
 }
 
 function updateMoveArrowPositions(selectedColumnElement) {
-    let columnMoveTopOffset = selectedColumnElement.offsetTop + (selectedColumnElement.offsetHeight / 2) - 8;
+    let columnMoveTopOffset = selectedColumnElement.offsetTop + (selectedColumnElement.offsetHeight / 2) + 23;
     setMoveArrowsOffsets(columnMoveTopOffset);
 }
 
