@@ -6,8 +6,8 @@ defmodule SacaStatsWeb.PollLive.View do
   use Phoenix.HTML
 
   alias Ecto.Multi
-  alias SacaStats.{Poll, Repo}
   alias SacaStats.Poll.Item.Vote
+  alias SacaStats.Repo
 
   import SacaStatsWeb.PollLive
 

@@ -261,6 +261,14 @@ export function setupFlexTables() {
     }
 }
 
+export function scrollToTopOfTable(e) {
+    if (e.target.classList.contains("page-link") || e.target.classList.contains("page-item")) {
+        $('html, body').animate({
+            scrollTop: $("#" + table.id).offset().top - ((window.innerWidth >= 768) ? 300 : 60) //- 254 to be at top
+        }, 500);
+    }
+}
+
 export function updateSearchParam() {
     let searchValue = document.querySelector("input.search-input").value;
 
