@@ -393,12 +393,14 @@ function handleInitialMobileSortButtonClick() {
     buttonElement.removeEventListener("click", handleInitialMobileSortButtonClick);
 }
 
-function isOpeningMobileSortMenu(target) {
-    return target.id == table.id + "-column-sort-button" && !$(target).attr('aria-expanded');
-}
-
-function isMobileSortMenuClosed(target) {
-    return target.id != table.id + "-column-sort-button" && !$("#" + table.id + "-column-sort-button").attr('aria-expanded');
+function isClickTargetAColumnAfterSelection(target) {
+    if ($(target).closest("div.sortable-column").length > 0 || target.classList.contains("sortable-column")) {
+        //remove selection without updating order as that will be done on the column sort click
+        removeSortableColumnSelection();
+        return true;
+    } else {
+        return false;
+    }
 }
 
 function handleColumnOrderSorted(e) {
@@ -411,7 +413,7 @@ function handleColumnOrderSorted(e) {
     }
 
     //early return if columns should NOT be reordered
-    if (target.id.includes("up") || target.id.includes("down") || isOpeningMobileSortMenu(target) || isMobileSortMenuClosed(target)) {
+    if (target.id == table.id + "-column-move-up" || target.id == table.id + "-column-move-down" || isClickTargetAColumnAfterSelection(target)) {
         return;
     }
 
@@ -435,7 +437,7 @@ function handleColumnOrderSorted(e) {
     });
 
     //update column orders
-    refreshDragColumns(orderObject);
+    setTimeout(() => { refreshDragColumns(orderObject) }, 100);
 }
 
 function updatePersistentColumns() {
@@ -479,7 +481,7 @@ function addEventHandlers() {
     document.getElementById(table.id + "-column-sort-button").addEventListener("click", handleInitialMobileSortButtonClick);
 
     //add event listeners for locking new column order
-    document.addEventListener("click", handleColumnOrderSorted);
+    $("#" + table.id + "-column-sort-dropdown").on('hide.bs.dropdown', handleColumnOrderSorted);
     document.getElementById(table.id + "-column-sort-dropdown-menu").addEventListener("click", handleColumnOrderSorted);
 
     //add event listeners for custom column change events
