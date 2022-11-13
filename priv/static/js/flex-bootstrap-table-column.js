@@ -4,6 +4,7 @@ let tableID;
 let table;
 let globalIndexOrder;
 let globalColumns;
+let previousDragTableUpdate = [{}];
 let previousColumns;
 let previousSorted;
 let animating = false;
@@ -220,11 +221,14 @@ function setColumnOrder() {
     }
 
     //set the column order
-    setTimeout(() => { refreshDragColumns(orderObject) }, 100);
+    refreshDragColumns(orderObject)
 }
 
 function refreshDragColumns(orderObject) {
-    $(tableID).bootstrapTable('orderColumns', orderObject);
+    if (JSON.stringify(previousDragTableUpdate) !== JSON.stringify(orderObject)) {
+        previousDragTableUpdate = orderObject;
+        setTimeout(() => { $(tableID).bootstrapTable('orderColumns', orderObject) }, 100);
+    }
 }
 
 function moveColumnUp(selectedColumnElement) {
@@ -437,7 +441,7 @@ function handleColumnOrderSorted(e) {
     });
 
     //update column orders
-    setTimeout(() => { refreshDragColumns(orderObject) }, 100);
+    refreshDragColumns(orderObject);
 }
 
 function updatePersistentColumns() {
