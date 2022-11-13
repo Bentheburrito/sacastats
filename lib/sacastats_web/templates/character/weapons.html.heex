@@ -328,6 +328,18 @@
         </div>
     </div>
 </div>
+
+<div id="weaponTable-column-sort-dropdown" class="dropdown table-column-sort-dropdown">
+    <button id="weaponTable-column-sort-button" class="btn btn-secondary ml-1 mt-3 float-right dropdown-toggle table-column-sort-button" data-toggle="dropdown" title="Column Sort" data-placement="top">
+        <i class="fa-solid fa-arrows-up-down"></i>
+    </button>
+    <div id="weaponTable-column-sort-dropdown-menu" class="dropdown-menu dropdown-menu-right table-column-sort-dropdown-menu">
+        <h5 class="text-center">Column Sort</h5>
+        <div id="weaponTable-column-move-down" class="table-column-move-down d-none"><i class="fa-solid fa-angle-down"></i></div>
+        <div id="weaponTable-column-move-up" class="table-column-move-up d-none"><i class="fa-solid fa-angle-up"></i></div>
+        <div id="weaponTable-sortable-columns" class="w-100 table-sortable-columns"></div>
+    </div>
+</div>
 <table class="table table-bordered table-striped table-responsive-stack" id="weaponTable"
     data-toolbar="#weaponTable-toolbar"
     data-show-columns="true"
@@ -376,7 +388,7 @@
             <th data-field="vsdamaget" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="VS damage taken" class="drag-accept">VS-Damage.T</th>
             <th data-field="ncdamaget" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="NC damage taken" class="drag-accept">NC-Damage.T</th>
             <th data-field="trdamaget" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="TR damage taken" class="drag-accept">TR-Damage.T</th>
-            <th data-field="time" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Time used with" class="drag-accept">Time</th>
+            <th data-field="time" data-sortable="true" data-sorter="timeSorter" data-sort-order="desc" data-toggle="tooltip" title="Time used with" class="drag-accept">Time</th>
             <th data-field="certs" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Certs earned with weapon" class="drag-accept">Certs</th>
             <th data-field="cpm" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Certs per minute" class="drag-accept">CPM</th>
             <th data-field="score" data-visible="false" data-sortable="true" data-sort-order="desc" data-toggle="tooltip" title="Score earned with weapon" class="drag-accept">Score</th>
@@ -395,7 +407,7 @@
     </thead>
     <tbody>
         <%= for {weapon_id, weapon} <- @weapons do %>
-            <tr id={"weapon#{weapon_id}Row"} class="">
+            <tr id={"weaponTable#{weapon_id}Row"} class="">
                 <td class="weapon p-0">
                     <%= if SacaStats.Conversions.medal_code_by_kill_count(SacaStats.Weapons.get_total_values(Map.get(weapon, "weapon_kills"), @character_info["faction_id"]) + 
                             SacaStats.Weapons.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character_info["faction_id"])) > 0 do%>
@@ -544,6 +556,22 @@
     </tbody>
 </table>
 
+<script>
+    //initialize weapon sorters
+    function timeSorter(a, b) {
+        var aa = getTimeInSeconds(a);
+        var bb = getTimeInSeconds(b);
+        return aa - bb;
+    }
+
+    function getTimeInSeconds(time) {
+        var div = document.createElement('div');
+        div.innerHTML = time.trim();
+
+        return +div.firstChild.innerHTML;
+    }
+</script>
+
 <script type="module">
     //initialize weapon table
     import init from "<%= Routes.static_path(@conn, "/js/character/weapons-table.js") %>";
@@ -553,7 +581,11 @@
 <script type="module">
     //initialize weapon id and kill count map
     import init from "<%= Routes.static_path(@conn, "/js/character/weapons.js") %>";
-    init();
+    let kills = new Map();
+    $('#weaponTable').bootstrapTable('getData', false).forEach(weapon => {
+        kills.set("weapon" + weapon.id + "Row", weapon.kills)
+    });
+    init(kills);
 </script>
 
 <script type="module" src={Routes.static_path(@conn, "/js/character/weapons-table.js")}></script>

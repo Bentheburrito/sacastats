@@ -1,12 +1,16 @@
 import { addFormatsToPage, addAnimationToProgressBars } from "/js/formats.js";
-import { showHideNextAuraxButton } from "/js/character/weapons-table.js";
 import * as bootstrapTableFilter from "/js/flex-bootstrap-table-filter.js";
 import * as bootstrapSelection from "/js/flex-bootstrap-table-selection.js";
 import * as bootstrapColumn from "/js/flex-bootstrap-table-column.js";
+import * as flexBootstrapTableEvents from "/js/events/flex-bootstrap-table-events.js";
+import * as generalEvents from "/js/events/general-events.js";
 
 let table;
 
+let isPageFormatted = false;
+
 export function setupFlexTables() {
+    addCustomDocumentEventListeners();
 
     document.querySelectorAll('.table-responsive-stack').forEach(table => {
         bootstrapTableFilter.init(table.id);
@@ -29,9 +33,10 @@ export function setupFlexTables() {
             addOnTHeadClick();
             addToolBarClick();
             addSearchEnter();
-            addPaginationClick();
             addOnDocumentMouseUp();
-            showHideNextAuraxButton();
+            addTableCustomEventListeners(table.id);
+            updateTableFormats(table.id);
+            $(table).trigger(flexBootstrapTableEvents.initializedEvent);
         });
     }
 
@@ -52,10 +57,29 @@ export function setupFlexTables() {
         }
     }
 
-    function setNextAuraxVisibilities() {
+    function handleTableColumnReorderEvent() {
+        refreshByScroll();
+
+        //will need to update formats as reorders take longer
         setTimeout(function () {
-            showHideNextAuraxButton();
+            updateTableFormats(table.id);
         }, 10);
+    }
+    function handleTablePageChangeEvent() {
+        $('html, body').animate({
+            scrollTop: $("#" + table.id).offset().top - ((window.innerWidth >= 768) ? 300 : 60) //- 254 to be at top
+        }, 500);
+    }
+    function handleTablePostBodyEvent() {
+        updateTableFormats(table.id);
+    }
+    function addTableCustomEventListeners(tableID) {
+        $('#' + tableID).off("reorder-column.bs.table", handleTableColumnReorderEvent);
+        $('#' + tableID).on("reorder-column.bs.table", handleTableColumnReorderEvent);
+        $('#' + tableID).off("page-change.bs.table", handleTablePageChangeEvent);
+        $('#' + tableID).on("page-change.bs.table", handleTablePageChangeEvent);
+        $('#' + tableID).off("post-body.bs.table", handleTablePostBodyEvent);
+        $('#' + tableID).on("post-body.bs.table", handleTablePostBodyEvent);
     }
 
     function tableSearchEnterEventHandler(e) {
@@ -74,7 +98,6 @@ export function setupFlexTables() {
         updateSearchParam();
         setTimeout(function () {
             bootstrapTableFilter.updateTableFiltration();
-            updateTableFormats(table.id);
         }, 10);
 
         if (document.querySelector("input.search-input").value != "" && e.keyCode == 13) {
@@ -128,14 +151,6 @@ export function setupFlexTables() {
                 }
             }, 10);
         }
-
-        setTimeout(function () {
-            setFlexTableVisibilities();
-        }, 10);
-
-        setTimeout(function () {
-            setMobileHeaderTexts(table.id);
-        }, 500);
     }
     function dropDownMenuClickEventHandler(e) {
         let target = e.target;
@@ -162,8 +177,15 @@ export function setupFlexTables() {
     }
 
     function refreshByScroll() {
-        window.scrollBy(0, -1);
-        window.scrollBy(0, 1);
+        let currentScrollPosition = $(window).scrollTop();
+        let maxScrollPosition = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+
+        if (currentScrollPosition == maxScrollPosition) {
+            $(window).scrollTop(currentScrollPosition - 1);
+        } else {
+            $(window).scrollTop(currentScrollPosition + 1);
+            $(window).scrollTop(currentScrollPosition - 1);
+        }
     }
 
     function documentMouseUpEventHandler(e) {
@@ -173,63 +195,36 @@ export function setupFlexTables() {
         }
 
         setTimeout(function () {
-            if (!didTableRecieveStyleUpdate()) {
-                setMobileHeaderTexts(table.id);
-                addAnimationToProgressBars();
-                addFormatsToPage();
-
-                setTimeout(function () {
-                    setStickyHeaderWidths();
-                }, 100);
-            }
             bootstrapColumn.updateColumns();
         }, 100);
     }
-
     function addOnDocumentMouseUp() {
         $(document).off("mouseup", documentMouseUpEventHandler);
         $(document).on("mouseup", documentMouseUpEventHandler);
     }
 
-    let prevDate = new Date().getTime();
-    function tableMouseMoveEventHandler(e) {
-        var date = new Date().getTime();
-        if (date - prevDate > 300) {
-            if (!didTableRecieveStyleUpdate()) {
-                addAnimationToProgressBars();
-                addFormatsToPage();
-                refreshByScroll();
-            }
-            prevDate = date;
-        }
-    }
-    function tableMouseClickEventHandler() {
-        setTimeout(function () {
-            updateTableFormats(table.id);
-            refreshByScroll();
-        }, 1);
+    function tableHeaderMouseDownEventHandler() {
+        bootstrapSelection.resetCopyRowSelection(undefined);
     }
     function addOnTHeadClick() {
-        table.removeEventListener('mousemove', tableMouseMoveEventHandler);
-        table.firstElementChild.removeEventListener('click', tableMouseClickEventHandler);
-        table.addEventListener('mousemove', tableMouseMoveEventHandler);
-        table.firstElementChild.addEventListener('click', tableMouseClickEventHandler);
-        document.querySelector(".sticky-header-container").removeEventListener('mousemove', tableMouseMoveEventHandler);
-        document.querySelector(".sticky-header-container").removeEventListener('click', tableMouseClickEventHandler);
-        document.querySelector(".sticky-header-container").addEventListener('mousemove', tableMouseMoveEventHandler);
-        document.querySelector(".sticky-header-container").addEventListener('click', tableMouseClickEventHandler);
+        table.firstElementChild.removeEventListener('mousedown', tableHeaderMouseDownEventHandler);
+        table.firstElementChild.addEventListener('mousedown', tableHeaderMouseDownEventHandler);
+        document.querySelector(".sticky-header").removeEventListener('mousedown', tableHeaderMouseDownEventHandler);
+        document.querySelector(".sticky-header").addEventListener('mousedown', tableHeaderMouseDownEventHandler);
     }
 
     function updateTableFormats(tableID) {
-        if (!didTableRecieveStyleUpdate()) {
-            addAnimationToProgressBars();
-            addFormatsToPage();
-        }
+        isPageFormatted = false;
+        addAnimationToProgressBars();
+        addFormatsToPage();
         setMobileHeaderTexts(tableID);
-        setNextAuraxVisibilities();
         bootstrapTableFilter.showHideClearFilterButtons();
-        makeSureTableRecievedStyles();
         setStickyHeaderWidths();
+        setFlexTableVisibilities();
+        $(table).trigger(flexBootstrapTableEvents.formatsUpdatedEvent);
+        setTimeout(function () {
+            makeSureTableRecievedStyles(tableID);
+        }, 10);
     }
 
     function makeSureTableRecievedStyles(tableID) {
@@ -248,15 +243,21 @@ export function setupFlexTables() {
         }, 10);
     }
 
-    function tablePaginationClickEventHandler(e) {
-        /* NOTE: this does not work after a filtration use flex-bootstrap-table-filter's tablePaginationClickEventHandler for anything after a filtration*/
-        scrollToTopOfTable(e);
+    function fixHeaderOnPageLoad() {
+        let isDesktop = window.innerWidth >= 768;
+
+        if (isDesktop) {
+            setTimeout(function () {
+                refreshByScroll();
+            }, 100);
+        }
     }
-    function addPaginationClick() {
-        $('a.page-link').off('click', tablePaginationClickEventHandler);
-        $('a.dropdown-item').off('click', tablePaginationClickEventHandler);
-        $('a.page-link').on('click', tablePaginationClickEventHandler);
-        $('a.dropdown-item').on('click', tablePaginationClickEventHandler);
+
+    function addCustomDocumentEventListeners() {
+        $(document).on(generalEvents.pageFormattedEvent, function () {
+            isPageFormatted = true;
+        });
+        $(document).on(generalEvents.loadingScreenRemovedEvent, fixHeaderOnPageLoad);
     }
 }
 
@@ -311,24 +312,8 @@ function hasMobileHeader(text) {
     return text != undefined && (text.includes("table-responsive-stack-thead") || text.trim() == "Weapon");
 }
 
-export function didTableRecieveStyleUpdate() {
-    //loop through the rows
-    for (let tableRow of table.querySelector("tbody").querySelectorAll("tr")) {
-        let td = tableRow.querySelector(".weapon");
-        if (td != undefined) {
-            //make sure if it is over 0% that the width of the progress bar is too
-            let progress = td.querySelector(".progress-bar");
-            if (parseInt(progress.innerHTML.replace("%", "")) > 0) {
-                if (progress.style.width.replace("px", "") == "0") {
-                    return false;
-                }
-            }
-            //if it doesn't have a .weapon column just ignore progress bar formats
-        } else {
-            return true;
-        }
-    }
-    return true;
+function didTableRecieveStyleUpdate() {
+    return isPageFormatted;
 }
 
 function initializeStickyHeaderWidths() {

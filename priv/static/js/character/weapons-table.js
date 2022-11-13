@@ -1,6 +1,9 @@
 import { nextAuraxElementID } from "/js/character/weapons.js";
 import * as bootstrapTableFilter from "/js/flex-bootstrap-table-filter.js";
 import * as bootstrapSelection from "/js/flex-bootstrap-table-selection.js";
+import * as flexBootstrapTableEvents from "/js/events/flex-bootstrap-table-events.js";
+
+const TABLE_ID = "#weaponTable";
 
 window.addEventListener('load', (event) => {
     if (window.innerWidth >= 768) {
@@ -53,19 +56,61 @@ function addCustomFilters() {
             //filter the array based on the filter name category
             switch (filterName) {
                 case "years":
-                    return dataArray.filter(weapon => weapon.time >= YEAR_SECOND);
+                    return dataArray.filter(weapon => {
+                        let div = document.createElement('div');
+                        div.innerHTML = weapon.time.trim();
+                        let time = +div.firstChild.innerHTML;
+
+                        return time >= YEAR_SECOND
+                    });
                 case "weeks":
-                    return dataArray.filter(weapon => weapon.time >= WEEK_SECOND && weapon.time < YEAR_SECOND);
+                    return dataArray.filter(weapon => {
+                        let div = document.createElement('div');
+                        div.innerHTML = weapon.time.trim();
+                        let time = +div.firstChild.innerHTML;
+
+                        return time >= WEEK_SECOND && time < YEAR_SECOND
+                    });
                 case "days":
-                    return dataArray.filter(weapon => weapon.time >= DAY_SECOND && weapon.time < WEEK_SECOND);
+                    return dataArray.filter(weapon => {
+                        let div = document.createElement('div');
+                        div.innerHTML = weapon.time.trim();
+                        let time = +div.firstChild.innerHTML;
+
+                        return time >= DAY_SECOND && time < WEEK_SECOND
+                    });
                 case "hours":
-                    return dataArray.filter(weapon => weapon.time >= HOUR_SECOND && weapon.time < DAY_SECOND);
+                    return dataArray.filter(weapon => {
+                        let div = document.createElement('div');
+                        div.innerHTML = weapon.time.trim();
+                        let time = +div.firstChild.innerHTML;
+
+                        return time >= HOUR_SECOND && time < DAY_SECOND
+                    });
                 case "minutes":
-                    return dataArray.filter(weapon => weapon.time >= MINUTE_SECOND && weapon.time < HOUR_SECOND);
+                    return dataArray.filter(weapon => {
+                        let div = document.createElement('div');
+                        div.innerHTML = weapon.time.trim();
+                        let time = +div.firstChild.innerHTML;
+
+                        return time >= MINUTE_SECOND && time < HOUR_SECOND
+                    });
                 case "seconds":
-                    return dataArray.filter(weapon => weapon.time > 0 && weapon.time < MINUTE_SECOND);
+                    return dataArray.filter(weapon => {
+                        let div = document.createElement('div');
+                        div.innerHTML = weapon.time.trim();
+                        let time = +div.firstChild.innerHTML;
+
+                        return time > 0 && time < MINUTE_SECOND
+                    });
                 case "none":
-                    return dataArray.filter(weapon => weapon.time == 0);
+                    return dataArray.filter(weapon => {
+                        let div = document.createElement('div');
+                        div.innerHTML = weapon.time.trim();
+                        let time = +div.firstChild.innerHTML;
+
+                        return time == 0
+                    });
                 default: return dataArray;
             }
         }
@@ -91,9 +136,9 @@ function addCustomCopyFunction() {
         }
 
         //add each selected id to the id arg separated by ','
-        newURL.search = newURL.search + "id=" + firstCopyElement.id.replaceAll("weapon", "").replaceAll("Row", "");
+        newURL.search = newURL.search + "id=" + firstCopyElement.id.replaceAll(TABLE_ID.substring(1), "").replaceAll("Row", "");
         for (let i = 1; i < copyRows.length; i++) {
-            newURL.search = newURL.search + "," + copyRows[i].id.replaceAll("weapon", "").replaceAll("Row", "");
+            newURL.search = newURL.search + "," + copyRows[i].id.replaceAll(TABLE_ID.substring(1), "").replaceAll("Row", "");
         }
 
         //return the new url
@@ -105,7 +150,7 @@ function addCustomCopyFunction() {
         let copyString = document.getElementById("characterName").innerText + "'s Weapon Stats\n\n";
 
         //initialize variables
-        let headerArray = [...$('#weaponTable').find('thead').first().find('tr').first()[0].children];
+        let headerArray = [...$(TABLE_ID).find('thead').first().find('tr').first()[0].children];
         let index = 0;
         let copyRows = bootstrapSelection.getSelectedRows();
 
@@ -114,14 +159,16 @@ function addCustomCopyFunction() {
             let dataArray = $(row).find('td');
 
             //create a weapon subheader
-            copyString = copyString + dataArray[0].innerText.split("\n")[0] + " (" + row.id.replaceAll("weapon", "").replaceAll("Row", "") + "):\n";
+            copyString = copyString + dataArray[0].innerText.split("\n")[0] + " (" + row.id.replaceAll(TABLE_ID.substring(1), "").replaceAll("Row", "") + "):\n";
 
             //loop through each coloumn and separate them by commas and property values by colons
             for (let i = 1; i < dataArray.length; i++) {
                 if (i > 1) {
                     copyString = copyString + ", ";
                 }
-                copyString = copyString + (isMobileScreen() ? "" : (headerArray[i].innerText + ": ")) + dataArray[i].innerText;
+                let desktopTitle = ((dataArray[i].hasAttribute('data-mobile-title') && dataArray[i].getAttribute('data-mobile-title')) ?
+                    dataArray[i].getAttribute('data-mobile-title') : headerArray[i].innerText) + ": ";
+                copyString = copyString + (isMobileScreen() ? "" : desktopTitle) + dataArray[i].innerText;
             }
 
             //create new line space between each weapon stat
@@ -158,14 +205,14 @@ function flashElement(elementId) {
     setTimeout(function () {
         window.clearInterval(flashInterval);
         $("#" + elementId).removeClass("flash-border");
-    }, 1000);
+    }, 1500);
 }
 
 function isMobileScreen() {
     return window.innerWidth <= 767;
 }
 
-export function showHideNextAuraxButton() {
+function showHideNextAuraxButton() {
     if (document.getElementById("nextAurax") != undefined) {
         if (document.getElementById(nextAuraxElementID) != undefined) {
             $("#nextAurax").show();
@@ -175,12 +222,45 @@ export function showHideNextAuraxButton() {
     }
 }
 
+function addCustomSearchFunction() {
+    let customSearchFunction = function (filteredTableData, searchInput) {
+        return filteredTableData.filter(function (option) {
+            //create a template element and set it to the weapon td
+            var template = document.createElement('template');
+            template.innerHTML = option.weapon;
+
+            //get the weapon name and filter based on the search input
+            return template.content.querySelector(".weaponName").innerHTML.toLowerCase().indexOf(searchInput.toLowerCase()) > -1;
+        });
+    };
+
+    bootstrapTableFilter.addCustomSearch(customSearchFunction);
+}
+
+function addCustomEventListeners() {
+    $(TABLE_ID).on(flexBootstrapTableEvents.filteredEvent, function () {
+        setTimeout(function () {
+            showHideNextAuraxButton();
+        }, 10);
+    });
+
+    $(TABLE_ID).on(flexBootstrapTableEvents.initializedEvent, function () {
+        showHideNextAuraxButton();
+    });
+
+    $(TABLE_ID).on(flexBootstrapTableEvents.formatsUpdatedEvent, function () {
+        showHideNextAuraxButton();
+    });
+}
+
 export default function init() {
-    $('#weaponTable').bootstrapTable({
+    $(TABLE_ID).bootstrapTable({
         dragaccept: '.drag-accept'
     });
 
     initializeButtonEvent();
+    addCustomSearchFunction();
     addCustomFilters();
     addCustomCopyFunction();
+    addCustomEventListeners();
 }

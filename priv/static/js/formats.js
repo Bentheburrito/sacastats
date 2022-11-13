@@ -1,3 +1,5 @@
+import * as generalEvents from "/js/events/general-events.js";
+
 const PREFERED_LANGUAGE = navigator.languages ? navigator.languages[0] : (navigator.language || navigator.userLanguage);
 const PREFERED_TIME_ZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -6,6 +8,7 @@ export function addFormatsToPage() {
     formatDateTimes();
     secondsToHHMMSS();
     addPercents();
+    $(document).trigger(generalEvents.pageFormattedEvent);
 
     function addCommasToNumbers() {
         //get every element with the number class and add proper commas

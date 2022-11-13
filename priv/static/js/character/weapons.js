@@ -1,9 +1,12 @@
+import * as flexBootstrapTableEvents from "/js/events/flex-bootstrap-table-events.js";
+
 let sortedKills;
 let unsortedKills;
+const TABLE_ID = "#weaponTable";
 export let nextAuraxElementID;
 
-function initializeSortedWeaponKillCount() {
-    let kills = getTrimmedKillNumbers(unsortedKills);
+function setSortedWeaponKillCount(kills) {
+    kills = getTrimmedKillNumbers(kills);
     sortedKills = new Map([...kills.entries()].sort((a, b) => b[1] - a[1]));
     nextAuraxElementID = [...sortedKills.keys()][0];
 }
@@ -18,17 +21,22 @@ function getTrimmedKillNumbers(kills) {
     return killNumbers;
 }
 
-function getDefaultWeaponStats() {
-    if (document.getElementById("weaponTable") != undefined) {
-        let kills = new Map();
-        $('#weaponTable').bootstrapTable('getData', false).forEach(weapon => {
-            kills.set("weapon" + weapon.id + "Row", weapon.kills)
-        });
-        unsortedKills = kills;
-    }
+function reInit(kills) {
+    unsortedKills = kills;
+    setSortedWeaponKillCount(kills);
 }
 
-export default function init() {
-    getDefaultWeaponStats();
-    initializeSortedWeaponKillCount();
+function addCustomEventListeners() {
+    $(TABLE_ID).on(flexBootstrapTableEvents.filteredEvent, function () {
+        let kills = new Map();
+        $(TABLE_ID).bootstrapTable('getData', false).forEach(weapon => {
+            kills.set(TABLE_ID.substring(1) + weapon.id + "Row", weapon.kills)
+        });
+        reInit(kills);
+    });
+}
+
+export default function init(kills) {
+    reInit(kills);
+    addCustomEventListeners();
 }
