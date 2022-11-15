@@ -1,0 +1,48 @@
+{
+  "name": "sacastats",
+  "version": "1.0.0",
+  "description": "A website for SaCa outfit member stats in PlanetSide 2.",
+  "main": "../priv/static/assets/dist/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "build": "node build.js",
+    "test": "jest --config jest.config.js",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "lint": "tslint -p tsconfig.json",
+    "prepublishOnly": "npm run lint && npm test",
+    "preversion": "npm run lint && npm test",
+    "prepare": "npm run build",
+    "save": "npm run lint && npm run format && npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bentheburrito/sacastats.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Bentheburrito/sacastats/issues"
+  },
+  "homepage": "https://github.com/Bentheburrito/sacastats#readme",
+  "devDependencies": {
+    "@types/jest": "^29.2.2",
+    "esbuild": "^0.15.13",
+    "jest": "^29.3.1",
+    "npm-dts": "^1.3.12",
+    "prettier": "^2.7.1",
+    "ts-jest": "^29.0.3",
+    "tslint": "^6.1.3",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^4.8.4"
+  },
+  "peerDependencies": {},
+  "files": [
+    "../priv/static/assets/dist/*"
+  ],
+  "module": "../priv/static/assets/dist/index.esm.js",
+  "typings": "../priv/static/assets/dist/index.d.ts"
+}
