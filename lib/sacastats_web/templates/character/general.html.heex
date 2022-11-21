@@ -3,15 +3,16 @@
 <div id="characterGeneral" class="row">
     <div id="characterModelHolder" class="col-md-4 d-none d-md-flex">
         <div class="class-icon-holder float-left d-flex flex-wrap align-items-center">
-            <img src={Routes.static_path(@conn, "/images/character/icons/class/" <> String.replace(@character_info["profile"]["profile_type_description"], " ", "") <> "_Icon.png")} 
+            <img src={Routes.static_path(@conn, "/images/character/icons/class/" <> String.replace(@character_info["profile"]["profile_type_description"], " ", "") <> "_Icon.png")}
                 alt={"#{@character_info["profile"]["profile_type_description"]}"} width="32" height="32" class="class-icon">
         </div>
         <div class={"characteristic-icon-holder float-right d-flex flex-wrap align-items-center #{@character_characteristics["ethnicity"]}-skin-tone"}>
-            <img src={"#{Routes.static_path(@conn, "/images/character/icons/sex/" <> @character_characteristics["sex"] <> ".png")}"} 
-                alt={"#{String.capitalize(@character_characteristics["ethnicity"])  <> " " <> String.capitalize(@character_characteristics["sex"])}"} 
+            <img src={"#{Routes.static_path(@conn, "/images/character/icons/sex/" <> @character_characteristics["sex"] <> ".png")}"}
+                alt={"#{String.capitalize(@character_characteristics["ethnicity"])  <> " " <> String.capitalize(@character_characteristics["sex"])}"}
                 width="32" height="32" class="characteristic-icon">
         </div>
-        <figure id="characterModel">
+        <figure id="characterModel" class="three-js-model" data-model-type="infantry" data-faction={Map.get(SacaStats.factions, SacaStats.Utils.maybe_to_int(@character_info["faction_id"], 0)).alias}
+            data-head-id={@character_info["head_id"]} data-clazz={@character_info["profile"]["profile_type_description"]}>
             <div class="d-flex justify-content-center align-items-center w-100 h-100" id="character-spinner-container">
                 <div class="spinner-border text-primary" id="character-spinner" role="status">
                     <span class="visually-hidden">Loading...</span>
@@ -19,7 +20,7 @@
             </div>
         </figure>
     </div>
-    
+
     <div class="col-md-8 col-12 stat-section-container">
         <div class="d-flex d-md-none flex-column justify-content-center stat-section">
             <h3 class="text-center">Characteristics</h3>
@@ -40,7 +41,7 @@
             <h4 class=""><%= @character_info["battle_rank"]["value"] %></h4>
             <p class={"move-up-4 text-center #{if Integer.parse(@character_info["prestige_level"]) > {0,""} do "visible" else "invisible" end}"}>(Prestige Level: <%= @character_info["prestige_level"]%>)</p>
         </div>
-        
+
         <div class="stat-section">
             <h3 class="text-center">Current Certification Points</h3>
             <div class="progress">
@@ -52,7 +53,7 @@
             <h4 class="number"><%= @character_info["certs"]["available_points"] %></h4>
             <p class="move-up-4 text-center number">(Total Earned: <%= elem(Integer.parse(@character_info["certs"]["earned_points"]), 0) + elem(Integer.parse(@character_info["certs"]["gifted_points"]), 0)%>)</p>
         </div>
-        
+
         <div class="stat-section pb-5">
             <div class="row w-100 mx-auto">
                 <div class="col-12">
@@ -72,9 +73,9 @@
                     </div>
                     <p class="text-center date-time"><%= @character_info["times"]["creation_date"] %></p>
                 </div>
-            </div>    
+            </div>
         </div>
-        
+
         <div class="stat-section pb-5">
             <div class="row w-100 mx-auto">
                 <div class="col-12">
@@ -116,9 +117,9 @@
                         </div>
                     </div>
                 <% end %>
-            </div> 
+            </div>
         </div>
-        
+
         <div class="stat-section">
             <div class="row w-100 mx-auto">
                 <div class="col-12">
@@ -131,12 +132,12 @@
                             <h4 class="text-center"><u><%= stat_name %></u></h4>
                         </div>
                         <div class="weapon-image-container w-100">
-                            <img src={"https://census.daybreakgames.com" <> Map.get(weapon, "image_path", "/files/ps2/images/static/-1.png")} 
-                                onerror={"this.onerror=null; this.src='" <> 
-                                    (if weapon["vehicle_weapon?"], 
-                                        do: Routes.static_path(@conn, "/images/character/unknownVehicleWeapon.png"), 
+                            <img src={"https://census.daybreakgames.com" <> Map.get(weapon, "image_path", "/files/ps2/images/static/-1.png")}
+                                onerror={"this.onerror=null; this.src='" <>
+                                    (if weapon["vehicle_weapon?"],
+                                        do: Routes.static_path(@conn, "/images/character/unknownVehicleWeapon.png"),
                                         else: Routes.static_path(@conn, "/images/character/unknownInfantryWeapon.png"))
-                                    <> "'"} 
+                                    <> "'"}
                                 alt={Map.get(weapon, "name", "N/A")} class="weapon-image mx-auto d-block"/>
                         </div>
                         <div class="text-center">
@@ -146,8 +147,8 @@
                     </div>
                 <% end %>
             </div>
-        </div>   
-    
+        </div>
+
         <div class="stat-section pb-5">
             <div class="row w-100 mx-auto justify-content-center flex-row">
                 <div class="col-12">
@@ -198,7 +199,7 @@
                         </div>
                     <% end %>
                 <% end %>
-            </div> 
+            </div>
         </div>
 
         <div class="stat-section pb-5">
@@ -251,9 +252,4 @@
 </div>
 
 <%# <script type="text/javascript" src={Routes.static_path(@conn, "/js/character/general.js")}></script> %>
-<script type="module">
-    import init from "<%= Routes.static_path(@conn, "/js/character/model.js") %>";
-    init("#characterModel", "<%= Map.get(SacaStats.factions, SacaStats.Utils.maybe_to_int(@character_info["faction_id"], 0)).alias %>", 
-        "<%= @character_info["head_id"] %>", "<%= @character_info["profile"]["profile_type_description"] %>");
-</script>
-
+<script type="module" src={Routes.static_path(@conn, "/assets/dist/character/planetside-model.js")}></script>

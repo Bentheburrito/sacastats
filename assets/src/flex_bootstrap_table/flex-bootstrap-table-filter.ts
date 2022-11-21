@@ -1,43 +1,42 @@
-import { updateSearchParam } from "/js/flex-bootstrap-table.js";
-import * as flexBootstrapTableEvents from "/js/events/flex-bootstrap-table-events.js";
+import { updateSearchParam } from './flex-bootstrap-table.js';
+import * as flexBootstrapTableEvents from '../events/flex-bootstrap-table-events.js';
 
-var originalTableData;
-var tableID;
-var clearFilterButtonID;
-var clearAllFilterButtonID;
-var customFilterFunctions = new Object();
-var customSearchFunction;
-var filters = new Map();
+import { ITableData } from '../models/flex-bootstrap-table/flex-bootstrap-table.js';
+import { CustomFilterFunction, FilterMap, TableFilter } from '../models/flex-bootstrap-table/flex-bootstrap-table-filter.js';
+
+var originalTableData: ITableData[];
+var tableID: String;
+var clearFilterButtonID: String;
+var clearAllFilterButtonID: String;
+var customFilterFunctions: CustomFilterFunction[];
+var customSearchFunction: Function;
+var filters = new FilterMap();
 var firstGo = true;
 var hasID = false;
-var idFilteredData;
+var idFilteredData: ITableData[];
 
 function createFilterObjects() {
     //reinitialize variables
-    filters = new Map();
+    filters = new FilterMap();
 
     //loop through each filter option
-    $(".filter-option").each(function () {
+    $('.filter-option').each(function () {
         //get filter property values from the input element
-        let input = $(this).find("input").first()[0];
-        let filterCategory = input.getAttribute("name");
-        let checked = input.checked;
-        let filterID = input.id;
-        let filterName = filterID.split("-")[0];
+        const input = $(this).find('input').first()[0];
+        const filterCategory = input.getAttribute('name')!;
+        const checked = input.checked;
+        const filterID = input.id;
+        const filterName = filterID.split('-')[0];
 
         //put filter properties into an object
-        let filterObject = new Object();
-        filterObject.filterID = filterID;
-        filterObject[filterName] = checked;
-        filterObject.filterName = filterName;
-        filterObject.checked = checked;
+        const filterObject = new TableFilter(filterID, filterName, checked);
 
         //if there is no filter for that filter category, add the object as a new array
         if (filters.get(filterCategory) == undefined) {
             filters.set(filterCategory, [filterObject]);
         } else {
             //otherwise add the object the the array on the map
-            let array = filters.get(filterCategory);
+            let array = filters.get(filterCategory)!;
             array.push(filterObject);
             filters.set(filterCategory, array);
         }
@@ -46,15 +45,15 @@ function createFilterObjects() {
 
 function updateFilterVariables() {
     //initialize variables
-    let persistentFiltersName = window.location.pathname + "/filterMap";
+    let persistentFiltersName = window.location.pathname + '/filterMap';
     let persistentFilters = localStorage.getItem(persistentFiltersName);
 
-    //if there are no persistent filters and it's not the first go reinitalize filter map with current and persist it 
+    //if there are no persistent filters and it's not the first go reinitalize filter map with current and persist it
     if (!firstGo || (firstGo && persistentFilters == undefined)) {
         createFilterObjects();
         localStorage.setItem(persistentFiltersName, JSON.stringify(Array.from(filters.entries())));
     } else {
-        filters = new Map(JSON.parse(persistentFilters));
+        filters = new Map(JSON.parse(persistentFilters!));
         updateSelections();
     }
 
@@ -67,7 +66,7 @@ function updateSelections() {
     for (let [_, filterOptions] of filters) {
         //loop through each filter option and update their checked selections
         filterOptions.forEach((filter) => {
-            let filterElement = document.getElementById(filter.filterID);
+            let filterElement = document.getElementById(filter.filterID) as HTMLInputElement;
             if (filterElement != undefined) {
                 filterElement.checked = filter.checked;
             }
@@ -80,60 +79,66 @@ function initializeSearchInput() {
     let query = document.location.search;
 
     //if the query string is valid
-    if (query != "" && (query.toLowerCase().startsWith("?search=") || query.toLowerCase().startsWith("?id="))) {
+    if (query != '' && (query.toLowerCase().startsWith('?search=') || query.toLowerCase().startsWith('?id='))) {
         //clear filters to make search visible
-        let persistentFiltersName = window.location.pathname + "/filterMap";
+        let persistentFiltersName = window.location.pathname + '/filterMap';
         localStorage.removeItem(persistentFiltersName);
 
         //get variables
         let search = query.substring(1);
-        let searchElement = document.querySelector("input.search-input");
+        let searchElement = document.querySelector('input.search-input');
         let searchText = getSearchTextFromSearchQuery(search);
 
         //determine if it will need a custom filter
-        if (search.startsWith("id=")) {
+        if (search.startsWith('id=')) {
             //filter by ids present
-            searchText = "";
-            let ids = search.split("=")[1].split(",");
+            searchText = '';
+            let ids = search.split('=')[1].split(',');
             filterByIds(ids);
-        } else if (!search.includes("&id=")) {
+        } else if (!search.includes('&id=')) {
             //simulate a search
-            const ke = new KeyboardEvent('keydown', { keyCode: 13 });
-            searchElement.dispatchEvent(ke);
+            const ke = new KeyboardEvent('keydown', { key: 'Enter' });
+            searchElement?.dispatchEvent(ke);
         } else {
             //filter on name and id
-            let textArray = search.split("&");
+            let textArray = search.split('&');
             //get the query object that has the id
-            textArray.find(text => {
-                if (text.includes("id=")) {
+            textArray.find((text) => {
+                if (text.includes('id=')) {
                     //get the id and filter the data based on that and the search key
-                    let ids = text.split("=")[1].split(",");
+                    let ids = text.split('=')[1].split(',');
                     filterByIds(ids);
                 }
             });
         }
         //set the input value
-        searchElement.value = searchText;
+        (searchElement as HTMLInputElement).value = searchText;
 
         //select the text on desktop
         if (window.innerWidth >= 768) {
-            document.querySelector("input.search-input").select();
+            (document.querySelector('input.search-input') as HTMLInputElement).select();
         }
     }
 }
 
-function getSearchTextFromSearchQuery(searchQuery) {
-    return searchQuery.split("&")[0].split("=")[1].replaceAll("%20", " ").replaceAll('%22', '\"').replaceAll("+", " ").replaceAll("_", " ");
+function getSearchTextFromSearchQuery(searchQuery: string) {
+    return searchQuery
+        .split('&')[0]
+        .split('=')[1]
+        .replaceAll('%20', ' ')
+        .replaceAll('%22', '"')
+        .replaceAll('+', ' ')
+        .replaceAll('_', ' ');
 }
 
-function filterByIds(ids) {
+function filterByIds(ids: string[]) {
     //filter original data based off of id
-    let filteredDataArray = getOriginalTableData().filter(function (row) {
-        return ids.includes(row.id.replaceAll(tableID.substring(1), "").replaceAll("Row", ""));
-    })
+    let filteredDataArray: ITableData[] = getOriginalTableData().filter(function (row: ITableData) {
+        return ids.includes((row.id as string).replaceAll(tableID.substring(1), '').replaceAll('Row', ''));
+    });
 
     //set the new id and make sure to compensate for the new filtering
-    $(getTableID()).bootstrapTable('load', filteredDataArray);
+    (<any>$(getTableID())).bootstrapTable('load', filteredDataArray);
     hasID = true;
     idFilteredData = filteredDataArray;
 }
@@ -142,9 +147,9 @@ function addFilterListeners() {
     //loop through filter map
     for (let [_, filterOptions] of filters) {
         //loop through each filter option and add a change event listener to update the filtration
-        let filtersToRemove = [];
+        let filtersToRemove: TableFilter[] = [];
         filterOptions.forEach((filter) => {
-            let filterElement = document.getElementById(filter.filterID)
+            let filterElement = document.getElementById(filter.filterID);
             if (filterElement != undefined) {
                 filterElement.addEventListener('change', updateTableFiltration);
             } else {
@@ -154,7 +159,7 @@ function addFilterListeners() {
 
         //loop through each filter that no longer exists and remove them
         filtersToRemove.forEach((filter) => {
-            filterOptions.filter(filterOption => filterOption != filter);
+            filterOptions.filter((filterOption) => filterOption != filter);
         });
     }
 
@@ -168,7 +173,7 @@ function removeFilterListeners() {
     for (let [_, filterOptions] of filters) {
         //loop through each filter option and remove the change event listener that updates the filtration
         filterOptions.forEach((filter) => {
-            document.getElementById(filter.filterID).removeEventListener('change', updateTableFiltration);
+            document.getElementById(filter.filterID)?.removeEventListener('change', updateTableFiltration);
         });
     }
 
@@ -177,8 +182,8 @@ function removeFilterListeners() {
     $(clearAllFilterButtonID).off('click', clearAllFiltration);
 }
 
-function getNonNamedFunctionDataArray(filterCategoryToNotAdd) {
-    //get original table data with the search filter applied 
+function getNonNamedFunctionDataArray(filterCategoryToNotAdd: string): ITableData[] {
+    //get original table data with the search filter applied
     var filteredTableData = accountForSearch();
 
     //loop through filter map
@@ -200,71 +205,92 @@ function updateFilterOptionAvailability() {
     }
 }
 
-function updateEachOptionAvailability(filterCategory, filterOptions) {
+function updateEachOptionAvailability(filterCategory: string, filterOptions: TableFilter[]) {
     //initialize variables
     var dataArray = getNonNamedFunctionDataArray(filterCategory);
     const originalArraySize = dataArray.length;
 
     //loop through each filter option
-    filterOptions.forEach(filter => {
+    filterOptions.forEach((filter) => {
         //initialize variables
         let newArraySize = originalArraySize;
-        let input = document.getElementById(filter.filterID);
+        let input = document.getElementById(filter.filterID) as HTMLInputElement;
 
         if (input != undefined) {
             //if the option is not a show all
-            if (filter.filterName != "showall") {
+            if (filter.filterName != 'showall') {
                 //if the filter name category is a custom filter apply the custom filter
-                if (customFilterFunctions.hasOwnProperty(filterCategory)) {
-                    newArraySize = customFilterFunctions[filterCategory](filter.filterName, dataArray).length;
+                if (customFilterFunctions != null && customFilterFunctions.hasOwnProperty(filterCategory)) {
+                    newArraySize = getCustomFilterFunctionFromCategory(filterCategory).runFilterFunction(
+                        filter.filterName,
+                        dataArray,
+                    ).length;
                 } else {
                     //otherwise apply the default filter
-                    newArraySize = dataArray.filter(option => option[filterCategory] == filter.filterName).length;
+                    newArraySize = dataArray.filter((option) => option[filterCategory] == filter.filterName).length;
                 }
             }
 
             //if the filtered array is empty and the filter is not checked, add disabled class and disable it
             if (newArraySize == 0 && !filter.checked) {
-                input.parentElement.classList.add("contains-disabled-input");
+                input.parentElement?.classList.add('contains-disabled-input');
                 input.disabled = true;
             } else {
                 //otherwise remove disabled class and enable it
-                input.parentElement.classList.remove("contains-disabled-input");
+                input.parentElement?.classList.remove('contains-disabled-input');
                 input.disabled = false;
             }
 
             //update the availability count element
-            input.parentElement.querySelector("span").querySelector(".filter-option-contains").innerHTML = "(" + newArraySize + ")";
+            (input.parentElement?.querySelector('span')?.querySelector('.filter-option-contains') as HTMLElement).innerHTML =
+                '(' + newArraySize + ')';
         }
     });
 }
 
-export function isShowAllSelectedBefore(filterArray) {
-    return (filterArray.find(filter => { return filter["showall"] === true }) != undefined);
+function getCustomFilterFunctionFromCategory(filterCategory: string) {
+    return customFilterFunctions.filter((filterFunctionObject) => {
+        filterFunctionObject.getCategory() === filterCategory;
+    })[0];
 }
 
-export function isShowAllSelected(filterArray) {
-    return (filterArray.find(filter => { return filter.filterName == "showall" && document.getElementById(filter.filterID).checked === true }) != undefined);
+export function isShowAllSelectedBefore(filterArray: TableFilter[]) {
+    return (
+        filterArray.find((filter) => {
+            return filter['showall'] === true;
+        }) != undefined
+    );
 }
 
-export function isShowAllSelectedRecently(filterArray) {
+export function isShowAllSelected(filterArray: TableFilter[]) {
+    return (
+        filterArray.find((filter) => {
+            return (
+                filter.filterName == 'showall' &&
+                (document.getElementById(filter.filterID) as HTMLInputElement).checked === true
+            );
+        }) != undefined
+    );
+}
+
+export function isShowAllSelectedRecently(filterArray: TableFilter[]) {
     return !isShowAllSelectedBefore(filterArray) && isShowAllSelected(filterArray);
 }
 
-function onlyCheckShowAll(filterOptions) {
+function onlyCheckShowAll(filterOptions: TableFilter[]) {
     //loop through each filter option
-    filterOptions.forEach(filter => {
+    filterOptions.forEach((filter) => {
         //check the show all option, and deselect all other options
-        document.getElementById(filter.filterID).checked = (filter.filterName == "showall");
+        (document.getElementById(filter.filterID) as HTMLInputElement).checked = filter.filterName == 'showall';
     });
 }
 
-function removeCheckShowAll(filterOptions) {
+function removeCheckShowAll(filterOptions: TableFilter[]) {
     //loop through each filter option
-    filterOptions.forEach(filter => {
+    filterOptions.forEach((filter) => {
         //if it's a show all option deselect it
-        if (filter.filterName == "showall") {
-            document.getElementById(filter.filterID).checked = false;
+        if (filter.filterName == 'showall') {
+            (document.getElementById(filter.filterID) as HTMLInputElement).checked = false;
         }
     });
 }
@@ -282,8 +308,12 @@ function accountForShowAlls() {
     }
 }
 
-function isAnOptionSelected(filterArray) {
-    return (filterArray.find(filter => { return document.getElementById(filter.filterID).checked === true }) != undefined);
+function isAnOptionSelected(filterArray: TableFilter[]) {
+    return (
+        filterArray.find((filter) => {
+            return (document.getElementById(filter.filterID) as HTMLInputElement).checked === true;
+        }) != undefined
+    );
 }
 
 function accountForNoneSelected() {
@@ -295,8 +325,8 @@ function accountForNoneSelected() {
     }
 }
 
-function isThereInput(text) {
-    return (text != undefined || text != null) && text != "";
+function isThereInput(text: string) {
+    return (text != undefined || text != null) && text != '';
 }
 
 function accountForSearch() {
@@ -304,7 +334,7 @@ function accountForSearch() {
     var filteredTableData = getOriginalTableData();
 
     //get the search input
-    var searchInput = $(".form-control.search-input").first().val();
+    var searchInput = $('.form-control.search-input').first().val() as string;
 
     //if there is a custom search function and there is a search input call it
     if (customSearchFunction != undefined && isThereInput(searchInput)) {
@@ -315,12 +345,12 @@ function accountForSearch() {
     return filteredTableData;
 }
 
-export function getCheckedBoxes(filterOptions) {
+export function getCheckedBoxes(filterOptions: TableFilter[]) {
     //initialize variables
-    var checkedFilteredOptions = [];
+    var checkedFilteredOptions: TableFilter[] = [];
 
     //loop through each filter option
-    filterOptions.forEach(filter => {
+    filterOptions.forEach((filter) => {
         //if it's checked add it to the array
         if (filter.checked) {
             checkedFilteredOptions.push(filter);
@@ -331,9 +361,9 @@ export function getCheckedBoxes(filterOptions) {
     return checkedFilteredOptions;
 }
 
-function defaultFiltrationFunction(filterCategory, filterOptions, dataArray) {
+function defaultFiltrationFunction(filterCategory: string, filterOptions: TableFilter[], dataArray: ITableData[]) {
     //initialize variables
-    var filteredDataArray = new Set();
+    var filteredDataArray = new Set<ITableData>();
 
     //if show all is not selected apply filters
     if (!isShowAllSelected(filterOptions)) {
@@ -341,20 +371,26 @@ function defaultFiltrationFunction(filterCategory, filterOptions, dataArray) {
         var checkedFilteredOptions = getCheckedBoxes(filterOptions);
 
         //loop through each filter option
-        checkedFilteredOptions.forEach(filter => {
+        checkedFilteredOptions.forEach((filter) => {
             if (filter.checked) {
                 //if the filter name category is a custom filter apply the custom filter
-                if (customFilterFunctions.hasOwnProperty(filterCategory)) {
-                    filteredDataArray = new Set(([...filteredDataArray, ...customFilterFunctions[filterCategory](filter.filterName, dataArray)]));
+                if (customFilterFunctions != null && customFilterFunctions.hasOwnProperty(filterCategory)) {
+                    filteredDataArray = new Set<ITableData>([
+                        ...filteredDataArray,
+                        ...getCustomFilterFunctionFromCategory(filterCategory).runFilterFunction(filter.filterName, dataArray),
+                    ]);
                 } else {
                     //otherwise apply the default filter
-                    filteredDataArray = new Set(([...filteredDataArray, ...dataArray.filter(option => option[filterCategory] == filter.filterName)]));
+                    filteredDataArray = new Set<ITableData>([
+                        ...filteredDataArray,
+                        ...dataArray.filter((option) => option[filterCategory] == filter.filterName),
+                    ]);
                 }
             }
         });
 
         //convert set to array
-        dataArray = [...filteredDataArray]
+        dataArray = [...filteredDataArray];
     }
 
     //return array
@@ -362,14 +398,14 @@ function defaultFiltrationFunction(filterCategory, filterOptions, dataArray) {
 }
 
 function clearAllFiltration() {
-    let searchElement = document.querySelector("input.search-input");
-    searchElement.value = "";
+    let searchElement = document.querySelector('input.search-input') as HTMLInputElement;
+    searchElement.value = '';
     turnOffIdFilter();
     updateSearchParam();
 
     //select the text on desktop
     if (window.innerWidth >= 768) {
-        document.querySelector("input.search-input").select();
+        (document.querySelector('input.search-input') as HTMLInputElement).select();
     }
     clearFiltration();
 }
@@ -383,8 +419,8 @@ function clearFiltration() {
         //if the show all option is not selected loop through each filter option and select the show all option
         if (!isShowAllSelected(filterOptions)) {
             filterOptions.forEach((filter) => {
-                if (filter.filterName == "showall") {
-                    document.getElementById(filter.filterID).checked = true;
+                if (filter.filterName == 'showall') {
+                    (document.getElementById(filter.filterID) as HTMLInputElement).checked = true;
                 }
             });
         }
@@ -412,7 +448,7 @@ export function showHideClearFilterButtons() {
         $(clearAllFilterButtonID).show();
     } else {
         $(clearFilterButtonID).hide();
-        if (new URL(window.location.href).search != "") {
+        if (new URL(window.location.href).search != '') {
             $(clearAllFilterButtonID).show();
         } else {
             $(clearAllFilterButtonID).hide();
@@ -439,33 +475,33 @@ export function updateTableFiltration() {
     showHideClearFilterButtons();
 
     //set table data to filtered data
-    $(getTableID()).bootstrapTable('load', sortData(filteredTableData));
+    (<any>$(getTableID())).bootstrapTable('load', sortData(filteredTableData));
     $(getTableID()).trigger(flexBootstrapTableEvents.filteredEvent);
 }
 
-export function sortData(filteredTableData) {
-    let toSortDesc = $(getTableID()).find(".desc").first()[0];
-    let toSortAsc = $(getTableID()).find(".asc").first()[0];
+export function sortData(filteredTableData: ITableData[]) {
+    let toSortDesc = $(getTableID()).find('.desc').first()[0];
+    let toSortAsc = $(getTableID()).find('.asc').first()[0];
 
     if (toSortDesc != undefined) {
         let sortOn = toSortDesc.innerText.toLowerCase();
-        return filteredTableData.sort(dynamicsort(sortOn, "desc"));
+        return filteredTableData.sort(dynamicsort(sortOn, 'desc'));
     } else if (toSortAsc != undefined) {
         let sortOn = toSortAsc.innerText.toLowerCase();
-        return filteredTableData.sort(dynamicsort(sortOn, "asc"));
+        return filteredTableData.sort(dynamicsort(sortOn, 'asc'));
     } else {
         return filteredTableData;
     }
 }
 
-function dynamicsort(property, order) {
-    var sortOrder = 1;
-    if (order === "desc") {
+function dynamicsort(property: string, order: string) {
+    let sortOrder = 1;
+    if (order === 'desc') {
         sortOrder = -1;
     }
-    return function (a, b) {
-        if (!isNaN(a[property])) {
-            return (a[property] - b[property]) * sortOrder;
+    return function (a: ITableData, b: ITableData) {
+        if (!isNaN(a[property] as number)) {
+            return ((a[property] as number) - (b[property] as number)) * sortOrder;
         } else {
             // a should come before b in the sorted order
             if (a[property] < b[property]) {
@@ -478,7 +514,7 @@ function dynamicsort(property, order) {
                 return 0 * sortOrder;
             }
         }
-    }
+    };
 }
 
 /*
@@ -520,7 +556,7 @@ function dynamicsort(property, order) {
     //Add it to the filter list
     bootstrapTableFilter.setCustomFilterFunctions(customFunctionObject);
 */
-export function setCustomFilterFunctions(functions) {
+export function setCustomFilterFunctions(functions: CustomFilterFunction[]) {
     customFilterFunctions = functions;
 }
 
@@ -545,20 +581,16 @@ export function setCustomFilterFunctions(functions) {
     //Add it to the Custom Search function
     bootstrapTableFilter.addCustomSearch(customSearchFunction);
 */
-export function addCustomSearch(searchFunction) {
+export function addCustomSearch(searchFunction: Function) {
     customSearchFunction = searchFunction;
 }
 
 export function revertFilteredData() {
-    $(tableID).bootstrapTable('load', getOriginalTableData);
+    (<any>$(tableID)).bootstrapTable('load', getOriginalTableData);
 }
 
 export function getOriginalTableData() {
     return hasID ? JSON.parse(JSON.stringify(idFilteredData)) : JSON.parse(JSON.stringify(originalTableData));
-}
-
-export function getFilteredTableData() {
-    return filteredTableData;
 }
 
 export function getTableID() {
@@ -573,12 +605,12 @@ export function turnOffIdFilter() {
     hasID = false;
 }
 
-export function init(id) {
+export function init(id: string) {
     //initialize class variables
     tableID = '#' + id;
-    clearFilterButtonID = '#' + id + "-clear-filter-button";
-    clearAllFilterButtonID = '#' + id + "-clear-all-filter-button";
-    originalTableData = JSON.parse(JSON.stringify($(tableID).bootstrapTable('getData', false)));
+    clearFilterButtonID = '#' + id + '-clear-filter-button';
+    clearAllFilterButtonID = '#' + id + '-clear-all-filter-button';
+    originalTableData = JSON.parse(JSON.stringify((<any>$(tableID)).bootstrapTable('getData', false)));
 
     //set up filter option data and event listeners
     initializeSearchInput();

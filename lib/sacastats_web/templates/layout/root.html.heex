@@ -7,13 +7,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link rel="shortcut icon" href={Routes.static_path(@conn, "/images/logo_icon.ico")} />
-    
+
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link rel="stylesheet" href={Routes.static_path(@conn, "/css/bootstrap-override.css")} />
-    
+
     <link href="https://unpkg.com/bootstrap-table@1.21.0/dist/extensions/sticky-header/bootstrap-table-sticky-header.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/@fortawesome/fontawesome-free@5.12.1/css/all.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/3.2.1/css/font-awesome.min.css" rel="stylesheet" />
@@ -29,10 +29,9 @@
     <script src="https://kit.fontawesome.com/c667abc43d.js" crossorigin="anonymous"></script>
 
     <script type="text/javascript" src={Routes.static_path(@conn, "/assets/app.js")}></script>
-    <script type="module" src={Routes.static_path(@conn, "/js/scripts.js")}></script>
     <link rel="stylesheet" href={Routes.static_path(@conn, "/css/app.css")} />
     <link rel="stylesheet" href={Routes.static_path(@conn, "/css/styles.css")} />
-    
+
     <link rel="stylesheet" href={Routes.static_path(@conn, "/css/flex-bootstrap-table.css")}/>
     <link rel="stylesheet" href={Routes.static_path(@conn, "/css/flex-bootstrap-table-filter.css")}/>
     <link rel="stylesheet" href={Routes.static_path(@conn, "/css/flex-bootstrap-table-selection.css")}/>
@@ -76,12 +75,12 @@
         <%= if @user do %>
           <div class="btn-group account-login-menu">
             <a href="#" id="account-dropdown-btn" data-toggle="dropdown">
-              <img src={SacaStats.DiscordUser.get_avatar_url(@user)} alt="Profile Picture" class="profile-picture" width="48" onerror={"this.onerror=null; this.src='" <> 
+              <img src={SacaStats.DiscordUser.get_avatar_url(@user)} alt="Profile Picture" class="profile-picture" width="48" onerror={"this.onerror=null; this.src='" <>
                                 Routes.static_path(@conn, "/images/user/defaultUserProfilePicture.png")
                                 <> "'"}>
             </a>
             <div id="account-dropdown" class="dropdown-menu dropdown-menu-right">
-              <img src={SacaStats.DiscordUser.get_avatar_url(@user)} alt="Profile Picture" class="profile-picture my-auto" width="32" onerror={"this.onerror=null; this.src='" <> 
+              <img src={SacaStats.DiscordUser.get_avatar_url(@user)} alt="Profile Picture" class="profile-picture my-auto" width="32" onerror={"this.onerror=null; this.src='" <>
                                 Routes.static_path(@conn, "/images/user/defaultUserProfilePicture.png")
                                 <> "'"}>
               <h3 class="d-inline align-middle"><%= @user.username %></h3>
@@ -102,7 +101,7 @@
     <footer>
       <nav class="navbar navbar-expand-md navbar-light main-nav d-md-none fixed-bottom">
 
-        <div class="bottom-navbar collapse navbar-collapse" id="collapse_bottom_target">
+        <div class="bottom-navbar collapse navbar-collapse" id="mobile-main-nav-menu">
           <ul class="navbar-nav">
             <li class="nav-item page-nav text-center">
               <%= if @user do %>
@@ -123,15 +122,11 @@
           </ul>
         </div>
           <h1>Saca Stats</h1>
-        <button class="navbar-toggler collapsed" data-toggle="collapse" data-target="#collapse_bottom_target">
+        <button class="navbar-toggler collapsed" data-toggle="collapse" data-target="#mobile-main-nav-menu">
           <span class="navbar-toggler-icon"></span>
         </button>
       </nav>
     </footer>
-    <script type="module">
-      //initialize page
-      import init from "<%= Routes.static_path(@conn, "/js/scripts.js") %>";
-      init();
-    </script>
+    <script type="module" src={Routes.static_path(@conn, "/assets/dist/scripts.js")}></script>
   </body>
 </html>

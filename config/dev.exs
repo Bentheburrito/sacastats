@@ -26,7 +26,8 @@ config :sacastats, SacaStatsWeb.Endpoint,
   secret_key_base: "s8BHf0SRqH/bqE7HuuaqA6fXa7W46/D1b3kz7znrBTmybanvzkQEnzNDjqCubVzq",
   watchers: [
     # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)
-    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]}
+    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
+    node: ["build.js", "--watch", cd: Path.expand("../assets", __DIR__)]
   ]
 
 # ## SSL Support

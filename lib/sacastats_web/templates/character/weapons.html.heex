@@ -11,10 +11,10 @@
                     </span>
                 </div>
             </label>
-        </div> 
+        </div>
         <div class="w-50 align-self-center">
             <label id="selection-mobile-menu-selection-count" class="h-100 text-right pr-2"></label>
-        </div> 
+        </div>
     </div>
 </div>
 <div class="selection-mobile-menu-bottom selection-mobile-menu">
@@ -25,21 +25,21 @@
                     Copy Link
                 </div>
             </label>
-        </div> 
+        </div>
         <div id="selection-mobile-menu-copy-text-btn" class="w-33 align-self-center">
             <label class="">
                 <div class="h-100 text-center">
                     Copy Text
                 </div>
             </label>
-        </div> 
+        </div>
         <div id="selection-mobile-menu-back-btn" class="w-33 align-self-center">
             <label class="">
                 <div class="h-100 text-center">
                     Back
                 </div>
             </label>
-        </div> 
+        </div>
     </div>
 </div>
 
@@ -409,25 +409,25 @@
         <%= for {weapon_id, weapon} <- @weapons do %>
             <tr id={"weaponTable#{weapon_id}Row"} class="">
                 <td class="weapon p-0">
-                    <%= if SacaStats.Conversions.medal_code_by_kill_count(SacaStats.Weapons.get_total_values(Map.get(weapon, "weapon_kills"), @character_info["faction_id"]) + 
+                    <%= if SacaStats.Conversions.medal_code_by_kill_count(SacaStats.Weapons.get_total_values(Map.get(weapon, "weapon_kills"), @character_info["faction_id"]) +
                             SacaStats.Weapons.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character_info["faction_id"])) > 0 do%>
-                        <img src={"https://census.daybreakgames.com/files/ps2/images/static/" <> (SacaStats.Conversions.medal_code_by_kill_count(SacaStats.Weapons.get_total_values(Map.get(weapon, "weapon_kills"), @character_info["faction_id"]) + 
+                        <img src={"https://census.daybreakgames.com/files/ps2/images/static/" <> (SacaStats.Conversions.medal_code_by_kill_count(SacaStats.Weapons.get_total_values(Map.get(weapon, "weapon_kills"), @character_info["faction_id"]) +
                             SacaStats.Weapons.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character_info["faction_id"]))|> Integer.to_string()) <>".png"} alt="medal" class="medal float-left position-absolute" width="30px"/>
                     <% end %>
                     <div class="weapon-image-container w-100">
-                        <img src={"https://census.daybreakgames.com" <> Map.get(weapon, "image_path", "/files/ps2/images/static/-1.png")} 
-                            onerror={"this.onerror=null; this.src='" <> 
-                                (if weapon["vehicle_weapon?"], 
-                                    do: Routes.static_path(@conn, "/images/character/unknownVehicleWeapon.png"), 
+                        <img src={"https://census.daybreakgames.com" <> Map.get(weapon, "image_path", "/files/ps2/images/static/-1.png")}
+                            onerror={"this.onerror=null; this.src='" <>
+                                (if weapon["vehicle_weapon?"],
+                                    do: Routes.static_path(@conn, "/images/character/unknownVehicleWeapon.png"),
                                     else: Routes.static_path(@conn, "/images/character/unknownInfantryWeapon.png"))
-                                <> "'"} 
+                                <> "'"}
                             alt={Map.get(weapon, "name", "N/A")} class="weapon-image mx-auto d-block"/>
                     </div>
                     <h5 class="weaponName align-text-bottom text-center mb-0"><%=Map.get(weapon, "name", "N/A")%></h5>
                     <div class="progress-bar-background">
-                        <div id={"weapon#{weapon_id}ProgressBar"} class="progress-bar progress-bar-striped progress-bar-animated aurax-progress" role="progressbar" 
+                        <div id={"weapon#{weapon_id}ProgressBar"} class="progress-bar progress-bar-striped progress-bar-animated aurax-progress" role="progressbar"
                             aria-valuenow={"#{SacaStats.Utils.to_percent(SacaStats.Weapons.get_total_values(Map.get(weapon, "weapon_kills"), @character_info["faction_id"]) +
-                                SacaStats.Weapons.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character_info["faction_id"]), 1160)}"} 
+                                SacaStats.Weapons.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character_info["faction_id"]), 1160)}"}
                             aria-valuemin="0" aria-valuemax="100" style="width: 0;">
                             <%= SacaStats.Utils.to_percent(SacaStats.Weapons.get_total_values(Map.get(weapon, "weapon_kills"), @character_info["faction_id"]) +
                                 SacaStats.Weapons.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character_info["faction_id"]), 1160)%>%
@@ -470,7 +470,7 @@
                     <%= SacaStats.Conversions.kills_to_next_medal(SacaStats.Weapons.get_total_values(Map.get(weapon, "weapon_kills"), @character_info["faction_id"]) + SacaStats.Weapons.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character_info["faction_id"]))%>
                 </td>
                 <td data-mobile-title="Kill/ Death Ratio" class="text-center">
-                    <%=SacaStats.Utils.to_percent((SacaStats.Weapons.get_total_values(Map.get(weapon, "weapon_kills"), @character_info["faction_id"]) 
+                    <%=SacaStats.Utils.to_percent((SacaStats.Weapons.get_total_values(Map.get(weapon, "weapon_kills"), @character_info["faction_id"])
                     + SacaStats.Weapons.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character_info["faction_id"])),
                         SacaStats.Utils.maybe_to_int(weapon["weapon_deaths"], 0))%>
                 </td>
@@ -503,7 +503,7 @@
                     <%=SacaStats.Utils.maybe_to_int(weapon["weapon_headshots"]["value_tr"], 0)%>
                 </td>
                 <td data-mobile-title="Headshot Ratio" class="text-center percentage">
-                    <%=SacaStats.Utils.to_percent(SacaStats.Weapons.get_total_values(Map.get(weapon, "weapon_headshots"), @character_info["faction_id"]), 
+                    <%=SacaStats.Utils.to_percent(SacaStats.Weapons.get_total_values(Map.get(weapon, "weapon_headshots"), @character_info["faction_id"]),
                         (SacaStats.Weapons.get_total_values(Map.get(weapon, "weapon_kills"), @character_info["faction_id"]) + SacaStats.Weapons.get_total_values(Map.get(weapon, "weapon_vehicle_kills"), @character_info["faction_id"])))%>%
                 </td>
                 <td data-mobile-title="Damage Given" class="number text-center"><%=SacaStats.Weapons.get_total_values(Map.get(weapon, "weapon_damage_given"), @character_info["faction_id"])%></td>
@@ -557,6 +557,9 @@
 </table>
 
 <script>
+    //initialize bootstrap table
+    $('#weaponTable').bootstrapTable();
+
     //initialize weapon sorters
     function timeSorter(a, b) {
         var aa = getTimeInSeconds(a);
@@ -572,20 +575,6 @@
     }
 </script>
 
-<script type="module">
-    //initialize weapon table
-    import init from "<%= Routes.static_path(@conn, "/js/character/weapons-table.js") %>";
-    init();
-</script>
+<script type="module" src={Routes.static_path(@conn, "/assets/dist/character/weapons-table.js")}></script>
 
-<script type="module">
-    //initialize weapon id and kill count map
-    import init from "<%= Routes.static_path(@conn, "/js/character/weapons.js") %>";
-    let kills = new Map();
-    $('#weaponTable').bootstrapTable('getData', false).forEach(weapon => {
-        kills.set("weapon" + weapon.id + "Row", weapon.kills)
-    });
-    init(kills);
-</script>
-
-<script type="module" src={Routes.static_path(@conn, "/js/character/weapons-table.js")}></script>
+<script type="module" src={Routes.static_path(@conn, "/assets/dist/character/weapons.js")}></script>
