@@ -1,3 +1,5 @@
+import { describe, it, expect } from '@jest/globals';
+
 import { sum } from '../src';
 describe('sum function', () => {
   it('adds 2 numbers', () => {
