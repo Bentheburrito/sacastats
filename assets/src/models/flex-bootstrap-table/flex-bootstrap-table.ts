@@ -1,4 +1,4 @@
-import { FlexBootstrapTable } from "../../flex_bootstrap_table/flex-bootstrap-table";
+import { FlexBootstrapTable } from "../../flex-bootstrap-table/flex-bootstrap-table";
 
 export interface ITableData {
     [key: string]: string | Object;

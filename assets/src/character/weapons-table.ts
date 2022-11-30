@@ -1,6 +1,6 @@
 import { nextAuraxElementID } from '../character/weapons.js';
-import { flexBootstrapTableMap } from '../flex_bootstrap_table/flex-bootstrap-table.js';
-import * as bootstrapSelection from '../flex_bootstrap_table/flex-bootstrap-table-selection.js';
+import { flexBootstrapTableMap } from '../flex-bootstrap-table/flex-bootstrap-table.js';
+import * as bootstrapSelection from '../flex-bootstrap-table/flex-bootstrap-table-selection.js';
 import * as flexBootstrapTableEvents from '../events/flex-bootstrap-table-events.js';
 
 import { CustomFilterFunction } from '../models/flex-bootstrap-table/flex-bootstrap-table-filter.js';
