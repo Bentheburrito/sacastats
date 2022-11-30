@@ -6,10 +6,8 @@ import {
     //CameraHelper, //only used for debugging
     PCFSoftShadowMap,
     WebGLRenderer,
-    // @ts-ignore
-} from 'https://cdn.skypack.dev/three@0.132.2';
-// @ts-ignore
-import { OrbitControls } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/controls/OrbitControls.js';
+} from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 export enum ModelType {
     INFANTRY = 'infantry',

@@ -30,7 +30,7 @@ function reInit(kills: WeaponKillsMap) {
 function addCustomEventListeners() {
   $(TABLE_ID).on(flexBootstrapTableEvents.filteredEvent, function () {
     let kills = new WeaponKillsMap();
-    (<any>$(TABLE_ID)).bootstrapTable('getData', false).forEach((weapon: { id: string; kills: string }) => {
+    $(TABLE_ID).bootstrapTable('getData', false).forEach((weapon: { id: string; kills: string }) => {
       kills.set(TABLE_ID.substring(1) + weapon.id + 'Row', weapon.kills);
     });
     reInit(kills);
@@ -39,7 +39,7 @@ function addCustomEventListeners() {
 
 function init() {
   let kills = new WeaponKillsMap();
-  (<any>$('#weaponTable')).bootstrapTable('getData', false).forEach((weapon: { id: string; kills: string; }) => {
+  $('#weaponTable').bootstrapTable('getData', false).forEach((weapon: { id: string; kills: string; }) => {
     kills.set("weapon" + weapon.id + "Row", weapon.kills)
   });
   reInit(kills);

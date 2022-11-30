@@ -4,10 +4,8 @@ import {
     MeshBasicMaterial,
     Vector3,
     LoadingManager,
-    // @ts-ignore
-} from 'https://cdn.skypack.dev/three@0.132.2';
-// @ts-ignore
-import { GLTF, GLTFLoader } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/loaders/GLTFLoader.js';
+} from 'three';
+import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { PlanetsideModel, ModelType } from "./planetside-model.js";
 import { CharacterSex } from "../character/character.js";
 
@@ -150,6 +148,11 @@ export class InfantryModel extends PlanetsideModel {
         } else {
             this.characterSex = CharacterSex.MALE;
         }
+
+        //make sure all NSO models are male as they don't have female models yet
+        if (this.characterFactionAlias === 'NSO') {
+            this.characterSex = CharacterSex.MALE;
+        }
     }
 
     protected loadModels = () => {
@@ -161,8 +164,9 @@ export class InfantryModel extends PlanetsideModel {
         //handle loading gltf models
         const onLoad = (gltf: GLTF, position: Vector3, reflective: boolean) => {
             const model = gltf.scene;
-            model.traverse((mesh: THREE.Mesh) => {
+            model.traverse((n) => {
                 //make sure to only edit the mesh material of the model
+                let mesh = n as THREE.Mesh;
                 if (mesh.isMesh) {
                     if (mesh.material) {
                         //create a copy of the material
