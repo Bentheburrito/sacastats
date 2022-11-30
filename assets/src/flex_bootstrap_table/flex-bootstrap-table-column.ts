@@ -18,6 +18,7 @@ let previousDragTableUpdate: IColumnOrderObject = {};
 let previousColumns: ITableField[];
 let previousSorted: ITableSortedField;
 let animating = false;
+let animationDuration = 50;
 
 export function fixColumnDropDown() {
     //fix column dropdown offset and bugs
@@ -89,7 +90,7 @@ function refreshByScroll() {
 
 function findVisibleFields() {
     //initialize variables
-    var columns = (<any>$(tableID)).bootstrapTable('getVisibleColumns');
+    var columns = $(tableID).bootstrapTable('getVisibleColumns');
     var fields: ITableField[] = [];
 
     //add fields and titles to array
@@ -178,7 +179,7 @@ function initializeColumns() {
 
 function setColumnVisibilitesAndSorts(persistentColumns: IPersistentColumn) {
     //hide all columns
-    (<any>$(tableID)).bootstrapTable('hideAllColumns');
+    $(tableID).bootstrapTable('hideAllColumns');
 
     //create the index order of columns
     let indexOrder: number[] = [];
@@ -219,7 +220,7 @@ function setColumnOrder() {
         });
 
         if (fieldIndex != -1) {
-            (<any>$(tableID)).bootstrapTable('showColumn', indexedColumnArray[fieldIndex].field);
+            $(tableID).bootstrapTable('showColumn', indexedColumnArray[fieldIndex].field);
         }
     }
 
@@ -231,7 +232,7 @@ function refreshDragColumns(orderObject: IColumnOrderObject) {
     if (JSON.stringify(previousDragTableUpdate) !== JSON.stringify(orderObject)) {
         previousDragTableUpdate = orderObject;
         setTimeout(() => {
-            (<any>$(tableID)).bootstrapTable('orderColumns', orderObject);
+            $(tableID).bootstrapTable('orderColumns', orderObject);
         }, 100);
     }
 }
@@ -250,13 +251,13 @@ function moveColumnUp(selectedColumnElement: HTMLElement) {
                 {
                     top: -distance,
                 },
-                100,
+                animationDuration,
             ),
             prevCol.animate(
                 {
                     top: distance,
                 },
-                100,
+                animationDuration,
             ),
         ).done(function () {
             //when animation is done reset element position
@@ -285,13 +286,13 @@ function moveColumnDown(selectedColumnElement: HTMLElement) {
                 {
                     top: -distance,
                 },
-                100,
+                animationDuration,
             ),
             $(selectedColumnElement).animate(
                 {
                     top: distance,
                 },
-                100,
+                animationDuration,
             ),
         ).done(function () {
             //when animation is done reset element position
@@ -338,7 +339,7 @@ function handleMoveColumnEvent(event: Event) {
 
     setTimeout(() => {
         refreshSortableColumnSelection(selectedColumnElement);
-    }, 110);
+    }, (animationDuration * 2) + 10);
 }
 
 function createSortableColumn(dataField: string, text: string, sortType: SortOrder) {

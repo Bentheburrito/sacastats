@@ -1,106 +1,108 @@
 import { addFormatsToPage, addAnimationToProgressBars } from '../formats.js';
-import * as bootstrapTableFilter from './flex-bootstrap-table-filter.js';
+import { FlexBootstrapTableFilter } from './flex-bootstrap-table-filter.js';
+import { FlexBootstrapTableMap } from '../models/flex-bootstrap-table/flex-bootstrap-table.js';
 import * as bootstrapSelection from './flex-bootstrap-table-selection.js';
 import * as bootstrapColumn from './flex-bootstrap-table-column.js';
 import * as flexBootstrapTableEvents from '../events/flex-bootstrap-table-events.js';
 import * as generalEvents from '../events/general-events.js';
 
-let table: HTMLTableElement;
+import "bootstrap-table";
 
-let isPageFormatted = false;
+export let flexBootstrapTableMap = new FlexBootstrapTableMap();
 
-export function setupFlexTables() {
-    addCustomDocumentEventListeners();
+export class FlexBootstrapTable {
+    private table!: HTMLTableElement;
 
-    document.querySelectorAll('.table-responsive-stack').forEach((table) => {
-        bootstrapTableFilter.init(table.id);
-        bootstrapSelection.init(table.id);
-        bootstrapColumn.init(table.id);
-        init();
-    });
+    private isPageFormatted = false;
+    private flexBootstrapTableFilter!: FlexBootstrapTableFilter;
+    private desktopHeaderOnly: string[] = [];
 
-    function init() {
-        initializeFlexTables();
+    constructor(responseTable: HTMLTableElement) {
+        this.table = responseTable as HTMLTableElement;
+        this.flexBootstrapTableFilter = new FlexBootstrapTableFilter(responseTable.id);
+        bootstrapSelection.init(responseTable.id);
+        bootstrapColumn.init(responseTable.id);
 
-        setFlexTableVisibilities();
-    }
+        this.initializeFlexTable();
+        this.setFlexTableVisibility();
+        this.addCustomDocumentEventListeners();
 
-    function initializeFlexTables() {
-        document.querySelectorAll('.table-responsive-stack').forEach((responseTable) => {
-            table = responseTable as HTMLTableElement;
-            initializeStickyHeaderWidths();
-            setMobileHeaderTexts(table.id);
-            addOnTHeadClick();
-            addToolBarClick();
-            addSearchEnter();
-            addOnDocumentMouseUp();
-            addTableCustomEventListeners(table.id);
-            updateTableFormats(table.id);
-            $(table).trigger(flexBootstrapTableEvents.initializedEvent);
+        window.addEventListener('load', (_event) => {
+            this.handleScreenWidthChange();
         });
     }
 
-    window.addEventListener('load', (event) => {
-        handleScreenWidthChange();
-    });
-
-    function handleScreenWidthChange() {
-        fixHeaderVisibilities();
-        window.addEventListener('resize', fixHeaderVisibilities);
+    private initializeFlexTable = () => {
+        this.initializeStickyHeaderWidths();
+        this.setMobileHeaderTexts(this.table.id);
+        this.addOnTHeadClick();
+        this.addToolBarClick();
+        this.addSearchEnter();
+        this.addOnDocumentMouseUp();
+        this.addTableCustomEventListeners(this.table.id);
+        this.updateTableFormats(this.table.id);
+        $(this.table).trigger(flexBootstrapTableEvents.initializedEvent);
     }
 
-    function fixHeaderVisibilities() {
+    private handleScreenWidthChange = () => {
+        this.fixHeaderVisibilities();
+        window.addEventListener('resize', this.fixHeaderVisibilities);
+    }
+
+    private fixHeaderVisibilities = () => {
+        this.setFlexTableVisibility();
+
         let isDesktop = window.innerWidth >= 768;
         if (!isDesktop) {
-            refreshByScroll();
+            this.refreshByScroll();
         }
     }
 
-    function handleTableColumnReorderEvent() {
-        refreshByScroll();
+    private handleTableColumnReorderEvent = () => {
+        this.refreshByScroll();
 
         //will need to update formats as reorders take longer
-        setTimeout(function () {
-            updateTableFormats(table.id);
+        setTimeout(() => {
+            this.updateTableFormats(this.table.id);
         }, 10);
     }
-    function handleTablePageChangeEvent() {
+    private handleTablePageChangeEvent = () => {
         $('html, body').animate(
             {
-                scrollTop: $('#' + table.id).offset()!.top - (window.innerWidth >= 768 ? 300 : 60), //- 254 to be at top
+                scrollTop: $('#' + this.table.id).offset()!.top - (window.innerWidth >= 768 ? 300 : 60), //- 254 to be at top
             },
             500,
         );
     }
-    function handleTablePostBodyEvent() {
-        updateTableFormats(table.id);
+    private handleTablePostBodyEvent = () => {
+        this.updateTableFormats(this.table.id);
     }
-    function addTableCustomEventListeners(tableID: string) {
-        $('#' + tableID).off('reorder-column.bs.table', handleTableColumnReorderEvent);
-        $('#' + tableID).on('reorder-column.bs.table', handleTableColumnReorderEvent);
-        $('#' + tableID).off('page-change.bs.table', handleTablePageChangeEvent);
-        $('#' + tableID).on('page-change.bs.table', handleTablePageChangeEvent);
-        $('#' + tableID).off('post-body.bs.table', handleTablePostBodyEvent);
-        $('#' + tableID).on('post-body.bs.table', handleTablePostBodyEvent);
+    private addTableCustomEventListeners = (tableID: string) => {
+        $('#' + tableID).off('reorder-column.bs.table', this.handleTableColumnReorderEvent);
+        $('#' + tableID).on('reorder-column.bs.table', this.handleTableColumnReorderEvent);
+        $('#' + tableID).off('page-change.bs.table', this.handleTablePageChangeEvent);
+        $('#' + tableID).on('page-change.bs.table', this.handleTablePageChangeEvent);
+        $('#' + tableID).off('post-body.bs.table', this.handleTablePostBodyEvent);
+        $('#' + tableID).on('post-body.bs.table', this.handleTablePostBodyEvent);
     }
 
-    function tableSearchEnterEventHandler(event: Event) {
+    private tableSearchEnterEventHandler = (event: Event) => {
         if ((event as KeyboardEvent).key === 'Enter') {
-            searchTable(event);
+            this.searchTable(event);
         } else {
             let input = document.querySelector('input.search-input') as HTMLInputElement;
             let text = JSON.parse(JSON.stringify(input.value));
-            setTimeout(function () {
+            setTimeout(() => {
                 if (text == input.value) {
-                    searchTable(event);
+                    this.searchTable(event);
                 }
             }, 300);
         }
     }
-    function searchTable(event: Event) {
-        updateSearchParam();
-        setTimeout(function () {
-            bootstrapTableFilter.updateTableFiltration();
+    private searchTable = (event: Event) => {
+        this.flexBootstrapTableFilter.updateSearchParam();
+        setTimeout(() => {
+            this.flexBootstrapTableFilter.updateTableFiltration();
         }, 10);
 
         let input = document.querySelector('input.search-input') as HTMLInputElement;
@@ -110,20 +112,20 @@ export function setupFlexTables() {
             }
         }
     }
-    function tableSearchEnterDownEventHandler(event: Event) {
+    private tableSearchEnterDownEventHandler = (event: Event) => {
         if ((event as KeyboardEvent).key === 'Enter') {
         }
     }
-    function addSearchEnter() {
+    private addSearchEnter = () => {
         document.querySelectorAll('input.search-input').forEach((searchInput) => {
-            searchInput.removeEventListener('keydown', tableSearchEnterDownEventHandler);
-            searchInput.addEventListener('keydown', tableSearchEnterDownEventHandler);
-            searchInput.removeEventListener('keyup', tableSearchEnterEventHandler);
-            searchInput.addEventListener('keyup', tableSearchEnterEventHandler);
+            searchInput.removeEventListener('keydown', this.tableSearchEnterDownEventHandler);
+            searchInput.addEventListener('keydown', this.tableSearchEnterDownEventHandler);
+            searchInput.removeEventListener('keyup', this.tableSearchEnterEventHandler);
+            searchInput.addEventListener('keyup', this.tableSearchEnterEventHandler);
         });
     }
 
-    function isTargetInputDisabled(target: HTMLElement) {
+    private isTargetInputDisabled = (target: HTMLElement) => {
         let input = target;
         if (target.localName != 'input') {
             input = input.closest('.filter-option')!;
@@ -141,13 +143,13 @@ export function setupFlexTables() {
         }
     }
 
-    function dropDownItemMouseUpEventHandler(event: Event) {
+    private dropDownItemMouseUpEventHandler = (event: Event) => {
         let target = event.target as HTMLElement;
 
-        if ('#' + target.id != bootstrapTableFilter.getClearFilterButtonID()) {
-            setTimeout(function () {
+        if ('#' + target.id != this.flexBootstrapTableFilter.getClearFilterButtonID()) {
+            setTimeout(() => {
                 var menuElement = target.closest('.dropdown-menu')!;
-                if (!isTargetInputDisabled(target)) {
+                if (!this.isTargetInputDisabled(target)) {
                     if (!menuElement.classList.contains('show')) {
                         (menuElement.parentElement?.firstElementChild as HTMLElement).click();
                     }
@@ -155,11 +157,11 @@ export function setupFlexTables() {
             }, 10);
         }
     }
-    function dropDownMenuClickEventHandler(event: Event) {
+    private dropDownMenuClickEventHandler = (event: Event) => {
         let target = event.target as HTMLElement;
         event.stopPropagation();
 
-        if ('#' + target.id == bootstrapTableFilter.getClearFilterButtonID()) {
+        if ('#' + target.id == this.flexBootstrapTableFilter.getClearFilterButtonID()) {
             setTimeout(function () {
                 var menuElement = target.closest('.dropdown-menu')!;
                 if (!menuElement.classList.contains('show')) {
@@ -168,18 +170,18 @@ export function setupFlexTables() {
             }, 100);
         }
     }
-    function addToolBarClick() {
+    private addToolBarClick = () => {
         document.querySelectorAll('.dropdown-item').forEach((itemDropDown) => {
-            itemDropDown.removeEventListener('mouseup', dropDownItemMouseUpEventHandler);
-            itemDropDown.addEventListener('mouseup', dropDownItemMouseUpEventHandler);
+            itemDropDown.removeEventListener('mouseup', this.dropDownItemMouseUpEventHandler);
+            itemDropDown.addEventListener('mouseup', this.dropDownItemMouseUpEventHandler);
         });
         document.querySelectorAll('.dropdown-menu').forEach((menu) => {
-            menu.removeEventListener('click', dropDownMenuClickEventHandler);
-            menu.addEventListener('click', dropDownMenuClickEventHandler);
+            menu.removeEventListener('click', this.dropDownMenuClickEventHandler);
+            menu.addEventListener('click', this.dropDownMenuClickEventHandler);
         });
     }
 
-    function refreshByScroll() {
+    private refreshByScroll = () => {
         let currentScrollPosition = $(window).scrollTop() as number;
         let maxScrollPosition = (document.documentElement.scrollHeight - document.documentElement.clientHeight) as number;
 
@@ -191,7 +193,7 @@ export function setupFlexTables() {
         }
     }
 
-    function documentMouseUpEventHandler(event: JQuery.MouseUpEvent) {
+    private documentMouseUpEventHandler = (event: JQuery.MouseUpEvent) => {
         let columnDropdown = document.querySelector("button[title='Columns']");
         if (columnDropdown == event.target) {
             bootstrapColumn.fixColumnDropDown();
@@ -201,190 +203,170 @@ export function setupFlexTables() {
             bootstrapColumn.updateColumns();
         }, 100);
     }
-    function addOnDocumentMouseUp() {
-        $(document).off('mouseup', documentMouseUpEventHandler);
-        $(document).on('mouseup', documentMouseUpEventHandler);
+    private addOnDocumentMouseUp = () => {
+        $(document).off('mouseup', this.documentMouseUpEventHandler);
+        $(document).on('mouseup', this.documentMouseUpEventHandler);
     }
 
-    function tableHeaderMouseDownEventHandler(event: Event) {
+    private tableHeaderMouseDownEventHandler = (event: Event) => {
         bootstrapSelection.resetCopyRowSelection(event);
     }
-    function addOnTHeadClick() {
-        table.firstElementChild?.removeEventListener('mousedown', tableHeaderMouseDownEventHandler);
-        table.firstElementChild?.addEventListener('mousedown', tableHeaderMouseDownEventHandler);
-        document.querySelector('.sticky-header')?.removeEventListener('mousedown', tableHeaderMouseDownEventHandler);
-        document.querySelector('.sticky-header')?.addEventListener('mousedown', tableHeaderMouseDownEventHandler);
+    private addOnTHeadClick = () => {
+        this.table.firstElementChild?.removeEventListener('mousedown', this.tableHeaderMouseDownEventHandler);
+        this.table.firstElementChild?.addEventListener('mousedown', this.tableHeaderMouseDownEventHandler);
+        document.querySelector('.sticky-header')?.removeEventListener('mousedown', this.tableHeaderMouseDownEventHandler);
+        document.querySelector('.sticky-header')?.addEventListener('mousedown', this.tableHeaderMouseDownEventHandler);
     }
 
-    function updateTableFormats(tableID: string) {
-        isPageFormatted = false;
+    private updateTableFormats = (tableID: string) => {
+        this.isPageFormatted = false;
         addAnimationToProgressBars();
         addFormatsToPage();
-        setMobileHeaderTexts(tableID);
-        bootstrapTableFilter.showHideClearFilterButtons();
-        setStickyHeaderWidths();
-        setFlexTableVisibilities();
-        $(table).trigger(flexBootstrapTableEvents.formatsUpdatedEvent);
-        setTimeout(function () {
-            makeSureTableRecievedStyles(tableID);
+        this.setMobileHeaderTexts(tableID);
+        this.flexBootstrapTableFilter.showHideClearFilterButtons();
+        this.setStickyHeaderWidths();
+        this.setFlexTableVisibility();
+        $(this.table).trigger(flexBootstrapTableEvents.formatsUpdatedEvent);
+        setTimeout(() => {
+            this.makeSureTableRecievedStyles(tableID);
         }, 10);
     }
 
-    function makeSureTableRecievedStyles(tableID: string) {
-        //wait a bit
-        setTimeout(function () {
-            //if the table is didn't get destroyed
-            let table = document.getElementById(tableID);
-            if (table != undefined) {
-                if (!didTableRecieveStyleUpdate()) {
-                    updateTableFormats(tableID);
-                }
-            } else {
-                //otherwise reinitialize the table
-                init();
+    private makeSureTableRecievedStyles = (tableID: string) => {
+        setTimeout(() => {
+            if (!this.didTableRecieveStyleUpdate()) {
+                this.updateTableFormats(tableID);
             }
         }, 10);
     }
 
-    function fixHeaderOnPageLoad() {
+    private fixHeaderOnPageLoad = () => {
         let isDesktop = window.innerWidth >= 768;
 
         if (isDesktop) {
-            setTimeout(function () {
-                refreshByScroll();
+            setTimeout(() => {
+                this.refreshByScroll();
             }, 100);
         }
     }
 
-    function addCustomDocumentEventListeners() {
-        $(document).on(generalEvents.pageFormattedEvent, function () {
-            isPageFormatted = true;
+    private addCustomDocumentEventListeners = () => {
+        $(document).on(generalEvents.pageFormattedEvent, () => {
+            this.isPageFormatted = true;
         });
-        $(document).on(generalEvents.loadingScreenRemovedEvent, fixHeaderOnPageLoad);
+        $(document).on(generalEvents.loadingScreenRemovedEvent, this.fixHeaderOnPageLoad);
     }
-}
 
-export function scrollToTopOfTable(event: Event) {
-    let target = event.target as HTMLElement;
-    if (target.classList.contains('page-link') || target.classList.contains('page-item')) {
-        $('html, body').animate(
-            {
-                scrollTop: $('#' + table.id).offset()!.top - (window.innerWidth >= 768 ? 300 : 60), //- 254 to be at top
-            },
-            500,
-        );
-    }
-}
-
-export function updateSearchParam() {
-    let searchValue = (document.querySelector('input.search-input') as HTMLInputElement).value as string;
-
-    if (window.history.pushState) {
-        const newURL = new URL(window.location.href);
-        if (searchValue != '') {
-            newURL.search = '?search=' + searchValue.replaceAll(' ', '_');
-        } else {
-            newURL.search = '';
+    private scrollToTopOfTable = (event: Event) => {
+        let target = event.target as HTMLElement;
+        if (target.classList.contains('page-link') || target.classList.contains('page-item')) {
+            $('html, body').animate(
+                {
+                    scrollTop: $('#' + this.table.id).offset()!.top - (window.innerWidth >= 768 ? 300 : 60), //- 254 to be at top
+                },
+                500,
+            );
         }
-
-        window.history.pushState({ path: newURL.href }, '', newURL.href);
-        bootstrapTableFilter.turnOffIdFilter();
     }
-}
 
-export function setMobileHeaderTexts(tableID: string) {
-    //append each header text to the front of the corresponding data element and hide it
-    $('#' + tableID)
-        .find('th')
-        .each(function (i) {
+    private setMobileHeaderTexts = (tableID: string) => {
+        //append each header text to the front of the corresponding data element and hide it
+        $('#' + tableID).find(".table-responsive-stack-thead").each((i, element) => element.remove());
+        $('#' + tableID).find("th").each((i, header) => {
             let tds = '#' + tableID + ' td:nth-child(' + (i + 1) + ')';
-            let tdsExist = document.querySelector(tds) != undefined ? true : false;
+            let tdsExist = (document.querySelector(tds) != undefined) ? true : false;
             if (tdsExist) {
-                $(tds).prepend(
-                    getMobileHeader(
-                        hasMobileHeader($(tds).html())
-                            ? ''
-                            : getMobileHeader(
-                                document.querySelector(tds)?.hasAttribute('data-mobile-title')
-                                    ? document.querySelector(tds)?.getAttribute('data-mobile-title')!
-                                    : $(this).text(),
-                            ),
-                    ),
-                );
+                $(tds).prepend(this.getMobileHeader(this.hasMobileHeader($(tds).html()) ?
+                    "" : this.getMobileHeader((document.querySelector(tds)!.hasAttribute('data-mobile-title')) ?
+                        document.querySelector(tds)!.getAttribute('data-mobile-title')! : $(header).text())));
                 if (window.innerWidth > 767) {
                     $('.table-responsive-stack-thead').hide();
                 }
             }
         });
-}
-function getMobileHeader(text: string) {
-    return !hasMobileHeader(text)
-        ? '<span class="table-responsive-stack-thead">' + text + getSeparator(text) + '</span>'
-        : text.trim() == 'Weapon'
-            ? ''
-            : text;
-}
-function getSeparator(text: string) {
-    return isThereAHeader(text) ? ': ' : '';
-}
-function isThereAHeader(text: string) {
-    return text.trim() != '' && text.trim() != 'Weapon';
-}
-function hasMobileHeader(text: string) {
-    return text != undefined && (text.includes('table-responsive-stack-thead') || text.trim() == 'Weapon');
-}
-
-function didTableRecieveStyleUpdate() {
-    return isPageFormatted;
-}
-
-function initializeStickyHeaderWidths() {
-    //get the current scroll position and scroll to the top of the page
-    let top = JSON.parse(JSON.stringify(document.body.scrollTop));
-    document.body.scrollTop = 0;
-
-    //set the sticky header widths
-    setStickyHeaderWidths();
-
-    //reset the scroll position to the original
-    document.body.scrollTop = top;
-}
-
-export function setStickyHeaderWidths() {
-    //initialize variables
-    let headers = document.querySelector('thead.sticky-header > tr')!.querySelectorAll('th');
-    let columns = document.querySelector('#' + table.id + '>tbody>tr')!.querySelectorAll('td');
-
-    //make sure each header matches it's matching td
-    for (let i = 0; i < headers.length; i++) {
-        let width = $(columns[i]).width();
-        $(headers[i]).css({
-            width: width + 'px',
-        });
     }
-}
+    private getMobileHeader = (text: string) => {
+        return !this.hasMobileHeader(text)
+            ? '<span class="table-responsive-stack-thead">' + text + this.getSeparator(text) + '</span>'
+            : this.desktopHeaderOnly.includes(text.trim()) ? '' : text;
+    }
+    private getSeparator = (text: string) => {
+        return this.isThereAHeader(text) ? ': ' : '';
+    }
+    private isThereAHeader = (text: string) => {
+        return text.trim() != '' && !this.desktopHeaderOnly.includes(text.trim());
+    }
+    private hasMobileHeader = (text: string) => {
+        return text != undefined && (text.includes('table-responsive-stack-thead') || this.desktopHeaderOnly.includes(text.trim()));
+    }
 
-export function setFlexTableVisibilities() {
-    let screenWidth = window.innerWidth <= 767;
-    (document.querySelectorAll('.table-responsive-stack') as NodeListOf<HTMLTableElement>).forEach((table) => {
-        showHideMobileAndRegularTables(table, screenWidth);
-    });
+    public setDesktopHeaderOnly(desktopHeaderOnly: string[]) {
+        this.desktopHeaderOnly = desktopHeaderOnly;
+        this.setMobileHeaderTexts(this.table.id);
+    }
 
-    function showHideMobileAndRegularTables(table: HTMLTableElement, showMobile: boolean) {
-        if (showMobile) {
-            showMobileTableAndHideRegularTable(table);
-        } else {
-            hideMobileTableAndShowRegularTable(table);
+    private didTableRecieveStyleUpdate = () => {
+        return this.isPageFormatted;
+    }
+
+    private initializeStickyHeaderWidths = () => {
+        //get the current scroll position and scroll to the top of the page
+        let top = JSON.parse(JSON.stringify(document.body.scrollTop));
+        document.body.scrollTop = 0;
+
+        //set the sticky header widths
+        this.setStickyHeaderWidths();
+
+        //reset the scroll position to the original
+        document.body.scrollTop = top;
+    }
+
+    public setStickyHeaderWidths = () => {
+        //initialize variables
+        let headers = document.querySelector('thead.sticky-header > tr')!.querySelectorAll('th');
+        let columns = document.querySelector('#' + this.table.id + '>tbody>tr')!.querySelectorAll('td');
+
+        //make sure each header matches it's matching td
+        for (let i = 0; i < headers.length; i++) {
+            let width = $(columns[i]).width();
+            $(headers[i]).css({
+                width: width + 'px',
+            });
         }
     }
 
-    function showMobileTableAndHideRegularTable(table: HTMLTableElement) {
-        $(table).find('.table-responsive-stack-thead').show();
-        $(table).find('thead').hide();
+    private setFlexTableVisibility = () => {
+        let screenWidth = window.innerWidth <= 767;
+        this.showHideMobileAndRegularTables(screenWidth);
     }
 
-    function hideMobileTableAndShowRegularTable(table: HTMLTableElement) {
-        $(table).find('.table-responsive-stack-thead').hide();
-        $(table).find('thead').show();
+    private showHideMobileAndRegularTables = (showMobile: boolean) => {
+        if (showMobile) {
+            this.showMobileTableAndHideRegularTable();
+        } else {
+            this.hideMobileTableAndShowRegularTable();
+        }
+    }
+
+    private showMobileTableAndHideRegularTable = () => {
+        $(this.table).find('.table-responsive-stack-thead').show();
+        $(this.table).find('thead').hide();
+    }
+
+    private hideMobileTableAndShowRegularTable = () => {
+        $(this.table).find('.table-responsive-stack-thead').hide();
+        $(this.table).find('thead').show();
+    }
+
+    public getFlexBootstrapTableFilter = () => {
+        return this.flexBootstrapTableFilter;
     }
 }
+
+function initializeFlexTables() {
+    document.querySelectorAll('.table-responsive-stack').forEach((element) => {
+        let responseTable = element as HTMLTableElement;
+        flexBootstrapTableMap.set(responseTable.id, new FlexBootstrapTable(responseTable));
+    });
+}
+initializeFlexTables();

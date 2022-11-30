@@ -1,4 +1,3 @@
-import { setupFlexTables, setFlexTableVisibilities } from './flex_bootstrap_table/flex-bootstrap-table.js';
 import { addFormatsToPage, addAnimationToProgressBars } from './formats.js';
 import * as loadingScreen from './loading-screen.js';
 import { addScrollToTop } from './scroll-to-top.js';
@@ -9,9 +8,6 @@ function addEventListeners() {
 }
 
 function setWindowResizeEvents() {
-  window.onresize = function (_event) {
-    setFlexTableVisibilities();
-  };
 }
 
 function init() {
@@ -22,8 +18,6 @@ function init() {
   addFormatsToPage();
 
   loadingScreen.addLoadingScreenToAnchorLinkEvents();
-
-  setupFlexTables();
 
   addScrollToTop();
 

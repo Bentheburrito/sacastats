@@ -1,10 +1,11 @@
 import { nextAuraxElementID } from '../character/weapons.js';
-import * as bootstrapTableFilter from '../flex_bootstrap_table/flex-bootstrap-table-filter.js';
+import { flexBootstrapTableMap } from '../flex_bootstrap_table/flex-bootstrap-table.js';
 import * as bootstrapSelection from '../flex_bootstrap_table/flex-bootstrap-table-selection.js';
 import * as flexBootstrapTableEvents from '../events/flex-bootstrap-table-events.js';
 
 import { CustomFilterFunction } from '../models/flex-bootstrap-table/flex-bootstrap-table-filter.js';
 import { ITableData } from '../models/flex-bootstrap-table/flex-bootstrap-table.js';
+import { BootstrapTableOptions } from 'bootstrap-table';
 
 
 const TABLE_ID = '#weaponTable';
@@ -124,7 +125,7 @@ function addCustomFilters() {
     ];
 
     //Add it to the filter list
-    bootstrapTableFilter.setCustomFilterFunctions(customFunction);
+    flexBootstrapTableMap.get(TABLE_ID.substring(1))?.getFlexBootstrapTableFilter().setCustomFilterFunctions(customFunction);
 }
 
 function addCustomCopyFunction() {
@@ -257,7 +258,8 @@ function addCustomSearchFunction() {
         });
     };
 
-    bootstrapTableFilter.addCustomSearch(customSearchFunction);
+
+    flexBootstrapTableMap.get(TABLE_ID.substring(1))?.getFlexBootstrapTableFilter().addCustomSearch(customSearchFunction);;
 }
 
 function addCustomEventListeners() {
@@ -276,14 +278,22 @@ function addCustomEventListeners() {
     });
 }
 
-function init() {
-    (<any>$(TABLE_ID)).bootstrapTable({
-        dragaccept: '.drag-accept',
-    });
+function waitForTableInitialization() {
+    if (flexBootstrapTableMap.get(TABLE_ID.substring(1))?.getFlexBootstrapTableFilter() != undefined) {
+        addCustomSearchFunction();
+        addCustomFilters();
+        flexBootstrapTableMap.get(TABLE_ID.substring(1))?.setDesktopHeaderOnly(["Weapon"]);
+    } else {
+        setTimeout(waitForTableInitialization, 10);
+    }
+}
 
+function init() {
+    let options = { dragaccept: '.drag-accept' } as BootstrapTableOptions;
+
+    $(TABLE_ID).bootstrapTable(options);
+    waitForTableInitialization();
     initializeButtonEvent();
-    addCustomSearchFunction();
-    addCustomFilters();
     addCustomCopyFunction();
     addCustomEventListeners();
 }

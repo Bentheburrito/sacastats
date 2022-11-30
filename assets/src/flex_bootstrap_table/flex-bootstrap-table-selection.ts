@@ -227,7 +227,7 @@ function addMobileSelectionMenuClickEvents() {
     //handle back button clicks
     backBtn?.addEventListener('click', function (event) {
         resetCopyRowSelection(event);
-        showHideSelectionMobileMenu();
+        hideSelectionMobileMenu();
     });
 
     //handle select all clicks
@@ -665,6 +665,6 @@ export function init(id: string) {
     rowArray = $(tableID).find('tbody').first()[0].children as HTMLCollectionOf<HTMLTableRowElement>;
 
     addTableClickHandler();
-    showHideSelectionMobileMenu();
+    hideSelectionMobileMenu();
     addMobileSelectionMenuClickEvents();
 }
