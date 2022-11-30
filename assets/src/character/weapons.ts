@@ -39,8 +39,8 @@ function addCustomEventListeners() {
 
 function init() {
   let kills = new WeaponKillsMap();
-  $('#weaponTable').bootstrapTable('getData', false).forEach((weapon: { id: string; kills: string; }) => {
-    kills.set("weapon" + weapon.id + "Row", weapon.kills)
+  $(TABLE_ID).bootstrapTable('getData', false).forEach((weapon: { id: string; kills: string; }) => {
+    kills.set(TABLE_ID.substring(1) + weapon.id + "Row", weapon.kills)
   });
   reInit(kills);
   addCustomEventListeners();
