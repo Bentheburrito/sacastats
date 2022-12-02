@@ -8,7 +8,7 @@
     "test": "test"
   },
   "scripts": {
-    "build": "rm -rf ../priv/static/assets/dist && node --experimental-json-modules build-production.js",
+    "build": "rm -rf ../priv/static/assets/dist && node --experimental-json-modules build-prod.js",
     "buildDev": "rm -rf ../priv/static/assets/dist && node --experimental-json-modules build-dev.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "format": "prettier --write \"src/**/*.ts\"",
