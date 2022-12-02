@@ -13,10 +13,8 @@
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p tsconfig.json",
-    "prepublishOnly": "npm run lint && npm test",
-    "preversion": "npm run lint && npm test",
-    "prepare": "npm run build",
-    "save": "npm run lint && npm run format && npm run build"
+    "prepare": "npm run lint && npm run format && npm test",
+    "save": "npm run format && npm run build && npm run buildDev"
   },
   "repository": {
     "type": "git",
