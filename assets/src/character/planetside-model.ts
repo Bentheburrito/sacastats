@@ -13,7 +13,7 @@ function init() {
             let headID = +modelFigureElement.dataset.headId!;
             let clazz = modelFigureElement.dataset.clazz!;
 
-            new InfantryModel(id, factionAlias, headID, clazz);
+            new InfantryModel(id, factionAlias, headID, clazz).loadModels(); //must call loadModels() to render infantry model
         }
 
 

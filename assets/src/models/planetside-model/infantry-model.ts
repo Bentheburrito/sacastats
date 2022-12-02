@@ -9,6 +9,12 @@ import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { PlanetsideModel, ModelType } from "./planetside-model.js";
 import { CharacterSex } from "../character/character.js";
 
+/**
+ * Must call loadModels() to render Models
+ * Ex. `new InfantryModel(id, factionAlias, headID, clazz).loadModels();`
+ * 
+ * This implementation is due to tests failing when called from constructor
+ */
 export class InfantryModel extends PlanetsideModel {
     constructor(containerID: string, factionAlias: string, headID: number, clazz: string) {
         super(containerID, ModelType.INFANTRY, false);
@@ -25,9 +31,6 @@ export class InfantryModel extends PlanetsideModel {
         this.setModelBase();
         this.setCharacterArmor();
         this.setCharacterWeapon();
-
-        //load and render model
-        this.loadModels();
     }
 
     //initialize path variables
@@ -110,13 +113,14 @@ export class InfantryModel extends PlanetsideModel {
     }
 
     private getNonNullCharacterVariables = (factionAlias: string, headID: number, characterClass: string) => {
-        if (factionAlias == '' || factionAlias == undefined) {
+        const FACTION_ALIAS_ARRAY = ["VS", "NC", "TR", "NS", "NSO"];
+        if (factionAlias == '' || factionAlias == undefined || !FACTION_ALIAS_ARRAY.includes(factionAlias)) {
             factionAlias = 'VS';
         }
-        if (headID == undefined) {
+        if (headID == undefined || headID > 8 || headID < 1) {
             headID = 1;
         }
-        if (characterClass == '' || characterClass == undefined) {
+        if (characterClass == '' || characterClass == undefined || ![...this.CHARACTER_CLASS_MAP.keys()].includes(characterClass)) {
             characterClass = 'Engineer';
         }
 
@@ -155,7 +159,11 @@ export class InfantryModel extends PlanetsideModel {
         }
     }
 
-    protected loadModels = () => {
+    /**
+     * Must be called to render Models
+     * This implementation is due to tests failing when called from constructor
+     */
+    public loadModels = () => {
         //initialize variables
         const manager = new LoadingManager();
         const loader = new GLTFLoader(manager);
@@ -199,9 +207,10 @@ export class InfantryModel extends PlanetsideModel {
         };
 
         //add model pieces
+        //****  IMPORTANT: NSO MAXES DO NOT HAVE WEAPONS MODELS, SO DON'T TRY TO RENDER THEM  ****/
         if (!(this.characterClassID == 5 && this.characterFactionAlias == 'NSO')) {
             loader.load(
-                this.weaponPath + this.characterWeapon + this.getFileType(),
+                this.getWeaponFile(),
                 (gltf: GLTF) => onLoad(gltf, modelPosition, true),
                 () => { },
                 () => { },
@@ -209,15 +218,16 @@ export class InfantryModel extends PlanetsideModel {
         }
 
         loader.load(
-            this.basePath + this.modelBase + this.getFileType(),
+            this.getBaseFile(),
             (gltf: GLTF) => onLoad(gltf, modelPosition, false),
             () => { },
             () => { },
         );
 
+        //****  IMPORTANT: NSO MAXES DO NOT HAVE ARMOR MODELS, SO DON'T TRY TO RENDER THEM  ****/
         if (!(this.characterClassID == 5 && this.characterFactionAlias == 'NSO')) {
             loader.load(
-                this.armorPath + this.characterArmor + this.getFileType(),
+                this.getArmorFile(),
                 (gltf: GLTF) => onLoad(gltf, modelPosition, true),
                 () => { },
                 () => { },
@@ -225,7 +235,7 @@ export class InfantryModel extends PlanetsideModel {
         }
 
         loader.load(
-            this.HEAD_PATH + this.characterHead + this.getFileType(),
+            this.getHeadFile(),
             (gltf: GLTF) => onLoad(gltf, modelPosition, false),
             () => { },
             () => { },
@@ -239,5 +249,21 @@ export class InfantryModel extends PlanetsideModel {
         };
 
         //scene.add(new CameraHelper(camera)); //shows light patterns
+    }
+
+    public getWeaponFile = () => {
+        return this.weaponPath + this.characterWeapon + this.getFileType();
+    }
+
+    public getBaseFile = () => {
+        return this.basePath + this.modelBase + this.getFileType();
+    }
+
+    public getArmorFile = () => {
+        return this.armorPath + this.characterArmor + this.getFileType();
+    }
+
+    public getHeadFile = () => {
+        return this.HEAD_PATH + this.characterHead + this.getFileType();
     }
 }
