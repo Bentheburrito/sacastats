@@ -5,7 +5,6 @@ import * as SharedBuild from "./build-shared.js";
 //set config
 let config = {
     ...SharedBuild.sharedConfig,
-    splitting: true,
     watch: {
         onRebuild(error, result) {
             if (error) {

@@ -5,6 +5,7 @@ import * as SharedBuild from "./build-shared.js";
 //set config
 let config = {
     ...SharedBuild.sharedConfig,
+    splitting: true,
     minify: true,
 };
 
