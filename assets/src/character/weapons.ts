@@ -1,5 +1,5 @@
 import * as flexBootstrapTableEvents from '../events/flex-bootstrap-table-events.js';
-import { WeaponKillsMap } from "../models/character/weapon.js";
+import { WeaponKillsMap } from '../models/character/weapon.js';
 
 let sortedKills: WeaponKillsMap;
 let unsortedKills: WeaponKillsMap;
@@ -30,18 +30,22 @@ function reInit(kills: WeaponKillsMap) {
 function addCustomEventListeners() {
   $(TABLE_ID).on(flexBootstrapTableEvents.filteredEvent, function () {
     let kills = new WeaponKillsMap();
-    $(TABLE_ID).bootstrapTable('getData', false).forEach((weapon: { id: string; kills: string }) => {
-      kills.set(TABLE_ID.substring(1) + weapon.id + 'Row', weapon.kills);
-    });
+    $(TABLE_ID)
+      .bootstrapTable('getData', false)
+      .forEach((weapon: { id: string; kills: string }) => {
+        kills.set(TABLE_ID.substring(1) + weapon.id + 'Row', weapon.kills);
+      });
     reInit(kills);
   });
 }
 
 function init() {
   let kills = new WeaponKillsMap();
-  $(TABLE_ID).bootstrapTable('getData', false).forEach((weapon: { id: string; kills: string; }) => {
-    kills.set(TABLE_ID.substring(1) + weapon.id + "Row", weapon.kills)
-  });
+  $(TABLE_ID)
+    .bootstrapTable('getData', false)
+    .forEach((weapon: { id: string; kills: string }) => {
+      kills.set(TABLE_ID.substring(1) + weapon.id + 'Row', weapon.kills);
+    });
   reInit(kills);
   addCustomEventListeners();
 }

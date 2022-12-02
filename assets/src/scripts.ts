@@ -7,8 +7,7 @@ function addEventListeners() {
   setWindowResizeEvents();
 }
 
-function setWindowResizeEvents() {
-}
+function setWindowResizeEvents() {}
 
 function init() {
   addEventListeners();
