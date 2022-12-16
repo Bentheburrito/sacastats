@@ -5,7 +5,6 @@ defmodule SacaStats.Application do
 
   use Application
 
-  alias SacaStats.CensusCache.Fallbacks
   alias SacaStats.EventTracker
 
   @impl true
@@ -22,37 +21,8 @@ defmodule SacaStats.Application do
       # Start the SID manager
       SacaStats.SIDs,
       # Start caches
-      Supervisor.child_spec(
-        {SacaStats.CensusCache,
-         [
-           name: SacaStats.CharacterCache,
-           fallback_fn: &Fallbacks.character/1,
-           entry_expiration_ms: 60 * 60 * 1000
-         ]},
-        id: :character_cache
-      ),
-      Supervisor.child_spec(
-        {SacaStats.CensusCache,
-         [
-           name: SacaStats.CharacterStatsCache,
-           fallback_fn: &Fallbacks.character_stats/1,
-           entry_expiration_ms: 2 * 60 * 60 * 1000
-         ]},
-        id: :character_stats_cache
-      ),
-      Supervisor.child_spec(
-        {SacaStats.CensusCache,
-         [
-           name: SacaStats.OnlineStatusCache,
-           fallback_fn: &Fallbacks.online_status/1,
-           entry_expiration_ms: 12 * 60 * 60 * 1000
-         ]},
-        id: :online_status_cache
-      ),
-      Supervisor.child_spec(
-        {SacaStats.CensusCache, [name: SacaStats.DiscordClientCache]},
-        id: :discord_cache
-      ),
+      Supervisor.child_spec({Cachex, name: :character_cache}, id: :character_cache),
+      Supervisor.child_spec({Cachex, name: :online_status_cache}, id: :online_status_cache),
       # Start the EventTracker Deduplicator
       {EventTracker.Deduper, []},
       # Start the EventTracker Manager

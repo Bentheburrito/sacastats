@@ -3,6 +3,7 @@ defmodule SacaStatsWeb.CharacterView do
 
   import SacaStats, only: [is_assist_xp: 1]
 
+  alias SacaStats.Census.Character
   alias SacaStats.Session
 
   alias SacaStats.Events.{
@@ -17,13 +18,6 @@ defmodule SacaStatsWeb.CharacterView do
   }
 
   require Logger
-
-  def next_battle_rank(character_info) do
-    character_info
-    |> get_in(["battle_rank", "value"])
-    |> String.to_integer()
-    |> Kernel.+(1)
-  end
 
   def pretty_session_summary(assigns, session) do
     login_time = prettify_timestamp(assigns, session.login.timestamp)
@@ -178,7 +172,7 @@ defmodule SacaStatsWeb.CharacterView do
 
   defp get_character_name(assigns, character_map, character_id) do
     case character_map do
-      %{^character_id => %{"name" => %{"first" => name}}} ->
+      %{^character_id => {:ok, %Character{name_first: name}}} ->
         ~H"""
         <a href={"/character/#{name}"}><%= name %></a>
         """

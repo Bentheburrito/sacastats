@@ -6,7 +6,8 @@ defmodule SacaStatsWeb.SessionLive.View do
   use Phoenix.HTML
 
   alias Phoenix.PubSub
-  alias SacaStats.{CensusCache, Session}
+  alias SacaStats.Census.OnlineStatus
+  alias SacaStats.{Characters, Session}
 
   require Logger
 
@@ -20,7 +21,8 @@ defmodule SacaStatsWeb.SessionLive.View do
         socket
       ) do
     %Session{} = session = Session.get(name, login_timestamp)
-    {:ok, status} = CensusCache.get(SacaStats.OnlineStatusCache, session.character_id)
+
+    {:ok, status} = OnlineStatus.get_by_id(session.character_id)
 
     PubSub.subscribe(SacaStats.PubSub, "game_event:#{session.character_id}")
 
@@ -49,7 +51,7 @@ defmodule SacaStatsWeb.SessionLive.View do
       end)
 
     # "Preload" characters
-    {:ok, character_map} = CensusCache.get_many(SacaStats.CharacterCache, all_character_ids)
+    {:ok, character_map} = Characters.get_many_by_id(all_character_ids)
 
     socket =
       socket
@@ -80,7 +82,7 @@ defmodule SacaStatsWeb.SessionLive.View do
       |> Map.take([:character_id, :attacker_character_id])
       |> Map.values()
 
-    {:ok, new_character_map} = CensusCache.get_many(SacaStats.CharacterCache, character_ids)
+    {:ok, new_character_map} = Characters.get_many_by_id(character_ids)
 
     {:noreply,
      socket
