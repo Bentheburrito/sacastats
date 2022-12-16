@@ -4,12 +4,12 @@ defmodule SacaStats.Census.Character do
   """
 
   alias SacaStats.Census.Character.{
-    StatHistory,
+    Outfit,
     Stat,
     StatByFaction,
+    StatHistory,
     WeaponStat,
-    WeaponStatByFaction,
-    Outfit
+    WeaponStatByFaction
   }
 
   require Logger

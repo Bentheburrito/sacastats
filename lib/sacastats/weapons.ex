@@ -4,7 +4,7 @@ defmodule SacaStats.Weapons do
   """
 
   alias SacaStats.Conversions
-  alias SacaStats.Census.Character.{WeaponStatByFaction, WeaponStat}
+  alias SacaStats.Census.Character.{WeaponStat, WeaponStatByFaction}
 
   import SacaStats.Utils
 

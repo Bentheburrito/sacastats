@@ -32,9 +32,10 @@ defmodule SacaStats.Census.OnlineStatus do
 
   @spec get_by_id(integer()) :: {:ok, struct()} | :not_found | :error
   def get_by_id(character_id) do
-    with {:ok, %OnlineStatus{} = status} <- Cachex.get(:online_status_cache, character_id) do
-      {:ok, status}
-    else
+    case Cachex.get(:online_status_cache, character_id) do
+      {:ok, %OnlineStatus{} = status} ->
+        {:ok, status}
+
       {:ok, nil} ->
         query = term(@query_base, "character_id", character_id)
         get_by_census(query, _attempt = 1)

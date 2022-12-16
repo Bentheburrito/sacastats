@@ -1,4 +1,8 @@
 defmodule SacaStats.Census.Character.StatByFaction do
+  @moduledoc """
+  Ecto embedded schema for a character's stats by faction
+  """
+
   use Ecto.Schema
   import Ecto.Changeset
   @primary_key false

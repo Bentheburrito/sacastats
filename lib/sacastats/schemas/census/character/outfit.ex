@@ -1,4 +1,8 @@
 defmodule SacaStats.Census.Character.Outfit do
+  @moduledoc """
+  Ecto embedded schema for a character's outfit
+  """
+
   use Ecto.Schema
   import Ecto.Changeset
   @primary_key false

@@ -1,4 +1,8 @@
 defmodule SacaStats.Census.Character.StatHistory do
+  @moduledoc """
+  Ecto embedded schema for a character's stat history
+  """
+
   use Ecto.Schema
   import Ecto.Changeset
   @primary_key false

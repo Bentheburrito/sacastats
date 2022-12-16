@@ -1,4 +1,8 @@
 defmodule SacaStats.Census.Character.WeaponStat do
+  @moduledoc """
+  Ecto embedded schema for a character's weapon stats
+  """
+
   use Ecto.Schema
   import Ecto.Changeset
   @primary_key false
