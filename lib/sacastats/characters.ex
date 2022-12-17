@@ -150,7 +150,7 @@ defmodule SacaStats.Characters do
   defp get_by_census(_query, attempt) when attempt == @max_attempts + 1, do: :error
 
   defp get_by_census(query, attempt) do
-    with {:ok, %QueryResult{data: data}} <-
+    with {:ok, %QueryResult{data: data, returned: returned}} when returned > 0 <-
            PS2.API.query_one(query, SacaStats.SIDs.next()),
          {:ok, char} <-
            %Character{} |> Character.changeset(data) |> Ecto.Changeset.apply_action(:update) do
@@ -161,8 +161,11 @@ defmodule SacaStats.Characters do
       {:ok, %QueryResult{returned: 0}} ->
         :not_found
 
-      {:error, _} ->
-        Logger.error("Could not parse census character response into a Character struct")
+      {:error, error} ->
+        Logger.error(
+          "Could not parse census character response into a Character struct: #{inspect(error)}"
+        )
+
         :error
 
       {:error, e} ->
