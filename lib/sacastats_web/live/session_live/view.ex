@@ -51,23 +51,33 @@ defmodule SacaStatsWeb.SessionLive.View do
       end)
 
     # "Preload" characters
-    {:ok, character_map} = Characters.get_many_by_id(all_character_ids)
+    case Characters.get_many_by_id(all_character_ids, _shallow_copy = true) do
+      {:ok, character_map} ->
+        socket =
+          socket
+          |> assign(:character_info, %{
+            "character_id" => session.character_id,
+            "name" => %{"first" => session.name},
+            "faction_id" => session.faction_id,
+            "outfit" => session.outfit
+          })
+          |> assign(:online_status, status)
+          |> assign(:events, events)
+          |> assign(:character_map, character_map)
+          |> assign(:stat_page, "session.html")
+          |> assign(:session, session)
 
-    socket =
-      socket
-      |> assign(:character_info, %{
-        "character_id" => session.character_id,
-        "name" => %{"first" => session.name},
-        "faction_id" => session.faction_id,
-        "outfit" => session.outfit
-      })
-      |> assign(:online_status, status)
-      |> assign(:events, events)
-      |> assign(:character_map, character_map)
-      |> assign(:stat_page, "session.html")
-      |> assign(:session, session)
+        {:ok, socket}
 
-    {:ok, socket}
+      :error ->
+        {:ok,
+         socket
+         |> put_flash(
+           :error,
+           "We were unable to get that session right now, please try again later."
+         )
+         |> redirect(to: Routes.character_path(socket, :character, name, :sessions))}
+    end
   end
 
   def handle_info(%Ecto.Changeset{} = event_cs, socket) do
@@ -82,11 +92,21 @@ defmodule SacaStatsWeb.SessionLive.View do
       |> Map.take([:character_id, :attacker_character_id])
       |> Map.values()
 
-    {:ok, new_character_map} = Characters.get_many_by_id(character_ids)
+    case Characters.get_many_by_id(character_ids, true) do
+      {:ok, new_character_map} ->
+        {:noreply,
+         socket
+         |> assign(:events, [event | events])
+         |> assign(:character_map, Map.merge(character_map, new_character_map))}
 
-    {:noreply,
-     socket
-     |> assign(:events, [event | events])
-     |> assign(:character_map, Map.merge(character_map, new_character_map))}
+      :error ->
+        {:noreply,
+         socket
+         |> assign(:events, [event | events])
+         |> put_flash(
+           :error,
+           "Tried to fetch character information for a new event, but something went wrong."
+         )}
+    end
   end
 end

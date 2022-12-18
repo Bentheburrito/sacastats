@@ -9,6 +9,7 @@ defmodule SacaStats.Characters do
   import PS2.API.QueryBuilder, except: [field: 2]
   import SacaStats.Utils
 
+  @httpoison_timeout_ms 10 * 1000
   @max_attempts 3
   @query_base Query.new(collection: "character")
               |> resolve([
@@ -29,6 +30,17 @@ defmodule SacaStats.Characters do
                 |> list(true)
               )
               |> lang("en")
+
+  @shallow_query_base Query.new(collection: "character")
+                      |> show([
+                        "character_id",
+                        "name",
+                        "faction_id",
+                        "profile_id",
+                        "title_id",
+                        "head_id"
+                      ])
+                      |> lang("en")
 
   require Logger
 
@@ -81,8 +93,14 @@ defmodule SacaStats.Characters do
     end
   end
 
-  @spec get_many_by_id([integer()]) :: {:ok, %{integer() => struct() | :not_found}} | :error
-  def get_many_by_id(id_list) do
+  @doc """
+  Similar to `c:get_by_id/1`, but gets multiple characters by their IDs. Since getting stats for many characters from
+  the Census API is an expensive query (and may lead to timeouts), you can provide `true` for shallow copy to skip
+  fetching character/weapon stats for uncached characters.
+  """
+  @spec get_many_by_id([integer()], boolean()) ::
+          {:ok, %{integer() => Character.t() | :not_found}} | :error
+  def get_many_by_id(id_list, shallow_copy? \\ false) do
     # `okay_map` are the IDs found in the cache pointing to their :ok tuples, and non-cached IDs pointing to :not_found
     # `uncached_ids` are the IDs not found in the cache that need to get fetched from the census.
     {okay_map, uncached_ids} =
@@ -102,18 +120,25 @@ defmodule SacaStats.Characters do
           end
       end
 
-    case get_uncached_ids(okay_map, uncached_ids) do
+    case get_uncached_ids(okay_map, uncached_ids, shallow_copy?) do
       :error -> :error
       okay_map -> {:ok, okay_map}
     end
   end
 
-  def get_uncached_ids(okay_map, []), do: okay_map
+  def get_uncached_ids(okay_map, [], _shallow_copy?), do: okay_map
 
-  def get_uncached_ids(okay_map, uncached_ids) do
-    query = term(@query_base, "character_id", uncached_ids)
+  def get_uncached_ids(okay_map, uncached_ids, shallow_copy?) do
+    {query, changeset_fn} =
+      if shallow_copy? do
+        {term(@shallow_query_base, "character_id", uncached_ids), &Character.shallow_changeset/2}
+      else
+        {term(@query_base, "character_id", uncached_ids), &Character.changeset/2}
+      end
 
-    case PS2.API.query(query, SacaStats.SIDs.next()) do
+    IO.inspect(shallow_copy?, label: "shallow copy?")
+
+    case PS2.API.query(query, SacaStats.SIDs.next(), recv_timeout: @httpoison_timeout_ms) do
       {:ok, %QueryResult{returned: 0}} ->
         okay_map
 
@@ -121,12 +146,16 @@ defmodule SacaStats.Characters do
         for char_params <- data, reduce: okay_map do
           result_map ->
             %Character{}
-            |> Character.changeset(char_params)
+            |> changeset_fn.(char_params)
             |> Ecto.Changeset.apply_action(:update)
             |> case do
               {:ok, %Character{} = char} ->
-                Cachex.put(:character_cache, char.character_id, char)
-                Cachex.put(:character_cache, char.name_first_lower, char.character_id)
+                # Only cache these responses if they contain character/weapon stats
+                unless shallow_copy? do
+                  Cachex.put(:character_cache, char.character_id, char)
+                  Cachex.put(:character_cache, char.name_first_lower, char.character_id)
+                end
+
                 Map.put(result_map, char.character_id, {:ok, char})
 
               {:error, error} ->

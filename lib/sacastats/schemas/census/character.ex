@@ -46,28 +46,32 @@ defmodule SacaStats.Census.Character do
     embeds_one :outfit, Outfit
   end
 
-  @fields [
+  @shallow_fields [
     :character_id,
     :name_first_lower,
     :name_first,
     :faction_id,
     :head_id,
     :title_id,
-    :profile_id,
-    :profile_type_description,
-    :prestige_level,
-    :creation,
-    :last_save,
-    :last_login,
-    :login_count,
-    :minutes_played,
-    :earned_points,
-    :gifted_points,
-    :available_points,
-    :percent_to_next_point,
-    :battle_rank,
-    :percent_to_next_br
+    :profile_id
   ]
+
+  @fields @shallow_fields ++
+            [
+              :profile_type_description,
+              :prestige_level,
+              :creation,
+              :last_save,
+              :last_login,
+              :login_count,
+              :minutes_played,
+              :earned_points,
+              :gifted_points,
+              :available_points,
+              :percent_to_next_point,
+              :battle_rank,
+              :percent_to_next_br
+            ]
 
   def changeset(character, census_res \\ %{}) do
     params =
@@ -99,5 +103,17 @@ defmodule SacaStats.Census.Character do
     |> cast_embed(:weapon_stat, with: &WeaponStat.changeset/2)
     |> cast_embed(:weapon_stat_by_faction, with: &WeaponStatByFaction.changeset/2)
     |> cast_embed(:outfit, with: &Outfit.changeset/2)
+  end
+
+  def shallow_changeset(character, census_res \\ %{}) do
+    params =
+      census_res
+      # flatten name object
+      |> Map.put("name_first_lower", census_res["name"]["first_lower"])
+      |> Map.put("name_first", census_res["name"]["first"])
+
+    character
+    |> cast(params, @shallow_fields)
+    |> validate_required(@shallow_fields)
   end
 end
