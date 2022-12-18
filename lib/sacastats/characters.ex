@@ -136,36 +136,12 @@ defmodule SacaStats.Characters do
         {term(@query_base, "character_id", uncached_ids), &Character.changeset/2}
       end
 
-    IO.inspect(shallow_copy?, label: "shallow copy?")
-
     case PS2.API.query(query, SacaStats.SIDs.next(), recv_timeout: @httpoison_timeout_ms) do
       {:ok, %QueryResult{returned: 0}} ->
         okay_map
 
       {:ok, %QueryResult{data: data}} ->
-        for char_params <- data, reduce: okay_map do
-          result_map ->
-            %Character{}
-            |> changeset_fn.(char_params)
-            |> Ecto.Changeset.apply_action(:update)
-            |> case do
-              {:ok, %Character{} = char} ->
-                # Only cache these responses if they contain character/weapon stats
-                unless shallow_copy? do
-                  Cachex.put(:character_cache, char.character_id, char)
-                  Cachex.put(:character_cache, char.name_first_lower, char.character_id)
-                end
-
-                Map.put(result_map, char.character_id, {:ok, char})
-
-              {:error, error} ->
-                Logger.error(
-                  "Couldn't make a changeset (changeset: #{inspect(error)}) from params: #{inspect(char_params)}"
-                )
-
-                result_map
-            end
-        end
+        update_okay_map(okay_map, data, changeset_fn, shallow_copy?)
 
       {:error, error} ->
         Logger.error(
@@ -173,6 +149,32 @@ defmodule SacaStats.Characters do
         )
 
         :error
+    end
+  end
+
+  defp update_okay_map(okay_map, census_data, changeset_fn, shallow_copy?) do
+    for char_params <- census_data, reduce: okay_map do
+      result_map ->
+        %Character{}
+        |> changeset_fn.(char_params)
+        |> Ecto.Changeset.apply_action(:update)
+        |> case do
+          {:ok, %Character{} = char} ->
+            # Only cache these responses if they contain character/weapon stats
+            unless shallow_copy? do
+              Cachex.put(:character_cache, char.character_id, char)
+              Cachex.put(:character_cache, char.name_first_lower, char.character_id)
+            end
+
+            Map.put(result_map, char.character_id, {:ok, char})
+
+          {:error, error} ->
+            Logger.error(
+              "Couldn't make a changeset (changeset: #{inspect(error)}) from params: #{inspect(char_params)}"
+            )
+
+            result_map
+        end
     end
   end
 
