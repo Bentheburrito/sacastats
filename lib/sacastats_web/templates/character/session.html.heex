@@ -7,11 +7,11 @@
     <li>Deaths: <%= @session.death_count %></li>
     <li>KDR: <%= SacaStats.Utils.safe_divide(@session.kill_count, @session.death_count, 2) %></li>
     <li>Headshot Kills: <%= @session.kill_hs_count %></li>
-    <li>Time Played: 
+    <li>Time Played:
       <%= SacaStatsWeb.CharacterView.prettify_duration(@session.login.timestamp, @session.logout.timestamp) %>
     </li>
     <li class="number">XP Earned: <%= @session.xp_earned %></li>
-    <li>Battle Ranks Earned: 
+    <li>Battle Ranks Earned:
       <%= length(@session.battle_rank_ups) > 0 && Enum.map_join(@session.battle_rank_ups, ", ",  &(&1.battle_rank)) || "None"%>
     </li>
     <li>Facilities Captured: <%= length(@session.player_facility_captures) %></li>
@@ -43,5 +43,9 @@
 
 <div class="poll-item">
   Event Log
-  <%= SacaStatsWeb.CharacterView.build_event_log(assigns, @session) %>
+	<%= if @events == :loading do %>
+		<p>Loading event log, this could take a few seconds...</p>
+	<% else %>
+		<%= SacaStatsWeb.CharacterView.build_event_log(assigns, @session) %>
+	<% end %>
 </div>
