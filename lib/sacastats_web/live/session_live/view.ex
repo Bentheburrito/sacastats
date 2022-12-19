@@ -54,6 +54,11 @@ defmodule SacaStatsWeb.SessionLive.View do
               |> MapSet.put(id)
               |> MapSet.put(a_id)
 
+            %{character_id: id, other_id: o_id}, mapset ->
+              mapset
+              |> MapSet.put(id)
+              |> MapSet.put(o_id)
+
             %{character_id: id}, mapset ->
               MapSet.put(mapset, id)
           end)
@@ -99,34 +104,36 @@ defmodule SacaStatsWeb.SessionLive.View do
     events = socket.assigns.events
     character_map = socket.assigns.character_map
 
+    # update the aggregate counts
+    new_session = Session.aggregate(socket.assigns.session, [[event]])
+
+    socket =
+      socket
+      |> assign(:events, [event | events])
+      |> assign(:session, new_session)
+
     # "Preload" any new character IDs
     character_ids =
       event_cs.changes
-      |> Map.take([:character_id, :attacker_character_id])
+      |> Map.take([:character_id, :attacker_character_id, :other_id])
       |> Map.values()
       |> Enum.reject(&(&1 == socket.assigns.session.character_id))
 
     if length(character_ids) > 0 do
       case Characters.get_many_by_id(character_ids, _shallow_copy = true) do
         {:ok, new_character_map} ->
-          {:noreply,
-           socket
-           |> assign(:events, [event | events])
-           |> assign(:character_map, Map.merge(character_map, new_character_map))}
+          {:noreply, assign(socket, :character_map, Map.merge(character_map, new_character_map))}
 
         :error ->
           {:noreply,
-           socket
-           |> assign(:events, [event | events])
-           |> put_flash(
+           put_flash(
+             socket,
              :error,
              "Tried to fetch character information for a new event, but something went wrong."
            )}
       end
     else
-      {:noreply,
-       socket
-       |> assign(:events, [event | events])}
+      {:noreply, socket}
     end
   end
 
