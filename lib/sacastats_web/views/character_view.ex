@@ -1,7 +1,7 @@
 defmodule SacaStatsWeb.CharacterView do
   use SacaStatsWeb, :view
 
-  import SacaStats, only: [is_assist_xp: 1]
+  import SacaStats, only: [is_assist_xp: 1, is_gunner_assist_xp: 1]
 
   alias SacaStats.Census.Character
   alias SacaStats.Session
@@ -18,6 +18,8 @@ defmodule SacaStatsWeb.CharacterView do
   }
 
   require Logger
+
+  @revive_xp_id 7
 
   def pretty_session_summary(assigns, session) do
     login_time = prettify_timestamp(assigns, session.login.timestamp)
@@ -75,8 +77,27 @@ defmodule SacaStatsWeb.CharacterView do
   defp build_event_log_item(assigns, %BattleRankUp{} = br_up, %Session{} = session, _c_map) do
     ~H"""
     <li>
-      <%= session.name %> ranked up to <%= br_up.battle_rank %> -
+      <%= format_character_link(session.name) %> ranked up to <%= br_up.battle_rank %> -
       <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, br_up.timestamp) %>
+    </li>
+    """
+  end
+
+  # Suicide
+  defp build_event_log_item(
+         assigns,
+         %Death{character_id: character_id, attacker_character_id: character_id} = death,
+         %Session{},
+         character_map
+       ) do
+    character_identifier = get_character_name(assigns, character_map, character_id)
+    weapon_identifier = get_weapon_name(assigns, death.attacker_weapon_id)
+
+    ~H"""
+    <li>
+      <%= character_identifier %> seems to have killed themself with <%= weapon_identifier %>
+      -
+      <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, death.timestamp) %>
     </li>
     """
   end
@@ -98,19 +119,77 @@ defmodule SacaStatsWeb.CharacterView do
   end
 
   defp build_event_log_item(assigns, %PlayerFacilityCapture{} = cap, %Session{} = session, _c_map) do
+    facility = SacaStats.facilities()[cap.facility_id]
+
+    facility_type_text =
+      unless facility["facility_type"] in ["Small Outpost", "Large Outpost"] do
+        facility["facility_type"]
+      else
+        ""
+      end
+
+    # can't do this right now, need outfit ID from FacilityControl events (the one provided here is just the player's
+    # current outfit :/)
+    outfit_captured_text = ""
+    # if cap.outfit_id == session.outfit.outfit_id do
+    #   "for #{session.outfit.name}!"
+    # else
+    #   ""
+    # end
+
     ~H"""
     <li>
-      <%= session.name %> captured <%= cap.facility_id %> (new outfit owner: <%= cap.outfit_id %>) -
+      <%= format_character_link(session.name) %> captured
+      <%= "#{facility["facility_name"] || "a facility"} #{facility_type_text}" %>
+      <%= outfit_captured_text %> -
       <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, cap.timestamp) %>
     </li>
     """
   end
 
   defp build_event_log_item(assigns, %PlayerFacilityDefend{} = def, %Session{} = session, _) do
+    facility = SacaStats.facilities()[def.facility_id]
+
+    facility_type_text =
+      unless facility["facility_type"] in ["Small Outpost", "Large Outpost"] do
+        facility["facility_type"]
+      else
+        ""
+      end
+
+    outfit_captured_text = ""
+    # if def.outfit_id == session.outfit.outfit_id do
+    #   "for #{session.outfit.name}!"
+    # else
+    #   ""
+    # end
+
     ~H"""
     <li>
-      <%= session.name %> defended <%= def.facility_id %> (outfit owner: <%= def.outfit_id %>) -
+      <%= format_character_link(session.name) %> defended
+      <%= "#{facility["facility_name"] || "a facility"} #{facility_type_text}" %>
+      <%= outfit_captured_text %> -
       <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, def.timestamp) %>
+    </li>
+    """
+  end
+
+  # Destroyed own vehicle
+  defp build_event_log_item(
+         assigns,
+         %VehicleDestroy{character_id: character_id, attacker_character_id: character_id} = vd,
+         %Session{},
+         character_map
+       ) do
+    character_identifier = get_character_name(assigns, character_map, character_id)
+    attacker_weapon_identifier = get_weapon_name(assigns, vd.attacker_weapon_id)
+
+    ~H"""
+    <li>
+      <%= character_identifier %> destroyed their <%= SacaStats.vehicles()[vd.vehicle_id]["name"] %>
+      with <%= attacker_weapon_identifier %>
+      -
+      <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, vd.timestamp) %>
     </li>
     """
   end
@@ -131,6 +210,7 @@ defmodule SacaStatsWeb.CharacterView do
     """
   end
 
+  # Kill assist
   defp build_event_log_item(
          assigns,
          %GainExperience{experience_id: id, character_id: character_id} = ge,
@@ -150,15 +230,64 @@ defmodule SacaStatsWeb.CharacterView do
     """
   end
 
+  # Revived someone
+  defp build_event_log_item(
+         assigns,
+         %GainExperience{experience_id: @revive_xp_id, character_id: character_id} = ge,
+         %Session{character_id: character_id},
+         character_map
+       ) do
+    other_identifier = get_character_name(assigns, character_map, ge.other_id)
+    character_identifier = get_character_name(assigns, character_map, character_id)
+
+    ~H"""
+    <li>
+      <%= character_identifier %> revived <%= other_identifier %>
+      -
+      <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, ge.timestamp) %>
+    </li>
+    """
+  end
+
+  # Gunner gets a kill
+  defp build_event_log_item(
+         assigns,
+         %GainExperience{experience_id: id, character_id: character_id} = ge,
+         %Session{character_id: character_id},
+         character_map
+       )
+       when is_gunner_assist_xp(id) do
+    other_identifier = get_character_name(assigns, character_map, ge.other_id)
+    character_identifier = get_character_name(assigns, character_map, character_id)
+
+    %{"description" => desc} = SacaStats.xp()[id]
+    # {VehicleKilled} Kill by {VehicleKiller} Gunner{?}
+    [vehicle_killed, vehicle_killer_gunner] = String.split(desc, " Kill by ")
+    vehicle_killer = String.trim_trailing(vehicle_killer_gunner, "Gunner")
+
+    ~H"""
+    <li>
+    <%= if vehicle_killed == "Player" do %>
+    <%= character_identifier %>'s <%= vehicle_killer %> gunner killed <%= other_identifier %>
+
+    <% else %>
+      <%= character_identifier %>'s <%= vehicle_killer %> gunner destroyed a <%= vehicle_killed %>
+      <% end %>
+      -
+      <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, ge.timestamp) %>
+    </li>
+    """
+  end
+
   defp build_event_log_item(assigns, %PlayerLogin{}, %Session{name: name}, _character_map) do
     ~H"""
-    <%= name %> logged in.
+    <%= format_character_link(name) %> logged in.
     """
   end
 
   defp build_event_log_item(assigns, %PlayerLogout{}, %Session{name: name}, _character_map) do
     ~H"""
-    <%= name %> logged out.
+    <%= format_character_link(name) %> logged out.
     """
   end
 
@@ -170,18 +299,23 @@ defmodule SacaStatsWeb.CharacterView do
     """
   end
 
-  defp get_character_name(assigns, character_map, character_id) do
+  defp get_character_name(_assigns, character_map, character_id) do
     case character_map do
       %{^character_id => {:ok, %Character{name_first: name}}} ->
-        ~H"""
-        <a href={"/character/#{name}"}><%= name %></a>
-        """
+        format_character_link(name)
 
       _ ->
-        ~H"""
-        <a href={"/character/#{character_id}"}><%= character_id %></a> (Character Search Failed)
-        """
+        format_character_link(character_id, " (Character Search Failed)")
     end
+  end
+
+  defp format_character_link(identifier, note \\ "") do
+    # need `assigns` map in scope to use ~H
+    assigns = %{}
+
+    ~H"""
+    <a href={"/character/#{identifier}"}><%= identifier %></a><%= note %>
+    """
   end
 
   defp get_weapon_name(assigns, 0) do

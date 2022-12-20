@@ -4,6 +4,9 @@ defmodule SacaStats.Session do
   this module to build session structs for given character IDs and timestamps.
   """
 
+  alias SacaStats.Events.BattleRankUp
+  alias SacaStats.Events.PlayerFacilityDefend
+  alias SacaStats.Events.PlayerFacilityCapture
   alias SacaStats.Census.Character
   alias SacaStats.{Characters, Events, Repo, Session}
 
@@ -172,8 +175,10 @@ defmodule SacaStats.Session do
 
       %Session{
         session
-        | faction_id: char.faction_id,
+        | character_id: character_id,
+          faction_id: char.faction_id,
           name: char.name_first,
+          outfit: char.outfit,
           battle_rank_ups: br_ups,
           deaths: deaths,
           gain_experiences: gain_xp,
@@ -346,6 +351,18 @@ defmodule SacaStats.Session do
     |> Map.update(:vehicle_death_count, vehicle_death_count_add, &(&1 + vehicle_death_count_add))
     |> Map.update(:nanites_destroyed, nanites_destroyed_add, &(&1 + nanites_destroyed_add))
     |> Map.update(:nanites_lost, nanites_lost_add, &(&1 + nanites_lost_add))
+  end
+
+  defp event_reducer(_character_id, %PlayerFacilityCapture{} = cap, session) do
+    Map.update(session, :player_facility_captures, [cap], &[cap | &1])
+  end
+
+  defp event_reducer(_character_id, %PlayerFacilityDefend{} = def, session) do
+    Map.update(session, :player_facility_defends, [def], &[def | &1])
+  end
+
+  defp event_reducer(_character_id, %BattleRankUp{} = br_up, session) do
+    Map.update(session, :battle_rank_ups, [br_up], &[br_up | &1])
   end
 
   defp event_reducer(_character_id, event, session) do
