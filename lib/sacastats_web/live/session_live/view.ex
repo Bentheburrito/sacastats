@@ -5,8 +5,8 @@ defmodule SacaStatsWeb.SessionLive.View do
   use SacaStatsWeb, :live_view
   use Phoenix.HTML
 
-  alias SacaStats.Census.Character
   alias Phoenix.PubSub
+  alias SacaStats.Census.Character
   alias SacaStats.Census.OnlineStatus
   alias SacaStats.{Characters, Session}
 
@@ -33,51 +33,7 @@ defmodule SacaStatsWeb.SessionLive.View do
       # message to the LiveView process after the page loads.
       liveview_pid = self()
 
-      Task.start_link(fn ->
-        # Combine + sort events
-        events =
-          ([session.login] ++
-             [session.logout] ++
-             session.battle_rank_ups ++
-             session.player_facility_captures ++
-             session.player_facility_defends ++
-             session.vehicle_destroys ++
-             session.deaths ++
-             session.gain_experiences)
-          |> Enum.sort_by(fn event -> event.timestamp end, :desc)
-
-        # Collect all unique character IDs
-        all_character_ids =
-          Enum.reduce(events, MapSet.new(), fn
-            %{character_id: id, attacker_character_id: a_id}, mapset ->
-              mapset
-              |> MapSet.put(id)
-              |> MapSet.put(a_id)
-
-            %{character_id: id, other_id: o_id}, mapset ->
-              mapset
-              |> MapSet.put(id)
-              |> MapSet.put(o_id)
-
-            %{character_id: id}, mapset ->
-              MapSet.put(mapset, id)
-          end)
-
-        # "Preload" characters
-        case Characters.get_many_by_id(all_character_ids, _shallow_copy = true) do
-          {:ok, character_map} ->
-            send(liveview_pid, {:update_expensive, events, character_map})
-
-          :error ->
-            Logger.error("Could not fetch many character IDs: #{inspect(all_character_ids)}")
-
-            send(
-              liveview_pid,
-              {:error, name,
-               "We were unable to get that session right now, please try again later."}
-            )
-        end
-      end)
+      Task.start_link(fn -> do_mount(session, name, liveview_pid) end)
     end
 
     {:ok,
@@ -95,6 +51,51 @@ defmodule SacaStatsWeb.SessionLive.View do
      |> assign(:conn, socket)
      |> assign(:character_map, :loading)
      |> assign(:session, session)}
+  end
+
+  defp do_mount(session, name, liveview_pid) do
+    # Combine + sort events
+    events =
+      ([session.login] ++
+         [session.logout] ++
+         session.battle_rank_ups ++
+         session.player_facility_captures ++
+         session.player_facility_defends ++
+         session.vehicle_destroys ++
+         session.deaths ++
+         session.gain_experiences)
+      |> Enum.sort_by(fn event -> event.timestamp end, :desc)
+
+    # Collect all unique character IDs
+    all_character_ids =
+      Enum.reduce(events, MapSet.new(), fn
+        %{character_id: id, attacker_character_id: a_id}, mapset ->
+          mapset
+          |> MapSet.put(id)
+          |> MapSet.put(a_id)
+
+        %{character_id: id, other_id: o_id}, mapset ->
+          mapset
+          |> MapSet.put(id)
+          |> MapSet.put(o_id)
+
+        %{character_id: id}, mapset ->
+          MapSet.put(mapset, id)
+      end)
+
+    # "Preload" characters
+    case Characters.get_many_by_id(all_character_ids, _shallow_copy = true) do
+      {:ok, character_map} ->
+        send(liveview_pid, {:update_expensive, events, character_map})
+
+      :error ->
+        Logger.error("Could not fetch many character IDs: #{inspect(all_character_ids)}")
+
+        send(
+          liveview_pid,
+          {:error, name, "We were unable to get that session right now, please try again later."}
+        )
+    end
   end
 
   # New event arrives

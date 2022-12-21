@@ -4,10 +4,10 @@ defmodule SacaStats.Session do
   this module to build session structs for given character IDs and timestamps.
   """
 
-  alias SacaStats.Events.BattleRankUp
-  alias SacaStats.Events.PlayerFacilityDefend
-  alias SacaStats.Events.PlayerFacilityCapture
   alias SacaStats.Census.Character
+  alias SacaStats.Events.BattleRankUp
+  alias SacaStats.Events.PlayerFacilityCapture
+  alias SacaStats.Events.PlayerFacilityDefend
   alias SacaStats.{Characters, Events, Repo, Session}
 
   import Ecto.Query
@@ -234,20 +234,10 @@ defmodule SacaStats.Session do
 
     attack_where_clause = build_where_clause(attack_where_clause, logout_timestamp)
 
-    revive_xp_ids = SacaStats.revive_xp_ids()
-
-    # Considers GE revive events where other_id is this character (i.e., this character was revived by someone else)
     ge_where_clause =
-      dynamic(
-        [e],
-        (field(e, :character_id) == ^character_id and
-           field(e, :timestamp) >= ^login_timestamp) or
-          (field(e, :other_id) == ^character_id and
-             field(e, :experience_id) in ^revive_xp_ids and
-             field(e, :timestamp) >= ^login_timestamp)
-      )
-
-    ge_where_clause = build_where_clause(ge_where_clause, logout_timestamp)
+      character_id
+      |> ge_where_clause(login_timestamp)
+      |> build_where_clause(logout_timestamp)
 
     br_ups = Repo.all(gen_session_events_query(Events.BattleRankUp, where_clause))
     deaths = Repo.all(gen_session_events_query(Events.Death, attack_where_clause))
@@ -293,6 +283,19 @@ defmodule SacaStats.Session do
         login: login,
         logout: logout
     }
+  end
+
+  defp ge_where_clause(character_id, login_timestamp) do
+    revive_xp_ids = SacaStats.revive_xp_ids()
+
+    dynamic(
+      [e],
+      (field(e, :character_id) == ^character_id and
+         field(e, :timestamp) >= ^login_timestamp) or
+        (field(e, :other_id) == ^character_id and
+           field(e, :experience_id) in ^revive_xp_ids and
+           field(e, :timestamp) >= ^login_timestamp)
+    )
   end
 
   defp get_logout_timestamp(character_id, login_timestamp) do

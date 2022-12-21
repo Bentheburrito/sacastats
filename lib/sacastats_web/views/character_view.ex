@@ -141,10 +141,10 @@ defmodule SacaStatsWeb.CharacterView do
     facility = SacaStats.facilities()[cap.facility_id]
 
     facility_type_text =
-      unless facility["facility_type"] in ["Small Outpost", "Large Outpost"] do
-        facility["facility_type"]
-      else
+      if facility["facility_type"] in ["Small Outpost", "Large Outpost"] do
         ""
+      else
+        facility["facility_type"]
       end
 
     # can't do this right now, need outfit ID from FacilityControl events (the one provided here is just the player's
@@ -170,10 +170,10 @@ defmodule SacaStatsWeb.CharacterView do
     facility = SacaStats.facilities()[def.facility_id]
 
     facility_type_text =
-      unless facility["facility_type"] in ["Small Outpost", "Large Outpost"] do
-        facility["facility_type"]
-      else
+      if facility["facility_type"] in ["Small Outpost", "Large Outpost"] do
         ""
+      else
+        facility["facility_type"]
       end
 
     outfit_captured_text = ""
