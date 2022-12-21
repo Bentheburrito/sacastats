@@ -41,6 +41,13 @@
 	</div>
 </div>
 
+<%= unless @session.logout.timestamp == :current_session do %>
+	<div class="poll-item">
+		<b>Kill Count by Weapon</b>
+		<%= SacaStatsWeb.CharacterView.build_kills_by_weapon(assigns, @session) %>
+	</div>
+<% end %>
+
 <div class="poll-item">
   <b>Event Log</b>
 	<%= if @events == :loading do %>

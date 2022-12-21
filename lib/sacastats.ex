@@ -44,6 +44,11 @@ defmodule SacaStats do
                     |> Enum.map(fn {id, _} -> id end)
   defguard is_gunner_assist_xp(id) when id in @gunner_assist_xp
 
+  # revive and squad revive experience_ids
+  @revive_xp_ids [7, 53]
+  def revive_xp_ids, do: @revive_xp_ids
+  defguard is_revive_xp(id) when id in @revive_xp_ids
+
   @events StaticData.load_static_file(@static_data_path <> "/events.json")
   def events, do: @events
 

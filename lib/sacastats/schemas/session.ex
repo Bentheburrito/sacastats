@@ -27,6 +27,7 @@ defmodule SacaStats.Session do
     field :kill_ivi_count, integer(), default: 0
     field :death_ivi_count, integer(), default: 0
     field :death_count, integer(), default: 0
+    field :revive_count, integer(), default: 0
     field :vehicle_kill_count, integer(), default: 0
     field :vehicle_death_count, integer(), default: 0
     field :nanites_destroyed, integer(), default: 0
@@ -115,9 +116,20 @@ defmodule SacaStats.Session do
           field(e, :attacker_character_id) == ^character_id
       )
 
+    revive_xp_ids = SacaStats.revive_xp_ids()
+
+    # Considers GE revive events where other_id is this character (i.e., this character was revived by someone else)
+    ge_where_clause =
+      dynamic(
+        [e],
+        field(e, :character_id) == ^character_id or
+          (field(e, :other_id) == ^character_id and
+             field(e, :experience_id) in ^revive_xp_ids)
+      )
+
     all_br_ups = Repo.all(gen_session_events_query(Events.BattleRankUp, where_clause))
     all_deaths = Repo.all(gen_session_events_query(Events.Death, attack_where_clause))
-    all_gain_xp = Repo.all(gen_session_events_query(Events.GainExperience, where_clause))
+    all_gain_xp = Repo.all(gen_session_events_query(Events.GainExperience, ge_where_clause))
 
     all_facility_caps =
       Repo.all(gen_session_events_query(Events.PlayerFacilityCapture, where_clause))
@@ -222,9 +234,24 @@ defmodule SacaStats.Session do
 
     attack_where_clause = build_where_clause(attack_where_clause, logout_timestamp)
 
+    revive_xp_ids = SacaStats.revive_xp_ids()
+
+    # Considers GE revive events where other_id is this character (i.e., this character was revived by someone else)
+    ge_where_clause =
+      dynamic(
+        [e],
+        (field(e, :character_id) == ^character_id and
+           field(e, :timestamp) >= ^login_timestamp) or
+          (field(e, :other_id) == ^character_id and
+             field(e, :experience_id) in ^revive_xp_ids and
+             field(e, :timestamp) >= ^login_timestamp)
+      )
+
+    ge_where_clause = build_where_clause(ge_where_clause, logout_timestamp)
+
     br_ups = Repo.all(gen_session_events_query(Events.BattleRankUp, where_clause))
     deaths = Repo.all(gen_session_events_query(Events.Death, attack_where_clause))
-    gain_xp = Repo.all(gen_session_events_query(Events.GainExperience, where_clause))
+    gain_xp = Repo.all(gen_session_events_query(Events.GainExperience, ge_where_clause))
     facility_caps = Repo.all(gen_session_events_query(Events.PlayerFacilityCapture, where_clause))
     facility_defs = Repo.all(gen_session_events_query(Events.PlayerFacilityDefend, where_clause))
 
@@ -332,7 +359,14 @@ defmodule SacaStats.Session do
   end
 
   defp event_reducer(_character_id, %Events.GainExperience{} = xp, %Session{} = session) do
-    Map.update(session, :xp_earned, xp.amount, &(&1 + xp.amount))
+    revive_count_add =
+      bool_to_int(
+        xp.other_id == session.character_id && xp.experience_id in SacaStats.revive_xp_ids()
+      )
+
+    session
+    |> Map.update(:xp_earned, xp.amount, &(&1 + xp.amount))
+    |> Map.update(:revive_count, revive_count_add, &(&1 + revive_count_add))
   end
 
   defp event_reducer(character_id, %Events.VehicleDestroy{} = vehicle, %Session{} = session) do

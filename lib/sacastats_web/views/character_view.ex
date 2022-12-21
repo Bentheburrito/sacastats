@@ -1,7 +1,7 @@
 defmodule SacaStatsWeb.CharacterView do
   use SacaStatsWeb, :view
 
-  import SacaStats, only: [is_assist_xp: 1, is_gunner_assist_xp: 1]
+  import SacaStats, only: [is_assist_xp: 1, is_gunner_assist_xp: 1, is_revive_xp: 1]
 
   alias SacaStats.Census.Character
   alias SacaStats.Session
@@ -18,8 +18,6 @@ defmodule SacaStatsWeb.CharacterView do
   }
 
   require Logger
-
-  @revive_xp_id 7
 
   def pretty_session_summary(assigns, session) do
     login_time = prettify_timestamp(assigns, session.login.timestamp)
@@ -62,6 +60,27 @@ defmodule SacaStatsWeb.CharacterView do
     |> Stream.filter(fn {duration, _unit} -> duration > 0 end)
     |> Stream.map(fn {duration, unit} -> "#{duration} #{unit}" end)
     |> Enum.join(" ")
+  end
+
+  def build_kills_by_weapon(assigns, %Session{} = session) do
+    weapon_kill_counts =
+      for %Death{} = death <- session.deaths, reduce: %{} do
+        weapon_kill_counts ->
+          if is_nil(SacaStats.weapons()[death.attacker_weapon_id]) do
+            weapon_kill_counts
+          else
+            weapon_name = get_weapon_name(assigns, death.attacker_weapon_id)
+            Map.update(weapon_kill_counts, weapon_name, 1, &(&1 + 1))
+          end
+      end
+
+    ~H"""
+    <ul>
+      <%= for {weapon_name, kill_count} <- Enum.sort_by(weapon_kill_counts, &-elem(&1, 1)) do %>
+        <li><%= kill_count %>x <%= weapon_name %></li>
+      <% end %>
+    </ul>
+    """
   end
 
   def build_event_log(assigns, %Session{} = session) do
@@ -230,13 +249,34 @@ defmodule SacaStatsWeb.CharacterView do
     """
   end
 
+  # Got revived by someone
+  defp build_event_log_item(
+         assigns,
+         %GainExperience{experience_id: id, other_id: character_id} = ge,
+         %Session{character_id: character_id},
+         character_map
+       )
+       when is_revive_xp(id) do
+    other_identifier = get_character_name(assigns, character_map, ge.character_id)
+    character_identifier = get_character_name(assigns, character_map, character_id)
+
+    ~H"""
+    <li>
+      <%= other_identifier %> revived <%= character_identifier %>
+      -
+      <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, ge.timestamp) %>
+    </li>
+    """
+  end
+
   # Revived someone
   defp build_event_log_item(
          assigns,
-         %GainExperience{experience_id: @revive_xp_id, character_id: character_id} = ge,
+         %GainExperience{experience_id: id, character_id: character_id} = ge,
          %Session{character_id: character_id},
          character_map
-       ) do
+       )
+       when is_revive_xp(id) do
     other_identifier = get_character_name(assigns, character_map, ge.other_id)
     character_identifier = get_character_name(assigns, character_map, character_id)
 
@@ -324,7 +364,7 @@ defmodule SacaStatsWeb.CharacterView do
 
   defp get_weapon_name(assigns, weapon_id) do
     ~H"""
-    <%= SacaStats.weapons()[weapon_id]["name"] %> (<%= weapon_id %>)
+    <%= SacaStats.weapons()[weapon_id]["name"] %>
     """
   end
 end
