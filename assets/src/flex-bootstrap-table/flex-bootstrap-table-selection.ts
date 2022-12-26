@@ -575,13 +575,17 @@ function overARow(row: HTMLTableRowElement) {
 }
 
 function addCustomListeners() {
-  document.getElementById(tableID.substring(1))?.addEventListener(flexBootstrapTableEvents.ADD_CUSTOM_COPY_EVENT, (customEvent: Event) => {
-    setCustomCopyFunction((<CustomEvent>customEvent).detail[0] as Function);
-  });
+  document
+    .getElementById(tableID.substring(1))
+    ?.addEventListener(flexBootstrapTableEvents.ADD_CUSTOM_COPY_EVENT, (customEvent: Event) => {
+      setCustomCopyFunction((<CustomEvent>customEvent).detail[0] as Function);
+    });
 
-  document.getElementById(tableID.substring(1))?.addEventListener(flexBootstrapTableEvents.ADD_SECOND_CUSTOM_COPY_EVENT, (customEvent: Event) => {
-    setSecondCustomCopyFunction((<CustomEvent>customEvent).detail[0] as Function);
-  });
+  document
+    .getElementById(tableID.substring(1))
+    ?.addEventListener(flexBootstrapTableEvents.ADD_SECOND_CUSTOM_COPY_EVENT, (customEvent: Event) => {
+      setSecondCustomCopyFunction((<CustomEvent>customEvent).detail[0] as Function);
+    });
 }
 
 function copySelectedRows(event: Event) {
@@ -628,7 +632,7 @@ function copySelectedRows(event: Event) {
 }
 
 function updateSelectedRowsDataset() {
-  let selectedRowIDs = [...copyRows].map(row => row.id);
+  let selectedRowIDs = [...copyRows].map((row) => row.id);
   document.getElementById(tableID.substring(1))!.dataset.selectedRowIDs = JSON.stringify(selectedRowIDs);
 }
 

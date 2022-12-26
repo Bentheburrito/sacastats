@@ -84,9 +84,11 @@ export class FlexBootstrapTable {
     $('#' + tableID).on('page-change.bs.table', this.handleTablePageChangeEvent);
     $('#' + tableID).off('post-body.bs.table', this.handleTablePostBodyEvent);
     $('#' + tableID).on('post-body.bs.table', this.handleTablePostBodyEvent);
-    document.getElementById(tableID.substring(1))?.addEventListener(flexBootstrapTableEvents.ADD_DESKTOP_HEADER_ONLY_EVENT, (customEvent: Event) => {
-      this.setDesktopHeaderOnly((<CustomEvent>customEvent).detail[0] as string[]);
-    });
+    document
+      .getElementById(tableID.substring(1))
+      ?.addEventListener(flexBootstrapTableEvents.ADD_DESKTOP_HEADER_ONLY_EVENT, (customEvent: Event) => {
+        this.setDesktopHeaderOnly((<CustomEvent>customEvent).detail[0] as string[]);
+      });
   };
 
   private tableSearchEnterEventHandler = (event: Event) => {
@@ -288,10 +290,10 @@ export class FlexBootstrapTable {
               this.hasMobileHeader($(tds).html())
                 ? ''
                 : this.getMobileHeader(
-                  document.querySelector(tds)!.hasAttribute('data-mobile-title')
-                    ? document.querySelector(tds)!.getAttribute('data-mobile-title')!
-                    : $(header).text(),
-                ),
+                    document.querySelector(tds)!.hasAttribute('data-mobile-title')
+                      ? document.querySelector(tds)!.getAttribute('data-mobile-title')!
+                      : $(header).text(),
+                  ),
             ),
           );
           if (window.innerWidth > 767) {
@@ -304,8 +306,8 @@ export class FlexBootstrapTable {
     return !this.hasMobileHeader(text)
       ? '<span class="table-responsive-stack-thead">' + text + this.getSeparator(text) + '</span>'
       : this.desktopHeaderOnly.includes(text.trim())
-        ? ''
-        : text;
+      ? ''
+      : text;
   };
   private getSeparator = (text: string) => {
     return this.isThereAHeader(text) ? ': ' : '';

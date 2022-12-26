@@ -166,13 +166,17 @@ export class FlexBootstrapTableFilter {
   };
 
   private addCustomListeners = () => {
-    document.getElementById(this.tableID.substring(1))?.addEventListener(flexBootstrapTableEvents.ADD_CUSTOM_FILTER_FUNCTIONS_EVENT, (customEvent: Event) => {
-      this.setCustomFilterFunctions((<CustomEvent>customEvent).detail[0] as CustomFilterFunction[]);
-    });
-    document.getElementById(this.tableID.substring(1))?.addEventListener(flexBootstrapTableEvents.ADD_CUSTOM_SEARCH_FUNCTION_EVENT, (customEvent: Event) => {
-      this.addCustomSearch((<CustomEvent>customEvent).detail[0] as Function);
-    });
-  }
+    document
+      .getElementById(this.tableID.substring(1))
+      ?.addEventListener(flexBootstrapTableEvents.ADD_CUSTOM_FILTER_FUNCTIONS_EVENT, (customEvent: Event) => {
+        this.setCustomFilterFunctions((<CustomEvent>customEvent).detail[0] as CustomFilterFunction[]);
+      });
+    document
+      .getElementById(this.tableID.substring(1))
+      ?.addEventListener(flexBootstrapTableEvents.ADD_CUSTOM_SEARCH_FUNCTION_EVENT, (customEvent: Event) => {
+        this.addCustomSearch((<CustomEvent>customEvent).detail[0] as Function);
+      });
+  };
 
   private addFilterListeners = () => {
     //loop through filter map
@@ -282,7 +286,7 @@ export class FlexBootstrapTableFilter {
 
   private customFilterFunctionsHasFilterCategory = (filterCategory: string) => {
     let hasCategory = false;
-    this.customFilterFunctions.forEach(customFunction => {
+    this.customFilterFunctions.forEach((customFunction) => {
       if (customFunction.category === filterCategory) {
         hasCategory = true;
       }
@@ -291,11 +295,11 @@ export class FlexBootstrapTableFilter {
   };
 
   private getCustomFilterFunctionFromCategory = (filterCategory: string) => {
-    let customFilterFunctionObject = new CustomFilterFunction("", new Function());
+    let customFilterFunctionObject = new CustomFilterFunction('', new Function());
     this.customFilterFunctions.forEach((filterFunctionObject) => {
       if (filterFunctionObject.getCategory() === filterCategory) {
         customFilterFunctionObject = filterFunctionObject;
-      };
+      }
     });
     return customFilterFunctionObject;
   };

@@ -122,7 +122,10 @@ function addCustomFilters() {
   ];
 
   //Add it to the filter list
-  let addCustomFilterFunctionEvent = flexBootstrapTableEvents.createEvent(flexBootstrapTableEvents.ADD_CUSTOM_FILTER_FUNCTIONS_EVENT, customFunction);
+  let addCustomFilterFunctionEvent = flexBootstrapTableEvents.createEvent(
+    flexBootstrapTableEvents.ADD_CUSTOM_FILTER_FUNCTIONS_EVENT,
+    customFunction,
+  );
   document.getElementById(TABLE_ID.substring(1))?.dispatchEvent(addCustomFilterFunctionEvent);
 }
 
@@ -165,7 +168,7 @@ function addCustomCopyFunction() {
 
     //loop through each selected weapon row
     copyRows.forEach((row) => {
-      let dataArray = $("#" + row).find('td');
+      let dataArray = $('#' + row).find('td');
 
       //create a weapon subheader
       copyString =
@@ -198,10 +201,16 @@ function addCustomCopyFunction() {
     return copyString;
   };
 
-  let addCustomCopyFunctionEvent = flexBootstrapTableEvents.createEvent(flexBootstrapTableEvents.ADD_CUSTOM_COPY_EVENT, customFunction);
+  let addCustomCopyFunctionEvent = flexBootstrapTableEvents.createEvent(
+    flexBootstrapTableEvents.ADD_CUSTOM_COPY_EVENT,
+    customFunction,
+  );
   document.getElementById(TABLE_ID.substring(1))?.dispatchEvent(addCustomCopyFunctionEvent);
 
-  let addSecondCustomCopyFunctionEvent = flexBootstrapTableEvents.createEvent(flexBootstrapTableEvents.ADD_SECOND_CUSTOM_COPY_EVENT, customCopyFunction);
+  let addSecondCustomCopyFunctionEvent = flexBootstrapTableEvents.createEvent(
+    flexBootstrapTableEvents.ADD_SECOND_CUSTOM_COPY_EVENT,
+    customCopyFunction,
+  );
   document.getElementById(TABLE_ID.substring(1))?.dispatchEvent(addSecondCustomCopyFunctionEvent);
 }
 
@@ -263,7 +272,10 @@ function addCustomSearchFunction() {
     });
   };
 
-  let addCustomSearchFunctionEvent = flexBootstrapTableEvents.createEvent(flexBootstrapTableEvents.ADD_CUSTOM_SEARCH_FUNCTION_EVENT, customSearchFunction);
+  let addCustomSearchFunctionEvent = flexBootstrapTableEvents.createEvent(
+    flexBootstrapTableEvents.ADD_CUSTOM_SEARCH_FUNCTION_EVENT,
+    customSearchFunction,
+  );
   document.getElementById(TABLE_ID.substring(1))?.dispatchEvent(addCustomSearchFunctionEvent);
 }
 
@@ -286,7 +298,10 @@ function addCustomEventListeners() {
 function initializeCustomFunctions() {
   addCustomSearchFunction();
   addCustomFilters();
-  let addDesktopHeaderOnlyEvent = flexBootstrapTableEvents.createEvent(flexBootstrapTableEvents.ADD_DESKTOP_HEADER_ONLY_EVENT, ['Weapon']);
+  let addDesktopHeaderOnlyEvent = flexBootstrapTableEvents.createEvent(
+    flexBootstrapTableEvents.ADD_DESKTOP_HEADER_ONLY_EVENT,
+    ['Weapon'],
+  );
   document.getElementById(TABLE_ID.substring(1))?.dispatchEvent(addDesktopHeaderOnlyEvent);
 }
 

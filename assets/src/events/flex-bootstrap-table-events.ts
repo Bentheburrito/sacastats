@@ -19,5 +19,5 @@ export const ADD_CUSTOM_COPY_EVENT = 'add-custom-copy' + POSTFIX;
 export const ADD_SECOND_CUSTOM_COPY_EVENT = 'add-second-custom-copy' + POSTFIX;
 
 export function createEvent(eventName: string, ...content: any): CustomEvent<any[]> {
-    return new CustomEvent(eventName, { detail: content });
+  return new CustomEvent(eventName, { detail: content });
 }
