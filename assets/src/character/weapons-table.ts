@@ -1,6 +1,4 @@
 import { nextAuraxElementID } from '../character/weapons.js';
-import { flexBootstrapTableMap } from '../flex-bootstrap-table/flex-bootstrap-table.js';
-import * as bootstrapSelection from '../flex-bootstrap-table/flex-bootstrap-table-selection.js';
 import * as flexBootstrapTableEvents from '../events/flex-bootstrap-table-events.js';
 
 import { CustomFilterFunction } from '../models/flex-bootstrap-table/flex-bootstrap-table-filter.js';
@@ -124,10 +122,8 @@ function addCustomFilters() {
   ];
 
   //Add it to the filter list
-  flexBootstrapTableMap
-    .get(TABLE_ID.substring(1))
-    ?.getFlexBootstrapTableFilter()
-    .setCustomFilterFunctions(customFunction);
+  let addCustomFilterFunctionEvent = flexBootstrapTableEvents.createEvent(flexBootstrapTableEvents.ADD_CUSTOM_FILTER_FUNCTIONS_EVENT, customFunction);
+  document.getElementById(TABLE_ID.substring(1))?.dispatchEvent(addCustomFilterFunctionEvent);
 }
 
 function addCustomCopyFunction() {
@@ -137,8 +133,8 @@ function addCustomCopyFunction() {
     newURL.search = '?';
 
     //if there is only 1 selection add the weapon name to the search arg
-    let copyRows = [...bootstrapSelection.getSelectedRows()];
-    let firstCopyElement = copyRows[0];
+    let copyRows = [...getTableSelection()];
+    let firstCopyElement = document.getElementById(copyRows[0]) as HTMLElement;
     if (copyRows.length == 1) {
       newURL.search = newURL.search + 'search=';
       newURL.search =
@@ -151,7 +147,7 @@ function addCustomCopyFunction() {
     newURL.search =
       newURL.search + 'id=' + firstCopyElement.id.replaceAll(TABLE_ID.substring(1), '').replaceAll('Row', '');
     for (let i = 1; i < copyRows.length; i++) {
-      newURL.search = newURL.search + ',' + copyRows[i].id.replaceAll(TABLE_ID.substring(1), '').replaceAll('Row', '');
+      newURL.search = newURL.search + ',' + copyRows[i].replaceAll(TABLE_ID.substring(1), '').replaceAll('Row', '');
     }
 
     //return the new url
@@ -165,18 +161,18 @@ function addCustomCopyFunction() {
     //initialize variables
     let headerArray = [...$(TABLE_ID).find('thead').first().find('tr').first()[0].children];
     let index = 0;
-    let copyRows = bootstrapSelection.getSelectedRows() as Set<HTMLTableRowElement>;
+    let copyRows = getTableSelection();
 
     //loop through each selected weapon row
     copyRows.forEach((row) => {
-      let dataArray = $(row).find('td');
+      let dataArray = $("#" + row).find('td');
 
       //create a weapon subheader
       copyString =
         copyString +
         dataArray[0].innerText.split('\n')[0] +
         ' (' +
-        row.id.replaceAll(TABLE_ID.substring(1), '').replaceAll('Row', '') +
+        row.replaceAll(TABLE_ID.substring(1), '').replaceAll('Row', '') +
         '):\n';
 
       //loop through each coloumn and separate them by commas and property values by colons
@@ -192,7 +188,7 @@ function addCustomCopyFunction() {
       }
 
       //create new line space between each weapon stat
-      if (index < copyRows.size - 1) {
+      if (index < copyRows.length - 1) {
         copyString = copyString + '\n\n';
         index++;
       }
@@ -202,8 +198,15 @@ function addCustomCopyFunction() {
     return copyString;
   };
 
-  bootstrapSelection.setCustomCopyFunction(customFunction);
-  bootstrapSelection.setSecondCustomCopyFunction(customCopyFunction);
+  let addCustomCopyFunctionEvent = flexBootstrapTableEvents.createEvent(flexBootstrapTableEvents.ADD_CUSTOM_COPY_EVENT, customFunction);
+  document.getElementById(TABLE_ID.substring(1))?.dispatchEvent(addCustomCopyFunctionEvent);
+
+  let addSecondCustomCopyFunctionEvent = flexBootstrapTableEvents.createEvent(flexBootstrapTableEvents.ADD_SECOND_CUSTOM_COPY_EVENT, customCopyFunction);
+  document.getElementById(TABLE_ID.substring(1))?.dispatchEvent(addSecondCustomCopyFunctionEvent);
+}
+
+function getTableSelection() {
+  return JSON.parse(document.getElementById(TABLE_ID.substring(1))!.dataset.selectedRowIDs!) as string[];
 }
 
 function initializeButtonEvent() {
@@ -260,7 +263,8 @@ function addCustomSearchFunction() {
     });
   };
 
-  flexBootstrapTableMap.get(TABLE_ID.substring(1))?.getFlexBootstrapTableFilter().addCustomSearch(customSearchFunction);
+  let addCustomSearchFunctionEvent = flexBootstrapTableEvents.createEvent(flexBootstrapTableEvents.ADD_CUSTOM_SEARCH_FUNCTION_EVENT, customSearchFunction);
+  document.getElementById(TABLE_ID.substring(1))?.dispatchEvent(addCustomSearchFunctionEvent);
 }
 
 function addCustomEventListeners() {
@@ -279,21 +283,18 @@ function addCustomEventListeners() {
   });
 }
 
-function waitForTableInitialization() {
-  if (flexBootstrapTableMap.get(TABLE_ID.substring(1))?.getFlexBootstrapTableFilter() != undefined) {
-    addCustomSearchFunction();
-    addCustomFilters();
-    flexBootstrapTableMap.get(TABLE_ID.substring(1))?.setDesktopHeaderOnly(['Weapon']);
-  } else {
-    setTimeout(waitForTableInitialization, 10);
-  }
+function initializeCustomFunctions() {
+  addCustomSearchFunction();
+  addCustomFilters();
+  let addDesktopHeaderOnlyEvent = flexBootstrapTableEvents.createEvent(flexBootstrapTableEvents.ADD_DESKTOP_HEADER_ONLY_EVENT, ['Weapon']);
+  document.getElementById(TABLE_ID.substring(1))?.dispatchEvent(addDesktopHeaderOnlyEvent);
 }
 
 function init() {
   let options = { dragaccept: '.drag-accept' } as BootstrapTableOptions;
 
   $(TABLE_ID).bootstrapTable(options);
-  waitForTableInitialization();
+  initializeCustomFunctions();
   initializeButtonEvent();
   addCustomCopyFunction();
   addCustomEventListeners();

@@ -1,3 +1,5 @@
+import * as flexBootstrapTableEvents from '../events/flex-bootstrap-table-events.js';
+
 //initialize variables
 let startRowIndex: number | null; //dragged main selection index
 let selectedRowIndex: number | null; //click main selection index
@@ -258,6 +260,7 @@ export function resetCopyRowSelection(event?: Event) {
     $(row).removeClass(selectionClass).removeClass(mainSelectionClass);
   });
   copyRows = new Set();
+  updateSelectedRowsDataset();
   if (event == undefined || !(event as KeyboardEvent).shiftKey) {
     selectedRowIndex = null;
   }
@@ -463,6 +466,7 @@ function getRowArrayIndex(row: HTMLTableRowElement) {
 
 function deleteRowFromSelection(row: HTMLTableRowElement) {
   copyRows.delete(row);
+  updateSelectedRowsDataset();
   $(row).removeClass(selectionClass).removeClass(mainSelectionClass);
   let rowIndex = getRowArrayIndex(row);
   if (!dragged && startRowIndex != rowIndex && rowIndex == selectedRowIndex) {
@@ -481,6 +485,7 @@ function deleteRowFromSelection(row: HTMLTableRowElement) {
 function addRowToSelection(row: HTMLTableRowElement, event?: Event) {
   if (!$(row).parent('thead').is('thead')) {
     copyRows.add(row);
+    updateSelectedRowsDataset();
     $(row).addClass(selectionClass);
     let rowIndex = getRowArrayIndex(row);
 
@@ -569,6 +574,16 @@ function overARow(row: HTMLTableRowElement) {
   return row != undefined && row.localName == 'tr' && row.parentElement!.localName == 'tbody';
 }
 
+function addCustomListeners() {
+  document.getElementById(tableID.substring(1))?.addEventListener(flexBootstrapTableEvents.ADD_CUSTOM_COPY_EVENT, (customEvent: Event) => {
+    setCustomCopyFunction((<CustomEvent>customEvent).detail[0] as Function);
+  });
+
+  document.getElementById(tableID.substring(1))?.addEventListener(flexBootstrapTableEvents.ADD_SECOND_CUSTOM_COPY_EVENT, (customEvent: Event) => {
+    setSecondCustomCopyFunction((<CustomEvent>customEvent).detail[0] as Function);
+  });
+}
+
 function copySelectedRows(event: Event) {
   $(copyToastID).removeClass('d-none');
   (<any>$(copyToastID)).toast('show');
@@ -612,6 +627,11 @@ function copySelectedRows(event: Event) {
   showHideSelectionMobileMenu();
 }
 
+function updateSelectedRowsDataset() {
+  let selectedRowIDs = [...copyRows].map(row => row.id);
+  document.getElementById(tableID.substring(1))!.dataset.selectedRowIDs = JSON.stringify(selectedRowIDs);
+}
+
 function fallbackCopyTextToClipboard(text: string) {
   var textArea = document.createElement('textarea');
   textArea.value = text;
@@ -645,7 +665,7 @@ function copyTextToClipboard(text: string) {
 }
 
 export function getSelectedRows() {
-  return copyRows;
+  return JSON.parse(document.getElementById(tableID.substring(1))!.dataset.selectedRowIDs!) as string[];
 }
 
 export function setCustomCopyFunction(customFunction: Function) {
@@ -663,8 +683,10 @@ export function init(id: string) {
   contextMenuID = '#table-context-menu';
   copyToastID = '#table-copy-toast';
   rowArray = $(tableID).find('tbody').first()[0].children as HTMLCollectionOf<HTMLTableRowElement>;
+  updateSelectedRowsDataset();
 
   addTableClickHandler();
+  addCustomListeners();
   hideSelectionMobileMenu();
   addMobileSelectionMenuClickEvents();
 }

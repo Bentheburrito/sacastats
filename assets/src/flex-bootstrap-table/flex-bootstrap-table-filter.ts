@@ -9,6 +9,7 @@ import {
 
 export class FlexBootstrapTableFilter {
   private originalTableData: ITableData[];
+  private previousTableData: ITableData[];
   private tableID: String;
   private clearFilterButtonID: String;
   private clearAllFilterButtonID: String;
@@ -25,11 +26,13 @@ export class FlexBootstrapTableFilter {
     this.clearFilterButtonID = '#' + id + '-clear-filter-button';
     this.clearAllFilterButtonID = '#' + id + '-clear-all-filter-button';
     this.originalTableData = JSON.parse(JSON.stringify($(this.tableID).bootstrapTable('getData', false)));
+    this.previousTableData = JSON.parse(JSON.stringify($(this.tableID).bootstrapTable('getData', false)));
 
     //set up filter option data and event listeners
     this.initializeSearchInput();
     this.updateTableFiltration();
     this.addFilterListeners();
+    this.addCustomListeners();
     this.updateFilterOptionAvailability();
   }
 
@@ -162,6 +165,15 @@ export class FlexBootstrapTableFilter {
     this.idFilteredData = filteredDataArray;
   };
 
+  private addCustomListeners = () => {
+    document.getElementById(this.tableID.substring(1))?.addEventListener(flexBootstrapTableEvents.ADD_CUSTOM_FILTER_FUNCTIONS_EVENT, (customEvent: Event) => {
+      this.setCustomFilterFunctions((<CustomEvent>customEvent).detail[0] as CustomFilterFunction[]);
+    });
+    document.getElementById(this.tableID.substring(1))?.addEventListener(flexBootstrapTableEvents.ADD_CUSTOM_SEARCH_FUNCTION_EVENT, (customEvent: Event) => {
+      this.addCustomSearch((<CustomEvent>customEvent).detail[0] as Function);
+    });
+  }
+
   private addFilterListeners = () => {
     //loop through filter map
     for (let [_, filterOptions] of this.filters) {
@@ -239,7 +251,7 @@ export class FlexBootstrapTableFilter {
         //if the option is not a show all
         if (filter.filterName != 'showall') {
           //if the filter name category is a custom filter apply the custom filter
-          if (this.customFilterFunctions != null && this.customFilterFunctions.hasOwnProperty(filterCategory)) {
+          if (this.customFilterFunctions != null && this.customFilterFunctionsHasFilterCategory(filterCategory)) {
             newArraySize = this.getCustomFilterFunctionFromCategory(filterCategory).runFilterFunction(
               filter.filterName,
               dataArray,
@@ -268,10 +280,24 @@ export class FlexBootstrapTableFilter {
     });
   };
 
+  private customFilterFunctionsHasFilterCategory = (filterCategory: string) => {
+    let hasCategory = false;
+    this.customFilterFunctions.forEach(customFunction => {
+      if (customFunction.category === filterCategory) {
+        hasCategory = true;
+      }
+    });
+    return hasCategory;
+  };
+
   private getCustomFilterFunctionFromCategory = (filterCategory: string) => {
-    return this.customFilterFunctions.filter((filterFunctionObject) => {
-      filterFunctionObject.getCategory() === filterCategory;
-    })[0];
+    let customFilterFunctionObject = new CustomFilterFunction("", new Function());
+    this.customFilterFunctions.forEach((filterFunctionObject) => {
+      if (filterFunctionObject.getCategory() === filterCategory) {
+        customFilterFunctionObject = filterFunctionObject;
+      };
+    });
+    return customFilterFunctionObject;
   };
 
   public isShowAllSelectedBefore = (filterArray: TableFilter[]) => {
@@ -398,7 +424,7 @@ export class FlexBootstrapTableFilter {
       checkedFilteredOptions.forEach((filter) => {
         if (filter.checked) {
           //if the filter name category is a custom filter apply the custom filter
-          if (this.customFilterFunctions != null && this.customFilterFunctions.hasOwnProperty(filterCategory)) {
+          if (this.customFilterFunctions != null && this.customFilterFunctionsHasFilterCategory(filterCategory)) {
             filteredDataArray = new Set<ITableData>([
               ...filteredDataArray,
               ...this.getCustomFilterFunctionFromCategory(filterCategory).runFilterFunction(
@@ -408,10 +434,15 @@ export class FlexBootstrapTableFilter {
             ]);
           } else {
             //otherwise apply the default filter
-            filteredDataArray = new Set<ITableData>([
+            let newFilteredDataArray = new Set<ITableData>([
               ...filteredDataArray,
               ...dataArray.filter((option) => option[filterCategory] == filter.filterName),
             ]);
+            if (newFilteredDataArray.size > 0) {
+              filteredDataArray = newFilteredDataArray;
+            } else {
+              filteredDataArray = new Set<ITableData>(dataArray);
+            }
           }
         }
       });
@@ -518,8 +549,12 @@ export class FlexBootstrapTableFilter {
     this.showHideClearFilterButtons();
 
     //set table data to filtered data
-    $(this.getTableID()).bootstrapTable('load', this.sortData(filteredTableData));
-    $(this.getTableID()).trigger(flexBootstrapTableEvents.filteredEvent);
+    let newTableData = this.sortData(filteredTableData);
+    if (this.previousTableData !== newTableData) {
+      $(this.getTableID()).bootstrapTable('load', newTableData);
+      this.previousTableData = newTableData;
+      $(this.getTableID()).trigger(flexBootstrapTableEvents.filteredEvent);
+    }
   };
 
   private sortData = (filteredTableData: ITableData[]) => {
@@ -599,8 +634,9 @@ export class FlexBootstrapTableFilter {
         //Add it to the filter list
         bootstrapTableFilter.setCustomFilterFunctions(customFunctionObject);
     */
-  public setCustomFilterFunctions = (functions: CustomFilterFunction[]) => {
+  private setCustomFilterFunctions = (functions: CustomFilterFunction[]) => {
     this.customFilterFunctions = functions;
+    this.updateTableFiltration();
   };
 
   /*
@@ -624,8 +660,9 @@ export class FlexBootstrapTableFilter {
         //Add it to the Custom Search function
         bootstrapTableFilter.addCustomSearch(customSearchFunction);
     */
-  public addCustomSearch = (searchFunction: Function) => {
+  private addCustomSearch = (searchFunction: Function) => {
     this.customSearchFunction = searchFunction;
+    this.updateTableFiltration();
   };
 
   public revertFilteredData = () => {
