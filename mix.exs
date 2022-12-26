@@ -52,7 +52,8 @@ defmodule SacaStats.MixProject do
       {:planetside_api, "~> 0.3.0"},
       {:dotenv_parser, "~> 1.2"},
       {:credo, "~> 1.6", only: [:dev, :test, :github], runtime: false},
-      {:contex, "~> 0.4.0"}
+      {:contex, "~> 0.4.0"},
+      {:cachex, "~> 3.4"}
     ]
   end
 
