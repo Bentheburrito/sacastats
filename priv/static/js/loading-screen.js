@@ -1,3 +1,5 @@
+import * as generalEvents from "/js/events/general-events.js";
+
 export let isLoadingScreenUp = true;
 export let isLoadingScreenLocked = false;
 
@@ -7,6 +9,7 @@ export function remove() {
         //fade the loading screen out
         loadingScreen.classList.remove("show-loading-screen");
         loadingScreen.classList.add("hide-loading-screen");
+        $(document).trigger(generalEvents.loadingScreenRemovedEvent);
         setTimeout(function () {
             isLoadingScreenUp = false;
         }, 200);

@@ -1,5 +1,6 @@
 .aurax-progress {
     background-color: #c29ffa !important;
+    overflow: visible;
 }
 
 .medal {
@@ -74,4 +75,9 @@ hr {
 
 .menu-item {
     padding-left: 20px;
+}
+
+/* Font awesome icon size */
+.svg-inline--fa {
+    height: 1.5em;
 }

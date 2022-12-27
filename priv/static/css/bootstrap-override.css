@@ -2830,8 +2830,8 @@ fieldset:disabled a.btn {
 .btn-primary.disabled,
 .btn-primary:disabled {
   color: #fff;
-  background-color: #9B84EE;
-  border-color: #9B84EE;
+  background-color: #b1a2e9;
+  border-color: #b1a2e9;
 }
 
 .btn-primary:not(:disabled):not(.disabled):active,

@@ -4,6 +4,7 @@ defmodule SacaStats.Weapons do
   """
 
   alias SacaStats.Conversions
+  alias SacaStats.Census.Character.{WeaponStat, WeaponStatByFaction}
 
   import SacaStats.Utils
 
@@ -33,10 +34,19 @@ defmodule SacaStats.Weapons do
 
   @doc """
   Parses the characters_weapon_stat and characters_weapon_stat_by_faction lists from a character response into a
+  map with the form of
+  ```elixir
+  %{item_id =>
+    %{stat_name =>
+      %{value: integer()}
+      | %{value_nc: integer(), value_tr: integer(), value_vs: integer()}
+    }
+  }
+  ```
   """
-  def compile_stats(stats) do
-    weapon_faction_stats = Enum.reduce(stats["weapons_by_faction"], %{}, &put_weapon_stat/2)
-    compiled_stats = Enum.reduce(stats["weapons"], weapon_faction_stats, &put_weapon_stat/2)
+  def compile_stats(weapon_stats, weapon_stats_by_faction) do
+    weapon_faction_stats = Enum.reduce(weapon_stats_by_faction, %{}, &put_weapon_stat/2)
+    compiled_stats = Enum.reduce(weapon_stats, weapon_faction_stats, &put_weapon_stat/2)
 
     for {weapon_id, weapon} <- SacaStats.weapons(),
         weapon_has_been_used?(compiled_stats, weapon_id, weapon["category"]),
@@ -155,25 +165,29 @@ defmodule SacaStats.Weapons do
     end
   end
 
-  defp put_weapon_stat(weapon_stat, acc) do
+  defp put_weapon_stat(%WeaponStatByFaction{} = stat, acc) do
+    stat_values = Map.take(stat, [:value_nc, :value_tr, :value_vs])
+
     Map.update(
       acc,
-      SacaStats.Utils.maybe_to_int(weapon_stat["item_id"], 0),
-      %{weapon_stat["stat_name"] => get_stat_values(weapon_stat)},
-      &Map.put(&1, weapon_stat["stat_name"], get_stat_values(weapon_stat))
+      stat.item_id,
+      %{stat.stat_name => stat_values},
+      &Map.put(&1, stat.stat_name, stat_values)
     )
   end
 
-  defp get_stat_values(%{"value" => value}), do: maybe_to_int(value, 0)
-
-  defp get_stat_values(w_stat),
-    do:
-      Map.take(w_stat, ["value_nc", "value_vs", "value_tr"])
-      |> Map.new(fn {key, val} -> {key, maybe_to_int(val, 0)} end)
+  defp put_weapon_stat(%WeaponStat{} = stat, acc) do
+    Map.update(
+      acc,
+      stat.item_id,
+      %{stat.stat_name => stat.value},
+      &Map.put(&1, stat.stat_name, stat.value)
+    )
+  end
 
   def get_total_values(nil, _faction_id), do: 0
 
-  def get_total_values(%{"value_nc" => nc, "value_vs" => vs, "value_tr" => tr}, faction_id) do
+  def get_total_values(%{value_nc: nc, value_vs: vs, value_tr: tr}, faction_id) do
     case maybe_to_int(faction_id, 0) do
       0 -> maybe_to_int(nc, 0) + maybe_to_int(vs, 0) + maybe_to_int(tr, 0)
       1 -> maybe_to_int(nc, 0) + maybe_to_int(tr, 0)
@@ -185,7 +199,7 @@ defmodule SacaStats.Weapons do
 
   def get_total_values(nil), do: 0
 
-  def get_total_values(%{"value_nc" => nc, "value_vs" => vs, "value_tr" => tr}) do
+  def get_total_values(%{value_nc: nc, value_vs: vs, value_tr: tr}) do
     maybe_to_int(nc, 0) + maybe_to_int(vs, 0) + maybe_to_int(tr, 0)
   end
 

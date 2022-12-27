@@ -11,6 +11,8 @@ defmodule SacaStats.Poll.Item.Choice do
   schema "poll_item_choices" do
     field :description, :string
     belongs_to :item, Item
+
+    timestamps()
   end
 
   def changeset(choice, params \\ %{}) do

@@ -4,7 +4,8 @@ defmodule SacaStats.Session do
   this module to build session structs for given character IDs and timestamps.
   """
 
-  alias SacaStats.{CensusCache, Events, Repo, Session}
+  alias SacaStats.Census.Character
+  alias SacaStats.{Characters, Events, Repo, Session}
 
   import Ecto.Query
   import SacaStats.Utils, only: [typedstruct: 1, bool_to_int: 1]
@@ -56,11 +57,8 @@ defmodule SacaStats.Session do
   (besides PlayerLogins and PlayerLogouts), and does not calculate aggregations. Therefore, this function is useful
   for seeing session durations and start/end times at a glance, when specific session data is not needed yet.
   """
-  def get_summary(character_id_or_name) do
-    {:ok, %{"character_id" => character_id} = character_info} =
-      CensusCache.get(SacaStats.CharacterCache, character_id_or_name)
-
-    character_id = SacaStats.Utils.maybe_to_int(character_id, 0)
+  def get_summary(character_name) do
+    {:ok, %Character{character_id: character_id} = char} = Characters.get_by_name(character_name)
 
     logins =
       Repo.all(
@@ -103,8 +101,8 @@ defmodule SacaStats.Session do
     |> Stream.map(fn {login, logout} ->
       %Session{
         character_id: character_id,
-        faction_id: SacaStats.Utils.maybe_to_int(character_info["faction_id"], 0),
-        name: character_info["name"]["first"],
+        faction_id: char.faction_id,
+        name: char.name_first,
         login: login,
         logout: logout
       }
@@ -112,9 +110,8 @@ defmodule SacaStats.Session do
     |> Enum.to_list()
   end
 
-  def get_all(character_id_or_name) do
-    {:ok, %{"character_id" => character_id} = character_info} =
-      CensusCache.get(SacaStats.CharacterCache, character_id_or_name)
+  def get_all(character_name) do
+    {:ok, %Character{character_id: character_id} = char} = Characters.get_by_name(character_name)
 
     character_id = SacaStats.Utils.maybe_to_int(character_id, 0)
 
@@ -187,8 +184,8 @@ defmodule SacaStats.Session do
 
       %Session{
         character_id: character_id,
-        faction_id: SacaStats.Utils.maybe_to_int(character_info["faction_id"], 0),
-        name: character_info["name"]["first"],
+        faction_id: char.faction_id,
+        name: char.name_first,
         kill_count: aggregations.kill_count,
         kill_hs_count: aggregations.kill_hs_count,
         kill_ivi_count: aggregations.kill_ivi_count,
@@ -213,13 +210,12 @@ defmodule SacaStats.Session do
     |> Enum.to_list()
   end
 
-  def get(character_id_or_name, %Events.PlayerLogin{timestamp: timestamp}) do
-    get(character_id_or_name, timestamp)
+  def get(character_name, %Events.PlayerLogin{timestamp: timestamp}) do
+    get(character_name, timestamp)
   end
 
-  def get(character_id_or_name, login_timestamp) do
-    {:ok, %{"character_id" => character_id} = character_info} =
-      CensusCache.get(SacaStats.CharacterCache, character_id_or_name)
+  def get(character_name, login_timestamp) do
+    {:ok, %Character{character_id: character_id} = char} = Characters.get_by_name(character_name)
 
     character_id = SacaStats.Utils.maybe_to_int(character_id, 0)
 
@@ -275,9 +271,9 @@ defmodule SacaStats.Session do
 
     %Session{
       character_id: character_id,
-      faction_id: SacaStats.Utils.maybe_to_int(character_info["faction_id"], 0),
-      name: character_info["name"]["first"],
-      outfit: character_info["outfit"],
+      faction_id: char.faction_id,
+      name: char.name_first,
+      outfit: char.outfit,
       kill_count: aggregations.kill_count,
       kill_hs_count: aggregations.kill_hs_count,
       kill_ivi_count: aggregations.kill_ivi_count,

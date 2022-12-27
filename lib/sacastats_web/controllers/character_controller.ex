@@ -5,7 +5,8 @@ defmodule SacaStatsWeb.CharacterController do
   import Ecto.Query
 
   alias SacaStats.{Characters, Weapons}
-  alias SacaStats.{CensusCache, Session}
+  alias SacaStats.Census.{Character, OnlineStatus}
+  alias SacaStats.Session
   alias SacaStats.Character.Favorite
   alias SacaStats.Repo
 
@@ -98,13 +99,13 @@ defmodule SacaStatsWeb.CharacterController do
   end
 
   def character(%Plug.Conn{} = conn, %{"character_name" => name, "stat_type" => stat_type}) do
-    with {:ok, info} <- CensusCache.get(SacaStats.CharacterCache, name),
-         {:ok, status} <- CensusCache.get(SacaStats.OnlineStatusCache, info["character_id"]) do
-      user_id = if is_nil(conn.assigns.user), do: nil, else: conn.assigns.user.id
-      assigns = build_assigns(info, status, stat_type, user_id)
+    with {:ok, %Character{} = char} <- Characters.get_by_name(name),
+         {:ok, %OnlineStatus{} = status} <- OnlineStatus.get_by_id(char.character_id),
+         status_text <- OnlineStatus.status_text(status) do
+      assigns = build_assigns(char, status_text, stat_type)
       render(conn, "template.html", assigns)
     else
-      {:error, :not_found} ->
+      :not_found ->
         conn
         |> put_flash(
           :error,
@@ -112,8 +113,8 @@ defmodule SacaStatsWeb.CharacterController do
         )
         |> redirect(to: "/character")
 
-      {:error, e} ->
-        Logger.error("Error fetching character: #{inspect(e)}")
+      :error ->
+        Logger.error("Error fetching character '#{name}'.")
 
         conn
         |> put_flash(
@@ -124,105 +125,89 @@ defmodule SacaStatsWeb.CharacterController do
     end
   end
 
-  defp build_assigns(info, status, "sessions", user_id) do
-    sessions = Session.get_summary(info["name"]["first_lower"])
+  defp build_assigns(%Character{} = char, status, "sessions") do
+    sessions = Session.get_summary(char.name_first_lower)
 
     [
-      character_info: info,
+      character_info: char,
       online_status: status,
       stat_page: "sessions.html",
       sessions: sessions,
-      is_favorite: is_favorite?(info["character_id"], user_id),
+      is_favorite: is_favorite?(char.character_id, user_id),
       changeset: Favorite.changeset(%Favorite{})
     ]
   end
 
-  defp build_assigns(info, status, "weapons", user_id) do
-    case CensusCache.get(SacaStats.CharacterStatsCache, info["character_id"]) do
+  defp build_assigns(%Character{} = char, status, "weapons") do
+    case CensusCache.get(SacaStats.CharacterStatsCache, char.character_id) do
       {:ok, stats} ->
-        complete_weapons = Weapons.compile_stats(stats["stats"])
+        complete_weapons = Weapons.compile_stats(char.weapon_stat, char.weapon_stat_by_faction)
         type_set = Weapons.get_sorted_set_of_items("category", complete_weapons)
         category_set = Weapons.get_sorted_set_of_items("sanction", complete_weapons)
 
         [
-          character_info: info,
+          character_info: char,
           online_status: status,
           stat_page: "weapons.html",
           weapons: complete_weapons,
           types: type_set,
           categories: category_set,
-          is_favorite: is_favorite?(info["character_id"], user_id),
+          is_favorite: is_favorite?(char.character_id, user_id),
           changeset: Favorite.changeset(%Favorite{})
         ]
 
       {:error, :not_found} ->
         [
-          character_info: info,
+          character_info: char,
           online_status: status,
           stat_page: "weapons_not_found.html",
-          is_favorite: is_favorite?(info["character_id"], user_id),
+          is_favorite: is_favorite?(char.character_id, user_id),
           changeset: Favorite.changeset(%Favorite{})
         ]
     end
   end
 
-  defp build_assigns(info, status, "general", user_id) do
-    {info, stats, best_weapons} =
-      case CensusCache.get(SacaStats.CharacterStatsCache, info["character_id"]) do
-        {:ok, stats} ->
-          compiled_stats = Weapons.compile_stats(stats["stats"])
-          info = Map.put(info, "all_medal_counts", Weapons.medal_counts(compiled_stats))
-          best_weapons = Weapons.compile_best_stats(compiled_stats)
-          {info, stats, best_weapons}
+  defp build_assigns(%Character{} = char, status, "general") do
+    compiled_stats = Weapons.compile_stats(char.weapon_stat, char.weapon_stat_by_faction)
+    all_medal_counts = Weapons.medal_counts(compiled_stats)
+    best_weapons = Weapons.compile_best_stats(compiled_stats)
 
-        {:error, :not_found} ->
-          {info, %{}, %{}}
-      end
-
-    faction = SacaStats.Utils.maybe_to_int(info["faction_id"], 0)
-    head = SacaStats.Utils.maybe_to_int(info["head_id"], 0)
-
-    ethnicity = Characters.get_ethnicity(faction, head)
-    sex = Characters.get_sex(faction, head)
+    ethnicity = Characters.get_ethnicity(char.faction_id, char.head_id)
+    sex = Characters.get_sex(char.faction_id, char.head_id)
 
     character_characteristics = %{
       "ethnicity" => ethnicity,
       "sex" => sex
     }
 
-    leader_id = get_in(info, ["outfit", "leader_character_id"])
+    outfit_leader_name =
+      case Characters.get_by_id(char.outfit.leader_character_id) do
+        {:ok, %Character{} = character} ->
+          character.name_first
 
-    info =
-      if is_nil(leader_id) do
-        info
-      else
-        case CensusCache.get(SacaStats.CharacterCache, leader_id) do
-          {:ok, character} ->
-            Map.put(info, "outfit_leader_name", character["name"]["first_lower"])
-
-          _ ->
-            info
-        end
+        _ ->
+          "Unknown Outfit Leader Name (ID #{char.outfit.leader_character_id})"
       end
 
     [
-      character_info: info,
-      character_stats: stats,
+      character_info: char,
       online_status: status,
+      outfit_leader_name: outfit_leader_name,
+      all_medal_counts: all_medal_counts,
       stat_page: "general.html",
       character_characteristics: character_characteristics,
       best_weapons: best_weapons,
-      is_favorite: is_favorite?(info["character_id"], user_id),
+      is_favorite: is_favorite?(char.character_id, user_id),
       changeset: Favorite.changeset(%Favorite{})
     ]
   end
 
-  defp build_assigns(info, status, stat_type, user_id) do
+  defp build_assigns(%Character{} = char, status, stat_type) do
     [
-      character_info: info,
+      character_info: char,
       online_status: status,
       stat_page: stat_type <> ".html",
-      is_favorite: is_favorite?(info["character_id"], user_id),
+      is_favorite: is_favorite?(char.character_id, user_id),
       changeset: Favorite.changeset(%Favorite{})
     ]
   end
