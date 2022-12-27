@@ -126,20 +126,24 @@ defmodule SacaStats.EventTracker.Deduper do
     if is_map_key(map, hash) do
       map
     else
-      case Map.fetch(event.changes, :character_id) do
-        {:ok, character_id} ->
-          PubSub.broadcast(SacaStats.PubSub, "game_event:#{character_id}", event)
-
-        :error ->
-          nil
+      if is_map_key(event.changes, :character_id) do
+        PubSub.broadcast(SacaStats.PubSub, "game_event:#{event.changes.character_id}", event)
       end
 
-      case Map.fetch(event.changes, :attacker_character_id) do
-        {:ok, attacker_character_id} ->
-          PubSub.broadcast(SacaStats.PubSub, "game_event:#{attacker_character_id}", event)
+      if is_map_key(event.changes, :attacker_character_id) do
+        PubSub.broadcast(
+          SacaStats.PubSub,
+          "game_event:#{event.changes.attacker_character_id}",
+          event
+        )
+      end
 
-        :error ->
-          nil
+      if is_map_key(event.changes, :other_id) do
+        PubSub.broadcast(
+          SacaStats.PubSub,
+          "game_event:#{event.changes.other_id}",
+          event
+        )
       end
 
       Map.put(map, hash, event)

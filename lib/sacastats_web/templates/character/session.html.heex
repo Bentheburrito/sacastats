@@ -1,47 +1,58 @@
 <%= link "<- Back to Sessions", to: Routes.character_path(@socket, :character, @session.name, :sessions) %>
 
-<div class="poll-item">
-  Session Summary
-  <ul>
-    <li>Kills: <%= @session.kill_count %></li>
-    <li>Deaths: <%= @session.death_count %></li>
-    <li>KDR: <%= SacaStats.Utils.safe_divide(@session.kill_count, @session.death_count, 2) %></li>
-    <li>Headshot Kills: <%= @session.kill_hs_count %></li>
-    <li>Time Played: 
-      <%= SacaStatsWeb.CharacterView.prettify_duration(@session.login.timestamp, @session.logout.timestamp) %>
-    </li>
-    <li class="number">XP Earned: <%= @session.xp_earned %></li>
-    <li>Battle Ranks Earned: 
-      <%= length(@session.battle_rank_ups) > 0 && Enum.map_join(@session.battle_rank_ups, ", ",  &(&1.battle_rank)) || "None"%>
-    </li>
-    <li>Facilities Captured: <%= length(@session.player_facility_captures) %></li>
-    <li>Facilities Defended: <%= length(@session.player_facility_defends) %></li>
-  </ul>
+<div class="poll-item d-md-flex justify-content-between">
+	<div class="mr-4">
+		<b>Session Summary</b>
+		<ul>
+			<li>Kills: <%= @session.kill_count %></li>
+			<li>Deaths: <%= @session.death_count %></li>
+			<li>KDR: <%= SacaStats.Utils.safe_divide(@session.kill_count, @session.death_count, 2) %></li>
+			<li>Headshot Kills: <%= @session.kill_hs_count %></li>
+			<li>Time Played:
+				<%= SacaStatsWeb.CharacterView.prettify_duration(@session.login.timestamp, @session.logout.timestamp) %>
+			</li>
+			<li class="number">XP Earned: <%= @session.xp_earned %></li>
+			<li>Battle Ranks Earned:
+				<%= length(@session.battle_rank_ups) > 0 && Enum.map_join(@session.battle_rank_ups, ", ",  &(&1.battle_rank)) || "None"%>
+			</li>
+			<li>Facilities Captured: <%= length(@session.player_facility_captures) %></li>
+			<li>Facilities Defended: <%= length(@session.player_facility_defends) %></li>
+		</ul>
+	</div>
+	<div class="mr-4">
+		<b>Vehicle Stats</b>
+		<ul>
+			<li>Kills: <%= @session.vehicle_kill_count %></li>
+			<li>Deaths: <%= @session.vehicle_death_count %></li>
+			<li>KDR: <%= SacaStats.Utils.safe_divide(@session.vehicle_kill_count, @session.vehicle_death_count, 2) %></li>
+			<li class="number">Kills in Nanites: <%= @session.nanites_destroyed %></li>
+			<li class="number">Deaths in Nanites: <%= @session.nanites_lost %></li>
+			<li>Nanite Efficiency: <%= SacaStats.Utils.safe_divide(@session.nanites_destroyed, @session.nanites_lost, 2) %></li>
+		</ul>
+	</div>
+	<div>
+		<b>Infantry vs. Infantry (IvI) Stats</b>
+		<ul>
+			<li>Kills: <%= @session.kill_ivi_count %></li>
+			<li>Deaths: <%= @session.death_ivi_count %></li>
+			<li>KDR: <%= SacaStats.Utils.safe_divide(@session.kill_ivi_count, @session.death_ivi_count, 2) %></li>
+			<li>Headshot Kills: <%= @session.kill_hs_ivi_count %></li>
+		</ul>
+	</div>
 </div>
 
-<div class="poll-item">
-  Vehicle Stats
-  <ul>
-    <li>Kills: <%= @session.vehicle_kill_count %></li>
-    <li>Deaths: <%= @session.vehicle_death_count %></li>
-    <li>KDR: <%= SacaStats.Utils.safe_divide(@session.vehicle_kill_count, @session.vehicle_death_count, 2) %></li>
-    <li class="number">Kills in Nanites: <%= @session.nanites_destroyed %></li>
-    <li class="number">Deaths in Nanites: <%= @session.nanites_lost %></li>
-    <li>Nanite Efficiency: <%= SacaStats.Utils.safe_divide(@session.nanites_destroyed, @session.nanites_lost, 2) %></li>
-  </ul>
-</div>
+<%= unless @session.logout.timestamp == :current_session do %>
+	<div class="poll-item">
+		<b>Kill Count by Weapon</b>
+		<%= SacaStatsWeb.CharacterView.build_kills_by_weapon(assigns, @session) %>
+	</div>
+<% end %>
 
 <div class="poll-item">
-  Infantry vs. Infantry (IvI) Stats
-  <ul>
-    <li>Kills: <%= @session.kill_ivi_count %></li>
-    <li>Deaths: <%= @session.death_ivi_count %></li>
-    <li>KDR: <%= SacaStats.Utils.safe_divide(@session.kill_ivi_count, @session.death_ivi_count, 2) %></li>
-    <li>Headshot Kills: <%= @session.kill_hs_ivi_count %></li>
-  </ul>
-</div>
-
-<div class="poll-item">
-  Event Log
-  <%= SacaStatsWeb.CharacterView.build_event_log(assigns, @session) %>
+  <b>Event Log</b>
+	<%= if @events == :loading do %>
+		<p>Loading event log, this could take a few seconds...</p>
+	<% else %>
+		<%= SacaStatsWeb.CharacterView.build_event_log(assigns, @session) %>
+	<% end %>
 </div>
