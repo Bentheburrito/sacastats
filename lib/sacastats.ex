@@ -37,11 +37,26 @@ defmodule SacaStats do
              |> Enum.map(fn {id, _} -> id end)
   defguard is_assist_xp(id) when id in @assist_xp
 
+  @gunner_assist_xp Stream.filter(@xp, fn {_id, %{"description" => desc}} ->
+                      desc = String.downcase(desc)
+                      String.contains?(desc, "kill by") and not String.contains?(desc, "HIVE XP")
+                    end)
+                    |> Enum.map(fn {id, _} -> id end)
+  defguard is_gunner_assist_xp(id) when id in @gunner_assist_xp
+
+  # revive and squad revive experience_ids
+  @revive_xp_ids [7, 53]
+  def revive_xp_ids, do: @revive_xp_ids
+  defguard is_revive_xp(id) when id in @revive_xp_ids
+
   @events StaticData.load_static_file(@static_data_path <> "/events.json")
   def events, do: @events
 
   @weapons StaticData.load_static_file(@static_data_path <> "/weapons.json")
   def weapons, do: @weapons
+
+  @facilities StaticData.load_static_file(@static_data_path <> "/facilities.json")
+  def facilities, do: @facilities
 
   def zones,
     do: %{
