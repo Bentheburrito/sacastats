@@ -11,7 +11,8 @@
                 alt={"#{String.capitalize(@character_characteristics["ethnicity"])  <> " " <> String.capitalize(@character_characteristics["sex"])}"}
                 width="32" height="32" class="characteristic-icon">
         </div>
-        <figure id="characterModel">
+        <figure id="characterModel" class="three-js-model" data-model-type="infantry" data-faction={Map.get(SacaStats.factions, SacaStats.Utils.maybe_to_int(@character_info["faction_id"], 0)).alias}
+            data-head-id={@character_info["head_id"]} data-clazz={@character_info["profile"]["profile_type_description"]}>
             <div class="d-flex justify-content-center align-items-center w-100 h-100" id="character-spinner-container">
                 <div class="spinner-border text-primary" id="character-spinner" role="status">
                     <span class="visually-hidden">Loading...</span>
@@ -251,8 +252,4 @@
 </div>
 
 <%# <script type="text/javascript" src={Routes.static_path(@conn, "/js/character/general.js")}></script> %>
-<script type="module">
-    import init from "<%= Routes.static_path(@conn, "/js/character/model.js") %>";
-    init("#characterModel", "<%= Map.get(SacaStats.factions, @character_info.faction_id).alias %>",
-        "<%= @character_info.head_id %>", "<%= @character_info.profile_type_description %>");
-</script>
+<script type="module" src={Routes.static_path(@conn, "/assets/dist/character/planetside-model.js")}></script>
