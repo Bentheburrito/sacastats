@@ -98,11 +98,15 @@ defmodule SacaStatsWeb.CharacterController do
     render(conn, "lookup.html")
   end
 
-  def character(%Plug.Conn{} = conn, %{"character_name" => name, "stat_type" => stat_type}) do
+  def character(
+        %Plug.Conn{} = conn,
+        %{"character_name" => name, "stat_type" => stat_type},
+        user_id
+      ) do
     with {:ok, %Character{} = char} <- Characters.get_by_name(name),
          {:ok, %OnlineStatus{} = status} <- OnlineStatus.get_by_id(char.character_id),
          status_text <- OnlineStatus.status_text(status) do
-      assigns = build_assigns(char, status_text, stat_type)
+      assigns = build_assigns(char, status_text, stat_type, user_id)
       render(conn, "template.html", assigns)
     else
       :not_found ->
@@ -125,7 +129,7 @@ defmodule SacaStatsWeb.CharacterController do
     end
   end
 
-  defp build_assigns(%Character{} = char, status, "sessions") do
+  defp build_assigns(%Character{} = char, status, "sessions", user_id) do
     sessions = Session.get_summary(char.name_first_lower)
 
     [
@@ -138,36 +142,24 @@ defmodule SacaStatsWeb.CharacterController do
     ]
   end
 
-  defp build_assigns(%Character{} = char, status, "weapons") do
-    case CensusCache.get(SacaStats.CharacterStatsCache, char.character_id) do
-      {:ok, stats} ->
-        complete_weapons = Weapons.compile_stats(char.weapon_stat, char.weapon_stat_by_faction)
-        type_set = Weapons.get_sorted_set_of_items("category", complete_weapons)
-        category_set = Weapons.get_sorted_set_of_items("sanction", complete_weapons)
+  defp build_assigns(%Character{} = char, status, "weapons", user_id) do
+    complete_weapons = Weapons.compile_stats(char.weapon_stat, char.weapon_stat_by_faction)
+    type_set = Weapons.get_sorted_set_of_items("category", complete_weapons)
+    category_set = Weapons.get_sorted_set_of_items("sanction", complete_weapons)
 
-        [
-          character_info: char,
-          online_status: status,
-          stat_page: "weapons.html",
-          weapons: complete_weapons,
-          types: type_set,
-          categories: category_set,
-          is_favorite: is_favorite?(char.character_id, user_id),
-          changeset: Favorite.changeset(%Favorite{})
-        ]
-
-      {:error, :not_found} ->
-        [
-          character_info: char,
-          online_status: status,
-          stat_page: "weapons_not_found.html",
-          is_favorite: is_favorite?(char.character_id, user_id),
-          changeset: Favorite.changeset(%Favorite{})
-        ]
-    end
+    [
+      character_info: char,
+      online_status: status,
+      stat_page: "weapons.html",
+      weapons: complete_weapons,
+      types: type_set,
+      categories: category_set,
+      is_favorite: is_favorite?(char.character_id, user_id),
+      changeset: Favorite.changeset(%Favorite{})
+    ]
   end
 
-  defp build_assigns(%Character{} = char, status, "general") do
+  defp build_assigns(%Character{} = char, status, "general", user_id) do
     compiled_stats = Weapons.compile_stats(char.weapon_stat, char.weapon_stat_by_faction)
     all_medal_counts = Weapons.medal_counts(compiled_stats)
     best_weapons = Weapons.compile_best_stats(compiled_stats)
@@ -183,7 +175,7 @@ defmodule SacaStatsWeb.CharacterController do
     outfit_leader_name =
       case Characters.get_by_id(char.outfit.leader_character_id) do
         {:ok, %Character{} = character} ->
-          character.name_first
+          char.name_first
 
         _ ->
           "Unknown Outfit Leader Name (ID #{char.outfit.leader_character_id})"
@@ -202,7 +194,7 @@ defmodule SacaStatsWeb.CharacterController do
     ]
   end
 
-  defp build_assigns(%Character{} = char, status, stat_type) do
+  defp build_assigns(%Character{} = char, status, stat_type, user_id) do
     [
       character_info: char,
       online_status: status,
@@ -228,34 +220,5 @@ defmodule SacaStatsWeb.CharacterController do
           true
       end
     end
-  end
-
-  @spec session(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def session(conn, %{"character_name" => name, "login_timestamp" => login_timestamp}) do
-    session = Session.get(name, login_timestamp)
-    {:ok, status} = CensusCache.get(SacaStats.OnlineStatusCache, session.character_id)
-
-    user_id =
-      if conn.assigns.user do
-        conn.assigns.user.id
-      else
-        0
-      end
-
-    assigns = [
-      character_info: %{
-        "character_id" => session.character_id,
-        "name" => %{"first" => session.name},
-        "faction_id" => session.faction_id,
-        "outfit" => session.outfit
-      },
-      online_status: status,
-      stat_page: "session.html",
-      session: session,
-      is_favorite: is_favorite?(session.character_id, user_id),
-      changeset: Favorite.changeset(%Favorite{})
-    ]
-
-    render(conn, "template.html", assigns)
   end
 end

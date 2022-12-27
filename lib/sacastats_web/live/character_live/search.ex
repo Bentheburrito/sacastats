@@ -6,10 +6,9 @@ defmodule SacaStatsWeb.CharacterLive.Search do
   use Phoenix.HTML
   import Ecto.Query
 
-  import PS2.API.QueryBuilder
   alias Phoenix.PubSub
-  alias PS2.API.{Query, QueryResult}
-  alias SacaStats.{CensusCache, OnlineStatusCache, Session}
+  alias SacaStats.Characters
+  alias SacaStats.Census.OnlineStatus
 
   alias SacaStats.Character.Favorite
   alias SacaStats.Repo
@@ -87,11 +86,10 @@ defmodule SacaStatsWeb.CharacterLive.Search do
       favorite_characters = Map.new(favorites_result, &{&1.character_id, &1})
       favorite_character_ids = Map.keys(favorite_characters)
 
-      {:ok, favorite_character_infos} =
-        SacaStats.CensusCache.get_many(SacaStats.CharacterCache, favorite_character_ids)
+      {:ok, favorite_character_infos} = Characters.get_many_by_id(favorite_character_ids)
 
       {:ok, online_status_map} =
-        SacaStats.CensusCache.get_many(SacaStats.OnlineStatusCache, favorite_character_ids)
+        OnlineStatus.get_many_by_id(favorite_character_ids)
         |> IO.inspect(label: "STATUS")
 
       favorite_character_infos
@@ -214,8 +212,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
         %Ecto.Changeset{data: %SacaStats.Events.PlayerLogin{character_id: character_id}},
         socket
       ) do
-    {:ok, favorite_character_info} =
-      SacaStats.CensusCache.get(SacaStats.CharacterCache, character_id)
+    {:ok, favorite_character_info} = Characters.get_by_id(character_id)
 
     character_info = %{
       "name" => favorite_character_info["name"]["first"],

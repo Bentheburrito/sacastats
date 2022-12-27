@@ -46,6 +46,30 @@ defmodule SacaStats.Census.OnlineStatus do
     end
   end
 
+  @doc """
+  Similar to `c:get_by_id/1`, but gets multiple online statuses by their IDs. Since getting multiple online statuses for many characters from
+  the Census API is an expensive query (and may lead to timeouts), you can provide `true` for shallow copy to skip
+  fetching character/weapon stats for uncached characters.
+  """
+  @spec get_many_by_id([integer()], boolean()) ::
+          {:ok, %{integer() => Character.t() | :not_found}} | :error
+  def get_many_by_id(id_list, _shallow_copy? \\ false) do
+    for character_id <- id_list, reduce: {_okay_map = %{}, _uncached_ids = []} do
+      {okay_map, uncached_ids} ->
+        with {:ok, %OnlineStatus{} = status} <- Cachex.get(:online_status_cache, character_id),
+             {:ok, true} <-
+               Cachex.put(:online_status_cache, status.character_id, status) do
+        else
+          {:ok, nil} ->
+            {Map.put(okay_map, character_id, :not_found), [character_id | uncached_ids]}
+
+          {:error, _} ->
+            Logger.error("Could not access :online_status_cache")
+            :error
+        end
+    end
+  end
+
   defp get_by_census(_query, attempt) when attempt == @max_attempts + 1, do: :error
 
   defp get_by_census(query, attempt) do
