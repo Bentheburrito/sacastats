@@ -5,10 +5,15 @@ defmodule SacaStats.Session do
   """
 
   alias SacaStats.Census.Character
+  alias SacaStats.Events.BattleRankUp
+  alias SacaStats.Events.PlayerFacilityCapture
+  alias SacaStats.Events.PlayerFacilityDefend
   alias SacaStats.{Characters, Events, Repo, Session}
 
   import Ecto.Query
   import SacaStats.Utils, only: [typedstruct: 1, bool_to_int: 1]
+
+  require Logger
 
   typedstruct do
     field :character_id, integer(), required?: true
@@ -16,17 +21,18 @@ defmodule SacaStats.Session do
     field :name, String.t()
     field :outfit, Map.t()
     # aggregate data
-    field :kill_count, integer()
-    field :kill_hs_count, integer()
-    field :kill_hs_ivi_count, integer()
-    field :kill_ivi_count, integer()
-    field :death_ivi_count, integer()
-    field :death_count, integer()
-    field :vehicle_kill_count, integer()
-    field :vehicle_death_count, integer()
-    field :nanites_destroyed, integer()
-    field :nanites_lost, integer()
-    field :xp_earned, integer()
+    field :kill_count, integer(), default: 0
+    field :kill_hs_count, integer(), default: 0
+    field :kill_hs_ivi_count, integer(), default: 0
+    field :kill_ivi_count, integer(), default: 0
+    field :death_ivi_count, integer(), default: 0
+    field :death_count, integer(), default: 0
+    field :revive_count, integer(), default: 0
+    field :vehicle_kill_count, integer(), default: 0
+    field :vehicle_death_count, integer(), default: 0
+    field :nanites_destroyed, integer(), default: 0
+    field :nanites_lost, integer(), default: 0
+    field :xp_earned, integer(), default: 0
     # raw data
     field :battle_rank_ups, Events.BattleRankUp.t()
     field :deaths, Events.Death.t()
@@ -37,20 +43,6 @@ defmodule SacaStats.Session do
     field :login, Events.PlayerLogin.t()
     field :logout, Events.PlayerLogout.t()
   end
-
-  @default_aggregation %{
-    kill_count: 0,
-    kill_hs_count: 0,
-    kill_ivi_count: 0,
-    kill_hs_ivi_count: 0,
-    death_count: 0,
-    death_ivi_count: 0,
-    vehicle_kill_count: 0,
-    vehicle_death_count: 0,
-    nanites_destroyed: 0,
-    nanites_lost: 0,
-    xp_earned: 0
-  }
 
   @doc """
   Gets a summary of all a character's sessions. This function is similar to `get_all/1`, except it does not fetch events
@@ -124,9 +116,20 @@ defmodule SacaStats.Session do
           field(e, :attacker_character_id) == ^character_id
       )
 
+    revive_xp_ids = SacaStats.revive_xp_ids()
+
+    # Considers GE revive events where other_id is this character (i.e., this character was revived by someone else)
+    ge_where_clause =
+      dynamic(
+        [e],
+        field(e, :character_id) == ^character_id or
+          (field(e, :other_id) == ^character_id and
+             field(e, :experience_id) in ^revive_xp_ids)
+      )
+
     all_br_ups = Repo.all(gen_session_events_query(Events.BattleRankUp, where_clause))
     all_deaths = Repo.all(gen_session_events_query(Events.Death, attack_where_clause))
-    all_gain_xp = Repo.all(gen_session_events_query(Events.GainExperience, where_clause))
+    all_gain_xp = Repo.all(gen_session_events_query(Events.GainExperience, ge_where_clause))
 
     all_facility_caps =
       Repo.all(gen_session_events_query(Events.PlayerFacilityCapture, where_clause))
@@ -180,31 +183,22 @@ defmodule SacaStats.Session do
       facility_defs = Enum.filter(all_facility_defs, event_in_session?)
       vehicle_destroys = Enum.filter(all_vehicle_destroys, event_in_session?)
 
-      aggregations = aggregate(character_id, [deaths, gain_xp, vehicle_destroys])
+      %Session{} = session = aggregate(character_id, [deaths, gain_xp, vehicle_destroys])
 
       %Session{
-        character_id: character_id,
-        faction_id: char.faction_id,
-        name: char.name_first,
-        kill_count: aggregations.kill_count,
-        kill_hs_count: aggregations.kill_hs_count,
-        kill_ivi_count: aggregations.kill_ivi_count,
-        kill_hs_ivi_count: aggregations.kill_hs_ivi_count,
-        death_count: aggregations.death_count,
-        death_ivi_count: aggregations.death_ivi_count,
-        vehicle_kill_count: aggregations.vehicle_kill_count,
-        vehicle_death_count: aggregations.vehicle_death_count,
-        nanites_destroyed: aggregations.nanites_destroyed,
-        nanites_lost: aggregations.nanites_lost,
-        xp_earned: aggregations.xp_earned,
-        battle_rank_ups: br_ups,
-        deaths: deaths,
-        gain_experiences: gain_xp,
-        player_facility_captures: facility_caps,
-        player_facility_defends: facility_defs,
-        vehicle_destroys: vehicle_destroys,
-        login: login,
-        logout: logout
+        session
+        | character_id: character_id,
+          faction_id: char.faction_id,
+          name: char.name_first,
+          outfit: char.outfit,
+          battle_rank_ups: br_ups,
+          deaths: deaths,
+          gain_experiences: gain_xp,
+          player_facility_captures: facility_caps,
+          player_facility_defends: facility_defs,
+          vehicle_destroys: vehicle_destroys,
+          login: login,
+          logout: logout
       }
     end)
     |> Enum.to_list()
@@ -240,16 +234,21 @@ defmodule SacaStats.Session do
 
     attack_where_clause = build_where_clause(attack_where_clause, logout_timestamp)
 
+    ge_where_clause =
+      character_id
+      |> ge_where_clause(login_timestamp)
+      |> build_where_clause(logout_timestamp)
+
     br_ups = Repo.all(gen_session_events_query(Events.BattleRankUp, where_clause))
     deaths = Repo.all(gen_session_events_query(Events.Death, attack_where_clause))
-    gain_xp = Repo.all(gen_session_events_query(Events.GainExperience, where_clause))
+    gain_xp = Repo.all(gen_session_events_query(Events.GainExperience, ge_where_clause))
     facility_caps = Repo.all(gen_session_events_query(Events.PlayerFacilityCapture, where_clause))
     facility_defs = Repo.all(gen_session_events_query(Events.PlayerFacilityDefend, where_clause))
 
     vehicle_destroys =
       Repo.all(gen_session_events_query(Events.VehicleDestroy, attack_where_clause))
 
-    aggregations = aggregate(character_id, [deaths, gain_xp, vehicle_destroys])
+    %Session{} = session = aggregate(character_id, [deaths, gain_xp, vehicle_destroys])
 
     login =
       Repo.one!(
@@ -270,30 +269,33 @@ defmodule SacaStats.Session do
       end
 
     %Session{
-      character_id: character_id,
-      faction_id: char.faction_id,
-      name: char.name_first,
-      outfit: char.outfit,
-      kill_count: aggregations.kill_count,
-      kill_hs_count: aggregations.kill_hs_count,
-      kill_ivi_count: aggregations.kill_ivi_count,
-      kill_hs_ivi_count: aggregations.kill_hs_ivi_count,
-      death_count: aggregations.death_count,
-      death_ivi_count: aggregations.death_ivi_count,
-      vehicle_kill_count: aggregations.vehicle_kill_count,
-      vehicle_death_count: aggregations.vehicle_death_count,
-      nanites_destroyed: aggregations.nanites_destroyed,
-      nanites_lost: aggregations.nanites_lost,
-      xp_earned: aggregations.xp_earned,
-      battle_rank_ups: br_ups,
-      deaths: deaths,
-      gain_experiences: gain_xp,
-      player_facility_captures: facility_caps,
-      player_facility_defends: facility_defs,
-      vehicle_destroys: vehicle_destroys,
-      login: login,
-      logout: logout
+      session
+      | character_id: character_id,
+        faction_id: char.faction_id,
+        name: char.name_first,
+        outfit: char.outfit,
+        battle_rank_ups: br_ups,
+        deaths: deaths,
+        gain_experiences: gain_xp,
+        player_facility_captures: facility_caps,
+        player_facility_defends: facility_defs,
+        vehicle_destroys: vehicle_destroys,
+        login: login,
+        logout: logout
     }
+  end
+
+  defp ge_where_clause(character_id, login_timestamp) do
+    revive_xp_ids = SacaStats.revive_xp_ids()
+
+    dynamic(
+      [e],
+      (field(e, :character_id) == ^character_id and
+         field(e, :timestamp) >= ^login_timestamp) or
+        (field(e, :other_id) == ^character_id and
+           field(e, :experience_id) in ^revive_xp_ids and
+           field(e, :timestamp) >= ^login_timestamp)
+    )
   end
 
   defp get_logout_timestamp(character_id, login_timestamp) do
@@ -312,17 +314,17 @@ defmodule SacaStats.Session do
     from event in event_module, where: ^conditional
   end
 
-  defp aggregate(character_id, event_lists) do
-    # event_lists
-    # |> Stream.map(fn events -> Enum.reduce(events, @default_aggregation, &event_reducer(character_id, &1, &2)) end)
-    # |> Enum.reduce(&Map.merge/2)
-
-    Enum.reduce(event_lists, @default_aggregation, fn event_list, aggregates ->
-      Enum.reduce(event_list, aggregates, &event_reducer(character_id, &1, &2))
+  def aggregate(%Session{character_id: character_id} = session, event_lists) do
+    Enum.reduce(event_lists, session, fn event_list, aggregate_session ->
+      Enum.reduce(event_list, aggregate_session, &event_reducer(character_id, &1, &2))
     end)
   end
 
-  defp event_reducer(character_id, %Events.Death{} = death, acc) do
+  def aggregate(character_id, event_lists) do
+    aggregate(%Session{character_id: character_id}, event_lists)
+  end
+
+  defp event_reducer(character_id, %Events.Death{} = death, %Session{} = session) do
     attackers_weapon = SacaStats.weapons()[death.attacker_weapon_id]
 
     kill_count_add = bool_to_int(death.attacker_character_id == character_id)
@@ -350,7 +352,7 @@ defmodule SacaStats.Session do
         death.character_id == character_id and attackers_weapon["sanction"] == "infantry"
       )
 
-    acc
+    session
     |> Map.update(:kill_count, kill_count_add, &(&1 + kill_count_add))
     |> Map.update(:kill_hs_count, kill_hs_count_add, &(&1 + kill_hs_count_add))
     |> Map.update(:kill_ivi_count, kill_ivi_count_add, &(&1 + kill_ivi_count_add))
@@ -359,11 +361,18 @@ defmodule SacaStats.Session do
     |> Map.update(:death_ivi_count, death_ivi_count_add, &(&1 + death_ivi_count_add))
   end
 
-  defp event_reducer(_character_id, %Events.GainExperience{} = xp, acc) do
-    Map.update(acc, :xp_earned, xp.amount, &(&1 + xp.amount))
+  defp event_reducer(_character_id, %Events.GainExperience{} = xp, %Session{} = session) do
+    revive_count_add =
+      bool_to_int(
+        xp.other_id == session.character_id && xp.experience_id in SacaStats.revive_xp_ids()
+      )
+
+    session
+    |> Map.update(:xp_earned, xp.amount, &(&1 + xp.amount))
+    |> Map.update(:revive_count, revive_count_add, &(&1 + revive_count_add))
   end
 
-  defp event_reducer(character_id, %Events.VehicleDestroy{} = vehicle, acc) do
+  defp event_reducer(character_id, %Events.VehicleDestroy{} = vehicle, %Session{} = session) do
     character_vehicle = SacaStats.vehicles()[vehicle.vehicle_id]
 
     vehicle_kill_count_add = bool_to_int(vehicle.attacker_character_id == character_id)
@@ -374,11 +383,31 @@ defmodule SacaStats.Session do
 
     nanites_lost_add = (vehicle.character_id == character_id && character_vehicle["cost"]) || 0
 
-    acc
+    session
     |> Map.update(:vehicle_kill_count, vehicle_kill_count_add, &(&1 + vehicle_kill_count_add))
     |> Map.update(:vehicle_death_count, vehicle_death_count_add, &(&1 + vehicle_death_count_add))
     |> Map.update(:nanites_destroyed, nanites_destroyed_add, &(&1 + nanites_destroyed_add))
     |> Map.update(:nanites_lost, nanites_lost_add, &(&1 + nanites_lost_add))
+  end
+
+  defp event_reducer(_character_id, %PlayerFacilityCapture{} = cap, session) do
+    Map.update(session, :player_facility_captures, [cap], &[cap | &1])
+  end
+
+  defp event_reducer(_character_id, %PlayerFacilityDefend{} = def, session) do
+    Map.update(session, :player_facility_defends, [def], &[def | &1])
+  end
+
+  defp event_reducer(_character_id, %BattleRankUp{} = br_up, session) do
+    Map.update(session, :battle_rank_ups, [br_up], &[br_up | &1])
+  end
+
+  defp event_reducer(_character_id, event, session) do
+    Logger.debug(
+      "event_reducer received event that doesn't affect aggregate stats: #{inspect(event)}"
+    )
+
+    session
   end
 
   defp build_where_clause(clause, logout_timestamp) do
