@@ -64,7 +64,9 @@ defmodule SacaStatsWeb.CharacterView do
 
   def build_kills_by_weapon(assigns, %Session{} = session) do
     weapon_kill_counts =
-      for %Death{} = death <- session.deaths, reduce: %{} do
+      for %Death{} = death <- session.deaths,
+          death.attacker_character_id == session.character_id,
+          reduce: %{} do
         weapon_kill_counts ->
           if is_nil(SacaStats.weapons()[death.attacker_weapon_id]) do
             weapon_kill_counts
