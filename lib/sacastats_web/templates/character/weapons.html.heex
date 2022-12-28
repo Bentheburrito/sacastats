@@ -556,7 +556,12 @@
     </tbody>
 </table>
 
+<%=SacaStats.Utils.import_flex_bootstrap_table(assigns)%>
+
 <script>
+    //initialize bootstrap table
+    $('#weaponTable').bootstrapTable();
+
     //initialize weapon sorters
     function timeSorter(a, b) {
         var aa = getTimeInSeconds(a);
@@ -572,20 +577,6 @@
     }
 </script>
 
-<script type="module">
-    //initialize weapon table
-    import init from "<%= Routes.static_path(@conn, "/js/character/weapons-table.js") %>";
-    init();
-</script>
+<script type="module" src={Routes.static_path(@conn, "/assets/dist/character/weapons-table.js")}></script>
 
-<script type="module">
-    //initialize weapon id and kill count map
-    import init from "<%= Routes.static_path(@conn, "/js/character/weapons.js") %>";
-    let kills = new Map();
-    $('#weaponTable').bootstrapTable('getData', false).forEach(weapon => {
-        kills.set("weapon" + weapon.id + "Row", weapon.kills)
-    });
-    init(kills);
-</script>
-
-<script type="module" src={Routes.static_path(@conn, "/js/character/weapons-table.js")}></script>
+<script type="module" src={Routes.static_path(@conn, "/assets/dist/character/weapons.js")}></script>

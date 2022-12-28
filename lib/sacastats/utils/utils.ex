@@ -1,4 +1,6 @@
 defmodule SacaStats.Utils do
+  use Phoenix.Component
+
   @moduledoc """
   Generic utility functions
   """
@@ -131,5 +133,23 @@ defmodule SacaStats.Utils do
     else
       "BR #{battle_rank}"
     end
+  end
+
+  def import_flex_bootstrap_table(assigns) do
+    ~H"""
+      <link href="https://unpkg.com/bootstrap-table@1.21.0/dist/extensions/sticky-header/bootstrap-table-sticky-header.css" rel="stylesheet">
+      <link rel="stylesheet" href="https://unpkg.com/@fortawesome/fontawesome-free@5.12.1/css/all.min.css">
+      <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/3.2.1/css/font-awesome.min.css" rel="stylesheet" />
+      <link href="https://cdn.jsdelivr.net/gh/akottr/dragtable@master/dragtable.css" rel="stylesheet">
+      <link href="https://unpkg.com/bootstrap-table@1.21.0/dist/bootstrap-table.min.css" rel="stylesheet">
+
+      <script src="https://cdn.jsdelivr.net/npm/jqueryui@1.11.1/jquery-ui.js"></script>
+      <script src="https://cdn.jsdelivr.net/gh/akottr/dragtable@master/jquery.dragtable.js"></script>
+      <script src="https://unpkg.com/bootstrap-table@1.21.0/dist/bootstrap-table.min.js"></script>
+      <script src="https://unpkg.com/bootstrap-table@1.21.0/dist/extensions/reorder-columns/bootstrap-table-reorder-columns.min.js"></script>
+      <script src="https://unpkg.com/bootstrap-table@1.21.0/dist/extensions/sticky-header/bootstrap-table-sticky-header.min.js"></script>
+
+      <script type="module" src="/assets/dist/flex-bootstrap-table/flex-bootstrap-table.js"></script>
+    """
   end
 end

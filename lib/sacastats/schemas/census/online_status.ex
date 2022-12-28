@@ -54,20 +54,23 @@ defmodule SacaStats.Census.OnlineStatus do
   @spec get_many_by_id([integer()], boolean()) ::
           {:ok, %{integer() => Character.t() | :not_found}} | :error
   def get_many_by_id(id_list, _shallow_copy? \\ false) do
-    for character_id <- id_list, reduce: {_okay_map = %{}, _uncached_ids = []} do
-      {okay_map, uncached_ids} ->
-        with {:ok, %OnlineStatus{} = status} <- Cachex.get(:online_status_cache, character_id),
-             {:ok, true} <-
-               Cachex.put(:online_status_cache, status.character_id, status) do
-        else
-          {:ok, nil} ->
-            {Map.put(okay_map, character_id, :not_found), [character_id | uncached_ids]}
+    {okay_map, _uncached_ids} =
+      for character_id <- id_list, reduce: {_okay_map = %{}, _uncached_ids = []} do
+        {okay_map, uncached_ids} ->
+          with {:ok, %OnlineStatus{} = status} <- Cachex.get(:online_status_cache, character_id),
+               {:ok, true} <-
+                 Cachex.put(:online_status_cache, status.character_id, status) do
+          else
+            {:ok, nil} ->
+              {Map.put(okay_map, character_id, :not_found), [character_id | uncached_ids]}
 
-          {:error, _} ->
-            Logger.error("Could not access :online_status_cache")
-            :error
-        end
-    end
+            {:error, _} ->
+              Logger.error("Could not access :online_status_cache")
+              :error
+          end
+      end
+
+    {:ok, okay_map}
   end
 
   defp get_by_census(_query, attempt) when attempt == @max_attempts + 1, do: :error

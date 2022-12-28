@@ -10,6 +10,11 @@ import Config
 # which you should run after static files are built and
 # before starting your production server.
 config :sacastats, SacaStatsWeb.Endpoint, url: [host: "sacastats.com", port: 80]
+# watchers: [
+#   # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)
+#   esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
+#   node: ["build-prod.js", "--watch", cd: Path.expand("../assets", __DIR__)]
+# ]
 
 # Do not print debug messages in production
 config :logger, level: :info
