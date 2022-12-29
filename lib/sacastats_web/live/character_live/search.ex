@@ -9,6 +9,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
   alias Phoenix.PubSub
   alias SacaStats.Characters
   alias SacaStats.Census.OnlineStatus
+  alias SacaStats.Events.{PlayerLogin, PlayerLogout}
 
   alias SacaStats.Character.Favorite
   alias SacaStats.Repo
@@ -46,6 +47,8 @@ defmodule SacaStatsWeb.CharacterLive.Search do
      |> assign(:user, session["user"] || session[:user])}
   end
 
+  defp get_favorite_users(nil), do: %{}
+
   defp get_favorite_users(user) do
     # if is_nil(user) || is_nil(user["id"]) do
     #   []
@@ -77,59 +80,69 @@ defmodule SacaStatsWeb.CharacterLive.Search do
     #       |> Enum.into(%{})
     #   end
     # end
-    if is_nil(user) || is_nil(user.id) do
+
+    favorites_result =
+      Ecto.Query.from(f in Favorite, select: f, where: f.discord_id == ^user.id) |> Repo.all()
+
+    # If the list is empty (i.e. no favorites), return an empty map
+    if match?([], favorites_result) do
       %{}
     else
-      favorites_result =
-        Ecto.Query.from(f in Favorite, select: f, where: f.discord_id == ^user.id) |> Repo.all()
-
       favorite_characters = Map.new(favorites_result, &{&1.character_id, &1})
+
       favorite_character_ids = Map.keys(favorite_characters)
 
-      {:ok, favorite_character_infos} = Characters.get_many_by_id(favorite_character_ids)
+      {:ok, character_infos} = Characters.get_many_by_id(favorite_character_ids)
 
-      {:ok, online_status_map} =
-        OnlineStatus.get_many_by_id(favorite_character_ids)
-        |> IO.inspect(label: "STATUS")
+      {:ok, online_status_map} = OnlineStatus.get_many_by_id(favorite_character_ids)
 
-      favorite_character_infos
-      |> Enum.map(fn
-        {character_id, :not_found} ->
+      character_infos
+      |> Enum.reduce(%{}, fn
+        {character_id, :not_found}, acc ->
           {:ok, favorite_character} = Map.fetch(favorite_characters, character_id)
           name = favorite_character.last_known_name
-          IO.inspect(name, label: "last_known")
+
+          status =
+            case Map.get(online_status_map, character_id) do
+              {:ok, status} -> OnlineStatus.status_text(status)
+              _ -> "unknown"
+            end
 
           PubSub.subscribe(SacaStats.PubSub, "game_event:#{character_id}")
 
-          %{
+          card_info = %{
             "name" => favorite_character.last_known_name,
             "id" => favorite_character.character_id,
             "outfit" => "",
             "rank" => "Status Not Found",
             "faction_id" => 0,
-            "online_status" =>
-              if(Map.get(online_status_map, character_id, "offline") > 0,
-                do: "online",
-                else: "offline"
-              )
+            "online_status" => status
           }
 
-        {character_id, {:ok, character}} ->
+          Map.update(acc, status, %{character_id => card_info}, fn character_infos ->
+            Map.put(
+              character_infos,
+              character_id,
+              card_info
+            )
+          end)
+
+        {character_id, {:ok, character}}, acc ->
           # check if value.name.first is different than last_known_name
           character.name_first |> IO.inspect(label: "who")
 
-          if(Map.get(online_status_map, character_id, "offline") > 0,
-            do: "online",
-            else: "offline"
-          )
-          |> IO.inspect(label: "online")
+          status =
+            case Map.get(online_status_map, character_id) do
+              {:ok, status} -> OnlineStatus.status_text(status)
+              _ -> :not_found
+            end
 
           {:ok, favorite_character} = Map.fetch(favorite_characters, character_id)
           favorite_character.last_known_name |> IO.inspect(label: "last_known")
 
           PubSub.subscribe(SacaStats.PubSub, "game_event:#{character_id}")
 
-          %{
+          card_info = %{
             "name" => character.name_first,
             "id" => character_id,
             "outfit" => character.outfit.name,
@@ -139,119 +152,60 @@ defmodule SacaStatsWeb.CharacterLive.Search do
                 character.prestige_level
               ),
             "faction_id" => character.faction_id,
-            "online_status" =>
-              if(Map.get(online_status_map, character_id, "offline") > 0,
-                do: "online",
-                else: "offline"
-              )
+            "online_status" => status
           }
+
+          Map.update(acc, status, %{character_id => card_info}, fn character_infos ->
+            Map.put(
+              character_infos,
+              character_id,
+              card_info
+            )
+          end)
       end)
-      |> Enum.group_by(& &1["online_status"], & &1)
       |> IO.inspect(label: "Favorite_Characters")
     end
-
-    # %{
-    #   "online" => [
-    #     %{
-    #       "name" => "dndmackey",
-    #       "id" => "5428085256239782129",
-    #       "outfit" => "The Sacagaweas",
-    #       "rank" => "ASP 2 BR 72",
-    #       "faction_id" => 1
-    #     },
-    #     %{
-    #       "name" => "RedCoats24",
-    #       "id" => "5428123302640594129",
-    #       "outfit" => "The Hakagaweas",
-    #       "rank" => "ASP 2 BR 20",
-    #       "faction_id" => 3
-    #     }
-    #   ],
-    #   "offline" => [
-    #     %{
-    #       "name" => "NSmackey",
-    #       "id" => "5429150307164952145",
-    #       "outfit" => "",
-    #       "rank" => "BR 46",
-    #       "faction_id" => 4
-    #     },
-    #     %{
-    #       "name" => "Snowful ",
-    #       "id" => "5428713425545165425",
-    #       "outfit" => "Cerulean Unicorns",
-    #       "rank" => "ASP 1 BR 95",
-    #       "faction_id" => 2
-    #     },
-    #     %{
-    #       "name" => "Snowful ",
-    #       "id" => "5428713425545165425",
-    #       "outfit" => "Cerulean Unicorns",
-    #       "rank" => "ASP 1 BR 95",
-    #       "faction_id" => 2
-    #     },
-    #     %{
-    #       "name" => "Snowful ",
-    #       "id" => "5428713425545165425",
-    #       "outfit" => "Cerulean Unicorns",
-    #       "rank" => "ASP 1 BR 95",
-    #       "faction_id" => 2
-    #     },
-    #     %{
-    #       "name" => "Snowful ",
-    #       "id" => "5428713425545165425",
-    #       "outfit" => "Cerulean Unicorns",
-    #       "rank" => "ASP 1 BR 95",
-    #       "faction_id" => 2
-    #     },
-    #     %{
-    #       "name" => "Snowful ",
-    #       "id" => "5428713425545165425",
-    #       "outfit" => "Cerulean Unicorns",
-    #       "rank" => "ASP 1 BR 95",
-    #       "faction_id" => 2
-    #     },
-    #     %{
-    #       "name" => "Snowful ",
-    #       "id" => "5428713425545165425",
-    #       "outfit" => "Cerulean Unicorns",
-    #       "rank" => "ASP 1 BR 95",
-    #       "faction_id" => 2
-    #     }
-    #   ]
-    # }
   end
 
   # A favorite character has gone online
   def handle_info(
-        %Ecto.Changeset{data: %SacaStats.Events.PlayerLogin{character_id: character_id}},
+        %Ecto.Changeset{data: %PlayerLogin{}} = event_cs,
         socket
       ) do
-    {:ok, favorite_character_info} = Characters.get_by_id(character_id)
+    %PlayerLogin{character_id: character_id} = Ecto.Changeset.apply_changes(event_cs)
 
-    character_info = %{
-      "name" => favorite_character_info.name_first,
-      "id" => character_id,
-      "outfit" => favorite_character_info.outfit.name,
-      "rank" =>
-        SacaStats.Utils.get_rank_string(
-          favorite_character_info.battle_rank,
-          favorite_character_info.prestige_level
-        ),
-      "faction_id" => favorite_character_info.faction_id,
-      "online_status" => "online"
-    }
+    {login_char_info, updated_char_map} =
+      pop_in(socket.assigns.favorite_characters, ["offline", character_id])
 
     updated_char_map =
-      socket.assigns.favorite_characters
-      |> Map.update!("online", fn char_list ->
-        [character_info | char_list]
-      end)
-      |> Map.update!("offline", fn char_list ->
-        Enum.reject(char_list, fn char -> char["id"] == character_id end)
-      end)
-      |> Map.update!("unknown", fn char_list ->
-        Enum.reject(char_list, fn char -> char["id"] == character_id end)
-      end)
+      Map.update(
+        updated_char_map,
+        "online",
+        %{character_id => login_char_info},
+        &Map.put(&1, character_id, login_char_info)
+      )
+
+    updated_socket = assign(socket, :favorite_characters, updated_char_map)
+
+    {:noreply, updated_socket}
+  end
+
+  def handle_info(
+        %Ecto.Changeset{data: %PlayerLogout{}} = event_cs,
+        socket
+      ) do
+    %PlayerLogout{character_id: character_id} = Ecto.Changeset.apply_changes(event_cs)
+
+    {logout_char_info, updated_char_map} =
+      pop_in(socket.assigns.favorite_characters, ["online", character_id])
+
+    updated_char_map =
+      Map.update(
+        updated_char_map,
+        "offline",
+        %{character_id => logout_char_info},
+        &Map.put(&1, character_id, logout_char_info)
+      )
 
     updated_socket = assign(socket, :favorite_characters, updated_char_map)
 
@@ -332,33 +286,48 @@ defmodule SacaStatsWeb.CharacterLive.Search do
      |> assign(:favorite_characters, updated_char_map)}
   end
 
-  def handle_event("remove_favorite_character", %{"id" => id}, socket) do
+  def handle_event("remove_favorite_character", %{"id" => char_id_and_status}, socket) do
     user = socket.assigns.user
+    [char_id_str, status] = String.split(char_id_and_status, ":")
+    char_id = String.to_integer(char_id_str)
 
     Repo.delete_all(
-      from(f in Favorite, where: f.discord_id == ^user.id and f.character_id == ^id)
+      from(f in Favorite, where: f.discord_id == ^user.id and f.character_id == ^char_id)
     )
 
-    {:noreply, socket}
+    {_, updated_char_map} =
+      socket.assigns.favorite_characters
+      |> pop_in([status, char_id])
+
+    updated_socket = assign(socket, :favorite_characters, updated_char_map)
+
+    {:noreply, updated_socket}
   end
 
   def create_character_status_cards(assigns, characters) do
-    online_characters = Map.get(characters, "online")
-    offline_characters = Map.get(characters, "offline")
-    no_status_characters = Map.get(characters, :not_found)
+    online_characters = Map.get(characters, "online", %{})
+    offline_characters = Map.get(characters, "offline", %{})
+    no_status_characters = Map.get(characters, "unknown", %{})
 
-    ~H"""
-      <%= encode_character_status_card_section(assigns, online_characters, "online") %>
-      <%= encode_character_status_card_section(assigns, offline_characters, "offline") %>
-      <%= encode_character_status_card_section(assigns, no_status_characters, "unknown") %>
-    """
+    if map_size(online_characters) + map_size(offline_characters) + map_size(no_status_characters) >
+         0 do
+      ~H"""
+        <%= encode_character_status_card_section(assigns, online_characters, "online") %>
+        <%= encode_character_status_card_section(assigns, offline_characters, "offline") %>
+        <%= encode_character_status_card_section(assigns, no_status_characters, "unknown") %>
+      """
+    else
+      ~H"""
+        <p class="text-center">You currently have no favorite characters.<br/>Favorite a character by visiting their page and adding them</p>
+      """
+    end
   end
 
   defp encode_character_status_card_section(assigns, characters, section_type) do
     ~H"""
-      <%= if(characters != nil && length(characters) > 0) do %>
+      <%= if is_map(characters) && map_size(characters) > 0 do %>
         <div class="status-card-section-header" data-bs-toggle="collapse" type="button" data-bs-target={"##{section_type}collapsable"}>
-          <h2 class="d-inline"><%=  String.capitalize(section_type)%></h2><p class="favorite-character-status-contains d-inline">(<%= length(characters) %>)</p>
+          <h2 class="d-inline"><%=  String.capitalize(section_type)%></h2><p class="favorite-character-status-contains d-inline">(<%= map_size(characters) %>)</p>
           <h2 class="float-right arrow-pointer"><i class="fa fa-chevron-up flip" style="font-size:24px"></i></h2>
         </div>
         <hr class="mt-3" />
@@ -373,7 +342,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
     """
   end
 
-  defp encode_character_card(assigns, character, online_status) do
+  defp encode_character_card(assigns, {_character_id, character}, online_status) do
     name = Map.get(character, "name")
     id = Map.get(character, "id")
     outfit = Map.get(character, "outfit", "")
@@ -383,8 +352,8 @@ defmodule SacaStatsWeb.CharacterLive.Search do
     ~H"""
       <div id={name <> "-character-status-card"}
           class={"col-12 col-md-6 col-lg-4 col-xl-3 border rounded py-3 px-0 mx-0 mx-md-3 my-2 " <> (Map.get(SacaStats.factions, SacaStats.Utils.maybe_to_int(faction_id))[:alias] |> String.downcase()) <> "-character-status-card character-status-card"}>
-        <%= encode_character_remove_button_mobile(assigns, id) %>
-        <%= encode_character_remove_button(assigns, id, name) %>
+        <%= encode_character_remove_button_mobile(assigns, id, online_status) %>
+        <%= encode_character_remove_button(assigns, id, name, online_status) %>
         <div class="row flex-row h-100">
           <%= encode_character_faction_image(assigns, name, faction_id) %>
           <%= encode_character_characteristics(assigns, name, outfit, rank) %>
@@ -394,10 +363,10 @@ defmodule SacaStatsWeb.CharacterLive.Search do
     """
   end
 
-  defp encode_character_remove_button_mobile(assigns, id) do
+  defp encode_character_remove_button_mobile(assigns, id, online_status) do
     ~H"""
       <div class="character-status-card-removal-button-mobile-container w-100 h-100 d-none">
-        <button id={"#{id}-character-status-card-removal-button-mobile"} phx-click="remove_favorite_character" phx-value-id={id}
+        <button id={"#{id}-character-status-card-removal-button-mobile"} phx-click="remove_favorite_character" phx-value-id={"#{id}:#{online_status}"}
               class="btn btn-danger character-status-card-removal-button-mobile">
           <i class="fas fa-trash"></i> Remove
         </button>
@@ -405,9 +374,9 @@ defmodule SacaStatsWeb.CharacterLive.Search do
     """
   end
 
-  defp encode_character_remove_button(assigns, id, name) do
+  defp encode_character_remove_button(assigns, id, name, online_status) do
     ~H"""
-      <button id={"#{id}-character-status-card-removal-button"} phx-click="remove_favorite_character" phx-value-id={id}
+      <button id={"#{id}-character-status-card-removal-button"} phx-click="remove_favorite_character" phx-value-id={"#{id}:#{online_status}"}
             class="btn btn-danger my-0 py-1 px-3 ml-5 d-none character-status-card-removal-button"
             title={"Remove " <> name <> " from favorites"}>
         <i class="fas fa-trash"></i>

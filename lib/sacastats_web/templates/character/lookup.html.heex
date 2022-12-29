@@ -45,13 +45,10 @@
 </div>
 
 <h1 class="text-center mb-5">Favorites</h1>
-<%= cond do %>
-    <% is_nil(@user) -> %>
-        <p class="text-center">Login to add favorites!</p>
-    <% @favorite_characters == %{} -> %>
-        <p class="text-center">You currently have no favorite characters.<br/>Favorite a character by visiting their page and adding them</p>
-    <% true -> %>
-        <%= SacaStatsWeb.CharacterLive.Search.create_character_status_cards(@socket.assigns, @favorite_characters)%>
+<%= if is_nil(@user) do %>
+	<p class="text-center">Login to add favorites!</p>
+<% else %>
+	<%= SacaStatsWeb.CharacterLive.Search.create_character_status_cards(@socket.assigns, @favorite_characters)%>
 <% end %>
 
 <script type="module" src="/assets/dist/character/lookup.js"></script>

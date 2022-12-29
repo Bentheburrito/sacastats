@@ -8,6 +8,7 @@ defmodule SacaStats.Census.OnlineStatus do
 
   import PS2.API.QueryBuilder, except: [field: 2]
 
+  @httpoison_timeout_ms 6 * 1000
   @max_attempts 3
   @query_base Query.new(collection: "characters_online_status") |> lang("en")
 
@@ -28,7 +29,8 @@ defmodule SacaStats.Census.OnlineStatus do
   end
 
   def status_text(%OnlineStatus{online_status: 0}), do: "offline"
-  def status_text(%OnlineStatus{}), do: "online"
+  def status_text(%OnlineStatus{online_status: 1}), do: "online"
+  def status_text(_), do: "unknown"
 
   @spec get_by_id(integer()) :: {:ok, struct()} | :not_found | :error
   def get_by_id(character_id) do
@@ -47,23 +49,18 @@ defmodule SacaStats.Census.OnlineStatus do
   end
 
   @doc """
-  Similar to `c:get_by_id/1`, but gets multiple online statuses by their IDs. Since getting multiple online statuses for many characters from
-  the Census API is an expensive query (and may lead to timeouts), you can provide `true` for shallow copy to skip
-  fetching character/weapon stats for uncached characters.
+  Similar to `c:get_by_id/1`, but gets multiple characters' online statuses by their IDs.
   """
-  @spec get_many_by_id([integer()], boolean()) ::
+  @spec get_many_by_id([integer()]) ::
           {:ok, %{integer() => Character.t() | :not_found}} | :error
-  def get_many_by_id(id_list, _shallow_copy? \\ false) do
-    {okay_map, _uncached_ids} =
+  def get_many_by_id(id_list) do
+    {okay_map, uncached_ids} =
       for character_id <- id_list, reduce: {_okay_map = %{}, _uncached_ids = []} do
         {okay_map, uncached_ids} ->
-          IO.inspect(Cachex.get(:online_status_cache, character_id), label: "ID")
+          case Cachex.get(:online_status_cache, character_id) do
+            {:ok, %OnlineStatus{} = status} ->
+              {Map.put(okay_map, character_id, {:ok, status}), uncached_ids}
 
-          with {:ok, %OnlineStatus{} = status} <- Cachex.get(:online_status_cache, character_id),
-               {:ok, true} <-
-                 Cachex.put(:online_status_cache, status.character_id, status) do
-            {Map.put(okay_map, character_id, status.online_status), uncached_ids}
-          else
             {:ok, nil} ->
               {Map.put(okay_map, character_id, :not_found), [character_id | uncached_ids]}
 
@@ -72,9 +69,54 @@ defmodule SacaStats.Census.OnlineStatus do
               :error
           end
       end
-      |> IO.inspect(label: "STATUS")
 
-    {:ok, okay_map}
+    case get_uncached_ids(okay_map, uncached_ids) do
+      :error -> :error
+      okay_map -> {:ok, okay_map}
+    end
+  end
+
+  def get_uncached_ids(okay_map, []), do: okay_map
+
+  def get_uncached_ids(okay_map, uncached_ids) do
+    query = term(@query_base, "character_id", uncached_ids)
+
+    case PS2.API.query(query, SacaStats.SIDs.next(), recv_timeout: @httpoison_timeout_ms) do
+      {:ok, %QueryResult{returned: 0}} ->
+        okay_map
+
+      {:ok, %QueryResult{data: data}} ->
+        update_okay_map(okay_map, data)
+
+      {:error, error} ->
+        Logger.error(
+          "Could not parse census character response into a Character struct: #{inspect(error)}"
+        )
+
+        :error
+    end
+  end
+
+  defp update_okay_map(okay_map, census_data) do
+    for char_params <- census_data, reduce: okay_map do
+      result_map ->
+        %OnlineStatus{}
+        |> OnlineStatus.changeset(char_params)
+        |> Ecto.Changeset.apply_action(:update)
+        |> case do
+          {:ok, %OnlineStatus{} = status} ->
+            Cachex.put(:online_status_cache, status.character_id, status)
+
+            Map.put(result_map, status.character_id, {:ok, status})
+
+          {:error, error} ->
+            Logger.error(
+              "Couldn't make a changeset (changeset: #{inspect(error)}) from params: #{inspect(char_params)}"
+            )
+
+            result_map
+        end
+    end
   end
 
   defp get_by_census(_query, attempt) when attempt == @max_attempts + 1, do: :error

@@ -23,6 +23,8 @@ defmodule SacaStats.Application do
       # Start caches
       Supervisor.child_spec({Cachex, name: :character_cache}, id: :character_cache),
       Supervisor.child_spec({Cachex, name: :online_status_cache}, id: :online_status_cache),
+      # Start the WorldTracker
+      {SacaStats.WorldTracker, nil},
       # Start the EventTracker Deduplicator
       {EventTracker.Deduper, []},
       # Start the EventTracker Manager
