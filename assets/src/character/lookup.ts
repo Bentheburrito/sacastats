@@ -102,6 +102,8 @@ function characterCardRightMouseClick(event: MouseEvent) {
     card.classList.add('character-card-selected');
     if (!isMobileScreen()) {
       //initialize special menu location
+      let removeID = selectedCard.querySelector(".character-status-card-removal-button")?.getAttribute("phx-value-id")!;
+      document.getElementById("remove-favorite-character-row")?.setAttribute("phx-value-id", removeID);
       let isFireFox = navigator.userAgent.indexOf('Firefox') != -1;
       let yAdj =
         event.clientY + $(contextMenuID).height()! > $(window).height()!
@@ -130,6 +132,7 @@ function characterCardRightMouseClick(event: MouseEvent) {
         'd-none',
       );
     }
+    event.preventDefault();
     return false; //blocks default Webbrowser right click menu
   }
 }

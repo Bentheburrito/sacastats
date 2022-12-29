@@ -107,29 +107,43 @@ defmodule SacaStatsWeb.CharacterLive.Search do
             "outfit" => "",
             "rank" => "Status Not Found",
             "faction_id" => 0,
-            "online_status" => Map.get(online_status_map, character_id, "offline")
+            "online_status" =>
+              if(Map.get(online_status_map, character_id, "offline") > 0,
+                do: "online",
+                else: "offline"
+              )
           }
 
-        {character_id, character} ->
+        {character_id, {:ok, character}} ->
           # check if value.name.first is different than last_known_name
-          character["name"]["first"] |> IO.inspect(label: "who")
-          Map.get(online_status_map, character_id, "offline") |> IO.inspect(label: "online")
+          character.name_first |> IO.inspect(label: "who")
+
+          if(Map.get(online_status_map, character_id, "offline") > 0,
+            do: "online",
+            else: "offline"
+          )
+          |> IO.inspect(label: "online")
+
           {:ok, favorite_character} = Map.fetch(favorite_characters, character_id)
           favorite_character.last_known_name |> IO.inspect(label: "last_known")
 
           PubSub.subscribe(SacaStats.PubSub, "game_event:#{character_id}")
 
           %{
-            "name" => character["name"]["first"],
+            "name" => character.name_first,
             "id" => character_id,
-            "outfit" => character["outfit"]["name"],
+            "outfit" => character.outfit.name,
             "rank" =>
               SacaStats.Utils.get_rank_string(
-                character["battle_rank"]["value"],
-                character["prestige_level"]
+                character.battle_rank,
+                character.prestige_level
               ),
-            "faction_id" => character["faction_id"],
-            "online_status" => Map.get(online_status_map, character_id, "offline")
+            "faction_id" => character.faction_id,
+            "online_status" =>
+              if(Map.get(online_status_map, character_id, "offline") > 0,
+                do: "online",
+                else: "offline"
+              )
           }
       end)
       |> Enum.group_by(& &1["online_status"], & &1)
@@ -215,15 +229,15 @@ defmodule SacaStatsWeb.CharacterLive.Search do
     {:ok, favorite_character_info} = Characters.get_by_id(character_id)
 
     character_info = %{
-      "name" => favorite_character_info["name"]["first"],
+      "name" => favorite_character_info.name_first,
       "id" => character_id,
-      "outfit" => favorite_character_info["outfit"]["name"],
+      "outfit" => favorite_character_info.outfit.name,
       "rank" =>
         SacaStats.Utils.get_rank_string(
-          favorite_character_info["battle_rank"]["value"],
-          favorite_character_info["prestige_level"]
+          favorite_character_info.battle_rank,
+          favorite_character_info.prestige_level
         ),
-      "faction_id" => favorite_character_info["faction_id"],
+      "faction_id" => favorite_character_info.faction_id,
       "online_status" => "online"
     }
 
@@ -244,6 +258,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
     {:noreply, updated_socket}
   end
 
+  # --------------------------------------------------------------------------------------------------------------------------------------Re apply js listeners on page update
   # If someone favorites a character in another window, this is the fn that receives that character to add to the assigns
   def handle_info(%Favorite{} = favorite, socket) do
     # {:ok, favorite_character_info} =

@@ -57,9 +57,12 @@ defmodule SacaStats.Census.OnlineStatus do
     {okay_map, _uncached_ids} =
       for character_id <- id_list, reduce: {_okay_map = %{}, _uncached_ids = []} do
         {okay_map, uncached_ids} ->
+          IO.inspect(Cachex.get(:online_status_cache, character_id), label: "ID")
+
           with {:ok, %OnlineStatus{} = status} <- Cachex.get(:online_status_cache, character_id),
                {:ok, true} <-
                  Cachex.put(:online_status_cache, status.character_id, status) do
+            {Map.put(okay_map, character_id, status.online_status), uncached_ids}
           else
             {:ok, nil} ->
               {Map.put(okay_map, character_id, :not_found), [character_id | uncached_ids]}
@@ -69,6 +72,7 @@ defmodule SacaStats.Census.OnlineStatus do
               :error
           end
       end
+      |> IO.inspect(label: "STATUS")
 
     {:ok, okay_map}
   end

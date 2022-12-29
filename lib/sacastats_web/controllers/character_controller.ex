@@ -98,14 +98,11 @@ defmodule SacaStatsWeb.CharacterController do
     render(conn, "lookup.html")
   end
 
-  def character(
-        %Plug.Conn{} = conn,
-        %{"character_name" => name, "stat_type" => stat_type},
-        user_id
-      ) do
+  def character(%Plug.Conn{} = conn, %{"character_name" => name, "stat_type" => stat_type}) do
     with {:ok, %Character{} = char} <- Characters.get_by_name(name),
          {:ok, %OnlineStatus{} = status} <- OnlineStatus.get_by_id(char.character_id),
          status_text <- OnlineStatus.status_text(status) do
+      user_id = if is_nil(conn.assigns.user), do: nil, else: conn.assigns.user.id
       assigns = build_assigns(char, status_text, stat_type, user_id)
       render(conn, "template.html", assigns)
     else
