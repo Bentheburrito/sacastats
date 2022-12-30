@@ -8,7 +8,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
 
   alias Phoenix.PubSub
   alias SacaStats.Characters
-  alias SacaStats.Census.OnlineStatus
+  alias SacaStats.Census.{Character, OnlineStatus}
   alias SacaStats.Events.{PlayerLogin, PlayerLogout}
 
   alias SacaStats.Character.Favorite
@@ -19,19 +19,6 @@ defmodule SacaStatsWeb.CharacterLive.Search do
   end
 
   def mount(_params, session, socket) do
-    # {:ok, %QueryResult{data: %{"name" => %{"first" => leader_name}}}} =
-    #   Query.new(collection: "character")
-    #   |> term("character_id", leader)
-    #   |> show(["name"])
-    #   |> PS2.API.query_one(SacaStats.sid())
-    # with {:ok, info} <- CensusCache.get(SacaStats.CharacterCache, name),
-    #      {:ok, status} <- CensusCache.get(SacaStats.OnlineStatusCache, info["character_id"]) do
-    #   assigns = build_assigns(info, status, stat_type)
-    #   render(conn, "template.html", assigns)
-
-    # subscribe ot PubSub event
-    # PubSub.subscribe(SacaStats.PubSub ..., "favorite_event:character_id")
-
     user = session["user"] || session[:user]
 
     if not is_nil(user) do
@@ -50,37 +37,6 @@ defmodule SacaStatsWeb.CharacterLive.Search do
   defp get_favorite_users(nil), do: %{}
 
   defp get_favorite_users(user) do
-    # if is_nil(user) || is_nil(user["id"]) do
-    #   []
-    # else
-    # cs =
-    #   SacaStats.Character.Favorite.changeset(%SacaStats.Character.Favorite{}, %{
-    #     "discord_id" => 206091499706908673,
-    #     "character_id" => 5429281854933028721,
-    #     "last_known_name" => "HeartBrain"
-    #   })
-
-    #   case Ecto.Query.from(f in Favorite, select: f, where: f.discord_id == ^user["id"])
-    #        |> Repo.all() do
-    #     nil ->
-    #       []
-
-    #     [head | tail] ->
-    #       characters = [head | tail]
-
-    #       characters
-    #       |> Stream.map(fn %Favorite{character_id: id} ->
-    #         {CensusCache.get(OnlineStatusCache, id), id}
-    #       end)
-    #       |> Enum.group_by(
-    #         fn {{:ok, online_status}, _id} -> online_status end,
-    #         fn {_online_status, id} -> id end
-    #       )
-    #       |> Stream.map(fn {online_status, ids} -> {online_status, Enum.sort(ids)} end)
-    #       |> Enum.into(%{})
-    #   end
-    # end
-
     favorites_result =
       Ecto.Query.from(f in Favorite, select: f, where: f.discord_id == ^user.id) |> Repo.all()
 
@@ -167,7 +123,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
     end
   end
 
-  # A favorite character has gone online
+  # A favorite character logs on
   def handle_info(
         %Ecto.Changeset{data: %PlayerLogin{}} = event_cs,
         socket
@@ -178,18 +134,21 @@ defmodule SacaStatsWeb.CharacterLive.Search do
       pop_in(socket.assigns.favorite_characters, ["offline", character_id])
 
     updated_char_map =
-      Map.update(
-        updated_char_map,
-        "online",
-        %{character_id => login_char_info},
-        &Map.put(&1, character_id, login_char_info)
-      )
+      if is_nil(login_char_info) do
+        updated_char_map
+      else
+        Map.update(
+          updated_char_map,
+          "online",
+          %{character_id => login_char_info},
+          &Map.put(&1, character_id, login_char_info)
+        )
+      end
 
-    updated_socket = assign(socket, :favorite_characters, updated_char_map)
-
-    {:noreply, updated_socket}
+    {:noreply, assign(socket, :favorite_characters, updated_char_map)}
   end
 
+  # A favorite character logs off
   def handle_info(
         %Ecto.Changeset{data: %PlayerLogout{}} = event_cs,
         socket
@@ -200,90 +159,71 @@ defmodule SacaStatsWeb.CharacterLive.Search do
       pop_in(socket.assigns.favorite_characters, ["online", character_id])
 
     updated_char_map =
+      if is_nil(logout_char_info) do
+        updated_char_map
+      else
+        Map.update(
+          updated_char_map,
+          "offline",
+          %{character_id => logout_char_info},
+          &Map.put(&1, character_id, logout_char_info)
+        )
+      end
+
+    {:noreply, assign(socket, :favorite_characters, updated_char_map)}
+  end
+
+  # --------------------------------------------------------------------------------Re apply js listeners on page update
+  # The user favorites a character in another window
+  def handle_info({:favorite, %Favorite{} = favorite}, socket) do
+    {:ok, %Character{} = info} = Characters.get_by_id(favorite.character_id)
+    {:ok, %OnlineStatus{} = status} = OnlineStatus.get_by_id(favorite.character_id)
+    status = OnlineStatus.status_text(status)
+
+    PubSub.subscribe(SacaStats.PubSub, "game_event:#{favorite.character_id}")
+
+    card_info = %{
+      "name" => info.name_first,
+      "id" => info.character_id,
+      "outfit" => info.outfit.name,
+      "rank" =>
+        SacaStats.Utils.get_rank_string(
+          info.battle_rank,
+          info.prestige_level
+        ),
+      "faction_id" => info.faction_id,
+      "online_status" => status
+    }
+
+    updated_char_map =
       Map.update(
-        updated_char_map,
-        "offline",
-        %{character_id => logout_char_info},
-        &Map.put(&1, character_id, logout_char_info)
+        socket.assigns.favorite_characters,
+        status,
+        %{info.character_id => card_info},
+        &Map.put(&1, info.character_id, card_info)
       )
+      |> IO.inspect(label: "POST ADD SEP WINDOW UPDATED CHAR MAP:")
 
-    updated_socket = assign(socket, :favorite_characters, updated_char_map)
-
-    {:noreply, updated_socket}
+    {:noreply, assign(socket, :favorite_characters, updated_char_map)}
   end
 
-  # --------------------------------------------------------------------------------------------------------------------------------------Re apply js listeners on page update
-  # If someone favorites a character in another window, this is the fn that receives that character to add to the assigns
-  def handle_info(%Favorite{} = favorite, socket) do
-    # {:ok, favorite_character_info} =
-    #   SacaStats.CensusCache.get(SacaStats.CharacterCache, favorite.character_id)
+  # The user unfavorites a character in another window
+  def handle_info({:unfavorite, %Favorite{} = favorite}, socket) do
+    PubSub.unsubscribe(SacaStats.PubSub, "game_event:#{favorite.character_id}")
 
-    # character_info = %{
-    #   "name" => favorite_character_info["name"]["first"],
-    #   "id" => favorite.character_id,
-    #   "outfit" => favorite_character_info["outfit"]["name"],
-    #   "rank" =>
-    #     SacaStats.Utils.get_rank_string(
-    #       favorite_character_info["battle_rank"]["value"],
-    #       favorite_character_info["prestige_level"]
-    #     ),
-    #   "faction_id" => favorite_character_info["faction_id"],
-    #   "online_status" => "online"
-    # }
+    updated_char_map =
+      Enum.reduce_while(socket.assigns.favorite_characters, nil, fn {status, char_map}, _ ->
+        if is_map_key(char_map, favorite.character_id) do
+          {_, updated_char_map} =
+            pop_in(socket.assigns.favorite_characters, [status, favorite.character_id])
 
-    # updated_char_map =
-    #   socket.assigns.favorite_characters
-    #   |> Map.update!("online", fn char_list ->
-    #     Enum.reject(char_list, fn char -> char["id"] == favorite.character_id end)
-    #   end)
-    #   |> Map.update!("offline", fn char_list ->
-    #     Enum.reject(char_list, fn char -> char["id"] == favorite.character_id end)
-    #   end)
-    #   |> Map.update!("unknown", fn char_list ->
-    #     Enum.reject(char_list, fn char -> char["id"] == favorite.character_id end)
-    #   end)
-    updated_char_map = get_favorite_users(socket.assigns.user)
+          {:halt, updated_char_map}
+        else
+          {:cont, nil}
+        end
+      end)
 
-    {:noreply,
-     socket
-     |> assign(:favorite_characters, updated_char_map)}
-  end
-
-  # If someone unfavorites a character in another window, this is the fn that receives that character to remove to the assigns
-  def handle_info(%Favorite{} = favorite, socket) do
-    # {:ok, favorite_character_info} =
-    #   SacaStats.CensusCache.get(SacaStats.CharacterCache, favorite.character_id)
-
-    # character_info = %{
-    #   "name" => favorite_character_info["name"]["first"],
-    #   "id" => favorite.character_id,
-    #   "outfit" => favorite_character_info["outfit"]["name"],
-    #   "rank" =>
-    #     SacaStats.Utils.get_rank_string(
-    #       favorite_character_info["battle_rank"]["value"],
-    #       favorite_character_info["prestige_level"]
-    #     ),
-    #   "faction_id" => favorite_character_info["faction_id"],
-    #   "online_status" => "online"
-    # }
-
-    # updated_char_map =
-    #   socket.assigns.favorite_characters
-    #   |> Map.update!("online", fn char_list ->
-    #     [character_info | char_list]
-    #   end)
-    #   |> Map.update!("offline", fn char_list ->
-    #     Enum.reject(char_list, fn char -> char["id"] == favorite.character_id end)
-    #   end)
-    #   |> Map.update!("unknown", fn char_list ->
-    #     Enum.reject(char_list, fn char -> char["id"] == favorite.character_id end)
-    #   end)
-
-    updated_char_map = get_favorite_users(socket.assigns.user)
-
-    {:noreply,
-     socket
-     |> assign(:favorite_characters, updated_char_map)}
+    {:noreply, assign(socket, :favorite_characters, updated_char_map)}
   end
 
   def handle_event("remove_favorite_character", %{"id" => char_id_and_status}, socket) do
@@ -325,7 +265,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
 
   defp encode_character_status_card_section(assigns, characters, section_type) do
     ~H"""
-      <%= if is_map(characters) && map_size(characters) > 0 do %>
+      <%= if is_map(characters) and map_size(characters) > 0 do %>
         <div class="status-card-section-header" data-bs-toggle="collapse" type="button" data-bs-target={"##{section_type}collapsable"}>
           <h2 class="d-inline"><%=  String.capitalize(section_type)%></h2><p class="favorite-character-status-contains d-inline">(<%= map_size(characters) %>)</p>
           <h2 class="float-right arrow-pointer"><i class="fa fa-chevron-up flip" style="font-size:24px"></i></h2>

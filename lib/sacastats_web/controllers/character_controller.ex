@@ -40,7 +40,12 @@ defmodule SacaStatsWeb.CharacterController do
 
       case Repo.insert(changeset) do
         {:ok, favorite} ->
-          PubSub.broadcast(SacaStats.PubSub, "favorite_event:#{favorite.discord_id}", favorite)
+          PubSub.broadcast(
+            SacaStats.PubSub,
+            "favorite_event:#{favorite.discord_id}",
+            {:favorite, favorite}
+          )
+
           redirect(conn, to: return_path)
 
         {:error, _changeset} ->
@@ -66,7 +71,12 @@ defmodule SacaStatsWeb.CharacterController do
       # Remove from DB.
       case Repo.delete(favorite) do
         {:ok, favorite} ->
-          PubSub.broadcast(SacaStats.PubSub, "unfavorite_event:#{favorite.discord_id}", favorite)
+          PubSub.broadcast(
+            SacaStats.PubSub,
+            "unfavorite_event:#{favorite.discord_id}",
+            {:unfavorite, favorite}
+          )
+
           redirect(conn, to: return_path)
 
         {:error, _changeset} ->
@@ -74,11 +84,6 @@ defmodule SacaStatsWeb.CharacterController do
           |> put_flash(:error, "An error occured while removing #{name} from the database.")
           |> redirect(to: return_path)
       end
-
-      # redir to general stat page for now
-      # character(conn, Map.put(params, "stat_type", "general"))
-
-      redirect(conn, to: return_path)
     else
       conn
       |> put_flash(:error, "#{name} has already been unfavorited.")
