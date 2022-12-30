@@ -53,13 +53,15 @@ defmodule SacaStats.Census.Character do
     :faction_id,
     :head_id,
     :title_id,
-    :profile_id
+    :profile_id,
+    :battle_rank,
+    :percent_to_next_br,
+    :prestige_level
   ]
 
   @fields @shallow_fields ++
             [
               :profile_type_description,
-              :prestige_level,
               :creation,
               :last_save,
               :last_login,
@@ -68,9 +70,7 @@ defmodule SacaStats.Census.Character do
               :earned_points,
               :gifted_points,
               :available_points,
-              :percent_to_next_point,
-              :battle_rank,
-              :percent_to_next_br
+              :percent_to_next_point
             ]
 
   def changeset(character, census_res \\ %{}) do
@@ -111,6 +111,9 @@ defmodule SacaStats.Census.Character do
       # flatten name object
       |> Map.put("name_first_lower", census_res["name"]["first_lower"])
       |> Map.put("name_first", census_res["name"]["first"])
+      # flatten br object
+      |> Map.put("battle_rank", census_res["battle_rank"]["value"])
+      |> Map.put("percent_to_next_br", census_res["battle_rank"]["percent_to_next"])
 
     character
     |> cast(params, @shallow_fields)

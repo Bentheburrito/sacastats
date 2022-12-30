@@ -38,7 +38,9 @@ defmodule SacaStats.Characters do
                         "faction_id",
                         "profile_id",
                         "title_id",
-                        "head_id"
+                        "head_id",
+                        "battle_rank",
+                        "prestige_level"
                       ])
                       |> lang("en")
 

@@ -48,79 +48,64 @@ defmodule SacaStatsWeb.CharacterLive.Search do
 
       favorite_character_ids = Map.keys(favorite_characters)
 
-      {:ok, character_infos} = Characters.get_many_by_id(favorite_character_ids)
+      {:ok, character_infos} = Characters.get_many_by_id(favorite_character_ids, _shallow = true)
 
       {:ok, online_status_map} = OnlineStatus.get_many_by_id(favorite_character_ids)
 
-      character_infos
-      |> Enum.reduce(%{}, fn
-        {character_id, :not_found}, acc ->
-          {:ok, favorite_character} = Map.fetch(favorite_characters, character_id)
-          name = favorite_character.last_known_name
-
-          status =
-            case Map.get(online_status_map, character_id) do
-              {:ok, status} -> OnlineStatus.status_text(status)
-              _ -> "unknown"
-            end
-
-          PubSub.subscribe(SacaStats.PubSub, "game_event:#{character_id}")
-
-          card_info = %{
-            "name" => favorite_character.last_known_name,
-            "id" => favorite_character.character_id,
-            "outfit" => "",
-            "rank" => "Status Not Found",
-            "faction_id" => 0,
-            "online_status" => status
-          }
-
-          Map.update(acc, status, %{character_id => card_info}, fn character_infos ->
-            Map.put(
-              character_infos,
-              character_id,
-              card_info
-            )
-          end)
-
-        {character_id, {:ok, character}}, acc ->
-          # check if value.name.first is different than last_known_name
-          character.name_first |> IO.inspect(label: "who")
-
-          status =
-            case Map.get(online_status_map, character_id) do
-              {:ok, status} -> OnlineStatus.status_text(status)
-              _ -> :not_found
-            end
-
-          {:ok, favorite_character} = Map.fetch(favorite_characters, character_id)
-          favorite_character.last_known_name |> IO.inspect(label: "last_known")
-
-          PubSub.subscribe(SacaStats.PubSub, "game_event:#{character_id}")
-
-          card_info = %{
-            "name" => character.name_first,
-            "id" => character_id,
-            "outfit" => character.outfit.name,
-            "rank" =>
-              SacaStats.Utils.get_rank_string(
-                character.battle_rank,
-                character.prestige_level
-              ),
-            "faction_id" => character.faction_id,
-            "online_status" => status
-          }
-
-          Map.update(acc, status, %{character_id => card_info}, fn character_infos ->
-            Map.put(
-              character_infos,
-              character_id,
-              card_info
-            )
-          end)
-      end)
-      |> IO.inspect(label: "Favorite_Characters")
+      group_favorites(character_infos, favorite_characters, online_status_map)
     end
+  end
+
+  defp group_favorites(
+         character_infos,
+         favorite_characters,
+         online_status_map
+       ) do
+    Enum.reduce(character_infos, %{}, fn {character_id, maybe_character}, acc ->
+      {:ok, favorite_character} = Map.fetch(favorite_characters, character_id)
+      # check if value.name.first is different than last_known_name
+
+      status =
+        case Map.get(online_status_map, character_id) do
+          {:ok, status} -> OnlineStatus.status_text(status)
+          _ -> :not_found
+        end
+
+      PubSub.subscribe(SacaStats.PubSub, "game_event:#{character_id}")
+
+      card_info =
+        case maybe_character do
+          {:ok, character} ->
+            %{
+              "name" => character.name_first,
+              "id" => character_id,
+              "rank" =>
+                SacaStats.Utils.get_rank_string(
+                  character.battle_rank,
+                  character.prestige_level
+                ),
+              "faction_id" => character.faction_id,
+              "online_status" => status
+            }
+
+          :not_found ->
+            %{
+              "name" => favorite_character.last_known_name,
+              "id" => favorite_character.character_id,
+              "rank" => "Status Not Found",
+              "faction_id" => 0,
+              "online_status" => status
+            }
+        end
+
+      Map.update(acc, status, %{character_id => card_info}, fn character_infos ->
+        Map.put(
+          character_infos,
+          character_id,
+          card_info
+        )
+      end)
+    end)
   end
 
   # A favorite character logs on
@@ -185,7 +170,6 @@ defmodule SacaStatsWeb.CharacterLive.Search do
     card_info = %{
       "name" => info.name_first,
       "id" => info.character_id,
-      "outfit" => info.outfit.name,
       "rank" =>
         SacaStats.Utils.get_rank_string(
           info.battle_rank,
@@ -202,7 +186,6 @@ defmodule SacaStatsWeb.CharacterLive.Search do
         %{info.character_id => card_info},
         &Map.put(&1, info.character_id, card_info)
       )
-      |> IO.inspect(label: "POST ADD SEP WINDOW UPDATED CHAR MAP:")
 
     {:noreply, assign(socket, :favorite_characters, updated_char_map)}
   end
@@ -285,7 +268,6 @@ defmodule SacaStatsWeb.CharacterLive.Search do
   defp encode_character_card(assigns, {_character_id, character}, online_status) do
     name = Map.get(character, "name")
     id = Map.get(character, "id")
-    outfit = Map.get(character, "outfit", "")
     rank = Map.get(character, "rank")
     faction_id = Map.get(character, "faction_id")
 
@@ -296,7 +278,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
         <%= encode_character_remove_button(assigns, id, name, online_status) %>
         <div class="row flex-row h-100">
           <%= encode_character_faction_image(assigns, name, faction_id) %>
-          <%= encode_character_characteristics(assigns, name, outfit, rank) %>
+          <%= encode_character_characteristics(assigns, name, rank) %>
           <%= encode_character_online_status(assigns, online_status) %>
         </div>
       </div>
@@ -327,7 +309,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
   defp encode_character_faction_image(assigns, name, faction_id) do
     ~H"""
       <div class="col-2 d-flex align-items-center">
-        <%= if(faction_id != 0) do %>
+        <%= if faction_id != 0 do %>
           <img class="float-md-left float-none" data-toggle="tooltip"
               title={name <> " plays on the " <> Map.get(SacaStats.factions, SacaStats.Utils.maybe_to_int(faction_id))[:name]}
               src={Map.get(SacaStats.factions, SacaStats.Utils.maybe_to_int(faction_id))[:image]}
@@ -337,17 +319,12 @@ defmodule SacaStatsWeb.CharacterLive.Search do
     """
   end
 
-  defp encode_character_characteristics(assigns, name, outfit, rank) do
+  defp encode_character_characteristics(assigns, name, rank) do
     ~H"""
       <div class="col-8 pl-5">
         <div class="row pl-3">
           <div class="col-12 px-0">
             <h2 class="mb-0"><%= name %></h2>
-          </div>
-        </div>
-        <div class="row pl-3">
-          <div class="col-12 px-0">
-            <p class="mb-0 small"><%= outfit %></p>
           </div>
         </div>
         <div class="row pl-3">
