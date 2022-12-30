@@ -6,6 +6,8 @@ defmodule SacaStatsWeb.CharacterLive.Search do
   use Phoenix.HTML
   import Ecto.Query
 
+  require Logger
+
   alias Phoenix.PubSub
   alias SacaStats.Characters
   alias SacaStats.Census.{Character, OnlineStatus}
@@ -62,8 +64,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
          online_status_map
        ) do
     Enum.reduce(character_infos, %{}, fn {character_id, maybe_character}, acc ->
-      {:ok, favorite_character} = Map.fetch(favorite_characters, character_id)
-      # check if value.name.first is different than last_known_name
+      {:ok, %Favorite{} = favorite_character} = Map.fetch(favorite_characters, character_id)
 
       status =
         case Map.get(online_status_map, character_id) do
@@ -75,7 +76,25 @@ defmodule SacaStatsWeb.CharacterLive.Search do
 
       card_info =
         case maybe_character do
-          {:ok, character} ->
+          {:ok, %Character{} = character} ->
+            # Update the last known name in our DB if it's changed
+            if character.name_first != favorite_character.last_known_name do
+              changeset =
+                Favorite.changeset(favorite_character, %{
+                  "last_known_name" => character.name_first
+                })
+
+              case Repo.update(changeset) do
+                {:ok, _updated_favorite} ->
+                  nil
+
+                {:error, changeset} ->
+                  Logger.error(
+                    "Unable to update last known favorite character name (#{favorite_character.last_known_name} -> #{character.name_first}): #{inspect(changeset)}"
+                  )
+              end
+            end
+
             %{
               "name" => character.name_first,
               "id" => character_id,
