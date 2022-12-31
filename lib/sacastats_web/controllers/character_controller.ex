@@ -1,11 +1,11 @@
-require Logger
-
 defmodule SacaStatsWeb.CharacterController do
   use SacaStatsWeb, :controller
 
   alias SacaStats.{Characters, Weapons}
   alias SacaStats.Census.{Character, OnlineStatus}
   alias SacaStats.Session
+
+  require Logger
 
   def base(conn, %{"character_name" => _name}) do
     redirect(conn, to: conn.request_path <> "/general")
