@@ -45,6 +45,20 @@ defmodule SacaStats.Session do
   end
 
   @doc """
+  Gets latest timestamp from of all a character's sessions.
+  """
+  def get_latest_timestamp(character_name) do
+    {:ok, %Character{character_id: character_id}} = Characters.get_by_name(character_name)
+
+    Repo.one(
+      from login in Events.PlayerLogin,
+        where: login.character_id == ^character_id,
+        order_by: [desc: :timestamp],
+        limit: 1
+    )
+  end
+
+  @doc """
   Gets a summary of all a character's sessions. This function is similar to `get_all/1`, except it does not fetch events
   (besides PlayerLogins and PlayerLogouts), and does not calculate aggregations. Therefore, this function is useful
   for seeing session durations and start/end times at a glance, when specific session data is not needed yet.

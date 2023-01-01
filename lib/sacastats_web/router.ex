@@ -33,6 +33,7 @@ defmodule SacaStatsWeb.Router do
     live "/", CharacterLive.Search
     get "/:character_name", CharacterController, :base
     get "/:character_name/:stat_type", CharacterController, :character
+    get "/:character_name/sessions/latest", CharacterController, :latest_session
     live "/:character_name/sessions/:login_timestamp", SessionLive.View
     post "/:character_name/:stat_type", CharacterController, :character_post
     post "/:character_name/:stat_type/favorite", CharacterController, :add_favorite

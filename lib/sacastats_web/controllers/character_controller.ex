@@ -7,6 +7,7 @@ defmodule SacaStatsWeb.CharacterController do
   alias SacaStats.Census.{Character, OnlineStatus}
   alias SacaStats.Character.Favorite
   alias SacaStats.Characters
+  alias SacaStats.Events
   alias SacaStats.Repo
   alias SacaStats.Session
   alias SacaStats.Weapons
@@ -15,6 +16,42 @@ defmodule SacaStatsWeb.CharacterController do
 
   def base(conn, %{"character_name" => _name}) do
     redirect(conn, to: conn.request_path <> "/general")
+  end
+
+  def latest_session(%Plug.Conn{} = conn, %{"character_name" => name}) do
+    case Characters.get_by_name(name) do
+      {:ok, %Character{} = char} ->
+        case Session.get_latest_timestamp(char.name_first_lower) do
+          %Events.PlayerLogin{timestamp: timestamp} ->
+            redirect(conn, to: "/character/#{char.name_first_lower}/sessions/#{timestamp}")
+
+          nil ->
+            conn
+            |> put_flash(
+              :error,
+              "A session has not yet been recorded for #{name}."
+            )
+            |> redirect(to: "/character/#{char.name_first_lower}/sessions")
+        end
+
+      :not_found ->
+        conn
+        |> put_flash(
+          :error,
+          "Could not find a character called '#{name}'. Make sure it's spelled correctly, then try again"
+        )
+        |> redirect(to: "/character")
+
+      :error ->
+        Logger.error("Error fetching character '#{name}'.")
+
+        conn
+        |> put_flash(
+          :error,
+          "We are unable to get #{name}'s latest session right now. Please try again soon."
+        )
+        |> redirect(to: "/character")
+    end
   end
 
   def add_favorite(conn, %{"character_name" => name} = params) do
