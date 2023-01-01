@@ -77,23 +77,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
       card_info =
         case maybe_character do
           {:ok, %Character{} = character} ->
-            # Update the last known name in our DB if it's changed
-            if character.name_first != favorite_character.last_known_name do
-              changeset =
-                Favorite.changeset(favorite_character, %{
-                  "last_known_name" => character.name_first
-                })
-
-              case Repo.update(changeset) do
-                {:ok, _updated_favorite} ->
-                  nil
-
-                {:error, changeset} ->
-                  Logger.error(
-                    "Unable to update last known favorite character name (#{favorite_character.last_known_name} -> #{character.name_first}): #{inspect(changeset)}"
-                  )
-              end
-            end
+            update_character_last_known_name_in_repo(favorite_character, character)
 
             %{
               "name" => character.name_first,
@@ -125,6 +109,31 @@ defmodule SacaStatsWeb.CharacterLive.Search do
         )
       end)
     end)
+  end
+
+  defp update_character_last_known_name_in_repo(favorite_character, character) do
+    # Update the last known name in our DB if it's changed
+    if character.name_first != favorite_character.last_known_name do
+      update_repo(
+        favorite_character,
+        character,
+        Favorite.changeset(favorite_character, %{
+          "last_known_name" => character.name_first
+        })
+      )
+    end
+  end
+
+  defp update_repo(favorite_character, character, changeset) do
+    case Repo.update(changeset) do
+      {:ok, _updated_favorite} ->
+        nil
+
+      {:error, changeset} ->
+        Logger.error(
+          "Unable to update last known favorite character name (#{favorite_character.last_known_name} -> #{character.name_first}): #{inspect(changeset)}"
+        )
+    end
   end
 
   # A favorite character logs on
