@@ -4,11 +4,12 @@ defmodule SacaStatsWeb.CharacterController do
   use SacaStatsWeb, :controller
   import Ecto.Query
 
-  alias SacaStats.{Characters, Weapons}
   alias SacaStats.Census.{Character, OnlineStatus}
-  alias SacaStats.Session
   alias SacaStats.Character.Favorite
+  alias SacaStats.Characters
   alias SacaStats.Repo
+  alias SacaStats.Session
+  alias SacaStats.Weapons
 
   alias Phoenix.PubSub
 

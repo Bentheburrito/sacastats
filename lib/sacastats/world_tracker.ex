@@ -6,8 +6,8 @@ defmodule SacaStats.WorldTracker do
   """
   use GenServer
 
-  alias SacaStats.Census.OnlineStatus
   alias Phoenix.PubSub
+  alias SacaStats.Census.OnlineStatus
   alias SacaStats.Events.{PlayerLogin, PlayerLogout}
 
   ## Client
