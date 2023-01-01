@@ -6,9 +6,13 @@ let selectedCard: HTMLElement | undefined;
 
 window.addEventListener('load', (event) => {
   searchCharacter();
+  addContextMenuEventHandlers();
   addCharacterCardClick();
-  addContextMenuOptionEventHandlers();
   addDocumentClickEvents();
+});
+
+window.addEventListener('phx:character_card_change', (event) => {
+  addCharacterCardClick();
 });
 
 function searchCharacter() {
@@ -52,37 +56,7 @@ function openURL(event: Event, characterName: string) {
   );
 }
 
-function characterCardLeftMouseClick(event: MouseEvent) {
-  characterCardClickEvent(event, false);
-}
-
-function characterCardMiddleMouseClick(event: MouseEvent) {
-  if (event.button === 1) {
-    event.preventDefault();
-    characterCardClickEvent(event, true);
-  }
-}
-
-function characterCardMiddleMouseClickPreventDefault(event: MouseEvent) {
-  if (event.which === 2) {
-    event.preventDefault();
-  }
-}
-
-function characterCardClickEvent(event: MouseEvent, isMiddleClick: boolean) {
-  //make sure it's not a removal
-  if (isEventTargetADeleteButtonClick(event)) {
-    return;
-  }
-  let card = $(event.target as HTMLElement).closest('.character-status-card')[0] as HTMLElement;
-  if (card != undefined && card.id != undefined && (!isMobileScreen() || selectedCard != card)) {
-    let characterName = card.id.split('-')[0];
-    let newTab = event.ctrlKey || isMiddleClick;
-    swapURL(event, characterName, newTab);
-  }
-}
-
-function isEventTargetADeleteButtonClick(event: Event) {
+function isEventTargetADeleteButtonClick(event: JQuery.ClickEvent) {
   let classList = (event.target as HTMLElement).classList;
   return (
     classList.contains('character-status-card-removal-button-mobile') ||
@@ -102,8 +76,6 @@ function characterCardRightMouseClick(event: MouseEvent) {
     card.classList.add('character-card-selected');
     if (!isMobileScreen()) {
       //initialize special menu location
-      let removeID = selectedCard.querySelector(".character-status-card-removal-button")?.getAttribute("phx-value-id")!;
-      document.getElementById("remove-favorite-character-row")?.setAttribute("phx-value-id", removeID);
       let isFireFox = navigator.userAgent.indexOf('Firefox') != -1;
       let yAdj =
         event.clientY + $(contextMenuID).height()! > $(window).height()!
@@ -115,6 +87,10 @@ function characterCardRightMouseClick(event: MouseEvent) {
           : event.clientX; //adjust width to show all of menu
       var top = (yAdj / $(window).height()!) * 100 + '%';
       var left = (xAdj / $(window).width()!) * 100 + '%';
+
+      //add data to menu options
+      let removeID = selectedCard.querySelector(".character-status-card-removal-button")?.getAttribute("phx-value-id")!;
+      document.getElementById("remove-favorite-character-row")?.setAttribute("phx-value-id", removeID);
 
       //show special menu at the bottom right of the mouse
       $(contextMenuID)
@@ -140,15 +116,6 @@ function characterCardRightMouseClick(event: MouseEvent) {
 function addCharacterCardClick() {
   document.querySelectorAll('.character-status-card').forEach((card) => {
     let cardElement = card as HTMLElement;
-    //remove and add LEFT mouse click handler
-    cardElement.removeEventListener('click', characterCardLeftMouseClick);
-    cardElement.addEventListener('click', characterCardLeftMouseClick);
-
-    //remove and add MIDDLE mouse click handler
-    cardElement.removeEventListener('auxclick', characterCardMiddleMouseClick);
-    cardElement.addEventListener('auxclick', characterCardMiddleMouseClick);
-    cardElement.removeEventListener('mousedown', characterCardMiddleMouseClickPreventDefault);
-    cardElement.addEventListener('mousedown', characterCardMiddleMouseClickPreventDefault);
 
     //remove and add RIGHT mouse click handler
     cardElement.removeEventListener('contextmenu', characterCardRightMouseClick);
@@ -156,21 +123,36 @@ function addCharacterCardClick() {
   });
 
   document.querySelectorAll('.status-card-section-header').forEach((header) => {
-    header.addEventListener('click', () => {
-      let chevron = header.querySelector('.fa-chevron-up') as HTMLElement;
-      $(chevron).toggleClass('down');
-    });
+    header.removeEventListener('click', handleSectionHeaderClickEvent);
+    header.addEventListener('click', handleSectionHeaderClickEvent);
   });
 }
 
+function handleSectionHeaderClickEvent(event: Event) {
+  let target = event.target as HTMLElement;
+  let chevron;
+  if (!target.classList.contains("status-card-section-header")) {
+    target = target.closest(".status-card-section-header")!;
+  }
+  chevron = target.querySelector('.fa-chevron-up') as HTMLElement;
+
+  $(chevron).toggleClass('down');
+}
+
 function addDocumentClickEvents() {
-  $(document).on('mousedown', function () {
+  $(document).on('mouseup', function () {
     hideContextMenu();
     document.querySelectorAll('.character-card-selected').forEach((card) => {
       card.classList.remove('character-card-selected');
     });
   });
   $(document).on('click', updateMobileSelectionCard);
+  $(document).on('click', 'a.character-status-card', function (event) {
+    //make sure it's not a removal anotherwise prevent page change
+    if (isEventTargetADeleteButtonClick(event)) {
+      event.preventDefault();
+    }
+  });
 }
 
 function hideContextMenu() {
@@ -187,24 +169,28 @@ function updateMobileSelectionCard() {
   }
 }
 
-function addContextMenuOptionEventHandlers() {
-  document.getElementById('character-card-open-stat-link-row')?.addEventListener('mousedown', function (event) {
+function addContextMenuEventHandlers() {
+  document.getElementById('character-card-open-stat-link-row')?.addEventListener('click', function (event) {
     swapURL(event, selectedCharacterName, false);
   });
-  document.getElementById('character-card-open-stat-link-new-tab-row')?.addEventListener('mousedown', function (event) {
+  document.getElementById('character-card-open-stat-link-new-tab-row')?.addEventListener('click', function (event) {
     swapURL(event, selectedCharacterName, true);
   });
   document
     .getElementById('character-card-open-stat-link-new-window-row')
-    ?.addEventListener('mousedown', function (event) {
+    ?.addEventListener('click', function (event) {
       openURL(event, selectedCharacterName);
     });
-  document.getElementById('remove-favorite-character-row')?.addEventListener('mousedown', function (event) {
-    removeCharacterFromFavorites(selectedCharacterName);
+  document.getElementById('character-card-open-latest-session-row')?.addEventListener('click', function (event) {
+    swapURL(event, selectedCharacterName + "/sessions/latest", false);
+  });
+  document.getElementById('character-card-open-latest-session-new-tab-row')?.addEventListener('click', function (event) {
+    swapURL(event, selectedCharacterName + "/sessions/latest", true);
+  });
+  document.getElementById('character-card-open-latest-session-new-window-row')?.addEventListener('click', function (event) {
+    openURL(event, selectedCharacterName + "/sessions/latest");
   });
 }
-
-function removeCharacterFromFavorites(characterName: string) { }
 
 function isMobileScreen() {
   return window.innerWidth <= 767;

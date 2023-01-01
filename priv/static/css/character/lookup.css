@@ -88,7 +88,13 @@
 }
 
 .character-status-card:hover {
-    cursor: pointer;
+    text-decoration: none;
+    color: #000;
+}
+
+.character-status-card,
+.character-status-card:focus {
+    color: #000;
 }
 
 @media screen and (min-width: 768px) {
@@ -121,5 +127,5 @@
 
 .character-status-card-removal-button-mobile {
     margin: auto;
-    transform: translateY(100%);
+    transform: translateY(60%);
 }

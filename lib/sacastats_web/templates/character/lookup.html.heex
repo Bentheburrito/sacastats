@@ -3,25 +3,43 @@
 <div class="dropdown-menu dropdown-menu-sm pb-0" id="character-card-context-menu">
     <div class="row context-menu-row" id="character-card-open-stat-link-row">
         <div class="col-12">
-            <h5 class="d-block text-center text-md-left" id="character-card-open-stat-link">Open Character Stat page</h5>
+            <h5 class="d-block text-center text-md-left" id="character-card-open-stat-link">Open character's stat page</h5>
         </div>
     </div>
 
     <div class="row context-menu-row" id="character-card-open-stat-link-new-tab-row">
         <div class="col-12">
-            <h5 class="d-block text-center text-md-left" id="character-card-open-stat-link-new-tab">Open Character Stat page in new tab</h5>
+            <h5 class="d-block text-center text-md-left" id="character-card-open-stat-link-new-tab">Open character's stat page in new tab</h5>
         </div>
     </div>
 
     <div class="row context-menu-row" id="character-card-open-stat-link-new-window-row">
         <div class="col-12">
-            <h5 class="d-block text-center text-md-left" id="character-card-open-stat-link-new-window">Open Character Stat page in new window</h5>
+            <h5 class="d-block text-center text-md-left" id="character-card-open-stat-link-new-window">Open character's stat page in new window</h5>
         </div>
     </div>
 
-    <div class="row context-menu-row" id="remove-favorite-character-row" phx-click="remove_favorite_character" phx-value-id={0}>
+    <div class="row context-menu-row" id="character-card-open-latest-session-row">
         <div class="col-12">
-            <h5 class="d-block text-center text-md-left" id="remove-favorite-character">Remove Character from favorites</h5>
+            <h5 class="d-block text-center text-md-left" id="character-card-open-latest-session">Open character's latest play session</h5>
+        </div>
+    </div>
+
+    <div class="row context-menu-row" id="character-card-open-latest-session-new-tab-row">
+        <div class="col-12">
+            <h5 class="d-block text-center text-md-left" id="character-card-open-latest-session-new-tab">Open character's latest play session in new tab</h5>
+        </div>
+    </div>
+
+    <div class="row context-menu-row" id="character-card-open-latest-session-new-window-row">
+        <div class="col-12">
+            <h5 class="d-block text-center text-md-left" id="character-card-open-latest-session-new-window">Open character's latest play session in new window</h5>
+        </div>
+    </div>
+
+    <div class="row context-menu-row" id="remove-favorite-character-row" phx-click="remove_favorite_character" phx-value-id="">
+        <div class="col-12">
+            <h5 class="d-block text-center text-md-left" id="remove-favorite-character">Remove character from favorites</h5>
         </div>
     </div>
 </div>
@@ -29,7 +47,7 @@
 <div class="pt-5">
     <div class="row ml-0">
         <div class="col-sm-6 col-xs-12 mx-auto">
-            <h1 class="text-center">Search</h1>
+            <h1 class="text-center" phx-click="remove_favorite_character" phx-value-id="5429104310728550177:offline">Search</h1>
 
             <form id="characterSearchForm" action="" method="">
                 <div class="form-group">

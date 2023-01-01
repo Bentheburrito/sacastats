@@ -149,7 +149,12 @@ defmodule SacaStatsWeb.CharacterLive.Search do
         )
       end
 
-    {:noreply, assign(socket, :favorite_characters, updated_char_map)}
+    {:noreply,
+     assign(
+       push_event(socket, "character_card_change", %{}),
+       :favorite_characters,
+       updated_char_map
+     )}
   end
 
   # A favorite character logs off
@@ -174,10 +179,14 @@ defmodule SacaStatsWeb.CharacterLive.Search do
         )
       end
 
-    {:noreply, assign(socket, :favorite_characters, updated_char_map)}
+    {:noreply,
+     assign(
+       push_event(socket, "character_card_change", %{}),
+       :favorite_characters,
+       updated_char_map
+     )}
   end
 
-  # --------------------------------------------------------------------------------Re apply js listeners on page update
   # The user favorites a character in another window
   def handle_info({:favorite, %Favorite{} = favorite}, socket) do
     {:ok, %Character{} = info} = Characters.get_by_id(favorite.character_id)
@@ -206,7 +215,12 @@ defmodule SacaStatsWeb.CharacterLive.Search do
         &Map.put(&1, info.character_id, card_info)
       )
 
-    {:noreply, assign(socket, :favorite_characters, updated_char_map)}
+    {:noreply,
+     assign(
+       push_event(socket, "character_card_change", %{}),
+       :favorite_characters,
+       updated_char_map
+     )}
   end
 
   # The user unfavorites a character in another window
@@ -291,7 +305,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
     faction_id = Map.get(character, "faction_id")
 
     ~H"""
-      <div id={name <> "-character-status-card"}
+      <a id={name <> "-character-status-card"} href={"/character/#{name}"}
           class={"col-12 col-md-6 col-lg-4 col-xl-3 border rounded py-3 px-0 mx-0 mx-md-3 my-2 " <> (Map.get(SacaStats.factions, SacaStats.Utils.maybe_to_int(faction_id))[:alias] |> String.downcase()) <> "-character-status-card character-status-card"}>
         <%= encode_character_remove_button_mobile(assigns, id, online_status) %>
         <%= encode_character_remove_button(assigns, id, name, online_status) %>
@@ -300,7 +314,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
           <%= encode_character_characteristics(assigns, name, rank) %>
           <%= encode_character_online_status(assigns, online_status) %>
         </div>
-      </div>
+      </a>
     """
   end
 
