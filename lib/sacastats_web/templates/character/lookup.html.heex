@@ -66,7 +66,11 @@
 <%= if is_nil(@user) do %>
 	<p class="text-center">Login to add favorites!</p>
 <% else %>
-	<%= SacaStatsWeb.CharacterLive.Search.create_character_status_cards(@socket.assigns, @favorite_characters)%>
+	<%= if @favorite_characters == :error do %>
+		<p>Uh oh</p>
+	<% else %>
+		<%= SacaStatsWeb.CharacterLive.Search.create_character_status_cards(@socket.assigns, @favorite_characters)%>
+	<% end %>
 <% end %>
 
 <script type="module" src="/assets/dist/character/lookup.js"></script>

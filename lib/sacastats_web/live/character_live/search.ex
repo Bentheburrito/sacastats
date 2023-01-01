@@ -28,7 +28,16 @@ defmodule SacaStatsWeb.CharacterLive.Search do
       PubSub.subscribe(SacaStats.PubSub, "unfavorite_event:#{user.id}")
     end
 
-    favorite_characters = get_favorite_users(user)
+    # either :error or map of favorite characters
+    favorite_characters =
+      case get_favorite_users(user) do
+        {:ok, fav_chars} ->
+          fav_chars
+
+        {:error, error} ->
+          Logger.error("Something went horribly wrong: #{inspect(error)}")
+          :error
+      end
 
     {:ok,
      socket
@@ -50,11 +59,12 @@ defmodule SacaStatsWeb.CharacterLive.Search do
 
       favorite_character_ids = Map.keys(favorite_characters)
 
-      {:ok, character_infos} = Characters.get_many_by_id(favorite_character_ids, _shallow = true)
-
-      {:ok, online_status_map} = OnlineStatus.get_many_by_id(favorite_character_ids)
-
-      group_favorites(character_infos, favorite_characters, online_status_map)
+      # {:ok, character_infos} = Characters.get_many_by_id(favorite_character_ids, _shallow = true)
+      with {:ok, character_infos} <-
+             Characters.get_many_by_id(favorite_character_ids, _shallow = true),
+           {:ok, online_status_map} <- OnlineStatus.get_many_by_id(favorite_character_ids) do
+        {:ok, group_favorites(character_infos, favorite_characters, online_status_map)}
+      end
     end
   end
 
@@ -198,38 +208,48 @@ defmodule SacaStatsWeb.CharacterLive.Search do
 
   # The user favorites a character in another window
   def handle_info({:favorite, %Favorite{} = favorite}, socket) do
-    {:ok, %Character{} = info} = Characters.get_by_id(favorite.character_id)
-    {:ok, %OnlineStatus{} = status} = OnlineStatus.get_by_id(favorite.character_id)
-    status = OnlineStatus.status_text(status)
+    with {:ok, %Character{} = info} <- Characters.get_by_id(favorite.character_id),
+         {:ok, %OnlineStatus{} = status} <- OnlineStatus.get_by_id(favorite.character_id) do
+      status = OnlineStatus.status_text(status)
 
-    PubSub.subscribe(SacaStats.PubSub, "game_event:#{favorite.character_id}")
+      PubSub.subscribe(SacaStats.PubSub, "game_event:#{favorite.character_id}")
 
-    card_info = %{
-      "name" => info.name_first,
-      "id" => info.character_id,
-      "rank" =>
-        SacaStats.Utils.get_rank_string(
-          info.battle_rank,
-          info.prestige_level
-        ),
-      "faction_id" => info.faction_id,
-      "online_status" => status
-    }
+      card_info = %{
+        "name" => info.name_first,
+        "id" => info.character_id,
+        "rank" =>
+          SacaStats.Utils.get_rank_string(
+            info.battle_rank,
+            info.prestige_level
+          ),
+        "faction_id" => info.faction_id,
+        "online_status" => status
+      }
 
-    updated_char_map =
-      Map.update(
-        socket.assigns.favorite_characters,
-        status,
-        %{info.character_id => card_info},
-        &Map.put(&1, info.character_id, card_info)
-      )
+      updated_char_map =
+        Map.update(
+          socket.assigns.favorite_characters,
+          status,
+          %{info.character_id => card_info},
+          &Map.put(&1, info.character_id, card_info)
+        )
 
-    {:noreply,
-     assign(
-       push_event(socket, "character_card_change", %{}),
-       :favorite_characters,
-       updated_char_map
-     )}
+      {:noreply,
+       socket
+       |> push_event("character_card_change", %{})
+       |> assign(
+         :favorite_characters,
+         updated_char_map
+       )}
+    else
+      error when error in [:not_found, :error] ->
+        {:noreply,
+         put_flash(
+           socket,
+           :error,
+           "We detected a new favorited character, but something went wrong."
+         )}
+    end
   end
 
   # The user unfavorites a character in another window
