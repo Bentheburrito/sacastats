@@ -16,8 +16,8 @@
   </div>
 </nav>
 
-<p class="alert alert-info text-center" role="alert"><%= get_flash(@conn, :info) %></p>
-<p class="alert alert-danger text-center" role="alert"><%= get_flash(@conn, :error) %></p>
+<p class="alert alert-info text-center" role="alert"><%= try do get_flash(@conn, :info) rescue  ArgumentError -> live_flash(@flash, :info) end %></p>
+<p class="alert alert-danger text-center" role="alert"><%= try do get_flash(@conn, :error) rescue  ArgumentError -> live_flash(@flash, :error) end %></p>
 
 <main role="main" class="container pt-4 pt-md-3">
   <div class="row">
@@ -37,30 +37,32 @@
           <p data-toggle="tooltip" title={@character_info.outfit.name <> "'s outfit leader"} class="d-block d-md-inline align-top text-center text-md-left">&#11088;</p>
         <% end %>
 
-        <%= if is_nil(@user) do %>
-          <div class="d-none d-md-inline-block">
-            <button class={"btn " <> (if @is_favorite, do: "btn-secondary", else: "btn-primary") <> " ml-3 character-favorite-btn px-3 py-3"} data-toggle="dropdown" aria-expanded="false" type="button">
-              <%= HtmlEntities.decode(if @is_favorite, do: "&#9829;	Unfavorite", else: "&#9825;	Favorite") %>
-            </button>
-            <div class="dropdown-menu px-2 not-logged-in-dropdown">
-              <h3>Looks like you are not logged in...</h3>
-              <p><%= "Log in to add '#{@character_info.name_first}' to your favorite's list."%></p>
-              <hr/>
-              <a href="/login">Log in</a>
-            </div>
-          </div>
-        <% else %>
-          <div class="d-none d-md-inline-block">
-            <.form let={form} for={@changeset} class="mb-0" action={if @is_favorite, do: "#{@conn.request_path}/unfavorite", else: "#{@conn.request_path}/favorite"}>
-              <%= hidden_input form, :discord_id, value: @user && @user.id || nil %>
-              <%= hidden_input form, :character_id, value: @character_info.character_id %>
-              <%= hidden_input form, :last_known_name, value: @character_info.name_first %>
-
-              <button class={"btn " <> (if @is_favorite, do: "btn-secondary", else: "btn-primary") <> " ml-3 character-favorite-btn px-3 py-3"} type="submit">
-                <%= HtmlEntities.decode(if @is_favorite, do: "&#9829;	Unfavorite", else: "&#9825;	Favorite") %>
+        <%= cond do %>
+          <% Map.has_key?(@conn, :user) && is_nil(@user) -> %>
+            <div class="d-none d-md-inline-block">
+              <button class={"btn btn-primary ml-3 character-favorite-btn px-3 py-3"} data-toggle="dropdown" aria-expanded="false" type="button">
+                <%= HtmlEntities.decode("&#9825;	Favorite") %>
               </button>
-            </.form>
-          </div>
+              <div class="dropdown-menu px-2 not-logged-in-dropdown">
+                <h3>Looks like you are not logged in...</h3>
+                <p><%= "Log in to add '#{@character_info.name_first}' to your favorite's list."%></p>
+                <hr/>
+                <a href="/login">Log in</a>
+              </div>
+            </div>
+          <% !Map.has_key?(@conn, :user) -> %>
+          <% true -> %>
+            <div class="d-none d-md-inline-block">
+              <.form let={form} for={@changeset} class="mb-0" action={if @is_favorite, do: "#{@conn.request_path}/unfavorite", else: "#{@conn.request_path}/favorite"}>
+                <%= hidden_input form, :discord_id, value: @user && @user.id || nil %>
+                <%= hidden_input form, :character_id, value: @character_info.character_id %>
+                <%= hidden_input form, :last_known_name, value: @character_info.name_first %>
+
+                <button class={"btn " <> (if @is_favorite, do: "btn-secondary", else: "btn-primary") <> " ml-3 character-favorite-btn px-3 py-3"} type="submit">
+                  <%= HtmlEntities.decode(if @is_favorite, do: "&#9829;	Unfavorite", else: "&#9825;	Favorite") %>
+                </button>
+              </.form>
+            </div>
         <% end %>
 
         <div class="d-none d-md-flex float-md-right align-items-center h-100">
