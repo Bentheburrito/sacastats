@@ -50,6 +50,19 @@
                 <a href="/login">Log in</a>
               </div>
             </div>
+            <div class="d-inline-block d-md-none w-100">
+              <div class="text-center">
+                <button class={"btn btn-primary ml-3 character-favorite-btn px-3 py-3"} data-toggle="dropdown" aria-expanded="false" type="button">
+                  <%= HtmlEntities.decode("&#9825;	Favorite") %>
+                </button>
+                <div class="dropdown-menu px-2 not-logged-in-dropdown">
+                  <h3>Looks like you are not logged in...</h3>
+                  <p><%= "Log in to add '#{@character_info.name_first}' to your favorite's list."%></p>
+                  <hr/>
+                  <a href="/login">Log in</a>
+                </div>
+              </div>
+            </div>
           <% !Map.has_key?(@conn.assigns, :user) -> %>
           <% true -> %>
             <div class="d-none d-md-inline-block pl-0 pl-lg-5">
