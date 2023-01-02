@@ -316,7 +316,8 @@ defmodule SacaStatsWeb.CharacterLive.Search do
         <hr class="mt-3" />
         <div class="collapse show" id={"#{section_type}collapsable"}>
           <div class="row justify-content-center pb-5">
-            <%= for character <- characters do %>
+            <%= for sorted_character <- get_sorted_character_ids(characters) do %>
+              <% character = characters[sorted_character.id] %>
               <%= encode_character_card(assigns, character, section_type) %>
             <% end %>
           </div>
@@ -325,7 +326,14 @@ defmodule SacaStatsWeb.CharacterLive.Search do
     """
   end
 
-  defp encode_character_card(assigns, {_character_id, character}, online_status) do
+  defp get_sorted_character_ids(characters) do
+    for {character_id, favorite_info} <- characters do
+      %{id: character_id, name: String.downcase(favorite_info["name"])}
+    end
+    |> Enum.sort_by(&Map.fetch(&1, :name))
+  end
+
+  defp encode_character_card(assigns, character, online_status) do
     name = Map.get(character, "name")
     id = Map.get(character, "id")
     rank = Map.get(character, "rank")
