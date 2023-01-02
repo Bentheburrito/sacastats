@@ -1,11 +1,13 @@
 <main class="container">
-  <p class="alert alert-info" role="alert"
-    phx-click_x="lv:clear-flash"
-    phx-value-key="info"><%= live_flash(@flash, :info) %></p>
-
-  <p class="alert alert-danger" role="alert"
-    phx-click_x="lv:clear-flash"
-    phx-value-key="error"><%= live_flash(@flash, :error) %></p>
+  <!-- Flash for non character pages as they already have one -->
+  <%= if !Map.has_key?(assigns, :character_info) do %>
+    <p class="alert alert-info" role="alert"
+      phx-click_x="lv:clear-flash"
+      phx-value-key="info"><%= live_flash(@flash, :info) %></p>
+    <p class="alert alert-danger" role="alert"
+      phx-click_x="lv:clear-flash"
+      phx-value-key="error"><%= live_flash(@flash, :error) %></p>
+  <% end %>
 
   <%= @inner_content %>
 </main>
