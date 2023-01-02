@@ -34,6 +34,9 @@ defmodule SacaStatsWeb.CharacterLive.Search do
         {:ok, fav_chars} ->
           fav_chars
 
+        %{} ->
+          %{}
+
         :error ->
           :error
       end
