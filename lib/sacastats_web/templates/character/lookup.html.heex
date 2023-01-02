@@ -67,7 +67,8 @@
 	<p class="text-center">Login to add favorites!</p>
 <% else %>
 	<%= if @favorite_characters == :error do %>
-		<p>Uh oh</p>
+        <p class="w-100 mx-auto text-center">An error occured while accessing your favorite characters' statuses from Planetside's Database.</p>
+        <p class="w-100 mx-auto text-center">Please try again later.</p>
 	<% else %>
 		<%= SacaStatsWeb.CharacterLive.Search.create_character_status_cards(@socket.assigns, @favorite_characters)%>
 	<% end %>

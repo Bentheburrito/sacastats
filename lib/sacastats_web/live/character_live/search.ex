@@ -34,8 +34,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
         {:ok, fav_chars} ->
           fav_chars
 
-        {:error, error} ->
-          Logger.error("Something went horribly wrong: #{inspect(error)}")
+        :error ->
           :error
       end
 
@@ -59,7 +58,6 @@ defmodule SacaStatsWeb.CharacterLive.Search do
 
       favorite_character_ids = Map.keys(favorite_characters)
 
-      # {:ok, character_infos} = Characters.get_many_by_id(favorite_character_ids, _shallow = true)
       with {:ok, character_infos} <-
              Characters.get_many_by_id(favorite_character_ids, _shallow = true),
            {:ok, online_status_map} <- OnlineStatus.get_many_by_id(favorite_character_ids) do
@@ -386,7 +384,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
       <div class="col-8 pl-5">
         <div class="row pl-3">
           <div class="col-12 px-0">
-            <h2 class="mb-0"><%= name %></h2>
+            <h2 class="mb-0 favorite-character-card-name"><%= name %></h2>
           </div>
         </div>
         <div class="row pl-3">

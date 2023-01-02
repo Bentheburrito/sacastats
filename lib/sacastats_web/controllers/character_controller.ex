@@ -176,12 +176,16 @@ defmodule SacaStatsWeb.CharacterController do
     }
 
     outfit_leader_name =
-      case Characters.get_by_id(char.outfit.leader_character_id) do
-        {:ok, %Character{} = character} ->
-          character.name_first
+      if is_nil(char.outfit) do
+        nil
+      else
+        case Characters.get_by_id(char.outfit.leader_character_id) do
+          {:ok, %Character{} = character} ->
+            character.name_first
 
-        _ ->
-          "Unknown Outfit Leader Name (ID #{char.outfit.leader_character_id})"
+          _ ->
+            "Unknown Outfit Leader Name (ID #{char.outfit.leader_character_id})"
+        end
       end
 
     [

@@ -57,8 +57,10 @@ function openURL(event: Event, characterName: string) {
 }
 
 function isEventTargetADeleteButtonClick(event: JQuery.ClickEvent) {
-  let classList = (event.target as HTMLElement).classList;
+  let target = (event.target as HTMLElement);
+  let classList = target.classList;
   return (
+    (target.tagName.toLowerCase() == 'path' && target.parentElement?.classList.contains('fa-trash')) ||
     classList.contains('character-status-card-removal-button-mobile') ||
     classList.contains('character-status-card-removal-button') ||
     classList.contains('fa-trash')
