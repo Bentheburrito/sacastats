@@ -39,7 +39,7 @@
 
         <%= cond do %>
           <% Map.has_key?(@conn.assigns, :user) && is_nil(@user) -> %>
-            <div class="d-none d-md-inline-block">
+            <div class="d-none d-md-inline-block pl-0 pl-lg-5">
               <button class={"btn btn-primary ml-3 character-favorite-btn px-3 py-3"} data-toggle="dropdown" aria-expanded="false" type="button">
                 <%= HtmlEntities.decode("&#9825;	Favorite") %>
               </button>
@@ -52,8 +52,19 @@
             </div>
           <% !Map.has_key?(@conn.assigns, :user) -> %>
           <% true -> %>
-            <div class="d-none d-md-inline-block">
+            <div class="d-none d-md-inline-block pl-0 pl-lg-5">
               <.form let={form} for={@changeset} class="mb-0" action={if @is_favorite, do: "#{@conn.request_path}/unfavorite", else: "#{@conn.request_path}/favorite"}>
+                <%= hidden_input form, :discord_id, value: @user && @user.id || nil %>
+                <%= hidden_input form, :character_id, value: @character_info.character_id %>
+                <%= hidden_input form, :last_known_name, value: @character_info.name_first %>
+
+                <button class={"btn " <> (if @is_favorite, do: "btn-secondary", else: "btn-primary") <> " ml-3 character-favorite-btn px-3 py-3"} type="submit">
+                  <%= HtmlEntities.decode(if @is_favorite, do: "&#9829;	Unfavorite", else: "&#9825;	Favorite") %>
+                </button>
+              </.form>
+            </div>
+            <div class="d-inline-block d-md-none w-100">
+              <.form let={form} for={@changeset} class="mb-0 mx-auto w-50" action={if @is_favorite, do: "#{@conn.request_path}/unfavorite", else: "#{@conn.request_path}/favorite"}>
                 <%= hidden_input form, :discord_id, value: @user && @user.id || nil %>
                 <%= hidden_input form, :character_id, value: @character_info.character_id %>
                 <%= hidden_input form, :last_known_name, value: @character_info.name_first %>
