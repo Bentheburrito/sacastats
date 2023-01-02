@@ -113,6 +113,12 @@
     z-index: 1;
 }
 
+.favorite-character-card-name {
+    width: 150%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .character-status-card-removal-button-mobile-container {
     background-color: rgba(0, 0, 0, 0.5);
     position: absolute;
