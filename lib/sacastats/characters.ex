@@ -6,6 +6,7 @@ defmodule SacaStats.Characters do
   alias PS2.API.{Join, Query, QueryResult}
   alias SacaStats.Census.Character
 
+  import Ecto.Query
   import PS2.API.QueryBuilder, except: [field: 2]
   import SacaStats.Utils
 
@@ -204,6 +205,32 @@ defmodule SacaStats.Characters do
       {:error, e} ->
         Logger.warning("CharacterCache query returned error (#{attempt}/3): #{inspect(e)}")
         get_by_census(query, attempt + 1)
+    end
+  end
+
+  def get_rank_string(battle_rank, prestige) do
+    if prestige > 0 do
+      "ASP #{prestige} BR #{battle_rank}"
+    else
+      "BR #{battle_rank}"
+    end
+  end
+
+  def favorite?(id, user_id) do
+    if is_nil(user_id) do
+      false
+    else
+      case Ecto.Query.from(f in Favorite,
+             select: f,
+             where: f.discord_id == ^user_id and f.character_id == ^id
+           )
+           |> Repo.all() do
+        [] ->
+          false
+
+        [_favorite_character] ->
+          true
+      end
     end
   end
 end

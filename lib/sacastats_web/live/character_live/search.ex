@@ -94,7 +94,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
               "name" => character.name_first,
               "id" => character_id,
               "rank" =>
-                SacaStats.Utils.get_rank_string(
+                SacaStats.Characters.get_rank_string(
                   character.battle_rank,
                   character.prestige_level
                 ),
@@ -219,7 +219,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
         "name" => info.name_first,
         "id" => info.character_id,
         "rank" =>
-          SacaStats.Utils.get_rank_string(
+          SacaStats.Characters.get_rank_string(
             info.battle_rank,
             info.prestige_level
           ),

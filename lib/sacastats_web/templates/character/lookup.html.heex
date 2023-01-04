@@ -63,15 +63,14 @@
 </div>
 
 <h1 class="text-center mb-5">Favorites</h1>
-<%= if is_nil(@user) do %>
-	<p class="text-center">Login to add favorites!</p>
-<% else %>
-	<%= if @favorite_characters == :error do %>
+<%= cond do %>
+    <% is_nil(@user) -> %>
+	    <p class="text-center">Login to add favorites!</p>
+	<% @favorite_characters == :error -> %>
         <p class="w-100 mx-auto text-center">An error occured while accessing your favorite characters' statuses from Planetside's Database.</p>
         <p class="w-100 mx-auto text-center">Please try again later.</p>
-	<% else %>
+	<% true -> %>
 		<%= SacaStatsWeb.CharacterLive.Search.create_character_status_cards(@socket.assigns, @favorite_characters)%>
-	<% end %>
 <% end %>
 
 <script type="module" src="/assets/dist/character/lookup.js"></script>

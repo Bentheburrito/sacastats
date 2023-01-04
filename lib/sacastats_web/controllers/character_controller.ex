@@ -26,7 +26,7 @@ defmodule SacaStatsWeb.CharacterController do
 
     return_path = Regex.replace(~r{/[^/]+$}, conn.request_path, "")
 
-    if discord_id not in [nil, ""] && is_favorite?(character_id, discord_id) do
+    if discord_id not in [nil, ""] && Characters.favorite?(character_id, discord_id) do
       conn
       |> put_flash(:error, "#{name} has already been favorited.")
       |> redirect(to: return_path)
@@ -66,7 +66,7 @@ defmodule SacaStatsWeb.CharacterController do
 
     return_path = Regex.replace(~r{/[^/]+$}, conn.request_path, "")
 
-    if user_id not in [nil, ""] && is_favorite?(id, user_id) do
+    if user_id not in [nil, ""] && Characters.favorite?(id, user_id) do
       query = from(f in Favorite, where: f.discord_id == ^user_id and f.character_id == ^id)
       favorite = Repo.one!(query)
       # Remove from DB.
@@ -140,7 +140,7 @@ defmodule SacaStatsWeb.CharacterController do
       online_status: status,
       stat_page: "sessions.html",
       sessions: sessions,
-      is_favorite: is_favorite?(char.character_id, user_id),
+      is_favorite: Characters.favorite?(char.character_id, user_id),
       changeset: Favorite.changeset(%Favorite{})
     ]
   end
@@ -157,7 +157,7 @@ defmodule SacaStatsWeb.CharacterController do
       weapons: complete_weapons,
       types: type_set,
       categories: category_set,
-      is_favorite: is_favorite?(char.character_id, user_id),
+      is_favorite: Characters.favorite?(char.character_id, user_id),
       changeset: Favorite.changeset(%Favorite{})
     ]
   end
@@ -196,7 +196,7 @@ defmodule SacaStatsWeb.CharacterController do
       stat_page: "general.html",
       character_characteristics: character_characteristics,
       best_weapons: best_weapons,
-      is_favorite: is_favorite?(char.character_id, user_id),
+      is_favorite: Characters.favorite?(char.character_id, user_id),
       changeset: Favorite.changeset(%Favorite{})
     ]
   end
@@ -206,26 +206,8 @@ defmodule SacaStatsWeb.CharacterController do
       character_info: char,
       online_status: status,
       stat_page: stat_type <> ".html",
-      is_favorite: is_favorite?(char.character_id, user_id),
+      is_favorite: Characters.favorite?(char.character_id, user_id),
       changeset: Favorite.changeset(%Favorite{})
     ]
-  end
-
-  defp is_favorite?(id, user_id) do
-    if is_nil(user_id) do
-      false
-    else
-      case Ecto.Query.from(f in Favorite,
-             select: f,
-             where: f.discord_id == ^user_id and f.character_id == ^id
-           )
-           |> Repo.all() do
-        [] ->
-          false
-
-        [_favorite_character] ->
-          true
-      end
-    end
   end
 end

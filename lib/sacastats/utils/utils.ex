@@ -127,14 +127,6 @@ defmodule SacaStats.Utils do
     }
   end
 
-  def get_rank_string(battle_rank, prestige) do
-    if maybe_to_int(prestige, 0) > 0 do
-      "ASP #{prestige} BR #{battle_rank}"
-    else
-      "BR #{battle_rank}"
-    end
-  end
-
   def import_flex_bootstrap_table(assigns) do
     ~H"""
       <link href="https://unpkg.com/bootstrap-table@1.21.0/dist/extensions/sticky-header/bootstrap-table-sticky-header.css" rel="stylesheet">
