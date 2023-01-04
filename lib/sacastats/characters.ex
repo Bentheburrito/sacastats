@@ -5,6 +5,8 @@ defmodule SacaStats.Characters do
 
   alias PS2.API.{Join, Query, QueryResult}
   alias SacaStats.Census.Character
+  alias SacaStats.Character.Favorite
+  alias SacaStats.Repo
 
   import Ecto.Query
   import PS2.API.QueryBuilder, except: [field: 2]
@@ -220,7 +222,7 @@ defmodule SacaStats.Characters do
     if is_nil(user_id) do
       false
     else
-      case Ecto.Query.from(f in Favorite,
+      case from(f in Favorite,
              select: f,
              where: f.discord_id == ^user_id and f.character_id == ^id
            )
