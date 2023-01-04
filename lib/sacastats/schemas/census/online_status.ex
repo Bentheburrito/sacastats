@@ -90,7 +90,7 @@ defmodule SacaStats.Census.OnlineStatus do
 
       {:error, error} ->
         Logger.error(
-          "Could not parse census character response into a Character struct: #{inspect(error)}"
+          "Could not parse census characters_online_status response into an OnlineStatus struct: #{inspect(error)}"
         )
 
         :error
