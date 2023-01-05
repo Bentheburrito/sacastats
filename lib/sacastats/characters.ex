@@ -5,7 +5,10 @@ defmodule SacaStats.Characters do
 
   alias PS2.API.{Join, Query, QueryResult}
   alias SacaStats.Census.Character
+  alias SacaStats.Character.Favorite
+  alias SacaStats.Repo
 
+  import Ecto.Query
   import PS2.API.QueryBuilder, except: [field: 2]
   import SacaStats.Utils
 
@@ -38,7 +41,9 @@ defmodule SacaStats.Characters do
                         "faction_id",
                         "profile_id",
                         "title_id",
-                        "head_id"
+                        "head_id",
+                        "battle_rank",
+                        "prestige_level"
                       ])
                       |> lang("en")
 
@@ -204,4 +209,31 @@ defmodule SacaStats.Characters do
         get_by_census(query, attempt + 1)
     end
   end
+
+  def get_rank_string(battle_rank, prestige) do
+    if prestige > 0 do
+      "ASP #{prestige} BR #{battle_rank}"
+    else
+      "BR #{battle_rank}"
+    end
+  end
+
+  def favorite?(_id, nil), do: false
+
+  def favorite?(id, user_id) do
+    case from(f in Favorite,
+           select: f,
+           where: f.discord_id == ^user_id and f.character_id == ^id
+         )
+         |> Repo.all() do
+      [] ->
+        false
+
+      [_favorite_character] ->
+        true
+    end
+  end
+
+  def get_favorite_button_path(current_path, true), do: current_path <> "/unfavorite"
+  def get_favorite_button_path(current_path, false), do: current_path <> "/favorite"
 end

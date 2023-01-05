@@ -1,9 +1,53 @@
-<link rel="stylesheet" href={Routes.static_path(@conn, "/css/character/template.css")}/>
+<link rel="stylesheet" href="/css/character/lookup.css"/>
+
+<div class="dropdown-menu dropdown-menu-sm pb-0" id="character-card-context-menu">
+    <div class="row context-menu-row" id="character-card-open-stat-link-row">
+        <div class="col-12">
+            <h5 class="d-block text-center text-md-left" id="character-card-open-stat-link">Open character's stat page</h5>
+        </div>
+    </div>
+
+    <div class="row context-menu-row" id="character-card-open-stat-link-new-tab-row">
+        <div class="col-12">
+            <h5 class="d-block text-center text-md-left" id="character-card-open-stat-link-new-tab">Open character's stat page in new tab</h5>
+        </div>
+    </div>
+
+    <div class="row context-menu-row" id="character-card-open-stat-link-new-window-row">
+        <div class="col-12">
+            <h5 class="d-block text-center text-md-left" id="character-card-open-stat-link-new-window">Open character's stat page in new window</h5>
+        </div>
+    </div>
+
+    <div class="row context-menu-row" id="character-card-open-latest-session-row">
+        <div class="col-12">
+            <h5 class="d-block text-center text-md-left" id="character-card-open-latest-session">Open character's latest play session</h5>
+        </div>
+    </div>
+
+    <div class="row context-menu-row" id="character-card-open-latest-session-new-tab-row">
+        <div class="col-12">
+            <h5 class="d-block text-center text-md-left" id="character-card-open-latest-session-new-tab">Open character's latest play session in new tab</h5>
+        </div>
+    </div>
+
+    <div class="row context-menu-row" id="character-card-open-latest-session-new-window-row">
+        <div class="col-12">
+            <h5 class="d-block text-center text-md-left" id="character-card-open-latest-session-new-window">Open character's latest play session in new window</h5>
+        </div>
+    </div>
+
+    <div class="row context-menu-row" id="remove-favorite-character-row" phx-click="remove_favorite_character" phx-value-id="">
+        <div class="col-12">
+            <h5 class="d-block text-center text-md-left" id="remove-favorite-character">Remove character from favorites</h5>
+        </div>
+    </div>
+</div>
 
 <div class="pt-5">
-    <div class="row">
-        <div class="col-sm-6 col-xl-3 col-xs-12 mx-auto">
-            <h2 class="text-center">Look-up Character</h2>
+    <div class="row ml-0">
+        <div class="col-sm-6 col-xs-12 mx-auto">
+            <h1 class="text-center" phx-click="remove_favorite_character" phx-value-id="5429104310728550177:offline">Search</h1>
 
             <form id="characterSearchForm" action="" method="">
                 <div class="form-group">
@@ -18,4 +62,15 @@
     </div>
 </div>
 
-<script type="module" src={Routes.static_path(@conn, "/assets/dist/character/lookup.js")}></script>
+<h1 class="text-center mb-5">Favorites</h1>
+<%= cond do %>
+    <% is_nil(@user) -> %>
+	    <p class="text-center">Login to add favorites!</p>
+	<% @favorite_characters == :error -> %>
+        <p class="w-100 mx-auto text-center">An error occurred while accessing your favorite characters.</p>
+        <p class="w-100 mx-auto text-center">Please try again later.</p>
+	<% true -> %>
+		<%= SacaStatsWeb.CharacterLive.Search.create_character_status_cards(@socket.assigns, @favorite_characters)%>
+<% end %>
+
+<script type="module" src="/assets/dist/character/lookup.js"></script>

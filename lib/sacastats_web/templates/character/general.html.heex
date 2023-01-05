@@ -11,8 +11,8 @@
                 alt={"#{String.capitalize(@character_characteristics["ethnicity"])  <> " " <> String.capitalize(@character_characteristics["sex"])}"}
                 width="32" height="32" class="characteristic-icon">
         </div>
-        <figure id="characterModel" class="three-js-model" data-model-type="infantry" data-faction={Map.get(SacaStats.factions, SacaStats.Utils.maybe_to_int(@character_info["faction_id"], 0)).alias}
-            data-head-id={@character_info["head_id"]} data-clazz={@character_info["profile"]["profile_type_description"]}>
+        <figure id="characterModel" class="three-js-model" data-model-type="infantry" data-faction={Map.get(SacaStats.factions, SacaStats.Utils.maybe_to_int(@character_info.faction_id, 0)).alias}
+            data-head-id={@character_info.head_id} data-clazz={@character_info.profile_type_description}>
             <div class="d-flex justify-content-center align-items-center w-100 h-100" id="character-spinner-container">
                 <div class="spinner-border text-primary" id="character-spinner" role="status">
                     <span class="visually-hidden">Loading...</span>
@@ -24,10 +24,10 @@
     <div class="col-md-8 col-12 stat-section-container">
         <div class="d-flex d-md-none flex-column justify-content-center stat-section">
             <h3 class="text-center">Characteristics</h3>
-            <p class="text-center"><%= if(@character_characteristics["ethnicity"] === "robot") do "" else String.capitalize(@character_characteristics["ethnicity"]) end <> " " <> String.capitalize(@character_characteristics["sex"]) %></p>
+            <p class="text-center"><%= if @character_characteristics["ethnicity"] === "robot" do "" else String.capitalize(@character_characteristics["ethnicity"]) end <> " " <> String.capitalize(@character_characteristics["sex"]) %></p>
         </div>
         <div class="d-flex d-md-none flex-column justify-content-center stat-section">
-            <h3 class="text-center">Last Seen As A<%=if(String.starts_with?(@character_info.profile_type_description, ["E", "I"]), do: "n") %></h3>
+            <h3 class="text-center">Last Seen As A<%=if String.starts_with?(@character_info.profile_type_description, ["E", "I"]), do: "n" %></h3>
             <p class="text-center"><%= @character_info.profile_type_description %></p>
         </div>
         <div class="stat-section">

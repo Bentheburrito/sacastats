@@ -30,10 +30,18 @@ defmodule SacaStatsWeb.Router do
   scope "/character", SacaStatsWeb do
     pipe_through :browser
 
-    get "/", CharacterController, :search
+    live "/", CharacterLive.Search
     get "/:character_name", CharacterController, :base
     get "/:character_name/:stat_type", CharacterController, :character
     live "/:character_name/sessions/:login_timestamp", SessionLive.View
+    post "/:character_name/:stat_type", CharacterController, :character_post
+    post "/:character_name/:stat_type/favorite", CharacterController, :add_favorite
+    post "/:character_name/:stat_type/unfavorite", CharacterController, :remove_favorite
+    post "/:character_name/sessions/:login_timestamp/favorite", CharacterController, :add_favorite
+
+    post "/:character_name/sessions/:login_timestamp/unfavorite",
+         CharacterController,
+         :remove_favorite
   end
 
   scope "/outfit", SacaStatsWeb do

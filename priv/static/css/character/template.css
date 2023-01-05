@@ -28,6 +28,23 @@
     padding-left: 15px;
 }
 
+.character-favorite-btn {
+    font-size: large;
+    padding: 3px;
+    margin: 0 !important;
+    height: auto;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+#not-logged-in-mobile-favorite-btn-container {
+    margin-bottom: 2.5rem;
+}
+
+.not-logged-in-dropdown {
+    font-size: 1.6rem;
+}
+
 @media only screen and (max-width: 767px) {
 
     /*for boostrap xs*/

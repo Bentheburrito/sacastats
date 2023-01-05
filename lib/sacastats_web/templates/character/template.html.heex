@@ -15,6 +15,10 @@
     </ul>
   </div>
 </nav>
+
+<p class="alert alert-info text-center" role="alert"><%= try do get_flash(@conn, :info) rescue  ArgumentError -> live_flash(@flash, :info) end %></p>
+<p class="alert alert-danger text-center" role="alert"><%= try do get_flash(@conn, :error) rescue  ArgumentError -> live_flash(@flash, :error) end %></p>
+
 <main role="main" class="container pt-4 pt-md-3">
   <div class="row">
     <div class="col-12 col-md-1 text-center">
@@ -32,6 +36,57 @@
         <%= if not is_nil(@character_info.outfit) && @character_info.outfit.leader_character_id == @character_info.character_id do %>
           <p data-toggle="tooltip" title={@character_info.outfit.name <> "'s outfit leader"} class="d-block d-md-inline align-top text-center text-md-left">&#11088;</p>
         <% end %>
+
+        <%= if is_nil(@user) do %>
+          <div class="d-none d-md-inline-block pl-0 pl-lg-5 ml-3">
+            <button class={"btn btn-primary character-favorite-btn px-3 py-3"} data-toggle="dropdown" aria-expanded="false" type="button">
+              <%= HtmlEntities.decode("&#9825;	Favorite") %>
+            </button>
+            <div class="dropdown-menu px-2 not-logged-in-dropdown">
+              <h3>Looks like you are not logged in...</h3>
+              <p><%= "Log in to add '#{@character_info.name_first}' to your favorite's list."%></p>
+              <hr/>
+              <a href="/login">Log in</a>
+            </div>
+          </div>
+          <div class="d-inline-block d-md-none w-100">
+            <div id="not-logged-in-mobile-favorite-btn-container" class="text-center">
+              <button class={"btn btn-primary character-favorite-btn px-3 py-3"} data-toggle="dropdown" aria-expanded="false" type="button">
+                <%= HtmlEntities.decode("&#9825;	Favorite") %>
+              </button>
+              <div class="dropdown-menu px-2 not-logged-in-dropdown">
+                <h3>Looks like you are not logged in...</h3>
+                <p><%= "Log in to add '#{@character_info.name_first}' to your favorite's list."%></p>
+                <hr/>
+                <a href="/login">Log in</a>
+              </div>
+            </div>
+          </div>
+        <% else %>
+          <div class="d-none d-md-inline-block pl-0 pl-lg-5">
+            <.form let={form} for={@changeset} class="mb-0" action={SacaStats.Characters.get_favorite_button_path((if !Map.has_key?(@conn, :request_path), do: @request_path, else: @conn.request_path), @is_favorite)}>
+              <%= hidden_input form, :discord_id, value: @user && @user.id || nil %>
+              <%= hidden_input form, :character_id, value: @character_info.character_id %>
+              <%= hidden_input form, :last_known_name, value: @character_info.name_first %>
+
+              <button class={"btn " <> (if @is_favorite, do: "btn-secondary", else: "btn-primary") <> " ml-3 character-favorite-btn px-3 py-3"} type="submit">
+                <%= HtmlEntities.decode(if @is_favorite, do: "&#9829;	Unfavorite", else: "&#9825;	Favorite") %>
+              </button>
+            </.form>
+          </div>
+          <div class="d-inline-block d-md-none w-100 text-center">
+            <.form let={form} for={@changeset} action={SacaStats.Characters.get_favorite_button_path((if !Map.has_key?(@conn, :request_path), do: @request_path, else: @conn.request_path), @is_favorite)}>
+              <%= hidden_input form, :discord_id, value: @user && @user.id || nil %>
+              <%= hidden_input form, :character_id, value: @character_info.character_id %>
+              <%= hidden_input form, :last_known_name, value: @character_info.name_first %>
+
+              <button class={"btn " <> (if @is_favorite, do: "btn-secondary", else: "btn-primary") <> " ml-3 character-favorite-btn px-3 py-3"} type="submit">
+                <%= HtmlEntities.decode(if @is_favorite, do: "&#9829;	Unfavorite", else: "&#9825;	Favorite") %>
+              </button>
+            </.form>
+          </div>
+        <% end %>
+
         <div class="d-none d-md-flex float-md-right align-items-center h-100">
           <img src={Routes.static_path(@conn, "/images/character/" <> @online_status <> ".ico")} alt={@online_status} width="30">
           <p class="d-inline my-auto"><%=String.capitalize(@online_status) %></p>
@@ -80,3 +135,5 @@
     </button>
   </nav>
 </footer>
+
+<script type="module" src="/assets/dist/character/template.js"></script>

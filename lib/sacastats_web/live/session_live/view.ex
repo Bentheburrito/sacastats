@@ -8,6 +8,7 @@ defmodule SacaStatsWeb.SessionLive.View do
   alias Phoenix.PubSub
   alias SacaStats.Census.Character
   alias SacaStats.Census.OnlineStatus
+  alias SacaStats.Character.Favorite
   alias SacaStats.{Characters, Session}
 
   require Logger
@@ -16,9 +17,12 @@ defmodule SacaStatsWeb.SessionLive.View do
     Phoenix.View.render(SacaStatsWeb.CharacterView, "template.html", assigns)
   end
 
+  def handle_params(_unsigned_params, uri, socket),
+    do: {:noreply, assign(socket, request_path: URI.parse(uri).path)}
+
   def mount(
         %{"character_name" => name, "login_timestamp" => login_timestamp},
-        _user_session,
+        user_session,
         socket
       ) do
     %Session{} = session = Session.get(name, login_timestamp)
@@ -36,6 +40,9 @@ defmodule SacaStatsWeb.SessionLive.View do
       Task.start_link(fn -> do_mount(session, name, liveview_pid) end)
     end
 
+    user = user_session["user"] || user_session[:user]
+    user_id = if is_nil(user), do: nil, else: user.id
+
     {:ok,
      socket
      |> assign(:character_info, %Character{
@@ -48,9 +55,13 @@ defmodule SacaStatsWeb.SessionLive.View do
      |> assign(:online_status, OnlineStatus.status_text(status))
      |> assign(:events, :loading)
      |> assign(:stat_page, "session.html")
+     |> assign(:request_path, nil)
      |> assign(:conn, socket)
      |> assign(:character_map, :loading)
-     |> assign(:session, session)}
+     |> assign(:session, session)
+     |> assign(:user, user_session["user"] || user_session[:user])
+     |> assign(is_favorite: Characters.favorite?(session.character_id, user_id))
+     |> assign(changeset: Favorite.changeset(%Favorite{}))}
   end
 
   defp do_mount(session, name, liveview_pid) do

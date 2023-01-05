@@ -146,6 +146,9 @@ defmodule SacaStats.EventTracker.Deduper do
         )
       end
 
+      event_name = event.data.__struct__ |> Module.split() |> List.last()
+      PubSub.broadcast(SacaStats.PubSub, "game_event:#{event_name}", event)
+
       Map.put(map, hash, event)
     end
   end
