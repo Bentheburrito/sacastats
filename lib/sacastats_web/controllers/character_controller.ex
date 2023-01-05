@@ -96,10 +96,6 @@ defmodule SacaStatsWeb.CharacterController do
     redirect(conn, to: conn.request_path)
   end
 
-  def character_optional_post(conn, _params) do
-    redirect(conn, to: conn.request_path)
-  end
-
   def search(conn, _params) do
     render(conn, "lookup.html")
   end

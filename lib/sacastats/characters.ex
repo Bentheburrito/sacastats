@@ -218,21 +218,22 @@ defmodule SacaStats.Characters do
     end
   end
 
-  def favorite?(id, user_id) do
-    if is_nil(user_id) do
-      false
-    else
-      case from(f in Favorite,
-             select: f,
-             where: f.discord_id == ^user_id and f.character_id == ^id
-           )
-           |> Repo.all() do
-        [] ->
-          false
+  def favorite?(_id, nil), do: false
 
-        [_favorite_character] ->
-          true
-      end
+  def favorite?(id, user_id) do
+    case from(f in Favorite,
+           select: f,
+           where: f.discord_id == ^user_id and f.character_id == ^id
+         )
+         |> Repo.all() do
+      [] ->
+        false
+
+      [_favorite_character] ->
+        true
     end
   end
+
+  def get_favorite_button_path(current_path, true), do: current_path <> "/unfavorite"
+  def get_favorite_button_path(current_path, false), do: current_path <> "/favorite"
 end

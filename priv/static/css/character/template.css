@@ -37,6 +37,10 @@
     text-transform: none;
 }
 
+#not-logged-in-mobile-favorite-btn-container {
+    margin-bottom: 2.5rem;
+}
+
 .not-logged-in-dropdown {
     font-size: 1.6rem;
 }

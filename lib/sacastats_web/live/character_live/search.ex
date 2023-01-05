@@ -34,9 +34,6 @@ defmodule SacaStatsWeb.CharacterLive.Search do
         {:ok, fav_chars} ->
           fav_chars
 
-        %{} ->
-          %{}
-
         :error ->
           :error
       end
@@ -47,7 +44,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
      |> assign(:user, session["user"] || session[:user])}
   end
 
-  defp get_favorite_users(nil), do: %{}
+  defp get_favorite_users(nil), do: {:ok, %{}}
 
   defp get_favorite_users(user) do
     favorites_result =
