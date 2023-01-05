@@ -3,6 +3,7 @@ defmodule SacaStats.Characters do
   Context module for character and character stat related functions and schemas
   """
 
+  alias Ecto.Changeset
   alias PS2.API.{Join, Query, QueryResult}
   alias SacaStats.Census.Character
   alias SacaStats.Character.Favorite
@@ -10,7 +11,6 @@ defmodule SacaStats.Characters do
 
   import Ecto.Query
   import PS2.API.QueryBuilder, except: [field: 2]
-  import SacaStats.Utils
 
   @httpoison_timeout_ms 10 * 1000
   @max_attempts 3
@@ -62,10 +62,11 @@ defmodule SacaStats.Characters do
   def get_stat_by_name(nil, _name), do: 0
 
   def get_stat_by_name(stats, name) do
-    stats
-    |> Enum.find(&(&1.stat_name == name))
-    |> Map.get(:all_time)
-    |> maybe_to_int(0)
+    case Enum.find(stats, &(&1.stat_name == name)) do
+      nil -> 0
+      %{all_time: all_time} -> all_time
+      _ -> 0
+    end
   end
 
   @spec get_by_id(integer()) :: {:ok, struct()} | :not_found | :error
@@ -150,7 +151,7 @@ defmodule SacaStats.Characters do
 
       {:error, error} ->
         Logger.error(
-          "Could not parse census character response into a Character struct: #{inspect(error)}"
+          "Error when querying the Census for uncached character IDs: #{inspect(error)}"
         )
 
         :error
@@ -162,7 +163,7 @@ defmodule SacaStats.Characters do
       result_map ->
         %Character{}
         |> changeset_fn.(char_params)
-        |> Ecto.Changeset.apply_action(:update)
+        |> Changeset.apply_action(:update)
         |> case do
           {:ok, %Character{} = char} ->
             # Only cache these responses if they contain character/weapon stats
@@ -189,7 +190,7 @@ defmodule SacaStats.Characters do
     with {:ok, %QueryResult{data: data, returned: returned}} when returned > 0 <-
            PS2.API.query_one(query, SacaStats.SIDs.next()),
          {:ok, char} <-
-           %Character{} |> Character.changeset(data) |> Ecto.Changeset.apply_action(:update) do
+           %Character{} |> Character.changeset(data) |> Changeset.apply_action(:update) do
       Cachex.put(:character_cache, char.character_id, char)
       Cachex.put(:character_cache, char.name_first_lower, char.character_id)
       {:ok, char}
@@ -197,9 +198,9 @@ defmodule SacaStats.Characters do
       {:ok, %QueryResult{returned: 0}} ->
         :not_found
 
-      {:error, error} ->
+      {:error, %Changeset{} = changeset} ->
         Logger.error(
-          "Could not parse census character response into a Character struct: #{inspect(error)}"
+          "Could not parse census character response into a Character struct: #{inspect(changeset.errors)}"
         )
 
         :error

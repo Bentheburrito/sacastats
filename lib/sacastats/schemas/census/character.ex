@@ -90,9 +90,9 @@ defmodule SacaStats.Census.Character do
       # flatten profile description
       |> Map.put("profile_type_description", census_res["profile"]["profile_type_description"])
       # flatten/rename character stats objects
-      |> Map.put("stat_history", census_res["stats"]["stat_history"])
-      |> Map.put("stat", census_res["stats"]["stat"])
-      |> Map.put("stat_by_faction", census_res["stats"]["stat_by_faction"])
+      |> Map.put("stat_history", census_res["stats"]["stat_history"] || %{})
+      |> Map.put("stat", census_res["stats"]["stat"] || %{})
+      |> Map.put("stat_by_faction", census_res["stats"]["stat_by_faction"] || %{})
 
     character
     |> cast(params, @fields)
