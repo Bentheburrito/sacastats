@@ -32,6 +32,7 @@
         </div>
         <div class="stat-section">
             <h3 class="text-center">Battle Rank</h3>
+            <h4 class="text-center display-6"><%= @character_info.battle_rank %></h4>
             <div class="progress">
                 <div id="brProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow={"#{@character_info.percent_to_next_br}"} aria-valuemin="0" aria-valuemax="100"  style="width: 0;">
                     <%= @character_info.percent_to_next_br %>%
@@ -44,6 +45,7 @@
 
         <div class="stat-section">
             <h3 class="text-center">Current Certification Points</h3>
+            <h4 class="text-center display-6 number"><%= @character_info.available_points %></h4>
             <div class="progress">
                 <div id="certProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" aria-valuenow={"#{SacaStats.Utils.to_percent(@character_info.percent_to_next_point)}"} aria-valuemin="0" aria-valuemax="100" style="width: 0;">
                     <%= SacaStats.Utils.to_percent(@character_info.percent_to_next_point) %>%

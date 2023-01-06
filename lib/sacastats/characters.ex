@@ -211,13 +211,8 @@ defmodule SacaStats.Characters do
     end
   end
 
-  def get_rank_string(battle_rank, prestige) do
-    if prestige > 0 do
-      "ASP #{prestige} BR #{battle_rank}"
-    else
-      "BR #{battle_rank}"
-    end
-  end
+  def get_rank_string(battle_rank, 0), do: "BR #{battle_rank}"
+  def get_rank_string(battle_rank, prestige), do: "ASP #{prestige} BR #{battle_rank}"
 
   def favorite?(_id, nil), do: false
 
