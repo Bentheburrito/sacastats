@@ -17,6 +17,12 @@
     z-index: 1;
 }
 
+.second-bottom-nav>h1 {
+    width: 85%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 #collapse_bottom_target {
     max-height: 200px;
     overflow: scroll;
