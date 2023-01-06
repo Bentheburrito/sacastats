@@ -303,18 +303,31 @@ defmodule SacaStatsWeb.CharacterView do
     character_identifier = get_character_name(assigns, character_map, character_id)
 
     %{"description" => desc} = SacaStats.xp()[id]
-    # {VehicleKilled} Kill by {VehicleKiller} Gunner{?}
-    [vehicle_killed, vehicle_killer_gunner] = String.split(desc, " Kill by ")
-    vehicle_killer = String.trim_trailing(vehicle_killer_gunner, "Gunner")
+    desc_downcase = String.downcase(desc)
+    # {VehicleKilled} kill by {VehicleKiller} gunner{?}
+    event_log_message =
+      case String.split(desc_downcase, " kill by ") do
+        ["player", vehicle_killer_gunner] ->
+          vehicle_killer = String.trim_trailing(vehicle_killer_gunner, "gunner")
+
+          ~H"<%= character_identifier %>'s <%= vehicle_killer %> gunner killed <%= other_identifier %>"
+
+        [vehicle_killed, vehicle_killer_gunner] ->
+          vehicle_killer = String.trim_trailing(vehicle_killer_gunner, "gunner")
+
+          ~H"<%= character_identifier %>'s <%= vehicle_killer %> gunner destroyed a <%= vehicle_killed %>"
+
+        _ ->
+          Logger.warning(
+            "Could not parse gunner assist xp for event log message: #{inspect(desc)}"
+          )
+
+          ~H"<%= desc %>"
+      end
 
     ~H"""
     <li>
-    <%= if vehicle_killed == "Player" do %>
-    <%= character_identifier %>'s <%= vehicle_killer %> gunner killed <%= other_identifier %>
-
-    <% else %>
-      <%= character_identifier %>'s <%= vehicle_killer %> gunner destroyed a <%= vehicle_killed %>
-      <% end %>
+      <%= event_log_message %>
       -
       <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, ge.timestamp) %>
     </li>
@@ -323,13 +336,13 @@ defmodule SacaStatsWeb.CharacterView do
 
   defp build_event_log_item(assigns, %PlayerLogin{}, %Session{name: name}, _character_map) do
     ~H"""
-    <%= format_character_link(name) %> logged in.
+    <li><%= format_character_link(name) %> logged in.</li>
     """
   end
 
   defp build_event_log_item(assigns, %PlayerLogout{}, %Session{name: name}, _character_map) do
     ~H"""
-    <%= format_character_link(name) %> logged out.
+    <li><%= format_character_link(name) %> logged out.</li>
     """
   end
 
