@@ -19,20 +19,18 @@ defmodule SacaStatsWeb.CharacterController do
   end
 
   def latest_session(%Plug.Conn{} = conn, %{"character_name" => name}) do
-    case Characters.get_by_name(name) do
-      {:ok, %Character{} = char} ->
-        case Session.get_latest_timestamp(char.name_first_lower) do
-          %Events.PlayerLogin{timestamp: timestamp} ->
-            redirect(conn, to: "/character/#{char.name_first_lower}/sessions/#{timestamp}")
-
-          nil ->
-            conn
-            |> put_flash(
-              :error,
-              "A session has not yet been recorded for #{name}."
-            )
-            |> redirect(to: "/character/#{char.name_first_lower}/sessions")
-        end
+    with {:ok, %Character{} = character} <- Characters.get_by_name(name),
+         %Events.PlayerLogin{timestamp: timestamp} <-
+           Session.get_latest_timestamp(character.character_id) do
+      redirect(conn, to: "/character/#{character.name_first}/sessions/#{timestamp}")
+    else
+      nil ->
+        conn
+        |> put_flash(
+          :error,
+          "A session has not yet been recorded for #{name}."
+        )
+        |> redirect(to: "/character/#{name}/sessions")
 
       :not_found ->
         conn

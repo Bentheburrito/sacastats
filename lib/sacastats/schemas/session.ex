@@ -47,9 +47,7 @@ defmodule SacaStats.Session do
   @doc """
   Gets latest timestamp from of all a character's sessions.
   """
-  def get_latest_timestamp(character_name) do
-    {:ok, %Character{character_id: character_id}} = Characters.get_by_name(character_name)
-
+  def get_latest_timestamp(character_id) do
     Repo.one(
       from login in Events.PlayerLogin,
         where: login.character_id == ^character_id,
