@@ -39,7 +39,9 @@ defmodule SacaStats do
 
   @gunner_assist_xp Stream.filter(@xp, fn {_id, %{"description" => desc}} ->
                       desc = String.downcase(desc)
-                      String.contains?(desc, "kill by") and not String.contains?(desc, "HIVE XP")
+
+                      String.contains?(desc, "kill by") and
+                        not String.contains?(desc, ["hive xp", "squad member"])
                     end)
                     |> Enum.map(fn {id, _} -> id end)
   defguard is_gunner_assist_xp(id) when id in @gunner_assist_xp
