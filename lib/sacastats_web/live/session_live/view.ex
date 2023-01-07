@@ -31,7 +31,9 @@ defmodule SacaStatsWeb.SessionLive.View do
 
     # If connected, this is the 2nd mount call/LiveView init
     if connected?(socket) do
-      PubSub.subscribe(SacaStats.PubSub, "game_event:#{session.character_id}")
+      if session.logout.timestamp == :current_session do
+        PubSub.subscribe(SacaStats.PubSub, "game_event:#{session.character_id}")
+      end
 
       # In order to load the page quickly, we do the expensive Event Log-related things in another task, and send a
       # message to the LiveView process after the page loads.
