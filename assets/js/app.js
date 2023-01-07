@@ -26,7 +26,7 @@ import "phoenix_html"
 import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
-import { formatDateTimesOnElem } from "../src/formats.ts";
+import { addCommasToNumber, formatDateTime, addPercent, secondsToHHMMSS } from "../src/formats.ts";
 
 // Init Hooks
 let Hooks = {};
@@ -34,10 +34,37 @@ let Hooks = {};
 // Format the given element when it is added or updated
 Hooks.NewDateToFormat = {
   mounted () {
-    formatDateTimesOnElem(this.el);
+    formatDateTime(this.el);
   },
   updated () {
-    formatDateTimesOnElem(this.el);
+    formatDateTime(this.el);
+  }
+};
+
+Hooks.AddCommasToNumber = {
+  mounted () {
+    addCommasToNumber(this.el);
+  },
+  updated () {
+    addCommasToNumber(this.el);
+  }
+};
+
+Hooks.AddPercent = {
+  mounted () {
+    addPercent(this.el);
+  },
+  updated () {
+    addPercent(this.el);
+  }
+};
+
+Hooks.SecondsToReadable = {
+  mounted () {
+    secondsToHHMMSS(this.el);
+  },
+  updated () {
+    secondsToHHMMSS(this.el);
   }
 };
 

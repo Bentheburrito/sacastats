@@ -15,8 +15,12 @@ const TIME_FORMATTER = new Intl.DateTimeFormat(PREFERED_LANGUAGE, {
   hour12: true,
   timeZone: PREFERED_TIME_ZONE
 });
+const YEAR_SECOND = 31556952;
+const DAY_SECOND = 86400;
+const HOUR_SECOND = 3600;
+const MINUTE_SECOND = 60;
 
-export function formatDateTimesOnElem (dateTime: Element) {
+export function formatDateTime (dateTime: Element) {
   try {
     let dateTimeObject = new Date(dateTime.innerHTML);
 
@@ -38,93 +42,94 @@ export function formatDateTimesOnElem (dateTime: Element) {
   }
 }
 
+export function addCommasToNumber (number: Element) {
+  number.innerHTML = number.innerHTML.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+export function addPercent(percent: Element) {
+  // if there is no percent sign, add one
+  if (percent.innerHTML == '') {
+    percent.innerHTML = 'N/A';
+  } else if (percent.innerHTML.slice(-1) != '%' && percent.innerHTML.slice(-1) != 'A') {
+    percent.innerHTML += '%';
+  }
+}
+
+export function secondsToHHMMSS (second: Element) {
+  let secondFindingArray = second.innerHTML.split('</span>');
+  let secondCount = +secondFindingArray[secondFindingArray.length - 1];
+
+  //if it's a number
+  if (!isNaN(secondCount)) {
+    let time = '';
+    let year;
+    let day;
+    let hour;
+    let min;
+    let sec;
+
+    //add y d h m s values
+    switch (true) {
+      case secondCount >= YEAR_SECOND:
+        year = Math.floor(secondCount / YEAR_SECOND);
+        secondCount %= YEAR_SECOND;
+        day = Math.floor(secondCount / DAY_SECOND);
+        secondCount %= DAY_SECOND;
+        hour = Math.floor(secondCount / HOUR_SECOND);
+        time = year + 'y ' + (day > 0 ? day + 'd ' : '') + (hour > 0 ? hour + 'h' : '');
+        break;
+      case secondCount >= DAY_SECOND:
+        day = Math.floor(secondCount / DAY_SECOND);
+        secondCount %= DAY_SECOND;
+        hour = Math.floor(secondCount / HOUR_SECOND);
+        time = day + 'd ' + (hour > 0 ? hour + 'h' : '');
+        break;
+      case secondCount >= HOUR_SECOND:
+        hour = Math.floor(secondCount / HOUR_SECOND);
+        secondCount %= HOUR_SECOND;
+        min = Math.floor(secondCount / MINUTE_SECOND);
+        time = hour + 'h ' + (min > 0 ? min + 'm' : '');
+        break;
+      case secondCount >= MINUTE_SECOND:
+        min = Math.floor(secondCount / MINUTE_SECOND);
+        sec = secondCount %= MINUTE_SECOND;
+        time = min + 'm ' + (sec > 0 ? sec + 's' : '');
+        break;
+      default:
+        time = secondCount + 's';
+    }
+    second.innerHTML = time;
+  }
+}
+
 export function addFormatsToPage() {
-  addCommasToNumbers();
-  formatDateTimes();
-  secondsToHHMMSS();
-  addPercents();
+  addCommasToAllNumbers();
+  formatAllDateTimes();
+  allSecondsToHHMMSS();
+  addAllPercents();
   $(document).trigger(generalEvents.pageFormattedEvent);
 
-  function addCommasToNumbers() {
+  function addCommasToAllNumbers() {
     //get every element with the number class and add proper commas
     let numbers = document.querySelectorAll('.number');
-    numbers.forEach((number) => {
-      number.innerHTML = number.innerHTML.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    });
+    numbers.forEach(addCommasToNumber);
   }
 
-  function formatDateTimes() {
+  function formatAllDateTimes() {
     let dateTimes = document.querySelectorAll('.date-time');
-    dateTimes.forEach(formatDateTimesOnElem);
+    dateTimes.forEach(formatDateTime);
   }
 
-  function addPercents() {
+  function addAllPercents() {
     //get every element with the percentage class and adds a '%' at the end
     let percents = document.querySelectorAll('.percentage');
-    percents.forEach((percent) => {
-      //if there is no percent sign add one
-      if (percent.innerHTML == '') {
-        percent.innerHTML = 'N/A';
-      } else if (percent.innerHTML.slice(-1) != '%' && percent.innerHTML.slice(-1) != 'A') {
-        percent.innerHTML += '%';
-      }
-    });
+    percents.forEach(addPercent);
   }
 
-  function secondsToHHMMSS() {
+  function allSecondsToHHMMSS() {
     //get every element with the seconds-to-readable class and convert the string
     let seconds = document.querySelectorAll('.seconds-to-readable');
-    const YEAR_SECOND = 31556952;
-    const DAY_SECOND = 86400;
-    const HOUR_SECOND = 3600;
-    const MINUTE_SECOND = 60;
-
-    seconds.forEach((second) => {
-      let secondFindingArray = second.innerHTML.split('</span>');
-      let secondCount = +secondFindingArray[secondFindingArray.length - 1];
-
-      //if it's a number
-      if (!isNaN(secondCount)) {
-        let time = '';
-        let year;
-        let day;
-        let hour;
-        let min;
-        let sec;
-
-        //add y d h m s values
-        switch (true) {
-          case secondCount >= YEAR_SECOND:
-            year = Math.floor(secondCount / YEAR_SECOND);
-            secondCount %= YEAR_SECOND;
-            day = Math.floor(secondCount / DAY_SECOND);
-            secondCount %= DAY_SECOND;
-            hour = Math.floor(secondCount / HOUR_SECOND);
-            time = year + 'y ' + (day > 0 ? day + 'd ' : '') + (hour > 0 ? hour + 'h' : '');
-            break;
-          case secondCount >= DAY_SECOND:
-            day = Math.floor(secondCount / DAY_SECOND);
-            secondCount %= DAY_SECOND;
-            hour = Math.floor(secondCount / HOUR_SECOND);
-            time = day + 'd ' + (hour > 0 ? hour + 'h' : '');
-            break;
-          case secondCount >= HOUR_SECOND:
-            hour = Math.floor(secondCount / HOUR_SECOND);
-            secondCount %= HOUR_SECOND;
-            min = Math.floor(secondCount / MINUTE_SECOND);
-            time = hour + 'h ' + (min > 0 ? min + 'm' : '');
-            break;
-          case secondCount >= MINUTE_SECOND:
-            min = Math.floor(secondCount / MINUTE_SECOND);
-            sec = secondCount %= MINUTE_SECOND;
-            time = min + 'm ' + (sec > 0 ? sec + 's' : '');
-            break;
-          default:
-            time = secondCount + 's';
-        }
-        second.innerHTML = time;
-      }
-    });
+    seconds.forEach(secondsToHHMMSS);
   }
 }
 
