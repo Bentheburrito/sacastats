@@ -66,14 +66,14 @@
                     <div class="h-50 d-flex justify-content-center align-items-end">
                         <h4 class=""><u>Last Online On</u></h4>
                     </div>
-                    <p class="text-center date-time"><%= prettify_timestamp(@conn.assigns, @character_info.last_save) %></p>
+                    <p class="text-center"><%= prettify_timestamp(@character_info.last_save) %></p>
                     <br />
                 </div>
                 <div class="col-12 col-md-6">
                     <div class="h-50 d-flex justify-content-center align-items-end">
                         <h4 class=""><u>Created On</u></h4>
                     </div>
-                    <p class="text-center date-time"><%= prettify_timestamp(@conn.assigns, @character_info.creation) %></p>
+                    <p class="text-center"><%= prettify_timestamp(@character_info.creation) %></p>
                 </div>
             </div>
         </div>
@@ -96,7 +96,7 @@
                         <div class="h-50 d-flex justify-content-center align-items-end">
                             <h4 class="text-center"><u>Joined</u></h4>
                         </div>
-                        <p class="text-center date-time"><%= @character_info.outfit.member_since_date |> to_string() |> String.trim_trailing("Z") %></p>
+                        <p class="text-center date-time"><%= to_string(@character_info.outfit.member_since_date) %></p>
                         <br />
                     </div>
                     <div class="col-12 col-md-6">
@@ -110,7 +110,7 @@
                         <div class="h-50 d-flex justify-content-center align-items-end">
                             <h4 class="text-center"><u>Created</u></h4>
                         </div>
-                        <p class="text-center date-time"><%= @character_info.outfit.time_created_date |> to_string() |> String.trim_trailing("Z") %></p>
+                        <p class="text-center date-time"><%= to_string(@character_info.outfit.time_created_date) %></p>
                     </div>
                 <% else %>
                     <div class="col-12 py-3">

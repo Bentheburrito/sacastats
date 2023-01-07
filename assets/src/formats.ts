@@ -2,6 +2,41 @@ import * as generalEvents from './events/general-events.js';
 
 const PREFERED_LANGUAGE = navigator.languages ? navigator.languages[0] : navigator.language;
 const PREFERED_TIME_ZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const LONG_FORMATTER = new Intl.DateTimeFormat(PREFERED_LANGUAGE, {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  timeZone: PREFERED_TIME_ZONE
+});
+const TIME_FORMATTER = new Intl.DateTimeFormat(PREFERED_LANGUAGE, {
+  hour: 'numeric',
+  minute: 'numeric',
+  second: 'numeric',
+  hour12: true,
+  timeZone: PREFERED_TIME_ZONE
+});
+
+export function formatDateTimesOnElem (dateTime: Element) {
+  try {
+    let dateTimeObject = new Date(dateTime.innerHTML);
+
+    try {
+      dateTime.innerHTML =
+        LONG_FORMATTER.format(dateTimeObject) + ' @ ' + TIME_FORMATTER.format(dateTimeObject);
+    } catch (error) {
+      console.error(error);
+      console.error('LONG_FORMATTER: ');
+      console.error(LONG_FORMATTER);
+      console.error('dateTimeObject: ');
+      console.error(dateTimeObject);
+      console.error('dateTime.innerHTML: ');
+      console.error(dateTime.innerHTML);
+    }
+  } catch (error) {
+    console.error(error);
+    console.error("Time variables not defined for: '" + dateTime.innerHTML + "'.");
+  }
+}
 
 export function addFormatsToPage() {
   addCommasToNumbers();
@@ -20,51 +55,7 @@ export function addFormatsToPage() {
 
   function formatDateTimes() {
     let dateTimes = document.querySelectorAll('.date-time');
-    dateTimes.forEach((dateTime) => {
-      let dateTimeString = dateTime.innerHTML;
-      let date = dateTimeString.split(' ')[0] as string;
-      let time = dateTimeString.split(' ')[1];
-      if (!isNaN(date.charAt(0) as unknown as number)) {
-        try {
-          let dateTimeObject = new Date(getLocalDateStringWithTimeFromStrings(date, time));
-          const LONG_FORMATTER = new Intl.DateTimeFormat(PREFERED_LANGUAGE, {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          });
-
-          try {
-            dateTime.innerHTML =
-              LONG_FORMATTER.format(dateTimeObject) + ' @ ' + dateTimeObject.toLocaleTimeString(PREFERED_LANGUAGE);
-          } catch (error) {
-            console.error(error);
-            console.error('LONG_FORMATTER: ');
-            console.error(LONG_FORMATTER);
-            console.error('dateTimeObject: ');
-            console.error(dateTimeObject);
-          }
-        } catch (error) {
-          console.error(error);
-          console.error("Time variables not defined for: '" + dateTimeString + "'.");
-        }
-      }
-    });
-  }
-
-  function getLocalDateStringWithTimeFromStrings(date: string, time: string): string {
-    let dateArr = date.split('-') as unknown as number[];
-    let timeArr = time.split(':') as unknown as number[];
-
-    return new Date(
-      Date.UTC(
-        dateArr[0],
-        dateArr[1] - 1,
-        dateArr[2],
-        timeArr[0],
-        timeArr[1],
-        (timeArr[2] as unknown as string).split('.')[0] as unknown as number,
-      ),
-    ).toLocaleString('en-US', { timeZone: PREFERED_TIME_ZONE });
+    dateTimes.forEach(formatDateTimesOnElem);
   }
 
   function addPercents() {

@@ -26,9 +26,23 @@ import "phoenix_html"
 import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
+import { formatDateTimesOnElem } from "../src/formats.ts";
+
+// Init Hooks
+let Hooks = {};
+
+// Format the given element when it is added or updated
+Hooks.NewDateToFormat = {
+  mounted () {
+    formatDateTimesOnElem(this.el);
+  },
+  updated () {
+    formatDateTimesOnElem(this.el);
+  }
+};
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-let liveSocket = new LiveSocket("/live", Socket, { params: { _csrf_token: csrfToken } })
+let liveSocket = new LiveSocket("/live", Socket, { hooks: Hooks, params: { _csrf_token: csrfToken } })
 
 // Show progress bar on live navigation and form submits
 topbar.topbar.config({ barColors: { 0: "#29d" }, shadowColor: "rgba(0, 0, 0, .3)" })
