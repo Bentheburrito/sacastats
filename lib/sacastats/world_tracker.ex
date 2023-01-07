@@ -43,7 +43,7 @@ defmodule SacaStats.WorldTracker do
       |> OnlineStatus.changeset(status_params)
       |> Ecto.Changeset.apply_changes()
 
-    Cachex.put(:online_status_cache, status.character_id, status)
+    Cachex.put(:online_status_cache, status.character_id, status, OnlineStatus.put_opts())
 
     state
   end
@@ -56,7 +56,7 @@ defmodule SacaStats.WorldTracker do
       |> OnlineStatus.changeset(status_params)
       |> Ecto.Changeset.apply_changes()
 
-    Cachex.put(:online_status_cache, status.character_id, status)
+    Cachex.put(:online_status_cache, status.character_id, status, OnlineStatus.put_opts())
 
     state
   end

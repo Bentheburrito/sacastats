@@ -12,6 +12,8 @@ defmodule SacaStats.Characters do
   import Ecto.Query
   import PS2.API.QueryBuilder, except: [field: 2]
 
+  @cache_ttl_ms 24 * 60 * 60 * 1000
+  @put_opts [ttl: @cache_ttl_ms]
   @httpoison_timeout_ms 10 * 1000
   @max_attempts 3
   @query_base Query.new(collection: "character")
@@ -72,7 +74,8 @@ defmodule SacaStats.Characters do
   @spec get_by_id(integer()) :: {:ok, struct()} | :not_found | :error
   def get_by_id(character_id) do
     with {:ok, %Character{} = char} <- Cachex.get(:character_cache, character_id),
-         {:ok, true} <- Cachex.put(:character_cache, char.name_first_lower, char.character_id) do
+         {:ok, true} <-
+           Cachex.put(:character_cache, char.name_first_lower, character_id, @put_opts) do
       {:ok, char}
     else
       {:ok, nil} ->
@@ -114,7 +117,7 @@ defmodule SacaStats.Characters do
         {okay_map, uncached_ids} ->
           with {:ok, %Character{} = char} <- Cachex.get(:character_cache, character_id),
                {:ok, true} <-
-                 Cachex.put(:character_cache, char.name_first_lower, char.character_id) do
+                 Cachex.put(:character_cache, char.name_first_lower, character_id, @put_opts) do
             {Map.put(okay_map, character_id, {:ok, char}), uncached_ids}
           else
             {:ok, nil} ->
@@ -168,8 +171,8 @@ defmodule SacaStats.Characters do
           {:ok, %Character{} = char} ->
             # Only cache these responses if they contain character/weapon stats
             unless shallow_copy? do
-              Cachex.put(:character_cache, char.character_id, char)
-              Cachex.put(:character_cache, char.name_first_lower, char.character_id)
+              Cachex.put(:character_cache, char.character_id, char, @put_opts)
+              Cachex.put(:character_cache, char.name_first_lower, char.character_id, @put_opts)
             end
 
             Map.put(result_map, char.character_id, {:ok, char})
@@ -191,8 +194,8 @@ defmodule SacaStats.Characters do
            PS2.API.query_one(query, SacaStats.SIDs.next()),
          {:ok, char} <-
            %Character{} |> Character.changeset(data) |> Changeset.apply_action(:update) do
-      Cachex.put(:character_cache, char.character_id, char)
-      Cachex.put(:character_cache, char.name_first_lower, char.character_id)
+      Cachex.put(:character_cache, char.character_id, char, @put_opts)
+      Cachex.put(:character_cache, char.name_first_lower, char.character_id, @put_opts)
       {:ok, char}
     else
       {:ok, %QueryResult{returned: 0}} ->

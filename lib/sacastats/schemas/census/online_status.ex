@@ -8,6 +8,8 @@ defmodule SacaStats.Census.OnlineStatus do
 
   import PS2.API.QueryBuilder, except: [field: 2]
 
+  @cache_ttl_ms 12 * 60 * 60 * 1000
+  def put_opts, do: [ttl: @cache_ttl_ms]
   @httpoison_timeout_ms 6 * 1000
   @max_attempts 3
   @query_base Query.new(collection: "characters_online_status") |> lang("en")
@@ -105,7 +107,7 @@ defmodule SacaStats.Census.OnlineStatus do
         |> Ecto.Changeset.apply_action(:update)
         |> case do
           {:ok, %OnlineStatus{} = status} ->
-            Cachex.put(:online_status_cache, status.character_id, status)
+            Cachex.put(:online_status_cache, status.character_id, status, put_opts())
 
             Map.put(result_map, status.character_id, {:ok, status})
 
@@ -126,7 +128,7 @@ defmodule SacaStats.Census.OnlineStatus do
            PS2.API.query_one(query, SacaStats.SIDs.next()),
          {:ok, status} <-
            %OnlineStatus{} |> changeset(data) |> Ecto.Changeset.apply_action(:update) do
-      Cachex.put(:online_status_cache, status.character_id, status)
+      Cachex.put(:online_status_cache, status.character_id, status, put_opts())
       {:ok, status}
     else
       {:ok, %QueryResult{returned: 0}} ->
