@@ -52,7 +52,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
 
     # If the list is empty (i.e. no favorites), return an empty map
     if match?([], favorites_result) do
-      %{}
+      {:ok, %{}}
     else
       favorite_characters = Map.new(favorites_result, &{&1.character_id, &1})
 
