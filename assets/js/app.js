@@ -26,9 +26,50 @@ import "phoenix_html"
 import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
+import { addCommasToNumber, formatDateTime, addPercent, secondsToHHMMSS } from "../src/formats.ts";
+
+// Init Hooks
+let Hooks = {};
+
+// Format the given element when it is added or updated
+Hooks.NewDateToFormat = {
+  mounted () {
+    formatDateTime(this.el);
+  },
+  updated () {
+    formatDateTime(this.el);
+  }
+};
+
+Hooks.AddCommasToNumber = {
+  mounted () {
+    addCommasToNumber(this.el);
+  },
+  updated () {
+    addCommasToNumber(this.el);
+  }
+};
+
+Hooks.AddPercent = {
+  mounted () {
+    addPercent(this.el);
+  },
+  updated () {
+    addPercent(this.el);
+  }
+};
+
+Hooks.SecondsToReadable = {
+  mounted () {
+    secondsToHHMMSS(this.el);
+  },
+  updated () {
+    secondsToHHMMSS(this.el);
+  }
+};
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-let liveSocket = new LiveSocket("/live", Socket, { params: { _csrf_token: csrfToken } })
+let liveSocket = new LiveSocket("/live", Socket, { hooks: Hooks, params: { _csrf_token: csrfToken } })
 
 // Show progress bar on live navigation and form submits
 topbar.topbar.config({ barColors: { 0: "#29d" }, shadowColor: "rgba(0, 0, 0, .3)" })

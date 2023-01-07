@@ -20,8 +20,8 @@ defmodule SacaStatsWeb.CharacterView do
   require Logger
 
   def pretty_session_summary(assigns, session) do
-    login_time = prettify_timestamp(assigns, session.login.timestamp)
-    logout_time = prettify_timestamp(assigns, session.logout.timestamp)
+    login_time = prettify_timestamp(session.login.timestamp)
+    logout_time = prettify_timestamp(session.logout.timestamp)
     session_duration = prettify_duration(session.login.timestamp, session.logout.timestamp)
 
     ~H"""
@@ -33,17 +33,20 @@ defmodule SacaStatsWeb.CharacterView do
     """
   end
 
-  def prettify_timestamp(_assigns, :current_session), do: "Current Session"
+  def prettify_timestamp(:current_session), do: "Current Session"
 
-  def prettify_timestamp(assigns, timestamp) do
+  def prettify_timestamp(timestamp) do
     dt_string =
       timestamp
       |> DateTime.from_unix!()
       |> to_string()
-      |> String.trim_trailing("Z")
+
+    id = :rand.uniform(999_999_999)
+
+    assigns = []
 
     ~H"""
-    <span class="date-time"><%= dt_string %></span>
+    <span class="date-time" id={"formatted-timestamp-#{id}"} phx-hook="NewDateToFormat"><%= dt_string %></span>
     """
   end
 
@@ -99,7 +102,7 @@ defmodule SacaStatsWeb.CharacterView do
     ~H"""
     <li>
       <%= format_character_link(session.name) %> ranked up to <%= br_up.battle_rank %> -
-      <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, br_up.timestamp) %>
+      <%= SacaStatsWeb.CharacterView.prettify_timestamp(br_up.timestamp) %>
     </li>
     """
   end
@@ -118,7 +121,7 @@ defmodule SacaStatsWeb.CharacterView do
     <li>
       <%= character_identifier %> seems to have killed themself with <%= weapon_identifier %>
       -
-      <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, death.timestamp) %>
+      <%= SacaStatsWeb.CharacterView.prettify_timestamp(death.timestamp) %>
     </li>
     """
   end
@@ -134,7 +137,7 @@ defmodule SacaStatsWeb.CharacterView do
       with <%= attacker_weapon_identifier %>
       <%= death.is_headshot && "(headshot)" || "" %>
       -
-      <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, death.timestamp) %>
+      <%= SacaStatsWeb.CharacterView.prettify_timestamp(death.timestamp) %>
     </li>
     """
   end
@@ -163,7 +166,7 @@ defmodule SacaStatsWeb.CharacterView do
       <%= format_character_link(session.name) %> captured
       <%= "#{facility["facility_name"] || "a facility"} #{facility_type_text}" %>
       <%= outfit_captured_text %> -
-      <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, cap.timestamp) %>
+      <%= SacaStatsWeb.CharacterView.prettify_timestamp(cap.timestamp) %>
     </li>
     """
   end
@@ -190,7 +193,7 @@ defmodule SacaStatsWeb.CharacterView do
       <%= format_character_link(session.name) %> defended
       <%= "#{facility["facility_name"] || "a facility"} #{facility_type_text}" %>
       <%= outfit_captured_text %> -
-      <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, def.timestamp) %>
+      <%= SacaStatsWeb.CharacterView.prettify_timestamp(def.timestamp) %>
     </li>
     """
   end
@@ -210,7 +213,7 @@ defmodule SacaStatsWeb.CharacterView do
       <%= character_identifier %> destroyed their <%= SacaStats.vehicles()[vd.vehicle_id]["name"] %>
       with <%= attacker_weapon_identifier %>
       -
-      <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, vd.timestamp) %>
+      <%= SacaStatsWeb.CharacterView.prettify_timestamp(vd.timestamp) %>
     </li>
     """
   end
@@ -226,7 +229,7 @@ defmodule SacaStatsWeb.CharacterView do
       with <%= attacker_weapon_identifier %>
       <%= vd.attacker_vehicle_id != 0 && " while in a #{SacaStats.vehicles()[vd.attacker_vehicle_id]["name"]}" || "" %>
       -
-      <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, vd.timestamp) %>
+      <%= SacaStatsWeb.CharacterView.prettify_timestamp(vd.timestamp) %>
     </li>
     """
   end
@@ -246,7 +249,7 @@ defmodule SacaStatsWeb.CharacterView do
     <li>
       <%= character_identifier %> assisted in killing <%= other_identifier %>
       -
-      <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, ge.timestamp) %>
+      <%= SacaStatsWeb.CharacterView.prettify_timestamp(ge.timestamp) %>
     </li>
     """
   end
@@ -266,7 +269,7 @@ defmodule SacaStatsWeb.CharacterView do
     <li>
       <%= other_identifier %> revived <%= character_identifier %>
       -
-      <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, ge.timestamp) %>
+      <%= SacaStatsWeb.CharacterView.prettify_timestamp(ge.timestamp) %>
     </li>
     """
   end
@@ -286,7 +289,7 @@ defmodule SacaStatsWeb.CharacterView do
     <li>
       <%= character_identifier %> revived <%= other_identifier %>
       -
-      <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, ge.timestamp) %>
+      <%= SacaStatsWeb.CharacterView.prettify_timestamp(ge.timestamp) %>
     </li>
     """
   end
@@ -329,7 +332,7 @@ defmodule SacaStatsWeb.CharacterView do
     <li>
       <%= event_log_message %>
       -
-      <%= SacaStatsWeb.CharacterView.prettify_timestamp(assigns, ge.timestamp) %>
+      <%= SacaStatsWeb.CharacterView.prettify_timestamp(ge.timestamp) %>
     </li>
     """
   end

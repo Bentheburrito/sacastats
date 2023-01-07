@@ -204,6 +204,14 @@ defmodule SacaStatsWeb.CharacterLive.Search do
      )}
   end
 
+  # Catch-all for other kinds of player events
+  def handle_info(
+        %Ecto.Changeset{},
+        socket
+      ) do
+    {:noreply, socket}
+  end
+
   # The user favorites a character in another window
   def handle_info({:favorite, %Favorite{} = favorite}, socket) do
     with {:ok, %Character{} = info} <- Characters.get_by_id(favorite.character_id),
