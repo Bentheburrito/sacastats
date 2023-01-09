@@ -31,7 +31,7 @@ defmodule SacaStatsWeb.Router do
     pipe_through :browser
 
     live "/", CharacterLive.Search
-    get "/:character_name", CharacterController, :base
+    live "/:character_name/general", CharacterLive.General
     get "/:character_name/:stat_type", CharacterController, :character
     get "/:character_name/sessions/latest", CharacterController, :latest_session
     live "/:character_name/sessions/:login_timestamp", SessionLive.View

@@ -171,7 +171,7 @@ defmodule SacaStatsWeb.CharacterController do
       online_status: status,
       stat_page: "sessions.html",
       sessions: sessions,
-      is_favorite: Characters.favorite?(char.character_id, user_id),
+      favorited?: Characters.favorite?(char.character_id, user_id),
       changeset: Favorite.changeset(%Favorite{})
     ]
   end
@@ -188,7 +188,7 @@ defmodule SacaStatsWeb.CharacterController do
       weapons: complete_weapons,
       types: type_set,
       categories: category_set,
-      is_favorite: Characters.favorite?(char.character_id, user_id),
+      favorited?: Characters.favorite?(char.character_id, user_id),
       changeset: Favorite.changeset(%Favorite{})
     ]
   end
@@ -227,7 +227,7 @@ defmodule SacaStatsWeb.CharacterController do
       stat_page: "general.html",
       character_characteristics: character_characteristics,
       best_weapons: best_weapons,
-      is_favorite: Characters.favorite?(char.character_id, user_id),
+      favorited?: Characters.favorite?(char.character_id, user_id),
       changeset: Favorite.changeset(%Favorite{})
     ]
   end
@@ -237,7 +237,7 @@ defmodule SacaStatsWeb.CharacterController do
       character_info: char,
       online_status: status,
       stat_page: stat_type <> ".html",
-      is_favorite: Characters.favorite?(char.character_id, user_id),
+      favorited?: Characters.favorite?(char.character_id, user_id),
       changeset: Favorite.changeset(%Favorite{})
     ]
   end

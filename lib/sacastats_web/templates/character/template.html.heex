@@ -1,4 +1,5 @@
-<link rel="stylesheet" href={Routes.static_path(@conn, "/css/character/template.css")}/>
+<link rel="stylesheet" href={Routes.static_path(@socket, "/css/character/template.css")}/>
+				<%= unless @character_info == :loading do %>
 
 <nav class="sticky-top second-nav navbar navbar-expand-md navbar-light bg-light d-none d-md-flex">
   <div class="collapse navbar-collapse d-flex">
@@ -16,14 +17,14 @@
   </div>
 </nav>
 
-<p class="alert alert-info text-center" role="alert"><%= try do get_flash(@conn, :info) rescue  ArgumentError -> live_flash(@flash, :info) end %></p>
-<p class="alert alert-danger text-center" role="alert"><%= try do get_flash(@conn, :error) rescue  ArgumentError -> live_flash(@flash, :error) end %></p>
+<p class="alert alert-info text-center" role="alert"><%= try do get_flash(@socket, :info) rescue  ArgumentError -> live_flash(@flash, :info) end %></p>
+<p class="alert alert-danger text-center" role="alert"><%= try do get_flash(@socket, :error) rescue  ArgumentError -> live_flash(@flash, :error) end %></p>
 
 <main role="main" class="container pt-4 pt-md-3">
   <div class="row">
     <div class="col-12 col-md-1 text-center">
       <img class="float-md-left float-none" data-toggle="tooltip"
-        title={@character_info.name_first <> " plays on the " <> Map.get(SacaStats.factions, @character_info.faction_id)[:name]}
+        title={"#{@character_info.name_first} plays on the #{Map.get(SacaStats.factions, @character_info.faction_id)[:name]}"}
         src={Map.get(SacaStats.factions, @character_info.faction_id)[:image]}
         alt={@online_status} width="70">
     </div>
@@ -64,31 +65,15 @@
           </div>
         <% else %>
           <div class="d-none d-md-inline-block pl-0 pl-lg-5">
-            <.form let={form} for={@changeset} class="mb-0" action={SacaStats.Characters.get_favorite_button_path((if !Map.has_key?(@conn, :request_path), do: @request_path, else: @conn.request_path), @is_favorite)}>
-              <%= hidden_input form, :discord_id, value: @user && @user.id || nil %>
-              <%= hidden_input form, :character_id, value: @character_info.character_id %>
-              <%= hidden_input form, :last_known_name, value: @character_info.name_first %>
-
-              <button class={"btn " <> (if @is_favorite, do: "btn-secondary", else: "btn-primary") <> " ml-3 character-favorite-btn px-3 py-3"} type="submit">
-                <%= HtmlEntities.decode(if @is_favorite, do: "&#9829;	Unfavorite", else: "&#9825;	Favorite") %>
-              </button>
-            </.form>
+            put favorite button here
           </div>
           <div class="d-inline-block d-md-none w-100 text-center">
-            <.form let={form} for={@changeset} action={SacaStats.Characters.get_favorite_button_path((if !Map.has_key?(@conn, :request_path), do: @request_path, else: @conn.request_path), @is_favorite)}>
-              <%= hidden_input form, :discord_id, value: @user && @user.id || nil %>
-              <%= hidden_input form, :character_id, value: @character_info.character_id %>
-              <%= hidden_input form, :last_known_name, value: @character_info.name_first %>
-
-              <button class={"btn " <> (if @is_favorite, do: "btn-secondary", else: "btn-primary") <> " ml-3 character-favorite-btn px-3 py-3"} type="submit">
-                <%= HtmlEntities.decode(if @is_favorite, do: "&#9829;	Unfavorite", else: "&#9825;	Favorite") %>
-              </button>
-            </.form>
+            again put favorite button here
           </div>
         <% end %>
 
         <div class="d-none d-md-flex float-md-right align-items-center h-100">
-          <img src={Routes.static_path(@conn, "/images/character/" <> @online_status <> ".ico")} alt={@online_status} width="30">
+          <img src={Routes.static_path(@socket, "/images/character/#{@online_status}.ico")} alt={@online_status} width="30">
           <p class="d-inline my-auto"><%=String.capitalize(@online_status) %></p>
         </div>
         <p id="characterId"><%= @character_info.character_id %></p>
@@ -96,7 +81,7 @@
     </div>
   </div>
   <div class="d-md-none d-flex justify-content-center pb-3">
-    <img src={Routes.static_path(@conn, "/images/character/" <> @online_status <> ".ico")} alt={@online_status} width="30">
+    <img src={Routes.static_path(@socket, "/images/character/" <> @online_status <> ".ico")} alt={@online_status} width="30">
     <p class="d-inline my-auto"><%=String.capitalize(@online_status) %></p>
   </div>
   <hr class="d-md-none">
@@ -135,5 +120,5 @@
     </button>
   </nav>
 </footer>
-
+<% end %>
 <script type="module" src="/assets/dist/character/template.js"></script>

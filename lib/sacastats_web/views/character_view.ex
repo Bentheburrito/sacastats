@@ -33,6 +33,8 @@ defmodule SacaStatsWeb.CharacterView do
     """
   end
 
+  def prettify_timestamp(:loading), do: "Loading..."
+  def prettify_timestamp(nil), do: ""
   def prettify_timestamp(:current_session), do: "Current Session"
 
   def prettify_timestamp(timestamp) do
