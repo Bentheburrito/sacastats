@@ -52,7 +52,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
 
     # If the list is empty (i.e. no favorites), return an empty map
     if match?([], favorites_result) do
-      %{}
+      {:ok, %{}}
     else
       favorite_characters = Map.new(favorites_result, &{&1.character_id, &1})
 
@@ -286,13 +286,19 @@ defmodule SacaStatsWeb.CharacterLive.Search do
       from(f in Favorite, where: f.discord_id == ^user.id and f.character_id == ^char_id)
     )
 
-    {_, updated_char_map} =
-      socket.assigns.favorite_characters
-      |> pop_in([status, char_id])
+    favorite = %Favorite{
+      character_id: char_id,
+      discord_id: user.id,
+      last_known_name: get_in(socket.assigns.favorite_characters, [status, char_id])
+    }
 
-    updated_socket = assign(socket, :favorite_characters, updated_char_map)
+    PubSub.broadcast(
+      SacaStats.PubSub,
+      "unfavorite_event:#{user.id}",
+      {:unfavorite, favorite}
+    )
 
-    {:noreply, updated_socket}
+    {:noreply, socket}
   end
 
   def create_character_status_cards(assigns, characters) do

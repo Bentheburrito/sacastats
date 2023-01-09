@@ -6,12 +6,15 @@ defmodule SacaStatsWeb.CharacterLive.General do
 
   require Logger
 
+  import Ecto.Query
+
   alias Phoenix.PubSub
   alias SacaStats.Census.Character.Outfit
   alias SacaStats.Character.Favorite
   alias SacaStats.{Characters, Weapons}
   alias SacaStats.Census.{Character, OnlineStatus}
   alias SacaStats.Events.{PlayerLogin, PlayerLogout}
+  alias SacaStats.Repo
 
   @init_assigns %{
     character_info: %Character{
@@ -45,7 +48,14 @@ defmodule SacaStatsWeb.CharacterLive.General do
   def mount(%{"character_name" => name}, session, socket) do
     socket =
       if connected?(socket) do
-        try_build_content(name, socket)
+        user = session["user"]
+
+        if not is_nil(user) do
+          PubSub.subscribe(SacaStats.PubSub, "favorite_event:#{user.id}")
+          PubSub.subscribe(SacaStats.PubSub, "unfavorite_event:#{user.id}")
+        end
+
+        try_build_content(name, session, socket)
       else
         assign(socket, @init_assigns)
       end
@@ -53,12 +63,19 @@ defmodule SacaStatsWeb.CharacterLive.General do
     {:ok, assign(socket, :user, session["user"])}
   end
 
-  defp try_build_content(character_name, socket) do
+  defp try_build_content(character_name, session, socket) do
     with {:ok, %Character{} = char} <- Characters.get_by_name(character_name) do
       # Start tasks to do some work concurrently
       online_status_task = Task.async(fn -> OnlineStatus.get_by_id(char.character_id) end)
-      user_id = socket.assigns[:user][:id]
-      favorited_task = Task.async(fn -> Characters.favorite?(char.character_id, user_id) end)
+
+      favorited_task =
+        Task.async(fn ->
+          if is_nil(session["user"]) do
+            false
+          else
+            Characters.favorite?(char.character_id, session["user"].id)
+          end
+        end)
 
       # Subscribe to events from this character
       PubSub.subscribe(SacaStats.PubSub, "game_event:#{char.character_id}")
@@ -127,6 +144,69 @@ defmodule SacaStatsWeb.CharacterLive.General do
     end
   end
 
+  # if this character's favorited status is still loading, ignore when the user presses the button
+  def handle_event("handle_favorite", %{"action" => "loading"}, socket), do: {:noreply, socket}
+
+  def handle_event("handle_favorite", params, socket) do
+    user_id = params |> Map.fetch!("user_id") |> String.to_integer()
+    character_id = params |> Map.fetch!("character_id") |> String.to_integer()
+    character_name = Map.fetch!(params, "character_name")
+    action = Map.fetch!(params, "favorite_action")
+
+    changeset =
+      Favorite.changeset(%Favorite{}, %{
+        :discord_id => user_id,
+        :character_id => character_id,
+        :last_known_name => character_name
+      })
+
+    action_result =
+      if action == "favorite" do
+        Repo.insert(changeset)
+      else
+        from(f in Favorite, where: f.discord_id == ^user_id and f.character_id == ^character_id)
+        |> Repo.delete_all()
+      end
+
+    case action_result do
+      {1, nil} ->
+        PubSub.broadcast(
+          SacaStats.PubSub,
+          "unfavorite_event:#{user_id}",
+          {:unfavorite, Ecto.Changeset.apply_changes(changeset)}
+        )
+
+        # NOTE: we don't update the `favorited?` assign here, because we subscribe to this user's favorites on mount,
+        # so the LV will receive a message that updates the assigns for us (which is what the broadcast above does).
+        {:noreply, socket}
+
+      {0, nil} ->
+        {:noreply,
+         put_flash(socket, :info, "It looks like this character is already unfavorited.")}
+
+      {:ok, favorite} ->
+        PubSub.broadcast(
+          SacaStats.PubSub,
+          "favorite_event:#{favorite.discord_id}",
+          {:favorite, favorite}
+        )
+
+        # See NOTE above
+        {:noreply, socket}
+
+      # This clause will only ever match when inserting
+      {:error, changeset} ->
+        Logger.error("Couldn't insert favorite character. Changeset: #{inspect(changeset)}")
+
+        {:noreply,
+         put_flash(
+           socket,
+           :error,
+           "An error occured while adding #{character_name} to your favorites. Please try again"
+         )}
+    end
+  end
+
   # A favorite character logs on
   def handle_info(
         %Ecto.Changeset{data: %PlayerLogin{}},
@@ -159,5 +239,15 @@ defmodule SacaStatsWeb.CharacterLive.General do
         socket
       ) do
     {:noreply, socket}
+  end
+
+  # The user favorites this character here or in another window
+  def handle_info({:favorite, %Favorite{}}, socket) do
+    {:noreply, assign(socket, favorited?: not socket.assigns.favorited?)}
+  end
+
+  # The user unfavorites this character here or in another window
+  def handle_info({:unfavorite, %Favorite{}}, socket) do
+    {:noreply, assign(socket, favorited?: not socket.assigns.favorited?)}
   end
 end

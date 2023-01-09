@@ -1,5 +1,4 @@
 <link rel="stylesheet" href={Routes.static_path(@socket, "/css/character/template.css")}/>
-				<%= unless @character_info == :loading do %>
 
 <nav class="sticky-top second-nav navbar navbar-expand-md navbar-light bg-light d-none d-md-flex">
   <div class="collapse navbar-collapse d-flex">
@@ -64,11 +63,22 @@
             </div>
           </div>
         <% else %>
+          <% {action, btn_class} = case @favorited? do
+            true -> {"unfavorite", "secondary"}
+            false -> {"favorite", "primary"}
+            :loading -> {"loading", "secondary"}
+          end %>
+          <% full_heart_num = 9 %>
+          <% empty_heart_num = 5 %>
           <div class="d-none d-md-inline-block pl-0 pl-lg-5">
-            put favorite button here
+            <button phx-click="handle_favorite" phx-value-user_id={@user.id} phx-value-favorite_action={action} phx-value-character_name={@character_info.name_first} phx-value-character_id={@character_info.character_id} class={"btn btn-#{btn_class} ml-3 character-favorite-btn px-3 py-3"} type="button">
+              <%= HtmlEntities.decode("&#982#{@favorited? && full_heart_num || empty_heart_num};    #{action}") %>
+            </button>
           </div>
           <div class="d-inline-block d-md-none w-100 text-center">
-            again put favorite button here
+            <button phx-click="handle_favorite" phx-value-user_id={@user.id} phx-value-favorite_action={action} phx-value-character_name={@character_info.name_first} phx-value-character_id={@character_info.character_id} class={"btn btn-#{btn_class} ml-3 character-favorite-btn px-3 py-3"} type="button">
+              <%= HtmlEntities.decode("&#982#{@favorited? && full_heart_num || empty_heart_num};    #{action}") %>
+            </button>
           </div>
         <% end %>
 
@@ -120,5 +130,4 @@
     </button>
   </nav>
 </footer>
-<% end %>
 <script type="module" src="/assets/dist/character/template.js"></script>
