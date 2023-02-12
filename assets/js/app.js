@@ -27,6 +27,7 @@ import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import { addCommasToNumber, formatDateTime, addPercent, secondsToHHMMSS } from "../src/formats.ts";
+import { init as initInfantryModel } from "../src/character/planetside-model.ts";
 
 // Init Hooks
 let Hooks = {};
@@ -65,6 +66,15 @@ Hooks.SecondsToReadable = {
   },
   updated () {
     secondsToHHMMSS(this.el);
+  }
+};
+
+Hooks.InitInfantryModel = {
+  mounted () {
+    initInfantryModel(this.el);
+  },
+  updated () {
+    initInfantryModel(this.el);
   }
 };
 

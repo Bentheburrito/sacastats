@@ -1,4 +1,4 @@
-<link rel="stylesheet" href={Routes.static_path(@conn, "/css/character/weapons.css")}/>
+<link rel="stylesheet" href={Routes.static_path(@socket, "/css/character/weapons.css")}/>
 
 <div class="selection-mobile-menu-top selection-mobile-menu">
     <div class="d-flex h-100 justify-content-between">
@@ -75,7 +75,7 @@
 <div id="weaponTable-toolbar">
 </div>
 <button id="nextAurax" class="btn btn-secondary p-0 m-0 ml-1 mt-3 float-right"  data-toggle="tooltip" data-placement="top" title="Scroll to closest weapon to auraxium">
-    <img src={Routes.static_path(@conn, "/images/character/alphaAurax.png")} class="m-auto" width="30px" alt="To Next Auraxium Weapon"/>
+    <img src={Routes.static_path(@socket, "/images/character/alphaAurax.png")} class="m-auto" width="30px" alt="To Next Auraxium Weapon"/>
 </button>
 <button id="weaponTable-clear-all-filter-button" class="btn btn-secondary ml-1 py-0 px-3 m-0 mt-3 float-right" title="Clear All Filters">
     <i class="fas fa-trash"></i>
@@ -418,8 +418,8 @@
                         <img src={"https://census.daybreakgames.com" <> Map.get(weapon, "image_path", "/files/ps2/images/static/-1.png")}
                             onerror={"this.onerror=null; this.src='" <>
                                 (if weapon["vehicle_weapon?"],
-                                    do: Routes.static_path(@conn, "/images/character/unknownVehicleWeapon.png"),
-                                    else: Routes.static_path(@conn, "/images/character/unknownInfantryWeapon.png"))
+                                    do: Routes.static_path(@socket, "/images/character/unknownVehicleWeapon.png"),
+                                    else: Routes.static_path(@socket, "/images/character/unknownInfantryWeapon.png"))
                                 <> "'"}
                             alt={Map.get(weapon, "name", "N/A")} class="weapon-image mx-auto d-block"/>
                     </div>
@@ -577,6 +577,6 @@
     }
 </script>
 
-<script type="module" src={Routes.static_path(@conn, "/assets/dist/character/weapons-table.js")}></script>
+<script type="module" src={Routes.static_path(@socket, "/assets/dist/character/weapons-table.js")}></script>
 
-<script type="module" src={Routes.static_path(@conn, "/assets/dist/character/weapons.js")}></script>
+<script type="module" src={Routes.static_path(@socket, "/assets/dist/character/weapons.js")}></script>

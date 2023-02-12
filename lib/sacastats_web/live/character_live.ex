@@ -1,6 +1,6 @@
-defmodule SacaStatsWeb.CharacterLive.General do
+defmodule SacaStatsWeb.CharacterLive do
   @moduledoc """
-  LiveView for a character's general stats page.
+  LiveView for a character.
   """
   use SacaStatsWeb, :live_view
 
@@ -8,41 +8,45 @@ defmodule SacaStatsWeb.CharacterLive.General do
 
   import Ecto.Query
 
+  alias SacaStatsWeb.CharacterLive
   alias Phoenix.PubSub
-  alias SacaStats.Census.Character.Outfit
   alias SacaStats.Character.Favorite
   alias SacaStats.{Characters, Weapons}
   alias SacaStats.Census.{Character, OnlineStatus}
+  alias SacaStats.Census.Character.Outfit
   alias SacaStats.Events.{PlayerLogin, PlayerLogout}
   alias SacaStats.Repo
 
-  @init_assigns %{
-    character_info: %Character{
-      head_id: 0,
-      profile_type_description: "Light Assault",
-      battle_rank: :loading,
-      available_points: :loading
-    },
-    online_status: "loading",
-    outfit_leader_name: :loading,
-    all_medal_counts: %{},
-    stat_page: "general.html",
-    character_characteristics: %{"ethnicity" => "robot", "sex" => "robot"},
-    best_weapons: %{"Loading..." => %{}},
-    favorited?: :loading,
-    changeset: :loading
-  }
-
-  def render(assigns) do
-    Phoenix.View.render(
-      SacaStatsWeb.CharacterView,
-      "template.html",
-      Map.put(assigns, :stat_page, "general.html")
-    )
+  def init_assigns do
+    %{
+      character_info: %Character{
+        head_id: 0,
+        profile_type_description: "Light Assault",
+        battle_rank: :loading,
+        available_points: :loading
+      },
+      online_status: "loading",
+      favorited?: :loading,
+      inner_options: :loading
+    }
   end
 
-  def handle_params(_unsigned_params, uri, socket) do
-    {:noreply, assign(socket, request_path: URI.parse(uri).path)}
+  def handle_params(%{"character_name" => character_name} = params, uri, socket) do
+    IO.inspect(uri, label: "uri")
+    IO.inspect(params, label: "params")
+    IO.inspect(socket.assigns.live_action, label: "live action")
+
+    # Begin getting the actual (possibly expensive) page data, receiving the result as a message later
+    live_action = socket.assigns.live_action
+    me = self()
+
+    if connected?(socket) do
+      Task.start_link(fn ->
+        send_inner_assigns(me, live_action, socket.assigns.character_info)
+      end)
+    end
+
+    {:noreply, assign(socket, request_path: URI.parse(uri).path, character_name: character_name)}
   end
 
   def mount(%{"character_name" => name}, session, socket) do
@@ -50,20 +54,24 @@ defmodule SacaStatsWeb.CharacterLive.General do
       if connected?(socket) do
         user = session["user"]
 
+        # Subscribe to favorite events if user is logged in
         if not is_nil(user) do
           PubSub.subscribe(SacaStats.PubSub, "favorite_event:#{user.id}")
           PubSub.subscribe(SacaStats.PubSub, "unfavorite_event:#{user.id}")
         end
 
-        try_build_content(name, session, socket)
+        # Fetch expensive data (character_info, online_status, etc.)
+        build_assigns(name, session, socket)
       else
-        assign(socket, @init_assigns)
+        # Put default/loading assign data for init static load
+        assign(socket, init_assigns())
       end
 
+    # For both mounts, assign the user from the session
     {:ok, assign(socket, :user, session["user"])}
   end
 
-  defp try_build_content(character_name, session, socket) do
+  defp build_assigns(character_name, session, socket) do
     with {:ok, %Character{} = char} <- Characters.get_by_name(character_name) do
       # Start tasks to do some work concurrently
       online_status_task = Task.async(fn -> OnlineStatus.get_by_id(char.character_id) end)
@@ -80,27 +88,14 @@ defmodule SacaStatsWeb.CharacterLive.General do
       # Subscribe to events from this character
       PubSub.subscribe(SacaStats.PubSub, "game_event:#{char.character_id}")
 
-      # Compile weapon stats
-      compiled_stats = Weapons.compile_stats(char.weapon_stat, char.weapon_stat_by_faction)
-      all_medal_counts = Weapons.medal_counts(compiled_stats)
-      best_weapons = Weapons.compile_best_stats(compiled_stats)
-
       # Get additional character info
       ethnicity = Characters.get_ethnicity(char.faction_id, char.head_id)
       sex = Characters.get_sex(char.faction_id, char.head_id)
 
-      character_characteristics = %{
+      characteristics = %{
         "ethnicity" => ethnicity,
         "sex" => sex
       }
-
-      outfit_leader_name =
-        with %Outfit{leader_character_id: leader_char_id} <- char.outfit,
-             {:ok, %Character{name_first: name}} <- Characters.get_by_id(leader_char_id) do
-          name
-        else
-          _ -> "Unknown Outfit Leader Name (ID #{char.outfit.leader_character_id})"
-        end
 
       # Await tasks
       status_text =
@@ -115,13 +110,9 @@ defmodule SacaStatsWeb.CharacterLive.General do
       assign(socket,
         character_info: char,
         online_status: status_text,
-        outfit_leader_name: outfit_leader_name,
-        all_medal_counts: all_medal_counts,
-        stat_page: "general.html",
-        character_characteristics: character_characteristics,
-        best_weapons: best_weapons,
+        characteristics: characteristics,
         favorited?: favorited?,
-        changeset: Favorite.changeset(%Favorite{})
+        inner_options: :loading
       )
     else
       :not_found ->
@@ -142,6 +133,37 @@ defmodule SacaStatsWeb.CharacterLive.General do
         )
         |> live_redirect(to: Routes.live_path(socket, CharacterLive.Search))
     end
+  end
+
+  defp send_inner_assigns(me, :general, %Character{} = char) do
+    outfit_leader_name =
+      with %Outfit{leader_character_id: leader_char_id} <- char.outfit,
+           {:ok, %Character{name_first: name}} <- Characters.get_by_id(leader_char_id) do
+        name
+      else
+        _ -> "Unknown Outfit Leader Name (ID #{char.outfit.leader_character_id})"
+      end
+
+    # Compile weapon stats
+    compiled_stats = Weapons.compile_stats(char.weapon_stat, char.weapon_stat_by_faction)
+    all_medal_counts = Weapons.medal_counts(compiled_stats)
+    best_weapons = Weapons.compile_best_stats(compiled_stats)
+
+    assigns = %{
+      outfit_leader_name: outfit_leader_name,
+      all_medal_counts: all_medal_counts,
+      best_weapons: best_weapons
+    }
+
+    send(me, {:render_inner, "general.html", assigns})
+    :ok
+  end
+
+  defp send_inner_assigns(me, :weapons, %Character{} = char) do
+    assigns = %{}
+
+    send(me, {:render_inner, "weapons.html", assigns})
+    :ok
   end
 
   # if this character's favorited status is still loading, ignore when the user presses the button
@@ -207,11 +229,8 @@ defmodule SacaStatsWeb.CharacterLive.General do
     end
   end
 
-  # A favorite character logs on
-  def handle_info(
-        %Ecto.Changeset{data: %PlayerLogin{}},
-        socket
-      ) do
+  # This character logs on
+  def handle_info(%Ecto.Changeset{data: %PlayerLogin{}}, socket) do
     {:noreply,
      assign(
        socket,
@@ -221,10 +240,7 @@ defmodule SacaStatsWeb.CharacterLive.General do
   end
 
   # This character logs off
-  def handle_info(
-        %Ecto.Changeset{data: %PlayerLogout{}},
-        socket
-      ) do
+  def handle_info(%Ecto.Changeset{data: %PlayerLogout{}}, socket) do
     {:noreply,
      assign(
        socket,
@@ -234,10 +250,7 @@ defmodule SacaStatsWeb.CharacterLive.General do
   end
 
   # Catch-all for other kinds of player events
-  def handle_info(
-        %Ecto.Changeset{},
-        socket
-      ) do
+  def handle_info(%Ecto.Changeset{}, socket) do
     {:noreply, socket}
   end
 
@@ -249,5 +262,13 @@ defmodule SacaStatsWeb.CharacterLive.General do
   # The user unfavorites this character here or in another window
   def handle_info({:unfavorite, %Favorite{}}, socket) do
     {:noreply, assign(socket, favorited?: not socket.assigns.favorited?)}
+  end
+
+  # New data arrives from a Task
+  def handle_info({:render_inner, template_name, inner_assigns}, socket) do
+    # the inner content will need access to things like :character_info, so merge them
+    assigns = inner_assigns |> Map.merge(socket.assigns) |> Map.put(:socket, socket)
+
+    {:noreply, assign(socket, :inner_options, {template_name, assigns})}
   end
 end

@@ -4,20 +4,20 @@
   <div class="collapse navbar-collapse d-flex">
     <ul class="navbar-nav character-nav mx-auto justify-content-center">
       <li class="moving-nav-link-container nav-item h-100 my-auto subpage-nav">
-        <a class="moving-nav-link nav-link" href={"/character/#{@character_info.name_first}/general"}>General</a>
+        <%= live_patch "General", to: Routes.character_path(@socket, :general, @character_name), class: "moving-nav-link nav-link" %>
       </li>
       <li class="moving-nav-link-container nav-item h-100 my-auto subpage-nav">
-        <a class="moving-nav-link nav-link" navigate={Routes.live_path(@socket, SacaStatsWeb.CharacterLive.Sessions, @character_name)}>Sessions</a>
+        <%= live_patch "Sessions", to: Routes.character_path(@socket, :sessions, @character_name), class: "moving-nav-link nav-link" %>
       </li>
       <li class="moving-nav-link-container nav-item h-100 my-auto subpage-nav">
-        <a class="moving-nav-link nav-link" href={"/character/#{@character_info.name_first}/weapons"}>Weapons</a>
+        <%= live_patch "Weapons", to: Routes.character_path(@socket, :weapons, @character_name), class: "moving-nav-link nav-link" %>
       </li>
     </ul>
   </div>
 </nav>
 
-<p class="alert alert-info text-center" role="alert"><%= try do get_flash(@socket, :info) rescue  ArgumentError -> live_flash(@flash, :info) end %></p>
-<p class="alert alert-danger text-center" role="alert"><%= try do get_flash(@socket, :error) rescue  ArgumentError -> live_flash(@flash, :error) end %></p>
+<p class="alert alert-info text-center" role="alert"><%= live_flash(@flash, :info) %></p>
+<p class="alert alert-danger text-center" role="alert"><%= live_flash(@flash, :error) %></p>
 
 <main role="main" class="container pt-4 pt-md-3">
   <div class="row">
@@ -95,7 +95,12 @@
     <p class="d-inline my-auto"><%=String.capitalize(@online_status) %></p>
   </div>
   <hr class="d-md-none">
-  <%= render SacaStatsWeb.CharacterView, @stat_page, assigns %>
+  <%= if @inner_options == :loading do %>
+    Loading...
+  <% else %>
+    <% {template_name, assigns} = @inner_options %>
+    <%= Phoenix.View.render(SacaStatsWeb.CharacterView, template_name, assigns) %>
+  <% end %>
 	<div class="text-center py-3">
 		<div class="row justify-content-center">
 			<div class="col-12 col-md-auto pr-0">
@@ -103,7 +108,7 @@
 			</div>
 			<div class="col-12 col-md-auto pl-3">
 				<strong><p class="d-inline">
-					<%= prettify_timestamp(@character_info.last_save) %>
+					<%= SacaStatsWeb.CharacterView.prettify_timestamp(@character_info.last_save) %>
 				</p></strong>
 			</div>
 		</div>
@@ -130,4 +135,3 @@
     </button>
   </nav>
 </footer>
-<script type="module" src="/assets/dist/character/template.js"></script>

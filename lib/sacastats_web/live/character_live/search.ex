@@ -277,6 +277,10 @@ defmodule SacaStatsWeb.CharacterLive.Search do
     {:noreply, assign(socket, :favorite_characters, updated_char_map)}
   end
 
+  def handle_event("search", %{"character" => name}, socket) do
+    {:noreply, push_redirect(socket, to: Routes.character_path(socket, :general, name))}
+  end
+
   def handle_event("remove_favorite_character", %{"id" => char_id_and_status}, socket) do
     user = socket.assigns.user
     [char_id_str, status] = String.split(char_id_and_status, ":")
@@ -360,7 +364,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
         <%= encode_character_remove_button(assigns, id, name, online_status) %>
         <div class="row flex-row h-100">
           <%= encode_character_faction_image(assigns, name, faction_id) %>
-          <%= encode_character_characteristics(assigns, name, rank) %>
+          <%= encode_characteristics(assigns, name, rank) %>
           <%= encode_character_online_status(assigns, online_status) %>
         </div>
       </a>
@@ -401,7 +405,7 @@ defmodule SacaStatsWeb.CharacterLive.Search do
     """
   end
 
-  defp encode_character_characteristics(assigns, name, rank) do
+  defp encode_characteristics(assigns, name, rank) do
     ~H"""
       <div class="col-8 pl-5">
         <div class="row pl-3">
