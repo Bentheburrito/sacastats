@@ -16,6 +16,7 @@ defmodule SacaStatsWeb.CharacterLive do
   alias SacaStats.Census.Character.Outfit
   alias SacaStats.Events.{PlayerLogin, PlayerLogout}
   alias SacaStats.Repo
+  alias SacaStats.Session
 
   def init_assigns do
     %{
@@ -32,17 +33,13 @@ defmodule SacaStatsWeb.CharacterLive do
   end
 
   def handle_params(%{"character_name" => character_name} = params, uri, socket) do
-    IO.inspect(uri, label: "uri")
-    IO.inspect(params, label: "params")
-    IO.inspect(socket.assigns.live_action, label: "live action")
-
     # Begin getting the actual (possibly expensive) page data, receiving the result as a message later
     live_action = socket.assigns.live_action
     me = self()
 
     if connected?(socket) do
       Task.start_link(fn ->
-        send_inner_assigns(me, live_action, socket.assigns.character_info)
+        send_inner_assigns(me, live_action, socket.assigns.character_info, params)
       end)
     end
 
@@ -135,7 +132,7 @@ defmodule SacaStatsWeb.CharacterLive do
     end
   end
 
-  defp send_inner_assigns(me, :general, %Character{} = char) do
+  defp send_inner_assigns(me, :general, %Character{} = char, _params) do
     outfit_leader_name =
       with %Outfit{leader_character_id: leader_char_id} <- char.outfit,
            {:ok, %Character{name_first: name}} <- Characters.get_by_id(leader_char_id) do
@@ -145,6 +142,7 @@ defmodule SacaStatsWeb.CharacterLive do
       end
 
     # Compile weapon stats
+    # TODO: compiled_stats is calculated both here and in :weapons, we should probably cache this
     compiled_stats = Weapons.compile_stats(char.weapon_stat, char.weapon_stat_by_faction)
     all_medal_counts = Weapons.medal_counts(compiled_stats)
     best_weapons = Weapons.compile_best_stats(compiled_stats)
@@ -159,8 +157,50 @@ defmodule SacaStatsWeb.CharacterLive do
     :ok
   end
 
-  defp send_inner_assigns(me, :weapons, %Character{} = char) do
-    assigns = %{}
+  defp send_inner_assigns(me, :sessions, %Character{} = char, _params) do
+    assigns = %{
+      sessions: Session.get_summary(char.name_first_lower)
+    }
+
+    send(me, {:render_inner, "sessions.html", assigns})
+    :ok
+  end
+
+  defp send_inner_assigns(me, :session, %Character{} = char, params) do
+    {template, assigns} =
+      with {:ok, login_timestamp} <- Map.fetch(params, "login_timestamp"),
+           session <- Session.get(char.name_first, login_timestamp),
+           {:ok, events, character_map} <- Session.get_events_and_character_map(session) do
+        assigns = %{
+          session: session,
+          events: events,
+          character_map: character_map
+        }
+
+        {"session.html", assigns}
+      else
+        _ ->
+          assigns = %{
+            message: "We were unable to get that session right now, please try again later."
+          }
+
+          {"session_not_found.html", assigns}
+      end
+
+    send(me, {:render_inner, template, assigns})
+    :ok
+  end
+
+  defp send_inner_assigns(me, :weapons, %Character{} = char, _params) do
+    compiled_stats = Weapons.compile_stats(char.weapon_stat, char.weapon_stat_by_faction)
+    type_set = Weapons.get_sorted_set_of_items("category", compiled_stats)
+    category_set = Weapons.get_sorted_set_of_items("sanction", compiled_stats)
+
+    assigns = %{
+      weapons: compiled_stats,
+      types: type_set,
+      categories: category_set
+    }
 
     send(me, {:render_inner, "weapons.html", assigns})
     :ok
@@ -229,29 +269,60 @@ defmodule SacaStatsWeb.CharacterLive do
     end
   end
 
-  # This character logs on
-  def handle_info(%Ecto.Changeset{data: %PlayerLogin{}}, socket) do
-    {:noreply,
-     assign(
-       socket,
-       :online_status,
-       "online"
-     )}
+  # New event arrives
+  def handle_info(
+        %Ecto.Changeset{} = event_cs,
+        %{assigns: %{live_action: :session, inner_options: _}} = socket
+      ) do
+    {template, inner_assigns} = socket.assigns.inner_options
+
+    event = Ecto.Changeset.apply_changes(event_cs)
+
+    events = inner_assigns.events
+    character_map = inner_assigns.character_map
+
+    # update the aggregate counts
+    new_session = Session.aggregate(inner_assigns.session, [[event]])
+
+    inner_assigns =
+      inner_assigns
+      |> Map.put(:events, [event | events])
+      |> Map.put(:session, new_session)
+
+    socket = assign_online_status(socket, event_cs)
+
+    # "Preload" any new character IDs
+    character_ids =
+      event_cs.changes
+      |> Map.take([:character_id, :attacker_character_id, :other_id])
+      |> Map.values()
+      |> Enum.reject(&(&1 == inner_assigns.session.character_id))
+
+    if length(character_ids) > 0 do
+      case Characters.get_many_by_id(character_ids, _shallow_copy = true) do
+        {:ok, new_character_map} ->
+          inner_assigns =
+            Map.put(inner_assigns, :character_map, Map.merge(character_map, new_character_map))
+
+          {:noreply, assign(socket, inner_options: {template, inner_assigns})}
+
+        :error ->
+          {:noreply,
+           socket
+           |> assign(inner_options: {template, inner_assigns})
+           |> put_flash(
+             :error,
+             "Tried to fetch character information for a new event, but something went wrong."
+           )}
+      end
+    else
+      {:noreply, assign(socket, inner_options: {template, inner_assigns})}
+    end
   end
 
-  # This character logs off
-  def handle_info(%Ecto.Changeset{data: %PlayerLogout{}}, socket) do
-    {:noreply,
-     assign(
-       socket,
-       :online_status,
-       "offline"
-     )}
-  end
-
-  # Catch-all for other kinds of player events
-  def handle_info(%Ecto.Changeset{}, socket) do
-    {:noreply, socket}
+  # Catch-all for player events when the inner page doesn't care about them
+  def handle_info(%Ecto.Changeset{} = event_cs, socket) do
+    {:noreply, assign_online_status(socket, event_cs)}
   end
 
   # The user favorites this character here or in another window
@@ -267,8 +338,33 @@ defmodule SacaStatsWeb.CharacterLive do
   # New data arrives from a Task
   def handle_info({:render_inner, template_name, inner_assigns}, socket) do
     # the inner content will need access to things like :character_info, so merge them
-    assigns = inner_assigns |> Map.merge(socket.assigns) |> Map.put(:socket, socket)
+    inner_assigns = inner_assigns |> Map.merge(socket.assigns) |> Map.put(:socket, socket)
 
-    {:noreply, assign(socket, :inner_options, {template_name, assigns})}
+    {:noreply, assign(socket, :inner_options, {template_name, inner_assigns})}
+  end
+
+  defp assign_online_status(socket, event_cs) do
+    character_id = socket.assigns.character_info.character_id
+
+    case event_cs do
+      # This character logs on
+      %Ecto.Changeset{data: %PlayerLogin{character_id: ^character_id}} ->
+        assign(
+          socket,
+          :online_status,
+          "online"
+        )
+
+      # This character logs off
+      %Ecto.Changeset{data: %PlayerLogout{character_id: ^character_id}} ->
+        assign(
+          socket,
+          :online_status,
+          "offline"
+        )
+
+      _ ->
+        socket
+    end
   end
 end

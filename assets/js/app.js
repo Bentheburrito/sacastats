@@ -28,6 +28,8 @@ import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import { addCommasToNumber, formatDateTime, addPercent, secondsToHHMMSS } from "../src/formats.ts";
 import { init as initInfantryModel } from "../src/character/planetside-model.ts";
+import { init as initWeaponsTable } from "../src/character/weapons-table.ts";
+import { init as initWeapons } from "../src/character/weapons.ts";
 
 // Init Hooks
 let Hooks = {};
@@ -75,6 +77,36 @@ Hooks.InitInfantryModel = {
   },
   updated () {
     initInfantryModel(this.el);
+  }
+};
+
+Hooks.InitWeaponsTable = {
+  mounted () {
+    console.log("wow starting")
+    //initialize bootstrap table
+    $('#weaponTable').bootstrapTable();
+    console.log('yep that worked')
+    //initialize weapon sorters
+    function timeSorter (a, b) {
+      var aa = getTimeInSeconds(a);
+      var bb = getTimeInSeconds(b);
+      return aa - bb;
+    }
+
+    function getTimeInSeconds (time) {
+      var div = document.createElement('div');
+      div.innerHTML = time.trim();
+
+      return +div.firstChild.innerHTML;
+    }
+    console.log('MOUNT')
+    initWeaponsTable();
+    initWeapons();
+  },
+  updated () {
+    console.log('UPDATED')
+    initWeaponsTable();
+    initWeapons();
   }
 };
 

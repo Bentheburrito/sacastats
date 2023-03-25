@@ -39,7 +39,8 @@ function addCustomEventListeners() {
   });
 }
 
-function init() {
+export function init() {
+  
   let kills = new WeaponKillsMap();
   $(TABLE_ID)
     .bootstrapTable('getData', false)
@@ -50,4 +51,4 @@ function init() {
   addCustomEventListeners();
 }
 
-init();
+// init();

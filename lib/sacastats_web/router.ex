@@ -42,10 +42,11 @@ defmodule SacaStatsWeb.Router do
     live "/:character_name/general", CharacterLive, :general
     live "/:character_name/sessions", CharacterLive, :sessions
     live "/:character_name/weapons", CharacterLive, :weapons
+    live "/:character_name/sessions/:login_timestamp", CharacterLive, :session
 
     # get "/:character_name/:stat_type", CharacterController, :character
     # get "/:character_name/sessions/latest", CharacterController, :latest_session
-    live "/:character_name/sessions/:login_timestamp", SessionLive.View
+    # live "/:character_name/sessions/:login_timestamp", SessionLive.View
     # post "/:character_name/:stat_type", CharacterController, :character_post
   end
 

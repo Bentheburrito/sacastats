@@ -1,4 +1,4 @@
-<%= link "<- Back to Sessions", to: Routes.character_path(@socket, :character, @session.name, :sessions) %>
+<%= live_patch "<- Back to Sessions", to: Routes.character_path(@socket, :sessions, @session.name) %>
 
 <div class="poll-item d-md-flex justify-content-between">
 	<div class="mr-4">

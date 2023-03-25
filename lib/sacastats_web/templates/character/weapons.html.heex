@@ -558,10 +558,11 @@
 
 <%=SacaStats.Utils.import_flex_bootstrap_table(assigns)%>
 
-<script>
+<script id="blah" phx-hook="InitWeaponsTable">
+    console.log("wow starting")
     //initialize bootstrap table
     $('#weaponTable').bootstrapTable();
-
+    console.log('yep that worked')
     //initialize weapon sorters
     function timeSorter(a, b) {
         var aa = getTimeInSeconds(a);
@@ -576,7 +577,3 @@
         return +div.firstChild.innerHTML;
     }
 </script>
-
-<script type="module" src={Routes.static_path(@socket, "/assets/dist/character/weapons-table.js")}></script>
-
-<script type="module" src={Routes.static_path(@socket, "/assets/dist/character/weapons.js")}></script>

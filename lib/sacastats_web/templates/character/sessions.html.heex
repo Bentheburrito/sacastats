@@ -4,7 +4,7 @@
   </div>
 <% else %>
   <%= for %SacaStats.Session{} = session <- @sessions do %>
-    <%= link to: Routes.live_path(@socket, SacaStatsWeb.SessionLive.View, session.name, session.login.timestamp) do %>
+    <%= live_redirect to: Routes.character_path(@socket, :session, session.name, session.login.timestamp), class: "moving-nav-link nav-link" do %>
       <%= SacaStatsWeb.CharacterView.pretty_session_summary(assigns, session) %>
     <% end %>
   <% end %>

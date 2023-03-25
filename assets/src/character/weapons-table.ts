@@ -305,7 +305,7 @@ function initializeCustomFunctions() {
   document.getElementById(TABLE_ID.substring(1))?.dispatchEvent(addDesktopHeaderOnlyEvent);
 }
 
-function init() {
+export function init() {
   let options = { dragaccept: '.drag-accept' } as BootstrapTableOptions;
 
   $(TABLE_ID).bootstrapTable(options);
@@ -314,4 +314,4 @@ function init() {
   addCustomCopyFunction();
   addCustomEventListeners();
 }
-init();
+// init();
