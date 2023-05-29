@@ -32,15 +32,15 @@ function addCustomFilters() {
       //filter the array based on the filter name category
       switch (filterName) {
         case 'auraxium':
-          return dataArray.filter((weapon) => weapon.kills >= 1160);
+          return dataArray.filter((weapon) => weapon.kills  as number >= 1160);
         case 'gold':
-          return dataArray.filter((weapon) => weapon.kills < 1160 && weapon.kills >= 160);
+          return dataArray.filter((weapon) => weapon.kills as number < 1160 && weapon.kills  as number >= 160);
         case 'silver':
-          return dataArray.filter((weapon) => weapon.kills < 160 && weapon.kills >= 60);
+          return dataArray.filter((weapon) => weapon.kills as number < 160 && weapon.kills as number >= 60);
         case 'bronze':
-          return dataArray.filter((weapon) => weapon.kills < 60 && weapon.kills >= 10);
+          return dataArray.filter((weapon) => weapon.kills  as number < 60 && weapon.kills  as number >= 10);
         case 'none':
-          return dataArray.filter((weapon) => weapon.kills < 10);
+          return dataArray.filter((weapon) => weapon.kills as number < 10);
         default:
           return dataArray;
       }
@@ -314,4 +314,3 @@ export function init() {
   addCustomCopyFunction();
   addCustomEventListeners();
 }
-// init();

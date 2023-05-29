@@ -345,7 +345,8 @@ export class FlexBootstrapTable {
 
   public setStickyHeaderWidths = () => {
     //initialize variables
-    let headers = document.querySelector('thead.sticky-header > tr')!.querySelectorAll('th');
+    // changed from 'thead.sticky-header > tr' to 'thead > tr'
+    let headers = document.querySelector('thead > tr')!.querySelectorAll('th');
     let columns = document.querySelector('#' + this.table.id + '>tbody>tr')!.querySelectorAll('td');
 
     //make sure each header matches it's matching td
@@ -385,10 +386,9 @@ export class FlexBootstrapTable {
   };
 }
 
-function initializeFlexTables() {
+export function initializeFlexTables() {
   document.querySelectorAll('.table-responsive-stack').forEach((element) => {
     let responseTable = element as HTMLTableElement;
     flexBootstrapTableMap.set(responseTable.id, new FlexBootstrapTable(responseTable));
   });
 }
-initializeFlexTables();

@@ -50,5 +50,3 @@ export function init() {
   reInit(kills);
   addCustomEventListeners();
 }
-
-// init();

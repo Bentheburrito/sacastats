@@ -1,5 +1,11 @@
 <link rel="stylesheet" href={Routes.static_path(@socket, "/css/character/weapons.css")}/>
 
+<link href="https://unpkg.com/bootstrap-table@1.21.0/dist/extensions/sticky-header/bootstrap-table-sticky-header.css" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/@fortawesome/fontawesome-free@5.12.1/css/all.min.css">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/3.2.1/css/font-awesome.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/gh/akottr/dragtable@master/dragtable.css" rel="stylesheet">
+<link href="https://unpkg.com/bootstrap-table@1.21.0/dist/bootstrap-table.min.css" rel="stylesheet">
+
 <div class="selection-mobile-menu-top selection-mobile-menu">
     <div class="d-flex h-100 justify-content-between">
         <div class="w-50 align-self-center">
@@ -351,7 +357,8 @@
     data-pagination="true"
     data-pagination-V-Align="both"
     data-page-size="5"
-    data-page-list="[5, 10, 25, 50, 100]">
+    data-page-list="[5, 10, 25, 50, 100]"
+    phx-hook="InitWeaponsTable">
     <thead class="">
         <tr>
             <th data-field="weapon" data-switchable="false" data-toggle="tooltip" title="Weapons" class="weapon">Weapon</th>
@@ -555,25 +562,3 @@
         <% end %>
     </tbody>
 </table>
-
-<%=SacaStats.Utils.import_flex_bootstrap_table(assigns)%>
-
-<script id="blah" phx-hook="InitWeaponsTable">
-    console.log("wow starting")
-    //initialize bootstrap table
-    $('#weaponTable').bootstrapTable();
-    console.log('yep that worked')
-    //initialize weapon sorters
-    function timeSorter(a, b) {
-        var aa = getTimeInSeconds(a);
-        var bb = getTimeInSeconds(b);
-        return aa - bb;
-    }
-
-    function getTimeInSeconds(time) {
-        var div = document.createElement('div');
-        div.innerHTML = time.trim();
-
-        return +div.firstChild.innerHTML;
-    }
-</script>

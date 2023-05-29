@@ -26,10 +26,19 @@ import "phoenix_html"
 import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
+
+import BootstrapTable from "bootstrap-table/src/bootstrap-table";
+import "../vendor/jquery-ui"
+import "../vendor/dragtable"
+import "bootstrap-table/src/extensions/reorder-columns/bootstrap-table-reorder-columns"
+import "bootstrap-table/src/extensions/sticky-header/bootstrap-table-sticky-header"
+
 import { addCommasToNumber, formatDateTime, addPercent, secondsToHHMMSS } from "../src/formats.ts";
 import { init as initInfantryModel } from "../src/character/planetside-model.ts";
 import { init as initWeaponsTable } from "../src/character/weapons-table.ts";
 import { init as initWeapons } from "../src/character/weapons.ts";
+
+import { initializeFlexTables } from "../src/flex-bootstrap-table/flex-bootstrap-table"
 
 // Init Hooks
 let Hooks = {};
@@ -82,10 +91,6 @@ Hooks.InitInfantryModel = {
 
 Hooks.InitWeaponsTable = {
   mounted () {
-    console.log("wow starting")
-    //initialize bootstrap table
-    $('#weaponTable').bootstrapTable();
-    console.log('yep that worked')
     //initialize weapon sorters
     function timeSorter (a, b) {
       var aa = getTimeInSeconds(a);
@@ -99,14 +104,16 @@ Hooks.InitWeaponsTable = {
 
       return +div.firstChild.innerHTML;
     }
-    console.log('MOUNT')
+    let _ = new BootstrapTable(this.el, {});
     initWeaponsTable();
     initWeapons();
+    initializeFlexTables();
   },
   updated () {
-    console.log('UPDATED')
+    let _ = new BootstrapTable(this.el, {});
     initWeaponsTable();
     initWeapons();
+    initializeFlexTables();
   }
 };
 
