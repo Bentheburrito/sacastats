@@ -4,6 +4,8 @@ import * as flexBootstrapTableEvents from '../events/flex-bootstrap-table-events
 import { CustomFilterFunction } from '../models/flex-bootstrap-table/flex-bootstrap-table-filter.js';
 import { ITableData } from '../models/flex-bootstrap-table/flex-bootstrap-table.js';
 import { BootstrapTableOptions } from 'bootstrap-table';
+import { SacaStatsEventUtil } from '../events/sacastats-event-util.js';
+import { AddCustomCopyEvent, AddCustomFilterFunctionsEvent, AddCustomSearchFunctionEvent, AddDesktopHeaderOnlyEvent, AddSecondCustomCopyEvent, FilteredEvent, FormatsUpdatedEvent, InitializedEvent } from '../events/flex-bootstrap-table-events.js';
 
 const TABLE_ID = '#weaponTable';
 
@@ -32,13 +34,13 @@ function addCustomFilters() {
       //filter the array based on the filter name category
       switch (filterName) {
         case 'auraxium':
-          return dataArray.filter((weapon) => weapon.kills  as number >= 1160);
+          return dataArray.filter((weapon) => weapon.kills as number >= 1160);
         case 'gold':
-          return dataArray.filter((weapon) => weapon.kills as number < 1160 && weapon.kills  as number >= 160);
+          return dataArray.filter((weapon) => weapon.kills as number < 1160 && weapon.kills as number >= 160);
         case 'silver':
           return dataArray.filter((weapon) => weapon.kills as number < 160 && weapon.kills as number >= 60);
         case 'bronze':
-          return dataArray.filter((weapon) => weapon.kills  as number < 60 && weapon.kills  as number >= 10);
+          return dataArray.filter((weapon) => weapon.kills as number < 60 && weapon.kills as number >= 10);
         case 'none':
           return dataArray.filter((weapon) => weapon.kills as number < 10);
         default:
@@ -122,11 +124,8 @@ function addCustomFilters() {
   ];
 
   //Add it to the filter list
-  let addCustomFilterFunctionEvent = flexBootstrapTableEvents.createEvent(
-    flexBootstrapTableEvents.ADD_CUSTOM_FILTER_FUNCTIONS_EVENT,
-    customFunction,
-  );
-  document.getElementById(TABLE_ID.substring(1))?.dispatchEvent(addCustomFilterFunctionEvent);
+  SacaStatsEventUtil.dispatchCustomEvent(document.getElementById(TABLE_ID.substring(1))!,
+    new AddCustomFilterFunctionsEvent(customFunction));
 }
 
 function addCustomCopyFunction() {
@@ -201,17 +200,11 @@ function addCustomCopyFunction() {
     return copyString;
   };
 
-  let addCustomCopyFunctionEvent = flexBootstrapTableEvents.createEvent(
-    flexBootstrapTableEvents.ADD_CUSTOM_COPY_EVENT,
-    customFunction,
-  );
-  document.getElementById(TABLE_ID.substring(1))?.dispatchEvent(addCustomCopyFunctionEvent);
+  SacaStatsEventUtil.dispatchCustomEvent(document.getElementById(TABLE_ID.substring(1))!,
+    new AddCustomCopyEvent(customFunction));
 
-  let addSecondCustomCopyFunctionEvent = flexBootstrapTableEvents.createEvent(
-    flexBootstrapTableEvents.ADD_SECOND_CUSTOM_COPY_EVENT,
-    customCopyFunction,
-  );
-  document.getElementById(TABLE_ID.substring(1))?.dispatchEvent(addSecondCustomCopyFunctionEvent);
+  SacaStatsEventUtil.dispatchCustomEvent(document.getElementById(TABLE_ID.substring(1))!,
+    new AddSecondCustomCopyEvent(customCopyFunction));
 }
 
 function getTableSelection() {
@@ -272,37 +265,32 @@ function addCustomSearchFunction() {
     });
   };
 
-  let addCustomSearchFunctionEvent = flexBootstrapTableEvents.createEvent(
-    flexBootstrapTableEvents.ADD_CUSTOM_SEARCH_FUNCTION_EVENT,
-    customSearchFunction,
-  );
-  document.getElementById(TABLE_ID.substring(1))?.dispatchEvent(addCustomSearchFunctionEvent);
+  SacaStatsEventUtil.dispatchCustomEvent(document.getElementById(TABLE_ID.substring(1))!,
+    new AddCustomSearchFunctionEvent(customSearchFunction));
 }
 
 function addCustomEventListeners() {
-  $(TABLE_ID).on(flexBootstrapTableEvents.filteredEvent, function () {
-    setTimeout(function () {
-      showHideNextAuraxButton();
-    }, 10);
-  });
+  SacaStatsEventUtil.addCustomEventListener(document.getElementById(TABLE_ID.substring(1))!, new FilteredEvent(),
+    function () {
+      setTimeout(function () {
+        showHideNextAuraxButton();
+      }, 10)
+    }
+  );
 
-  $(TABLE_ID).on(flexBootstrapTableEvents.initializedEvent, function () {
-    showHideNextAuraxButton();
-  });
+  SacaStatsEventUtil.addCustomEventListener(document.getElementById(TABLE_ID.substring(1))!,
+    new InitializedEvent(), showHideNextAuraxButton);
 
-  $(TABLE_ID).on(flexBootstrapTableEvents.formatsUpdatedEvent, function () {
-    showHideNextAuraxButton();
-  });
+  SacaStatsEventUtil.addCustomEventListener(document.getElementById(TABLE_ID.substring(1))!,
+    new FormatsUpdatedEvent(), showHideNextAuraxButton);
 }
 
 function initializeCustomFunctions() {
   addCustomSearchFunction();
   addCustomFilters();
-  let addDesktopHeaderOnlyEvent = flexBootstrapTableEvents.createEvent(
-    flexBootstrapTableEvents.ADD_DESKTOP_HEADER_ONLY_EVENT,
-    ['Weapon'],
-  );
-  document.getElementById(TABLE_ID.substring(1))?.dispatchEvent(addDesktopHeaderOnlyEvent);
+
+  SacaStatsEventUtil.dispatchCustomEvent(document.getElementById(TABLE_ID.substring(1))!,
+    new AddDesktopHeaderOnlyEvent(['Weapon']));
 }
 
 export function init() {

@@ -1,4 +1,6 @@
 import * as FlexBootstrapTableEvents from '../events/flex-bootstrap-table-events.js';
+import { ColumnsChangedEvent, ColumnSortChangedEvent } from '../events/flex-bootstrap-table-events.js';
+import { SacaStatsEventUtil } from '../events/sacastats-event-util.js';
 
 import {
   IPersistentColumn,
@@ -526,8 +528,8 @@ function addEventHandlers() {
   document.getElementById(table.id + '-column-sort-dropdown-menu')?.addEventListener('click', handleColumnOrderSorted);
 
   //add event listeners for custom column change events
-  $(table).on(FlexBootstrapTableEvents.COLUMNS_CHANGED_EVENT, handleColumnChangedEvent);
-  $(table).on(FlexBootstrapTableEvents.COLUMN_SORT_CHANGED_EVENT, handleSortChangedEvent);
+  SacaStatsEventUtil.addCustomEventListener(table, new ColumnsChangedEvent(), handleColumnChangedEvent);
+  SacaStatsEventUtil.addCustomEventListener(table, new ColumnSortChangedEvent(), handleSortChangedEvent);
 }
 
 function setMoveArrowsOffsets(topOffset: number) {
@@ -614,7 +616,7 @@ function checkIfAColumnDifferent() {
     previousColumns = columns;
 
     //trigger custom event
-    $(table).trigger(FlexBootstrapTableEvents.COLUMNS_CHANGED_EVENT, JSON.stringify(columns));
+    SacaStatsEventUtil.dispatchCustomEvent(table, new ColumnsChangedEvent(JSON.stringify(columns)));
   }
 }
 
@@ -626,7 +628,7 @@ function checkIfASortDifferent() {
     previousSorted = sorted;
 
     //trigger custom event
-    $(table).trigger(FlexBootstrapTableEvents.COLUMN_SORT_CHANGED_EVENT, sorted);
+    SacaStatsEventUtil.dispatchCustomEvent(table, new ColumnSortChangedEvent(sorted));
   }
 }
 

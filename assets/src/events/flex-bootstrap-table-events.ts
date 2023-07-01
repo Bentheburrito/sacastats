@@ -1,23 +1,65 @@
-const POSTFIX = '.sacastats.flex.bootstrap.table';
+import { SacaStatsEvent } from '../events/sacastats-event.js';
+
+class FlexBootstrapTableEvent<T> extends SacaStatsEvent<T> {
+  constructor(eventName: string, ...content: any) {
+    super(eventName, ".sacastats.flex.bootstrap.table", ...content);
+  }
+}
 
 //Main Events
-export const initializedEvent = 'initialized' + POSTFIX;
-export const formatsUpdatedEvent = 'formats-updated' + POSTFIX;
-export const ADD_DESKTOP_HEADER_ONLY_EVENT = 'add-desktop-header-only' + POSTFIX;
+export class InitializedEvent<T> extends FlexBootstrapTableEvent<T> {
+  public constructor(...content: any) {
+    super("initialized", ...content);
+  }
+}
+export class FormatsUpdatedEvent<T> extends FlexBootstrapTableEvent<T> {
+  public constructor(...content: any) {
+    super("formats-updated", ...content);
+  }
+}
+export class AddDesktopHeaderOnlyEvent<T> extends FlexBootstrapTableEvent<T> {
+  public constructor(...content: any) {
+    super("add-desktop-header-only", ...content);
+  }
+}
 
 //Filter Events
-export const filteredEvent = 'filtered' + POSTFIX;
-export const ADD_CUSTOM_FILTER_FUNCTIONS_EVENT = 'add-custom-filter-functions' + POSTFIX;
-export const ADD_CUSTOM_SEARCH_FUNCTION_EVENT = 'add-custom-search-function' + POSTFIX;
+export class FilteredEvent<T> extends FlexBootstrapTableEvent<T> {
+  public constructor(...content: any) {
+    super("filtered", ...content);
+  }
+}
+export class AddCustomFilterFunctionsEvent<T> extends FlexBootstrapTableEvent<T> {
+  public constructor(...content: any) {
+    super("add-custom-filter-functions", ...content);
+  }
+}
+export class AddCustomSearchFunctionEvent<T> extends FlexBootstrapTableEvent<T> {
+  public constructor(...content: any) {
+    super("add-custom-search-function", ...content);
+  }
+}
 
 //Column Events
-export const COLUMN_SORT_CHANGED_EVENT = 'column-sort-changed' + POSTFIX;
-export const COLUMNS_CHANGED_EVENT = 'columns-changed' + POSTFIX;
+export class ColumnSortChangedEvent<T> extends FlexBootstrapTableEvent<T> {
+  public constructor(...content: any) {
+    super("column-sort-changed", ...content);
+  }
+}
+export class ColumnsChangedEvent<T> extends FlexBootstrapTableEvent<T> {
+  public constructor(...content: any) {
+    super("columns-changed", ...content);
+  }
+}
 
 //Selection Events
-export const ADD_CUSTOM_COPY_EVENT = 'add-custom-copy' + POSTFIX;
-export const ADD_SECOND_CUSTOM_COPY_EVENT = 'add-second-custom-copy' + POSTFIX;
-
-export function createEvent(eventName: string, ...content: any): CustomEvent<any[]> {
-  return new CustomEvent(eventName, { detail: content });
+export class AddCustomCopyEvent<T> extends FlexBootstrapTableEvent<T> {
+  public constructor(...content: any) {
+    super("add-custom-copy", ...content);
+  }
+}
+export class AddSecondCustomCopyEvent<T> extends FlexBootstrapTableEvent<T> {
+  public constructor(...content: any) {
+    super("add-second-custom-copy", ...content);
+  }
 }
