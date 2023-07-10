@@ -111,5 +111,17 @@
       </nav>
     </footer>
     <script type="module" src={Routes.static_path(@conn, "/assets/dist/scripts.js")}></script>
+    <script type="text/javascript">
+      function timeSorter(a, b) {
+        var aa = getTimeInSeconds(a);
+        var bb = getTimeInSeconds(b);
+        return aa - bb;
+      }
+      function getTimeInSeconds(time) {
+        var div = document.createElement("div");
+        div.innerHTML = time.trim();
+        return +div.firstChild.innerHTML;
+      }
+    </script>
   </body>
 </html>

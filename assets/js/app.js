@@ -45,71 +45,58 @@ let Hooks = {};
 
 // Format the given element when it is added or updated
 Hooks.NewDateToFormat = {
-  mounted () {
+  mounted() {
     formatDateTime(this.el);
   },
-  updated () {
+  updated() {
     formatDateTime(this.el);
   }
 };
 
 Hooks.AddCommasToNumber = {
-  mounted () {
+  mounted() {
     addCommasToNumber(this.el);
   },
-  updated () {
+  updated() {
     addCommasToNumber(this.el);
   }
 };
 
 Hooks.AddPercent = {
-  mounted () {
+  mounted() {
     addPercent(this.el);
   },
-  updated () {
+  updated() {
     addPercent(this.el);
   }
 };
 
 Hooks.SecondsToReadable = {
-  mounted () {
+  mounted() {
     secondsToHHMMSS(this.el);
   },
-  updated () {
+  updated() {
     secondsToHHMMSS(this.el);
   }
 };
 
 Hooks.InitInfantryModel = {
-  mounted () {
+  mounted() {
     initInfantryModel(this.el);
   },
-  updated () {
+  updated() {
     initInfantryModel(this.el);
   }
 };
 
 Hooks.InitWeaponsTable = {
-  mounted () {
-    //initialize weapon sorters
-    function timeSorter (a, b) {
-      var aa = getTimeInSeconds(a);
-      var bb = getTimeInSeconds(b);
-      return aa - bb;
-    }
-
-    function getTimeInSeconds (time) {
-      var div = document.createElement('div');
-      div.innerHTML = time.trim();
-
-      return +div.firstChild.innerHTML;
-    }
+  mounted() {
     let _ = new BootstrapTable(this.el, {});
     initWeaponsTable();
     initWeapons();
     initializeFlexTables();
   },
-  updated () {
+  updated() {
     let _ = new BootstrapTable(this.el, {});
     initWeaponsTable();
     initWeapons();
