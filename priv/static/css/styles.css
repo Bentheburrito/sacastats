@@ -3,7 +3,51 @@
 @import "account.css";
 @import "home.css";
 
+/*Font*/
+@font-face {
+  font-family: planetsideHeaderFont;
+  src: url('/images/font/PlanetSide2.ttf');
+}
+
+@font-face {
+  font-family: planetsideHeaderFont;
+  src: url('/images/font/PlanetSide2.ttf');
+  font-weight: bold;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: planetsideHeaderFont !important;
+}
+
+
 /*General*/
+html,
+.card,
+body,
+label,
+input {
+  cursor: url('/images/arrow.cur'), auto;
+  background-color: rgb(23, 23, 23);
+  color: whitesmoke;
+}
+
+.card {
+  border-color: whitesmoke;
+}
+
+button,
+button:not(:disabled),
+.btn:not(:disabled):not(.disabled),
+.page-link:not(:disabled):not(.disabled),
+input[type="text"],
+a {
+  cursor: url('/images/arrow-select.cur'), auto !important;
+}
+
 footer {
   z-index: 99;
 }

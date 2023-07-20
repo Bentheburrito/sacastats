@@ -12,17 +12,17 @@
     #create-new-poll-div {
         margin: 0;
         width: 100%;
-        border-right: black 1px solid;
+        border-right: whitesmoke 1px solid;
         min-height: 60vh;
         padding: 0;
         background-color: rgba(155, 132, 238, 0);
         padding-top: 25vh;
-        color: rgb(0, 0, 0);
+        color: whitesmoke(0, 0, 0);
     }
 }
 
 #create-new-poll-div:hover {
-    cursor: pointer;
+    cursor: url('/images/arrow-select.cur'), auto;
     background-color: rgb(155, 132, 238);
     color: rgb(255, 255, 255);
 }
