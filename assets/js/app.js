@@ -33,37 +33,37 @@ let Hooks = {};
 
 // Format the given element when it is added or updated
 Hooks.NewDateToFormat = {
-  mounted () {
+  mounted() {
     formatDateTime(this.el);
   },
-  updated () {
+  updated() {
     formatDateTime(this.el);
   }
 };
 
 Hooks.AddCommasToNumber = {
-  mounted () {
+  mounted() {
     addCommasToNumber(this.el);
   },
-  updated () {
+  updated() {
     addCommasToNumber(this.el);
   }
 };
 
 Hooks.AddPercent = {
-  mounted () {
+  mounted() {
     addPercent(this.el);
   },
-  updated () {
+  updated() {
     addPercent(this.el);
   }
 };
 
 Hooks.SecondsToReadable = {
-  mounted () {
+  mounted() {
     secondsToHHMMSS(this.el);
   },
-  updated () {
+  updated() {
     secondsToHHMMSS(this.el);
   }
 };
