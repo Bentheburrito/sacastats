@@ -104,6 +104,17 @@ Hooks.InitWeaponsTable = {
   }
 };
 
+Hooks.InitEventLogTable = {
+  mounted() {
+    let _ = new BootstrapTable(this.el, {});
+    initializeFlexTables();
+  },
+  updated() {
+    let _ = new BootstrapTable(this.el, {});
+    initializeFlexTables();
+  }
+};
+
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, { hooks: Hooks, params: { _csrf_token: csrfToken } })
 
