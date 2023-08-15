@@ -65,16 +65,18 @@ function setSortedField(sortedFieldText: string, sortTo: SortOrder) {
       (el) => el.textContent === sortedFieldText,
     ) as HTMLElement;
 
-    //click header once to provide initial sort
-    el.click();
-
-    //if it should be sorted the other way click the header again
-    if (![...el.classList].includes(sortTo)) {
+    if (el != undefined) {
+      //click header once to provide initial sort
       el.click();
-    }
 
-    //refresh by scroll to bring back sticky headers
-    refreshByScroll();
+      //if it should be sorted the other way click the header again
+      if (![...el.classList].includes(sortTo)) {
+        el.click();
+      }
+
+      //refresh by scroll to bring back sticky headers
+      refreshByScroll();
+    }
   }
 }
 
@@ -389,42 +391,44 @@ function initializeMobileSortMenu(persistentColumnsObject: IPersistentColumn) {
   //initialize variables
   let sortableColumnMenu = document.getElementById(table.id + '-column-sort-dropdown-menu') as HTMLElement;
   let sortableColumnsContainer = document.getElementById(table.id + '-sortable-columns') as HTMLElement;
-  let isReInitialization = sortableColumnsContainer.innerHTML != '';
-  let currentScroll: number = 0;
+  if (sortableColumnMenu != undefined) {
+    let isReInitialization = sortableColumnsContainer.innerHTML != '';
+    let currentScroll: number = 0;
 
-  //if it has already been initialized
-  if (isReInitialization) {
-    //save the current scroll and clear the columns
-    currentScroll = sortableColumnMenu.scrollTop;
-    sortableColumnsContainer.innerHTML = '';
-  }
-
-  //get all visible sortable columns and which one is sorted in what way
-  let sortedField = persistentColumnsObject.sorted;
-  let columns = findSortableVisibleColumns();
-
-  //for each column
-  columns.forEach((column) => {
-    //set sort type to none
-    let sortType = SortOrder.NONE;
-
-    //if the column should be sorted set the specific sort type
-    if (column.title == sortedField.fieldText) {
-      sortType = sortedField.order;
+    //if it has already been initialized
+    if (isReInitialization) {
+      //save the current scroll and clear the columns
+      currentScroll = sortableColumnMenu.scrollTop;
+      sortableColumnsContainer.innerHTML = '';
     }
 
-    //create the column element and add an alt and click listener to handle selecting and sorting respectively
-    let columnElement = createSortableColumn(column.field, column.title, sortType);
-    columnElement?.addEventListener('contextmenu', handleSortableColumnContextMenu);
-    columnElement?.addEventListener('click', handleSortableColumnClick);
+    //get all visible sortable columns and which one is sorted in what way
+    let sortedField = persistentColumnsObject.sorted;
+    let columns = findSortableVisibleColumns();
 
-    //add column element to container
-    sortableColumnsContainer.appendChild(columnElement);
-  });
+    //for each column
+    columns.forEach((column) => {
+      //set sort type to none
+      let sortType = SortOrder.NONE;
 
-  //if it was already initialized restore scroll position
-  if (isReInitialization) {
-    sortableColumnMenu.scrollTop = currentScroll;
+      //if the column should be sorted set the specific sort type
+      if (column.title == sortedField.fieldText) {
+        sortType = sortedField.order;
+      }
+
+      //create the column element and add an alt and click listener to handle selecting and sorting respectively
+      let columnElement = createSortableColumn(column.field, column.title, sortType);
+      columnElement?.addEventListener('contextmenu', handleSortableColumnContextMenu);
+      columnElement?.addEventListener('click', handleSortableColumnClick);
+
+      //add column element to container
+      sortableColumnsContainer.appendChild(columnElement);
+    });
+
+    //if it was already initialized restore scroll position
+    if (isReInitialization) {
+      sortableColumnMenu.scrollTop = currentScroll;
+    }
   }
 }
 

@@ -349,15 +349,18 @@ export class FlexBootstrapTable {
   public setStickyHeaderWidths = () => {
     //initialize variables
     // changed from 'thead.sticky-header > tr' to 'thead > tr'
-    let headers = document.querySelector('thead > tr')!.querySelectorAll('th');
-    let columns = document.querySelector('#' + this.table.id + '>tbody>tr')!.querySelectorAll('td');
+    let tableHeadRowElement = document.querySelector('thead > tr');
+    if (tableHeadRowElement != undefined) {
+      let headers = tableHeadRowElement.querySelectorAll('th');
+      let columns = document.querySelector('#' + this.table.id + '>tbody>tr')!.querySelectorAll('td');
 
-    //make sure each header matches it's matching td
-    for (let i = 0; i < headers.length; i++) {
-      let width = $(columns[i]).width();
-      $(headers[i]).css({
-        width: width + 'px',
-      });
+      //make sure each header matches it's matching td
+      for (let i = 0; i < headers.length; i++) {
+        let width = $(columns[i]).width();
+        $(headers[i]).css({
+          width: width + 'px',
+        });
+      }
     }
   };
 
