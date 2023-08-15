@@ -108,11 +108,9 @@ defmodule SacaStatsWeb.CharacterView do
               <th data-field="method" data-switchable="false" data-toggle="tooltip" title="Method" class="weapon">Method</th>
               <th data-field="victum" data-visible="false" data-toggle="tooltip" title="Victum">Victum</th>
               <th data-field="timestamp" data-visible="false" data-toggle="tooltip" title="Timestamp">Timestamp</th>
-              <th data-field="type" data-visible="false" data-toggle="tooltip" title="Type">Type</th>
             </tr>
         </thead>
         <tbody>
-          <%= Logger.error("restarting..............................................................") %>
           <%= for e <- assigns.events do %>
             <%= build_event_log_table_row(assigns, e, session, assigns.character_map) %>
           <% end %>
@@ -152,6 +150,29 @@ defmodule SacaStatsWeb.CharacterView do
     """
   end
 
+  defp build_event_log_table_vehicle_cell(character_id, character_map, vehicle_id) do
+    # need `assigns` map in scope to use ~H
+    assigns = %{}
+
+
+    character_link = if character_id == 0, do: "", else: get_character_link(character_map, character_id)
+    vehicle_name = if character_id == 0, do: "A " <> get_vehicle_name(vehicle_id), else: "'s " <> get_vehicle_name(vehicle_id)
+    vehicle_img = get_vehicle_image_path(vehicle_id)
+
+    ~H"""
+      <td class="p-0">
+          <div class="w-100">
+              <img src={"https://census.daybreakgames.com" <> vehicle_img}
+                  alt={vehicle_name} class="mx-auto d-block"/>
+          </div>
+          <h5 class="align-text-bottom text-center mb-0">
+            <%= character_link %>
+            <%= vehicle_name%>
+          </h5>
+      </td>
+    """
+  end
+
   defp build_event_log_table_row(assigns, %BattleRankUp{} = e, %Session{} = session, c_map) do
     build_event_log_table_row_items(assigns, e, session, c_map)
   end
@@ -172,12 +193,12 @@ defmodule SacaStatsWeb.CharacterView do
     build_event_log_table_row_items(assigns, e, session, c_map)
   end
 
-  defp build_event_log_table_row(assigns, %GainExperience{experience_id: id, other_id: _other_id} = e, %Session{} = session, c_map)
-      when is_assist_xp(id) or is_gunner_assist_xp(id) or is_revive_xp(id) do
+  defp build_event_log_table_row(assigns, %GainExperience{experience_id: id, other_id: character_id} = e, %Session{character_id: character_id} = session, c_map)
+      when is_revive_xp(id) do
     build_event_log_table_row_items(assigns, e, session, c_map)
   end
 
-  defp build_event_log_table_row(assigns, %GainExperience{experience_id: id, character_id: _character_id} = e, %Session{} = session, c_map)
+  defp build_event_log_table_row(assigns, %GainExperience{experience_id: id, character_id: character_id} = e, %Session{character_id: character_id} = session, c_map)
       when is_assist_xp(id) or is_gunner_assist_xp(id) or is_revive_xp(id) do
     build_event_log_table_row_items(assigns, e, session, c_map)
   end
@@ -202,9 +223,6 @@ defmodule SacaStatsWeb.CharacterView do
         <td>
           <%= SacaStatsWeb.CharacterView.prettify_timestamp(e.timestamp) %>
         </td>
-        <td>
-          <%= Logger.error(e) %>
-        </td>
       </tr>
     """
   end
@@ -224,7 +242,7 @@ defmodule SacaStatsWeb.CharacterView do
          %Session{},
          character_map
        ) do
-    character_link = get_character_name(character_map, character_id)
+    character_link = get_character_link(character_map, character_id)
 
     ~H"""
       <td>
@@ -236,8 +254,8 @@ defmodule SacaStatsWeb.CharacterView do
   end
 
   defp build_event_log_table_row_item(assigns, %Death{} = death, %Session{}, character_map) do
-    character_link = get_character_name(character_map, death.character_id)
-    attacker_link = get_character_name(character_map, death.attacker_character_id)
+    character_link = get_character_link(character_map, death.character_id)
+    attacker_link = get_character_link(character_map, death.attacker_character_id)
 
     ~H"""
       <%= build_event_log_table_player_cell(attacker_link) %>
@@ -267,7 +285,7 @@ defmodule SacaStatsWeb.CharacterView do
 
     ~H"""
     <td colspan={"#{get_event_log_table_col_span_count()}"}>
-      <%= format_character_link(session.name, session.faction_id) %> captured
+      <%= format_faction_character_link(session.name, session.faction_id) %> captured
       <%= "#{facility["facility_name"] || "a facility"} #{facility_type_text}" %>
       <%= outfit_captured_text %>
     </td>
@@ -293,7 +311,7 @@ defmodule SacaStatsWeb.CharacterView do
 
     ~H"""
     <td colspan={"#{get_event_log_table_col_span_count()}"}>
-      <%= format_character_link(session.name, session.faction_id) %> defended
+      <%= format_faction_character_link(session.name, session.faction_id) %> defended
       <%= "#{facility["facility_name"] || "a facility"} #{facility_type_text}" %>
       <%= outfit_captured_text %>
     </td>
@@ -307,7 +325,7 @@ defmodule SacaStatsWeb.CharacterView do
          %Session{},
          character_map
        ) do
-    character_link = get_character_name(character_map, character_id)
+    character_link = get_character_link(character_map, character_id)
 
     ~H"""
       <%= build_event_log_table_player_cell(character_link) %>
@@ -319,13 +337,12 @@ defmodule SacaStatsWeb.CharacterView do
   end
 
   defp build_event_log_table_row_item(assigns, %VehicleDestroy{} = vd, %Session{}, character_map) do
-    character_link = get_character_name(character_map, vd.character_id)
-    attacker_link = get_character_name(character_map, vd.attacker_character_id)
+    attacker_link = get_character_link(character_map, vd.attacker_character_id)
 
     ~H"""
       <%= build_event_log_table_player_cell(attacker_link) %>
       <%= build_event_log_table_weapon_cell(vd.attacker_weapon_id) %>
-      <%= build_event_log_table_player_cell(character_link) %>
+      <%= build_event_log_table_vehicle_cell(vd.character_id, character_map, vd.vehicle_id) %>
     """
   end
 
@@ -337,8 +354,8 @@ defmodule SacaStatsWeb.CharacterView do
          character_map
        )
        when is_assist_xp(id) do
-    other_link = get_character_name(character_map, ge.other_id)
-    character_link = get_character_name(character_map, character_id)
+    other_link = get_character_link(character_map, ge.other_id)
+    character_link = get_character_link(character_map, character_id)
 
     ~H"""
       <%= build_event_log_table_player_cell(character_link) %>
@@ -357,12 +374,12 @@ defmodule SacaStatsWeb.CharacterView do
          character_map
        )
        when is_revive_xp(id) do
-    other_identifier = get_character_name(character_map, ge.character_id)
-    character_identifier = get_character_name(character_map, character_id)
+        other_link = get_character_link(character_map, ge.character_id)
+    character_link = get_character_link(character_map, character_id)
 
     ~H"""
     <td colspan={"#{get_event_log_table_col_span_count()}"}>
-      <%= other_identifier %> revived <%= character_identifier %>
+      <%= other_link %> revived <%= character_link %>
     </td>
     """
   end
@@ -375,12 +392,12 @@ defmodule SacaStatsWeb.CharacterView do
          character_map
        )
        when is_revive_xp(id) do
-    other_identifier = get_character_name(character_map, ge.other_id)
-    character_identifier = get_character_name(character_map, character_id)
+    other_link = get_character_link(character_map, ge.other_id)
+    character_link = get_character_link(character_map, character_id)
 
     ~H"""
     <td colspan={"#{get_event_log_table_col_span_count()}"}>
-      <%= character_identifier %> revived <%= other_identifier %>
+      <%= character_link %> revived <%= other_link %>
     </td>
     """
   end
@@ -393,8 +410,8 @@ defmodule SacaStatsWeb.CharacterView do
          character_map
        )
        when is_gunner_assist_xp(id) do
-    other_identifier = get_character_name(character_map, ge.other_id)
-    character_identifier = get_character_name(character_map, character_id)
+    other_identifier = get_character_link(character_map, ge.other_id)
+    character_identifier = get_character_link(character_map, character_id)
 
     %{"description" => desc} = SacaStats.xp()[id]
     desc_downcase = String.downcase(desc)
@@ -428,21 +445,32 @@ defmodule SacaStatsWeb.CharacterView do
 
   defp build_event_log_table_row_item(assigns, %PlayerLogin{}, %Session{name: name, faction_id: faction_id}, _character_map) do
     ~H"""
-    <td colspan={"#{get_event_log_table_col_span_count()}"}><%= format_character_link(name, faction_id) %> logged in.</td>
+    <td colspan={"#{get_event_log_table_col_span_count()}"}><%= format_faction_character_link(name, faction_id) %> logged in.</td>
     """
   end
 
   defp build_event_log_table_row_item(assigns, %PlayerLogout{}, %Session{name: name, faction_id: faction_id}, _character_map) do
     ~H"""
-    <td colspan={"#{get_event_log_table_col_span_count()}"}><%= format_character_link(name, faction_id) %> logged out.</td>
+    <td colspan={"#{get_event_log_table_col_span_count()}"}><%= format_faction_character_link(name, faction_id) %> logged out.</td>
     """
   end
 
-  defp build_event_log_table_row_item(_, _, _, _), do: ""
+  defp build_event_log_table_row_item(assigns, e, _, _) do
+    id = e.experience_id
+    ~H"""
+    <td colspan={"#{get_event_log_table_col_span_count()}"}>
+      <%= Logger.error(e) %>
+      <%= Logger.error(is_assist_xp(id)) %>
+      <%= Logger.error(is_revive_xp(id)) %>
+      <%= Logger.error(is_gunner_assist_xp(id)) %>
+    </td>
+    """
+  end
 
-  defp get_character_name(_character_map, 0), do: "[Unknown Character]"
 
-  defp get_character_name(character_map, character_id) do
+  defp get_character_link(_character_map, 0), do: "[Unknown Character]"
+
+  defp get_character_link(character_map, character_id) do
     case character_map do
       %{^character_id => {:ok, %Character{name_first: name, faction_id: faction_id}}} ->
         format_faction_character_link(name, faction_id)
@@ -462,15 +490,6 @@ defmodule SacaStatsWeb.CharacterView do
     """
   end
 
-  defp format_character_link(identifier, faction_id, note \\ "") do
-    # need `assigns` map in scope to use ~H
-    assigns = %{}
-
-    ~H"""
-    <a href={"/character/#{identifier}"}><%= identifier %></a><%= note %>
-    """
-  end
-
   defp get_weapon_name(0), do: "[Unknown Weapon]"
 
   defp get_weapon_name(weapon_id), do: SacaStats.weapons()[weapon_id]["name"]
@@ -482,6 +501,26 @@ defmodule SacaStatsWeb.CharacterView do
     case weapon do
       nil -> "/files/ps2/images/static/-1.png"
       _ -> weapon["image_path"]
+    end
+  end
+
+  defp get_vehicle_image_path(vehicle_id) when vehicle_id in [0, nil], do: "/files/ps2/images/static/3.png"
+
+  defp get_vehicle_image_path(vehicle_id) do
+    vehicle = SacaStats.vehicles()[vehicle_id]
+    case vehicle do
+      nil -> "/files/ps2/images/static/3.png"
+      _ -> if vehicle["image_path"] == nil, do: "/files/ps2/images/static/3.png", else: vehicle["image_path"]
+    end
+  end
+
+  defp get_vehicle_name(0), do: "Unknown Vehicle"
+
+  defp get_vehicle_name(vehicle_id) do
+    vehicle = SacaStats.vehicles()[vehicle_id]
+    case vehicle do
+      nil -> "Unknown Vehicle"
+      _ -> vehicle["name"]
     end
   end
 
