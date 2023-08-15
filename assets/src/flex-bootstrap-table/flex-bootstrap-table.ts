@@ -290,10 +290,10 @@ export class FlexBootstrapTable {
               this.hasMobileHeader($(tds).html())
                 ? ''
                 : this.getMobileHeader(
-                    document.querySelector(tds)!.hasAttribute('data-mobile-title')
-                      ? document.querySelector(tds)!.getAttribute('data-mobile-title')!
-                      : $(header).text(),
-                  ),
+                  document.querySelector(tds)!.hasAttribute('data-mobile-title')
+                    ? document.querySelector(tds)!.getAttribute('data-mobile-title')!
+                    : $(header).text(),
+                ),
             ),
           );
           if (window.innerWidth > 767) {
@@ -306,8 +306,8 @@ export class FlexBootstrapTable {
     return !this.hasMobileHeader(text)
       ? '<span class="table-responsive-stack-thead">' + text + this.getSeparator(text) + '</span>'
       : this.desktopHeaderOnly.includes(text.trim())
-      ? ''
-      : text;
+        ? ''
+        : text;
   };
   private getSeparator = (text: string) => {
     return this.isThereAHeader(text) ? ': ' : '';
@@ -345,15 +345,19 @@ export class FlexBootstrapTable {
 
   public setStickyHeaderWidths = () => {
     //initialize variables
-    let headers = document.querySelector('thead.sticky-header > tr')!.querySelectorAll('th');
-    let columns = document.querySelector('#' + this.table.id + '>tbody>tr')!.querySelectorAll('td');
+    // changed from 'thead.sticky-header > tr' to 'thead > tr'
+    let tableHeadRowElement = document.querySelector('thead > tr');
+    if (tableHeadRowElement != undefined) {
+      let headers = tableHeadRowElement.querySelectorAll('th');
+      let columns = document.querySelector('#' + this.table.id + '>tbody>tr')!.querySelectorAll('td');
 
-    //make sure each header matches it's matching td
-    for (let i = 0; i < headers.length; i++) {
-      let width = $(columns[i]).width();
-      $(headers[i]).css({
-        width: width + 'px',
-      });
+      //make sure each header matches it's matching td
+      for (let i = 0; i < headers.length; i++) {
+        let width = $(columns[i]).width();
+        $(headers[i]).css({
+          width: width + 'px',
+        });
+      }
     }
   };
 

@@ -440,7 +440,10 @@ function handleMobileMenu() {
 }
 
 function updateCountShown() {
-  document.getElementById(mobileSelectionMenu + '-selection-count')!.innerHTML = copyRows.size + ' Selected';
+  let selectionCountElement = document.getElementById(mobileSelectionMenu + '-selection-count');
+  if (selectionCountElement != undefined) {
+    selectionCountElement.innerHTML = copyRows.size + ' Selected';
+  }
 }
 
 function showHideSelectionMobileMenu() {
@@ -454,7 +457,10 @@ function showHideSelectionMobileMenu() {
 
 function hideSelectionMobileMenu() {
   $('.' + mobileSelectionMenu).hide();
-  (document.getElementById(mobileSelectionMenu + '-select-all-btn') as HTMLInputElement).checked = false;
+  let selectAllBtn = (document.getElementById(mobileSelectionMenu + '-select-all-btn') as HTMLInputElement);
+  if (selectAllBtn != undefined) {
+    selectAllBtn.checked = false;
+  }
 }
 
 function getRowArrayIndex(row: HTMLTableRowElement) {
