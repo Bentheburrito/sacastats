@@ -73,6 +73,27 @@ figure {
   }
 }
 
+/* Links - colors from sacastats.ex#factions */
+a.NS-link {
+  color: #575757;
+}
+
+a.VS-link {
+  color: #B035F2;
+}
+
+a.NC-link {
+  color: #2A94F7;
+}
+
+a.TR-link {
+  color: #E52D2D;
+}
+
+a.NSO-link {
+  color: #E5E5E5;
+}
+
 /*Loading Screen*/
 #loading-screen {
   width: 100%;
