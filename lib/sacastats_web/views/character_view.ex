@@ -455,19 +455,6 @@ defmodule SacaStatsWeb.CharacterView do
     """
   end
 
-  defp build_event_log_table_row_item(assigns, e, _, _) do
-    id = e.experience_id
-    ~H"""
-    <td colspan={"#{get_event_log_table_col_span_count()}"}>
-      <%= Logger.error(e) %>
-      <%= Logger.error(is_assist_xp(id)) %>
-      <%= Logger.error(is_revive_xp(id)) %>
-      <%= Logger.error(is_gunner_assist_xp(id)) %>
-    </td>
-    """
-  end
-
-
   defp get_character_link(_character_map, 0), do: "[Unknown Character]"
 
   defp get_character_link(character_map, character_id) do
