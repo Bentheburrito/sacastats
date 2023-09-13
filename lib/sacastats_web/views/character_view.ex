@@ -108,7 +108,7 @@ defmodule SacaStatsWeb.CharacterView do
               <th data-field="timestamp" data-visible="false" data-toggle="tooltip" title="Timestamp">Timestamp</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="events" phx-update="append">
           <%= for e <- assigns.events do %>
             <%= build_event_log_table_row(assigns, e, session, assigns.character_map) %>
           <% end %>
@@ -154,7 +154,8 @@ defmodule SacaStatsWeb.CharacterView do
 
 
     character_link = if character_id == 0, do: "", else: get_character_link(character_map, character_id)
-    vehicle_name = if character_id == 0, do: "A " <> get_vehicle_name(vehicle_id), else: "'s " <> get_vehicle_name(vehicle_id)
+    vehicle_name = get_vehicle_name(vehicle_id)
+    vehicle_identifier = if character_id == 0, do: "A " <> vehicle_name, else: "'s " <> vehicle_name
     vehicle_img = get_vehicle_image_path(vehicle_id)
 
     ~H"""
@@ -165,7 +166,7 @@ defmodule SacaStatsWeb.CharacterView do
           </div>
           <h5 class="align-text-bottom text-center mb-0">
             <%= character_link %>
-            <%= vehicle_name%>
+            <%= vehicle_identifier%>
           </h5>
       </td>
     """
@@ -490,6 +491,9 @@ defmodule SacaStatsWeb.CharacterView do
   end
 
   defp get_vehicle_image_path(vehicle_id) when vehicle_id in [0, nil], do: "/files/ps2/images/static/3.png"
+
+  defp get_vehicle_image_path(vehicle_id) when vehicle_id in [103, 104, 105, 2128],
+   do: "/files/ps2/images/static/82148.png" # spitfire's image path is wrong
 
   defp get_vehicle_image_path(vehicle_id) do
     vehicle = SacaStats.vehicles()[vehicle_id]
