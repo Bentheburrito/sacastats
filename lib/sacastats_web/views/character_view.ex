@@ -88,9 +88,9 @@ defmodule SacaStatsWeb.CharacterView do
     """
   end
 
-  def get_event_log_table_col_span_count(), do: 3
+  def get_event_log_table_col_span_count, do: 3
 
-  def get_event_log_table_id(), do: "eventLogTable"
+  def get_event_log_table_id, do: "eventLogTable"
 
   def build_event_log(assigns, %Session{} = session) do
     ~H"""
@@ -151,7 +151,6 @@ defmodule SacaStatsWeb.CharacterView do
   defp build_event_log_table_vehicle_cell(character_id, character_map, vehicle_id) do
     # need `assigns` map in scope to use ~H
     assigns = %{}
-
 
     character_link = if character_id == 0, do: "", else: get_character_link(character_map, character_id)
     vehicle_name = get_vehicle_name(vehicle_id)
