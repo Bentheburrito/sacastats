@@ -8,7 +8,6 @@ defmodule SacaStatsWeb.CharacterLive do
 
   import Ecto.Query
 
-  alias SacaStatsWeb.CharacterLive
   alias Phoenix.PubSub
   alias SacaStats.Character.Favorite
   alias SacaStats.{Characters, Weapons}
@@ -17,6 +16,7 @@ defmodule SacaStatsWeb.CharacterLive do
   alias SacaStats.Events.{PlayerLogin, PlayerLogout}
   alias SacaStats.Repo
   alias SacaStats.Session
+  alias SacaStatsWeb.CharacterLive
 
   def init_assigns do
     %{
@@ -69,49 +69,43 @@ defmodule SacaStatsWeb.CharacterLive do
   end
 
   defp build_assigns(character_name, session, socket) do
-    with {:ok, %Character{} = char} <- Characters.get_by_name(character_name) do
-      # Start tasks to do some work concurrently
-      online_status_task = Task.async(fn -> OnlineStatus.get_by_id(char.character_id) end)
+    case Characters.get_by_name(character_name) do
+      {:ok, %Character{} = char} ->
+        # Start tasks to do some work concurrently
+        online_status_task = Task.async(fn -> OnlineStatus.get_by_id(char.character_id) end)
 
-      favorited_task =
-        Task.async(fn ->
-          if is_nil(session["user"]) do
-            false
-          else
-            Characters.favorite?(char.character_id, session["user"].id)
+        favorited_task = get_favorited_task(char, session)
+
+        # Subscribe to events from this character
+        PubSub.subscribe(SacaStats.PubSub, "game_event:#{char.character_id}")
+
+        # Get additional character info
+        ethnicity = Characters.get_ethnicity(char.faction_id, char.head_id)
+        sex = Characters.get_sex(char.faction_id, char.head_id)
+
+        characteristics = %{
+          "ethnicity" => ethnicity,
+          "sex" => sex
+        }
+
+        # Await tasks
+        status_text =
+          case Task.await(online_status_task) do
+            {:ok, %OnlineStatus{} = status} -> OnlineStatus.status_text(status)
+            _ -> "unknown"
           end
-        end)
 
-      # Subscribe to events from this character
-      PubSub.subscribe(SacaStats.PubSub, "game_event:#{char.character_id}")
+        favorited? = Task.await(favorited_task)
 
-      # Get additional character info
-      ethnicity = Characters.get_ethnicity(char.faction_id, char.head_id)
-      sex = Characters.get_sex(char.faction_id, char.head_id)
+        # Assign data to socket and return
+        assign(socket,
+          character_info: char,
+          online_status: status_text,
+          characteristics: characteristics,
+          favorited?: favorited?,
+          inner_options: :loading
+        )
 
-      characteristics = %{
-        "ethnicity" => ethnicity,
-        "sex" => sex
-      }
-
-      # Await tasks
-      status_text =
-        case Task.await(online_status_task) do
-          {:ok, %OnlineStatus{} = status} -> OnlineStatus.status_text(status)
-          _ -> "unknown"
-        end
-
-      favorited? = Task.await(favorited_task)
-
-      # Assign data to socket and return
-      assign(socket,
-        character_info: char,
-        online_status: status_text,
-        characteristics: characteristics,
-        favorited?: favorited?,
-        inner_options: :loading
-      )
-    else
       :not_found ->
         socket
         |> put_flash(
@@ -130,6 +124,16 @@ defmodule SacaStatsWeb.CharacterLive do
         )
         |> live_redirect(to: Routes.live_path(socket, CharacterLive.Search))
     end
+  end
+
+  defp get_favorited_task(char, session) do
+    Task.async(fn ->
+      if is_nil(session["user"]) do
+        false
+      else
+        Characters.favorite?(char.character_id, session["user"].id)
+      end
+    end)
   end
 
   defp send_inner_assigns(me, :general, %Character{} = char, _params) do
