@@ -135,11 +135,16 @@ export function addFormatsToPage() {
   }
 }
 
-export function addAnimationToProgressBars() {
+export function addAnimationToProgressBars(optionalSelectedProgressBar: Element) {
   let progressBars = document.querySelectorAll('.progress-bar');
   progressBars.forEach(function (progressBar, index) {
     var finishedWidth = progressBar.getAttribute('aria-valuenow');
     if (progressBar.id.indexOf('weapon') <= -1) {
+      if (optionalSelectedProgressBar != undefined) {
+        if (!progressBar.isEqualNode(optionalSelectedProgressBar)) {
+          return;
+        }
+      }
       setTimeout(animateProgressBar, index * 500);
     } else {
       animateProgressBar();
