@@ -48,7 +48,7 @@
                 <% else %>
                   <h4 class="text-center display-6"><%= @character_info.battle_rank %></h4>
                   <div class="progress">
-                      <div id="brProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow={"#{@character_info.percent_to_next_br}"} aria-valuemin="0" aria-valuemax="100"  style="width: 0;">
+                      <div phx-hook="AddAnimationToProgressBars" id="brProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow={"#{@character_info.percent_to_next_br}"} aria-valuemin="0" aria-valuemax="100"  style="width: 0;">
                           <%= @character_info.percent_to_next_br %>%
                       </div>
                   </div>
@@ -63,21 +63,21 @@
                 <%= if @character_info.available_points == :loading do %>
                     <h4 class="text-center display-6 number">Loading cert info...</h4>
                     <div class="progress">
-                        <div id="certProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0;">
                             Loading...
                         </div>
                     </div>
                     <p class="move-up-4 text-center number">(Loading Total Earned...)</p>
                 <% else %>
-                    <h4 class="text-center display-6 number"><%= @character_info.available_points %></h4>
+                    <h4 phx-hook="AddCommasToNumber" id="available-certs" class="text-center display-6 number"><%= @character_info.available_points %></h4>
                     <div class="progress">
-                        <div id="certProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" aria-valuenow={"#{SacaStats.Utils.to_percent(@character_info.percent_to_next_point)}"} aria-valuemin="0" aria-valuemax="100" style="width: 0;">
+                        <div phx-hook="AddAnimationToProgressBars" id="certProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" aria-valuenow={"#{SacaStats.Utils.to_percent(@character_info.percent_to_next_point)}"} aria-valuemin="0" aria-valuemax="100" style="width: 0;">
                             <%= SacaStats.Utils.to_percent(@character_info.percent_to_next_point) %>%
                         </div>
                     </div>
-                    <h4 class="float-right number"><%= @character_info.available_points + 1 %></h4>
-                    <h4 class="number"><%= @character_info.available_points %></h4>
-                    <p class="move-up-4 text-center number">(Total Earned: <%= @character_info.earned_points + @character_info.gifted_points%>)</p>
+                    <h4 phx-hook="AddCommasToNumber" id="available-next-certs" class="float-right number"><%= @character_info.available_points + 1 %></h4>
+                    <h4 phx-hook="AddCommasToNumber" id="abailable-certs-small" class="number"><%= @character_info.available_points %></h4>
+                    <p phx-hook="AddCommasToNumber" id="total-certs-earned" class="move-up-4 text-center number">(Total Earned: <%= @character_info.earned_points + @character_info.gifted_points%>)</p>
                 <% end %>
             </div>
 
@@ -121,7 +121,7 @@
                             <div class="h-50 d-flex justify-content-center align-items-end">
                                 <h4 class="text-center"><u>Joined</u></h4>
                             </div>
-                            <p class="text-center date-time"><%= to_string(@character_info.outfit.member_since_date) %></p>
+                            <p phx-hook="NewDateToFormat" id="outfit-member-since-date" class="text-center date-time"><%= to_string(@character_info.outfit.member_since_date) %></p>
                             <br />
                         </div>
                         <div class="col-12 col-md-6">
@@ -135,7 +135,7 @@
                             <div class="h-50 d-flex justify-content-center align-items-end">
                                 <h4 class="text-center"><u>Created</u></h4>
                             </div>
-                            <p class="text-center date-time"><%= to_string(@character_info.outfit.time_created_date) %></p>
+                            <p phx-hook="NewDateToFormat" id="outfit-created-date" class="text-center date-time"><%= to_string(@character_info.outfit.time_created_date) %></p>
                         </div>
                     <% else %>
                         <div class="col-12 py-3">
@@ -168,7 +168,11 @@
                                     alt={Map.get(weapon, "name", "N/A")} class="weapon-image mx-auto d-block"/>
                             </div>
                             <div class="text-center">
-                                <p class="text-center d-inline font-weight-bold"><%= "#{weapon["name"]}: "%></p><p class={"text-center d-inline font-weight-bold #{weapon["type"]}"}><%= weapon["value"] %></p>
+                                <p class="text-center d-inline font-weight-bold"><%= "#{weapon["name"]}: "%></p>
+                                <p phx-hook={"#{SacaStats.Characters.get_hook_type_from_stat_name(stat_name)}"} id={"#{stat_name}-best-value"} 
+                                    class={"text-center d-inline font-weight-bold #{weapon["type"]}"}>
+                                        <%= weapon["value"] %>
+                                </p>
                             </div>
                             <p class="text-center"><%= "(#{weapon["weapon_type"]})"%></p>
                         </div>
@@ -193,7 +197,7 @@
                             <div class="col-auto">
                                 <div class="mx-auto w-auto">
                                     <h4 class="d-inline"><u>Auraxium</u>:</h4>
-                                    <p class="d-inline number"><%= @all_medal_counts["Auraxium"] %></p>
+                                    <p phx-hook="AddCommasToNumber" id="auraxium-medal-count" class="d-inline number"><%= @all_medal_counts["Auraxium"] %></p>
                                     <img src={"https://census.daybreakgames.com/files/ps2/images/static/3068.png"} alt="Auraxium Medal" class="medal" width="30px"/>
                                 </div>
                             </div>
@@ -202,7 +206,7 @@
                             <div class="col-auto">
                                 <div class="mx-auto w-auto">
                                     <h4 class="d-inline"><u>Gold</u>:</h4>
-                                    <p class="d-inline number"><%= @all_medal_counts["Gold"] %></p>
+                                    <p phx-hook="AddCommasToNumber" id="gold-medal-count" class="d-inline number"><%= @all_medal_counts["Gold"] %></p>
                                     <img src={"https://census.daybreakgames.com/files/ps2/images/static/3075.png"} alt="Gold Medal" class="medal" width="30px"/>
                                 </div>
                             </div>
@@ -211,7 +215,7 @@
                             <div class="col-auto">
                                 <div class="mx-auto w-auto">
                                     <h4 class="d-inline"><u>Silver</u>:</h4>
-                                    <p class="d-inline number"><%= @all_medal_counts["Silver"] %></p>
+                                    <p phx-hook="AddCommasToNumber" id="silver-medal-count" class="d-inline number"><%= @all_medal_counts["Silver"] %></p>
                                     <img src={"https://census.daybreakgames.com/files/ps2/images/static/3079.png"} alt="Silver Medal" class="medal" width="30px"/>
                                 </div>
                             </div>
@@ -220,8 +224,8 @@
                             <div class="col-auto">
                                 <div class="mx-auto w-auto">
                                     <h4 class="d-inline"><u>Bronze</u>:</h4>
-                                    <p class="d-inline number"><%= @all_medal_counts["Bronze"] %></p>
-                                    <img src={"https://census.daybreakgames.com/files/ps2/images/static/3072.png"} alt="Auraxium Bronze" class="medal" width="30px"/>
+                                    <p phx-hook="AddCommasToNumber" id="bronze-medal-count" class="d-inline number"><%= @all_medal_counts["Bronze"] %></p>
+                                    <img src={"https://census.daybreakgames.com/files/ps2/images/static/3072.png"} alt="Bronze Medal" class="medal" width="30px"/>
                                 </div>
                             </div>
                         <% end %>
@@ -239,13 +243,13 @@
                                 <p class="d-inline"><u>Kills</u>:</p>
                             </div>
                             <div class="col-5 col-md-4">
-                                <p class="d-inline number"><%= SacaStats.Characters.get_stat_by_name(@character_info.stat_history, "kills") %></p>
+                                <p phx-hook="AddCommasToNumber" id="total-kill-count" class="d-inline number"><%= SacaStats.Characters.get_stat_by_name(@character_info.stat_history, "kills") %></p>
                             </div>
                             <div class="offset-0 col-7 offset-sm-2 col-sm-5 offset-md-3 col-md-3">
                                 <p class="d-inline"><u>Deaths</u>:</p>
                             </div>
                             <div class="col-5 col-md-4">
-                                <p class="d-inline number"><%= SacaStats.Characters.get_stat_by_name(@character_info.stat_history, "deaths") %></p>
+                                <p phx-hook="AddCommasToNumber" id="total-deaths-count" class="d-inline number"><%= SacaStats.Characters.get_stat_by_name(@character_info.stat_history, "deaths") %></p>
                             </div>
                             <div class="offset-0 col-7 offset-sm-2 col-sm-5 offset-md-3 col-md-3">
                                 <p class="d-inline"><u>K/D Ratio</u>:</p>
@@ -257,19 +261,19 @@
                                 <p class="d-inline"><u>Score</u>:</p>
                             </div>
                             <div class="col-5 col-md-4">
-                                <p class="d-inline number"><%= SacaStats.Characters.get_stat_by_name(@character_info.stat_history, "score") %></p>
+                                <p phx-hook="AddCommasToNumber" id="total-score-count" class="d-inline number"><%= SacaStats.Characters.get_stat_by_name(@character_info.stat_history, "score") %></p>
                             </div>
                             <div class="offset-0 col-7 offset-sm-2 col-sm-5 offset-md-3 col-md-3">
                                 <p class="d-inline"><u>Time Played</u>:</p>
                             </div>
                             <div class="col-5 col-md-4">
-                                <p class="d-inline seconds-to-readable"><%= SacaStats.Characters.get_stat_by_name(@character_info.stat_history, "time") %></p>
+                                <p phx-hook="SecondsToReadable" id="player-total-time-played" class="d-inline seconds-to-readable"><%= SacaStats.Characters.get_stat_by_name(@character_info.stat_history, "time") %></p>
                             </div>
                             <div class="offset-0 col-7 offset-sm-2 col-sm-5 offset-md-3 col-md-3">
                                 <p class="d-inline"><u>Total Medals</u>:</p>
                             </div>
                             <div class="col-5 col-md-4">
-                                <p class="d-inline number"><%= SacaStats.Characters.get_stat_by_name(@character_info.stat_history, "medals") %></p>
+                                <p phx-hook="AddCommasToNumber" id="total-medal-count" class="d-inline number"><%= SacaStats.Characters.get_stat_by_name(@character_info.stat_history, "medals") %></p>
                             </div>
                         </div>
                     </div>
