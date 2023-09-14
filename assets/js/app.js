@@ -33,7 +33,7 @@ import "../vendor/dragtable"
 import "bootstrap-table/src/extensions/reorder-columns/bootstrap-table-reorder-columns"
 import "bootstrap-table/src/extensions/sticky-header/bootstrap-table-sticky-header"
 
-import { addCommasToNumber, formatDateTime, addPercent, secondsToHHMMSS } from "../src/formats.ts";
+import { addCommasToNumber, formatDateTime, addPercent, secondsToHHMMSS, addAnimationToProgressBars } from "../src/formats.ts";
 import { init as initInfantryModel } from "../src/character/planetside-model.ts";
 import { init as initWeaponsTable } from "../src/character/weapons-table.ts";
 import { init as initWeapons } from "../src/character/weapons.ts";
@@ -77,6 +77,15 @@ Hooks.SecondsToReadable = {
   },
   updated() {
     secondsToHHMMSS(this.el);
+  }
+};
+
+Hooks.AddAnimationToProgressBars = {
+  mounted() {
+    addAnimationToProgressBars(this.el);
+  },
+  updated() {
+    addAnimationToProgressBars(this.el);
   }
 };
 

@@ -108,7 +108,7 @@ export class PlanetsideModel {
     this.scene.add(this.directionalLight);
   };
 
-  protected loadModels = () => {};
+  protected loadModels = () => { };
 
   protected createRenderer = () => {
     // create a WebGLRenderer and set its width and height
@@ -162,6 +162,10 @@ export class PlanetsideModel {
     position.y += 2;
     this.directionalLight.position.copy(position);
   };
+
+  protected initializeCameraAndRenderSettings = () => {
+    this.onWindowResize();
+  }
 
   private onWindowResize = () => {
     //maintain aspect ratio
