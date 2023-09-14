@@ -152,9 +152,14 @@ defmodule SacaStatsWeb.CharacterView do
     # need `assigns` map in scope to use ~H
     assigns = %{}
 
-    character_link = if character_id == 0, do: "", else: get_character_link(character_map, character_id)
+    character_link =
+      if character_id == 0, do: "", else: get_character_link(character_map, character_id)
+
     vehicle_name = get_vehicle_name(vehicle_id)
-    vehicle_identifier = if character_id == 0, do: "A " <> vehicle_name, else: "'s " <> vehicle_name
+
+    vehicle_identifier =
+      if character_id == 0, do: "A " <> vehicle_name, else: "'s " <> vehicle_name
+
     vehicle_img = get_vehicle_image_path(vehicle_id)
 
     ~H"""
@@ -179,11 +184,21 @@ defmodule SacaStatsWeb.CharacterView do
     build_event_log_table_row_items(assigns, e, session, c_map)
   end
 
-  defp build_event_log_table_row(assigns, %PlayerFacilityCapture{} = e, %Session{} = session, c_map) do
+  defp build_event_log_table_row(
+         assigns,
+         %PlayerFacilityCapture{} = e,
+         %Session{} = session,
+         c_map
+       ) do
     build_event_log_table_row_items(assigns, e, session, c_map)
   end
 
-  defp build_event_log_table_row(assigns, %PlayerFacilityDefend{} = e, %Session{} = session, c_map) do
+  defp build_event_log_table_row(
+         assigns,
+         %PlayerFacilityDefend{} = e,
+         %Session{} = session,
+         c_map
+       ) do
     build_event_log_table_row_items(assigns, e, session, c_map)
   end
 
@@ -191,13 +206,23 @@ defmodule SacaStatsWeb.CharacterView do
     build_event_log_table_row_items(assigns, e, session, c_map)
   end
 
-  defp build_event_log_table_row(assigns, %GainExperience{experience_id: id, other_id: character_id} = e, %Session{character_id: character_id} = session, c_map)
-      when is_revive_xp(id) do
+  defp build_event_log_table_row(
+         assigns,
+         %GainExperience{experience_id: id, other_id: character_id} = e,
+         %Session{character_id: character_id} = session,
+         c_map
+       )
+       when is_revive_xp(id) do
     build_event_log_table_row_items(assigns, e, session, c_map)
   end
 
-  defp build_event_log_table_row(assigns, %GainExperience{experience_id: id, character_id: character_id} = e, %Session{character_id: character_id} = session, c_map)
-      when is_assist_xp(id) or is_gunner_assist_xp(id) or is_revive_xp(id) do
+  defp build_event_log_table_row(
+         assigns,
+         %GainExperience{experience_id: id, character_id: character_id} = e,
+         %Session{character_id: character_id} = session,
+         c_map
+       )
+       when is_assist_xp(id) or is_gunner_assist_xp(id) or is_revive_xp(id) do
     build_event_log_table_row_items(assigns, e, session, c_map)
   end
 
@@ -225,7 +250,12 @@ defmodule SacaStatsWeb.CharacterView do
     """
   end
 
-  defp build_event_log_table_row_item(assigns, %BattleRankUp{} = br_up, %Session{} = session, _c_map) do
+  defp build_event_log_table_row_item(
+         assigns,
+         %BattleRankUp{} = br_up,
+         %Session{} = session,
+         _c_map
+       ) do
     ~H"""
       <td colspan={"#{get_event_log_table_col_span_count()}"}>
         <%= format_faction_character_link(session.name, session.faction_id) %> ranked up to <%= br_up.battle_rank %>
@@ -262,7 +292,12 @@ defmodule SacaStatsWeb.CharacterView do
     """
   end
 
-  defp build_event_log_table_row_item(assigns, %PlayerFacilityCapture{} = cap, %Session{} = session, _c_map) do
+  defp build_event_log_table_row_item(
+         assigns,
+         %PlayerFacilityCapture{} = cap,
+         %Session{} = session,
+         _c_map
+       ) do
     facility = SacaStats.facilities()[cap.facility_id]
 
     facility_type_text =
@@ -290,7 +325,12 @@ defmodule SacaStatsWeb.CharacterView do
     """
   end
 
-  defp build_event_log_table_row_item(assigns, %PlayerFacilityDefend{} = def, %Session{} = session, _) do
+  defp build_event_log_table_row_item(
+         assigns,
+         %PlayerFacilityDefend{} = def,
+         %Session{} = session,
+         _
+       ) do
     facility = SacaStats.facilities()[def.facility_id]
 
     facility_type_text =
@@ -372,7 +412,7 @@ defmodule SacaStatsWeb.CharacterView do
          character_map
        )
        when is_revive_xp(id) do
-        other_link = get_character_link(character_map, ge.character_id)
+    other_link = get_character_link(character_map, ge.character_id)
     character_link = get_character_link(character_map, character_id)
 
     ~H"""
@@ -441,13 +481,23 @@ defmodule SacaStatsWeb.CharacterView do
     """
   end
 
-  defp build_event_log_table_row_item(assigns, %PlayerLogin{}, %Session{name: name, faction_id: faction_id}, _character_map) do
+  defp build_event_log_table_row_item(
+         assigns,
+         %PlayerLogin{},
+         %Session{name: name, faction_id: faction_id},
+         _character_map
+       ) do
     ~H"""
     <td colspan={"#{get_event_log_table_col_span_count()}"}><%= format_faction_character_link(name, faction_id) %> logged in.</td>
     """
   end
 
-  defp build_event_log_table_row_item(assigns, %PlayerLogout{}, %Session{name: name, faction_id: faction_id}, _character_map) do
+  defp build_event_log_table_row_item(
+         assigns,
+         %PlayerLogout{},
+         %Session{name: name, faction_id: faction_id},
+         _character_map
+       ) do
     ~H"""
     <td colspan={"#{get_event_log_table_col_span_count()}"}><%= format_faction_character_link(name, faction_id) %> logged out.</td>
     """
@@ -483,22 +533,31 @@ defmodule SacaStatsWeb.CharacterView do
 
   defp get_weapon_image_path(weapon_id) do
     weapon = SacaStats.weapons()[weapon_id]
+
     case weapon do
       nil -> "/files/ps2/images/static/-1.png"
       _ -> weapon["image_path"]
     end
   end
 
-  defp get_vehicle_image_path(vehicle_id) when vehicle_id in [0, nil], do: "/files/ps2/images/static/3.png"
+  defp get_vehicle_image_path(vehicle_id) when vehicle_id in [0, nil],
+    do: "/files/ps2/images/static/3.png"
 
   defp get_vehicle_image_path(vehicle_id) when vehicle_id in [103, 104, 105, 2128],
-   do: "/files/ps2/images/static/82148.png" # spitfire's image path is wrong
+    # spitfire's image path is wrong
+    do: "/files/ps2/images/static/82148.png"
 
   defp get_vehicle_image_path(vehicle_id) do
     vehicle = SacaStats.vehicles()[vehicle_id]
+
     case vehicle do
-      nil -> "/files/ps2/images/static/3.png"
-      _ -> if vehicle["image_path"] == nil, do: "/files/ps2/images/static/3.png", else: vehicle["image_path"]
+      nil ->
+        "/files/ps2/images/static/3.png"
+
+      _ ->
+        if vehicle["image_path"] == nil,
+          do: "/files/ps2/images/static/3.png",
+          else: vehicle["image_path"]
     end
   end
 
@@ -506,6 +565,7 @@ defmodule SacaStatsWeb.CharacterView do
 
   defp get_vehicle_name(vehicle_id) do
     vehicle = SacaStats.vehicles()[vehicle_id]
+
     case vehicle do
       nil -> "Unknown Vehicle"
       _ -> vehicle["name"]
