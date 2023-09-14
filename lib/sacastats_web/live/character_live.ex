@@ -146,7 +146,7 @@ defmodule SacaStatsWeb.CharacterLive do
       end
 
     # Compile weapon stats
-    # TODO: compiled_stats is calculated both here and in :weapons, we should probably cache this
+    # compiled_stats is calculated both here and in :weapons, we should probably cache this
     compiled_stats = Weapons.compile_stats(char.weapon_stat, char.weapon_stat_by_faction)
     all_medal_counts = Weapons.medal_counts(compiled_stats)
     best_weapons = Weapons.compile_best_stats(compiled_stats)
