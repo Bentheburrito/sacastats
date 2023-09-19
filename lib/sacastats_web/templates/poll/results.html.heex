@@ -1,3 +1,5 @@
+<link rel="stylesheet" href="/css/outfit/results.css" />
+
 <section class="m-4">
   <h2><%= @poll.title %></h2>
   <%= if SacaStatsWeb.PollLive.poll_owner?(@voter_id, @poll) do %>
