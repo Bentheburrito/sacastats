@@ -1,5 +1,6 @@
 tbody tr.selection>td {
     background-color: #dddddd !important;
+    color: #000;
 }
 
 .selection {
@@ -109,10 +110,13 @@ tbody tr.selection.main-selected>td {
     /*for boostrap > xs*/
     .table tr.selected td:first-child {
         background-color: #ffffff;
+        color: #000;
     }
 
-    tbody tr:not(tr.selection):hover>td {
+    tbody tr:not(tr.selection):hover>td,
+    tbody tr:not(tr.selection):hover>td>label {
         background-color: #dddddd !important;
+        color: #000;
     }
 
     tr.selection:hover {

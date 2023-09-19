@@ -44,6 +44,7 @@ button:not(:disabled),
 .btn:not(:disabled):not(.disabled),
 .page-link:not(:disabled):not(.disabled),
 input[type="text"],
+[type="datetime-local"]::-webkit-calendar-picker-indicator,
 a {
   cursor: url('/images/arrow-select.cur'), auto !important;
 }
