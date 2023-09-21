@@ -207,9 +207,11 @@ export class FlexBootstrapTable {
       bootstrapColumn.fixColumnDropDown();
     }
 
-    setTimeout(function () {
-      bootstrapColumn.updateColumns();
-    }, 100);
+    if (event.target instanceof HTMLAnchorElement && (event.target as HTMLAnchorElement).href != undefined && (event.target as HTMLAnchorElement).href != "") {
+      setTimeout(function () {
+        bootstrapColumn.updateColumns();
+      }, 100);
+    }
   };
   private addOnDocumentMouseUp = () => {
     $(document).off('mouseup', this.documentMouseUpEventHandler);
@@ -228,7 +230,7 @@ export class FlexBootstrapTable {
 
   private updateTableFormats = (tableID: string) => {
     this.isPageFormatted = false;
-    addAnimationToProgressBars();
+    addAnimationToProgressBars(undefined);
     addFormatsToPage();
     this.setMobileHeaderTexts(tableID);
     this.flexBootstrapTableFilter.showHideClearFilterButtons();

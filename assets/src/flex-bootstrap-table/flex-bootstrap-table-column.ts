@@ -611,7 +611,7 @@ function handleSortableColumnClick(event: Event) {
 function checkIfAColumnDifferent() {
   //if there is a different column visible or they are in a new order
   let columns = findSortedVisibleFields();
-  if (JSON.stringify(columns) !== JSON.stringify(previousColumns)) {
+  if (JSON.stringify(columns) !== JSON.stringify(previousColumns) && columns.length != 0) {
     //update previous columns
     previousColumns = columns;
 
@@ -623,7 +623,7 @@ function checkIfAColumnDifferent() {
 function checkIfASortDifferent() {
   //if there is a different column sorted or the sort is different
   let sorted = getSortedField();
-  if (JSON.stringify(sorted) !== JSON.stringify(previousSorted)) {
+  if (JSON.stringify(sorted) !== JSON.stringify(previousSorted) && sorted.fieldText != "") {
     //update previous sorted
     previousSorted = sorted;
 
