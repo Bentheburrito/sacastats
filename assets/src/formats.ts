@@ -135,7 +135,7 @@ export function addFormatsToPage() {
   }
 }
 
-export function addAnimationToProgressBars(optionalSelectedProgressBar: Element) {
+export function addAnimationToProgressBars(optionalSelectedProgressBar: Element | undefined) {
   let progressBars = document.querySelectorAll('.progress-bar');
   progressBars.forEach(function (progressBar, index) {
     var finishedWidth = progressBar.getAttribute('aria-valuenow');
