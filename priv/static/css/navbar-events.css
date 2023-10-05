@@ -35,7 +35,6 @@
 
 nav {
     opacity: 0.94;
-    background-color: #f8f9fa;
 }
 
 .navbar-expand-md .navbar-collapse {
@@ -47,9 +46,10 @@ nav {
     transition: .3s;
 }
 
-.sticky-top {
+.sticky-top,
+.fixed-bottom {
     margin-bottom: 0px;
-    background-color: #ffffff;
+    background-color: rgb(23, 23, 23);
 }
 
 .active-page>a,

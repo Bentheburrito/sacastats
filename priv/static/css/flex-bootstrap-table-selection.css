@@ -3,13 +3,22 @@ tbody tr.selection>td {
 }
 
 .selection {
-    z-index: 2;
-    outline: gold 4px solid !important;
+    position: relative;
+}
+
+.selection:after {
+    position: absolute;
+    outline: gold 5px solid !important;
     outline-offset: -4px;
+    width: 100%;
+    height: 100%;
+    content: '';
+    top: 0;
+    left: 0;
 }
 
 .selection>td {
-    z-index: -1;
+    color: #000;
 }
 
 .table {
@@ -47,6 +56,10 @@ tbody tr.selection>td {
     #table-copy-text {
         padding: 0;
         padding-left: 10px !important;
+    }
+
+    .table-hover>tbody>tr:hover {
+        color: whitesmoke;
     }
 }
 

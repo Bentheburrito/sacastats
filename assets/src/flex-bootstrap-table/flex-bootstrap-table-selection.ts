@@ -1,4 +1,6 @@
 import * as flexBootstrapTableEvents from '../events/flex-bootstrap-table-events.js';
+import { AddCustomCopyEvent, AddSecondCustomCopyEvent } from '../events/flex-bootstrap-table-events.js';
+import { SacaStatsEventUtil } from '../events/sacastats-event-util.js';
 
 //initialize variables
 let startRowIndex: number | null; //dragged main selection index
@@ -581,17 +583,17 @@ function overARow(row: HTMLTableRowElement) {
 }
 
 function addCustomListeners() {
-  document
-    .getElementById(tableID.substring(1))
-    ?.addEventListener(flexBootstrapTableEvents.ADD_CUSTOM_COPY_EVENT, (customEvent: Event) => {
+  SacaStatsEventUtil.addCustomEventListener(document.getElementById(tableID.substring(1))!, new AddCustomCopyEvent(),
+    (customEvent: Event) => {
       setCustomCopyFunction((<CustomEvent>customEvent).detail[0] as Function);
-    });
+    }
+  );
 
-  document
-    .getElementById(tableID.substring(1))
-    ?.addEventListener(flexBootstrapTableEvents.ADD_SECOND_CUSTOM_COPY_EVENT, (customEvent: Event) => {
+  SacaStatsEventUtil.addCustomEventListener(document.getElementById(tableID.substring(1))!, new AddSecondCustomCopyEvent(),
+    (customEvent: Event) => {
       setSecondCustomCopyFunction((<CustomEvent>customEvent).detail[0] as Function);
-    });
+    }
+  );
 }
 
 function copySelectedRows(event: Event) {

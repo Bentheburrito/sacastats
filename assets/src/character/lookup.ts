@@ -1,12 +1,10 @@
-import { show as showLoadingScreen } from './../loading-screen.js';
+// import { show as showLoadingScreen } from './../loading-screen.js';
 
 let contextMenuID = '#character-card-context-menu';
 let selectedCharacterName: string;
 let selectedCard: HTMLElement | undefined;
 
 window.addEventListener('load', (event) => {
-  searchCharacter();
-  addContextMenuEventHandlers();
   addCharacterCardClick();
   addDocumentClickEvents();
 });
@@ -14,47 +12,6 @@ window.addEventListener('load', (event) => {
 window.addEventListener('phx:character_card_change', (event) => {
   addCharacterCardClick();
 });
-
-function searchCharacter() {
-  let btn = document.getElementById('searchButton');
-  let form = document.getElementById('characterSearchForm');
-  form?.addEventListener('submit', handleCharacterSearchEvent);
-  btn?.addEventListener('click', handleCharacterSearchEvent);
-
-  btn?.addEventListener('auxclick', function (event) {
-    if (event.button === 1) {
-      let characterName = (document.getElementById('character') as HTMLInputElement).value;
-      swapURL(event, characterName, true);
-    }
-  });
-}
-
-function handleCharacterSearchEvent(event: Event) {
-  let characterName = (document.getElementById('character') as HTMLInputElement).value;
-  swapURL(event, characterName, false);
-}
-
-function swapURL(event: Event, characterName: string, newTab: boolean) {
-  event.preventDefault();
-  if (newTab) {
-    const tab = window.open('about:blank')!;
-    tab.location = document.URL + '/' + characterName;
-  } else {
-    showLoadingScreen();
-    location.href = document.URL + '/' + characterName;
-  }
-}
-
-function openURL(event: Event, characterName: string) {
-  event.preventDefault();
-  var width = window.innerWidth;
-  var height = window.innerHeight;
-  window.open(
-    document.URL + '/' + characterName,
-    '_blank',
-    'location=yes,width=' + width + ', height=' + height + ',scrollbars=yes,status=yes',
-  );
-}
 
 function isEventTargetADeleteButtonClick(event: JQuery.ClickEvent) {
   let target = (event.target as HTMLElement);
@@ -169,29 +126,6 @@ function updateMobileSelectionCard() {
     }
     selectedCard = undefined;
   }
-}
-
-function addContextMenuEventHandlers() {
-  document.getElementById('character-card-open-stat-link-row')?.addEventListener('click', function (event) {
-    swapURL(event, selectedCharacterName, false);
-  });
-  document.getElementById('character-card-open-stat-link-new-tab-row')?.addEventListener('click', function (event) {
-    swapURL(event, selectedCharacterName, true);
-  });
-  document
-    .getElementById('character-card-open-stat-link-new-window-row')
-    ?.addEventListener('click', function (event) {
-      openURL(event, selectedCharacterName);
-    });
-  document.getElementById('character-card-open-latest-session-row')?.addEventListener('click', function (event) {
-    swapURL(event, selectedCharacterName + "/sessions/latest", false);
-  });
-  document.getElementById('character-card-open-latest-session-new-tab-row')?.addEventListener('click', function (event) {
-    swapURL(event, selectedCharacterName + "/sessions/latest", true);
-  });
-  document.getElementById('character-card-open-latest-session-new-window-row')?.addEventListener('click', function (event) {
-    openURL(event, selectedCharacterName + "/sessions/latest");
-  });
 }
 
 function isMobileScreen() {

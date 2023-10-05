@@ -1,7 +1,7 @@
 import { FlexBootstrapTable } from '../../flex-bootstrap-table/flex-bootstrap-table';
 
 export interface ITableData {
-  [key: string]: string | Object;
+  [key: string]: string | Object | number;
 }
 
 export class FlexBootstrapTableMap extends Map<string, FlexBootstrapTable> {

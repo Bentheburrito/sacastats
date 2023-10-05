@@ -235,4 +235,13 @@ defmodule SacaStats.Characters do
 
   def get_favorite_button_path(current_path, true), do: current_path <> "/unfavorite"
   def get_favorite_button_path(current_path, false), do: current_path <> "/favorite"
+
+  @spec get_hook_type_from_stat_name(any) :: <<_::80, _::_*56>>
+  def get_hook_type_from_stat_name(stat_name) do
+    cond do
+      stat_name == "Most Used" -> "SecondsToReadable"
+      stat_name == "Best Accuracy" -> "AddPercent"
+      true -> "AddCommasToNumber"
+    end
+  end
 end

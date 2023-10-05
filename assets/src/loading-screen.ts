@@ -1,4 +1,5 @@
-import * as generalEvents from './events/general-events.js';
+import { LoadingScreenRemovedEvent } from './events/general-events.js';
+import { SacaStatsEventUtil } from './events/sacastats-event-util.js';
 
 export let isLoadingScreenUp = true;
 export let isLoadingScreenLocked = false;
@@ -9,7 +10,8 @@ export function remove() {
     //fade the loading screen out
     loadingScreen.classList.remove('show-loading-screen');
     loadingScreen.classList.add('hide-loading-screen');
-    $(document).trigger(generalEvents.loadingScreenRemovedEvent);
+    SacaStatsEventUtil.dispatchDocumentCustomEvent(new LoadingScreenRemovedEvent());
+
     setTimeout(function () {
       isLoadingScreenUp = false;
     }, 200);
@@ -43,13 +45,13 @@ export function waitForOpenThenRunFunction(functionToRun: Function) {
 }
 
 function handleAnchorClickEvent(event: Event) {
-  let target = event.target as HTMLAnchorElement;
-  if (target.classList.contains('nav-link')) {
-    event.preventDefault();
-    let url = target.href;
-    show();
-    window.location.href = url;
-  }
+  // let target = event.target as HTMLAnchorElement;
+  // if (target.classList.contains('nav-link')) {
+  //   event.preventDefault();
+  //   let url = target.href;
+  //   show();
+  //   window.location.href = url;
+  // }
 }
 
 export function addLoadingScreenToAnchorLinkEvents() {

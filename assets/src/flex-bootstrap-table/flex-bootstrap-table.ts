@@ -4,9 +4,12 @@ import { FlexBootstrapTableMap } from '../models/flex-bootstrap-table/flex-boots
 import * as bootstrapSelection from './flex-bootstrap-table-selection.js';
 import * as bootstrapColumn from './flex-bootstrap-table-column.js';
 import * as flexBootstrapTableEvents from '../events/flex-bootstrap-table-events.js';
-import * as generalEvents from '../events/general-events.js';
+
+import { LoadingScreenRemovedEvent, PageFormattedEvent } from '../events/general-events.js';
+import { SacaStatsEventUtil } from '../events/sacastats-event-util.js';
 
 import 'bootstrap-table';
+import { AddDesktopHeaderOnlyEvent, FormatsUpdatedEvent, InitializedEvent } from '../events/flex-bootstrap-table-events.js';
 
 export let flexBootstrapTableMap = new FlexBootstrapTableMap();
 
@@ -41,7 +44,7 @@ export class FlexBootstrapTable {
     this.addOnDocumentMouseUp();
     this.addTableCustomEventListeners(this.table.id);
     this.updateTableFormats(this.table.id);
-    $(this.table).trigger(flexBootstrapTableEvents.initializedEvent);
+    SacaStatsEventUtil.dispatchCustomEvent(this.table, new InitializedEvent());
   };
 
   private handleScreenWidthChange = () => {
@@ -84,11 +87,11 @@ export class FlexBootstrapTable {
     $('#' + tableID).on('page-change.bs.table', this.handleTablePageChangeEvent);
     $('#' + tableID).off('post-body.bs.table', this.handleTablePostBodyEvent);
     $('#' + tableID).on('post-body.bs.table', this.handleTablePostBodyEvent);
-    document
-      .getElementById(tableID.substring(1))
-      ?.addEventListener(flexBootstrapTableEvents.ADD_DESKTOP_HEADER_ONLY_EVENT, (customEvent: Event) => {
+    SacaStatsEventUtil.addCustomEventListener(this.table, new AddDesktopHeaderOnlyEvent(),
+      (customEvent: Event) => {
         this.setDesktopHeaderOnly((<CustomEvent>customEvent).detail[0] as string[]);
-      });
+      }
+    );
   };
 
   private tableSearchEnterEventHandler = (event: Event) => {
@@ -231,7 +234,7 @@ export class FlexBootstrapTable {
     this.flexBootstrapTableFilter.showHideClearFilterButtons();
     this.setStickyHeaderWidths();
     this.setFlexTableVisibility();
-    $(this.table).trigger(flexBootstrapTableEvents.formatsUpdatedEvent);
+    SacaStatsEventUtil.dispatchCustomEvent(this.table, new FormatsUpdatedEvent());
     setTimeout(() => {
       this.makeSureTableRecievedStyles(tableID);
     }, 10);
@@ -256,10 +259,10 @@ export class FlexBootstrapTable {
   };
 
   private addCustomDocumentEventListeners = () => {
-    $(document).on(generalEvents.pageFormattedEvent, () => {
+    SacaStatsEventUtil.addDocumentCustomEventListener(new PageFormattedEvent(), () => {
       this.isPageFormatted = true;
     });
-    $(document).on(generalEvents.loadingScreenRemovedEvent, this.fixHeaderOnPageLoad);
+    SacaStatsEventUtil.addDocumentCustomEventListener(new LoadingScreenRemovedEvent(), this.fixHeaderOnPageLoad);
   };
 
   private scrollToTopOfTable = (event: Event) => {
@@ -389,10 +392,9 @@ export class FlexBootstrapTable {
   };
 }
 
-function initializeFlexTables() {
+export function initializeFlexTables() {
   document.querySelectorAll('.table-responsive-stack').forEach((element) => {
     let responseTable = element as HTMLTableElement;
     flexBootstrapTableMap.set(responseTable.id, new FlexBootstrapTable(responseTable));
   });
 }
-initializeFlexTables();

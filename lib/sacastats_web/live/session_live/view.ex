@@ -17,8 +17,9 @@ defmodule SacaStatsWeb.SessionLive.View do
     Phoenix.View.render(SacaStatsWeb.CharacterView, "template.html", assigns)
   end
 
-  def handle_params(_unsigned_params, uri, socket),
-    do: {:noreply, assign(socket, request_path: URI.parse(uri).path)}
+  def handle_params(_unsigned_params, uri, socket) do
+    {:noreply, assign(socket, request_path: URI.parse(uri).path)}
+  end
 
   def mount(
         %{"character_name" => name, "login_timestamp" => login_timestamp},
@@ -62,7 +63,7 @@ defmodule SacaStatsWeb.SessionLive.View do
      |> assign(:character_map, :loading)
      |> assign(:session, session)
      |> assign(:user, user_session["user"] || user_session[:user])
-     |> assign(is_favorite: Characters.favorite?(session.character_id, user_id))
+     |> assign(favorited?: Characters.favorite?(session.character_id, user_id))
      |> assign(changeset: Favorite.changeset(%Favorite{}))}
   end
 

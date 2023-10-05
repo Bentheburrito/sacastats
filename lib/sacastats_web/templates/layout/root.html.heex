@@ -27,13 +27,6 @@
     <link rel="stylesheet" href={Routes.static_path(@conn, "/css/flex-bootstrap-table-selection.css")}/>
   </head>
   <body>
-    <div id="loading-screen" class="d-flex justify-content-center">
-      <div class="" role="status">
-        <img class="rotate mx-auto d-block" src={Routes.static_path(@conn, "/images/logo_icon.ico")} alt="Sacagawea Icon" width="150">
-        <h1 id="loading-screen-text" class="text-center">Loading that for you now...</h1>
-        <span class="sr-only">Loading...</span>
-      </div>
-    </div>
     <button
       type="button"
       class="btn btn-primary btn-floating btn-lg btn-circle"
@@ -42,7 +35,7 @@
         <i class="fas fa-chevron-up"></i>
     </button>
     <header class="sticky-top">
-      <nav class="navbar navbar-expand-md navbar-light bg-light d-none d-md-flex">
+      <nav class="navbar navbar-expand-md navbar-dark d-none d-md-flex">
         <a class="navbar-brand" href="/">
           <img src={Routes.static_path(@conn, "/images/logo_icon.ico")} alt="Sacagawea Icon" width="150">
         </a>
@@ -89,7 +82,7 @@
 		  <%= @inner_content %>
     </div>
     <footer>
-      <nav class="navbar navbar-expand-md navbar-light main-nav d-md-none fixed-bottom bottom-nav">
+      <nav class="navbar navbar-expand-md navbar-dark main-nav d-md-none fixed-bottom bottom-nav">
 
         <div class="bottom-navbar collapse navbar-collapse" id="mobile-main-nav-menu">
           <ul class="navbar-nav">
@@ -118,5 +111,17 @@
       </nav>
     </footer>
     <script type="module" src={Routes.static_path(@conn, "/assets/dist/scripts.js")}></script>
+    <script type="text/javascript">
+      function timeSorter(a, b) {
+        var aa = getTimeInSeconds(a);
+        var bb = getTimeInSeconds(b);
+        return aa - bb;
+      }
+      function getTimeInSeconds(time) {
+        var div = document.createElement("div");
+        div.innerHTML = time.trim();
+        return +div.firstChild.innerHTML;
+      }
+    </script>
   </body>
 </html>

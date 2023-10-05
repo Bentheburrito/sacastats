@@ -322,6 +322,55 @@ defmodule SacaStats.Session do
     end
   end
 
+  @doc """
+  ❗**Expensive Operation**❗
+
+  Takes a session, sorts its events and combines them in one list, and gathers all the `%Character{}`s associated
+  with those events. Returns both the events and the characters mapped by their IDs. May return `:error` if the
+  character fetches fail.
+  """
+  @spec get_events_and_character_map(Session.t()) :: {:ok, list(), map()} | :error
+  def get_events_and_character_map(session) do
+    # Combine + sort events
+    events =
+      ([session.login] ++
+         [session.logout] ++
+         session.battle_rank_ups ++
+         session.player_facility_captures ++
+         session.player_facility_defends ++
+         session.vehicle_destroys ++
+         session.deaths ++
+         session.gain_experiences)
+      |> Enum.sort_by(fn event -> event.timestamp end, :desc)
+
+    # Collect all unique character IDs
+    all_character_ids =
+      Enum.reduce(events, MapSet.new(), fn
+        %{character_id: id, attacker_character_id: a_id}, mapset ->
+          mapset
+          |> MapSet.put(id)
+          |> MapSet.put(a_id)
+
+        %{character_id: id, other_id: o_id}, mapset ->
+          mapset
+          |> MapSet.put(id)
+          |> MapSet.put(o_id)
+
+        %{character_id: id}, mapset ->
+          MapSet.put(mapset, id)
+      end)
+
+    case Characters.get_many_by_id(all_character_ids, _shallow_copy = true) do
+      {:ok, character_map} ->
+        {:ok, events, character_map}
+
+      :error ->
+        Logger.error("Could not fetch many character IDs: #{inspect(all_character_ids)}")
+
+        :error
+    end
+  end
+
   defp gen_session_events_query(event_module, conditional) do
     from event in event_module, where: ^conditional
   end

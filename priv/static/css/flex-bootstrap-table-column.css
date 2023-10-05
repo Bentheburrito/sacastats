@@ -13,9 +13,18 @@
 }
 
 .selected-sortable-column {
-    z-index: 2;
-    outline: gold 4px solid !important;
+    position: relative;
+}
+
+.selected-sortable-column:after {
+    position: absolute;
+    outline: gold 5px solid !important;
     outline-offset: -4px;
+    width: 100%;
+    height: 100%;
+    content: '';
+    top: 0;
+    left: 0;
 }
 
 .sortable-column-title {

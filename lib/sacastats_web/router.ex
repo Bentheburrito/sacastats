@@ -30,19 +30,24 @@ defmodule SacaStatsWeb.Router do
   scope "/character", SacaStatsWeb do
     pipe_through :browser
 
-    live "/", CharacterLive.Search
-    get "/:character_name", CharacterController, :base
-    get "/:character_name/:stat_type", CharacterController, :character
-    get "/:character_name/sessions/latest", CharacterController, :latest_session
-    live "/:character_name/sessions/:login_timestamp", SessionLive.View
-    post "/:character_name/:stat_type", CharacterController, :character_post
-    post "/:character_name/:stat_type/favorite", CharacterController, :add_favorite
-    post "/:character_name/:stat_type/unfavorite", CharacterController, :remove_favorite
-    post "/:character_name/sessions/:login_timestamp/favorite", CharacterController, :add_favorite
+    # live_session :character do
+    #   live "/", CharacterLive.Search
+    #   live "/:character_name", CharacterLive.General
+    #   live "/:character_name/general", CharacterLive.General
+    #   live "/:character_name/sessions", CharacterLive.Sessions
+    # end
 
-    post "/:character_name/sessions/:login_timestamp/unfavorite",
-         CharacterController,
-         :remove_favorite
+    live "/", CharacterLive.Search
+    live "/:character_name", CharacterLive, :general
+    live "/:character_name/general", CharacterLive, :general
+    live "/:character_name/sessions", CharacterLive, :sessions
+    live "/:character_name/weapons", CharacterLive, :weapons
+    live "/:character_name/sessions/:login_timestamp", CharacterLive, :session
+
+    # get "/:character_name/:stat_type", CharacterController, :character
+    # get "/:character_name/sessions/latest", CharacterController, :latest_session
+    # live "/:character_name/sessions/:login_timestamp", SessionLive.View
+    # post "/:character_name/:stat_type", CharacterController, :character_post
   end
 
   scope "/outfit", SacaStatsWeb do

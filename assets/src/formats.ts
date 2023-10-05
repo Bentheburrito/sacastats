@@ -1,4 +1,6 @@
 import * as generalEvents from './events/general-events.js';
+import { PageFormattedEvent } from './events/general-events.js';
+import { SacaStatsEventUtil } from './events/sacastats-event-util.js';
 
 const PREFERED_LANGUAGE = navigator.languages ? navigator.languages[0] : navigator.language;
 const PREFERED_TIME_ZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -20,7 +22,7 @@ const DAY_SECOND = 86400;
 const HOUR_SECOND = 3600;
 const MINUTE_SECOND = 60;
 
-export function formatDateTime (dateTime: Element) {
+export function formatDateTime(dateTime: Element) {
   try {
     let dateTimeObject = new Date(dateTime.innerHTML);
 
@@ -42,7 +44,7 @@ export function formatDateTime (dateTime: Element) {
   }
 }
 
-export function addCommasToNumber (number: Element) {
+export function addCommasToNumber(number: Element) {
   number.innerHTML = number.innerHTML.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
@@ -55,7 +57,7 @@ export function addPercent(percent: Element) {
   }
 }
 
-export function secondsToHHMMSS (second: Element) {
+export function secondsToHHMMSS(second: Element) {
   let secondFindingArray = second.innerHTML.split('</span>');
   let secondCount = +secondFindingArray[secondFindingArray.length - 1];
 
@@ -107,7 +109,7 @@ export function addFormatsToPage() {
   formatAllDateTimes();
   allSecondsToHHMMSS();
   addAllPercents();
-  $(document).trigger(generalEvents.pageFormattedEvent);
+  SacaStatsEventUtil.dispatchDocumentCustomEvent(new PageFormattedEvent());
 
   function addCommasToAllNumbers() {
     //get every element with the number class and add proper commas
@@ -133,11 +135,16 @@ export function addFormatsToPage() {
   }
 }
 
-export function addAnimationToProgressBars() {
+export function addAnimationToProgressBars(optionalSelectedProgressBar: Element) {
   let progressBars = document.querySelectorAll('.progress-bar');
   progressBars.forEach(function (progressBar, index) {
     var finishedWidth = progressBar.getAttribute('aria-valuenow');
     if (progressBar.id.indexOf('weapon') <= -1) {
+      if (optionalSelectedProgressBar != undefined) {
+        if (!progressBar.isEqualNode(optionalSelectedProgressBar)) {
+          return;
+        }
+      }
       setTimeout(animateProgressBar, index * 500);
     } else {
       animateProgressBar();

@@ -31,6 +31,19 @@
     padding-left: 15px;
 }
 
+#faction-img-holder {
+    background: radial-gradient(rgba(255, 255, 255, 0.9), rgba(0, 0, 0, 0) 70%);
+    padding: 10px;
+    width: 80px;
+    height: 80px;
+}
+
+#faction-img-holder>img {
+    position: relative;
+    top: -5%;
+    left: -10%;
+}
+
 .character-favorite-btn {
     font-size: large;
     padding: 3px;
@@ -46,6 +59,15 @@
 
 .not-logged-in-dropdown {
     font-size: 1.6rem;
+}
+
+@media only screen and (max-width: 768px) {
+
+    /*for boostrap > xs*/
+    #faction-img-holder {
+        position: relative;
+        left: 31%;
+    }
 }
 
 @media only screen and (max-width: 767px) {

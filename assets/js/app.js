@@ -26,7 +26,19 @@ import "phoenix_html"
 import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
-import { addCommasToNumber, formatDateTime, addPercent, secondsToHHMMSS } from "../src/formats.ts";
+
+import BootstrapTable from "bootstrap-table/src/bootstrap-table";
+import "../vendor/jquery-ui"
+import "../vendor/dragtable"
+import "bootstrap-table/src/extensions/reorder-columns/bootstrap-table-reorder-columns"
+import "bootstrap-table/src/extensions/sticky-header/bootstrap-table-sticky-header"
+
+import { addCommasToNumber, formatDateTime, addPercent, secondsToHHMMSS, addAnimationToProgressBars } from "../src/formats.ts";
+import { init as initInfantryModel } from "../src/character/planetside-model.ts";
+import { init as initWeaponsTable } from "../src/character/weapons-table.ts";
+import { init as initWeapons } from "../src/character/weapons.ts";
+
+import { initializeFlexTables } from "../src/flex-bootstrap-table/flex-bootstrap-table"
 
 // Init Hooks
 let Hooks = {};
@@ -65,6 +77,50 @@ Hooks.SecondsToReadable = {
   },
   updated() {
     secondsToHHMMSS(this.el);
+  }
+};
+
+Hooks.AddAnimationToProgressBars = {
+  mounted() {
+    addAnimationToProgressBars(this.el);
+  },
+  updated() {
+    addAnimationToProgressBars(this.el);
+  }
+};
+
+Hooks.InitInfantryModel = {
+  mounted() {
+    initInfantryModel(this.el);
+  },
+  updated() {
+    initInfantryModel(this.el);
+  }
+};
+
+Hooks.InitWeaponsTable = {
+  mounted() {
+    let _ = new BootstrapTable(this.el, {});
+    initWeaponsTable();
+    initWeapons();
+    initializeFlexTables();
+  },
+  updated() {
+    let _ = new BootstrapTable(this.el, {});
+    initWeaponsTable();
+    initWeapons();
+    initializeFlexTables();
+  }
+};
+
+Hooks.InitEventLogTable = {
+  mounted() {
+    let _ = new BootstrapTable(this.el, {});
+    initializeFlexTables();
+  },
+  updated() {
+    let _ = new BootstrapTable(this.el, {});
+    initializeFlexTables();
   }
 };
 

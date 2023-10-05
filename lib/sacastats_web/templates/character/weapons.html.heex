@@ -1,4 +1,10 @@
-<link rel="stylesheet" href={Routes.static_path(@conn, "/css/character/weapons.css")}/>
+<link rel="stylesheet" href={Routes.static_path(@socket, "/css/character/weapons.css")}/>
+
+<link href="https://unpkg.com/bootstrap-table@1.21.0/dist/extensions/sticky-header/bootstrap-table-sticky-header.css" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/@fortawesome/fontawesome-free@5.12.1/css/all.min.css">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/3.2.1/css/font-awesome.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/gh/akottr/dragtable@master/dragtable.css" rel="stylesheet">
+<link href="https://unpkg.com/bootstrap-table@1.21.0/dist/bootstrap-table.min.css" rel="stylesheet">
 
 <div class="selection-mobile-menu-top selection-mobile-menu">
     <div class="d-flex h-100 justify-content-between">
@@ -75,7 +81,7 @@
 <div id="weaponTable-toolbar">
 </div>
 <button id="nextAurax" class="btn btn-secondary p-0 m-0 ml-1 mt-3 float-right"  data-toggle="tooltip" data-placement="top" title="Scroll to closest weapon to auraxium">
-    <img src={Routes.static_path(@conn, "/images/character/alphaAurax.png")} class="m-auto" width="30px" alt="To Next Auraxium Weapon"/>
+    <img src={Routes.static_path(@socket, "/images/character/alphaAurax.png")} class="m-auto" width="30px" alt="To Next Auraxium Weapon"/>
 </button>
 <button id="weaponTable-clear-all-filter-button" class="btn btn-secondary ml-1 py-0 px-3 m-0 mt-3 float-right" title="Clear All Filters">
     <i class="fas fa-trash"></i>
@@ -351,7 +357,8 @@
     data-pagination="true"
     data-pagination-V-Align="both"
     data-page-size="5"
-    data-page-list="[5, 10, 25, 50, 100]">
+    data-page-list="[5, 10, 25, 50, 100]"
+    phx-hook="InitWeaponsTable">
     <thead class="">
         <tr>
             <th data-field="weapon" data-switchable="false" data-toggle="tooltip" title="Weapons" class="weapon">Weapon</th>
@@ -418,8 +425,8 @@
                         <img src={"https://census.daybreakgames.com" <> Map.get(weapon, "image_path", "/files/ps2/images/static/-1.png")}
                             onerror={"this.onerror=null; this.src='" <>
                                 (if weapon["vehicle_weapon?"],
-                                    do: Routes.static_path(@conn, "/images/character/unknownVehicleWeapon.png"),
-                                    else: Routes.static_path(@conn, "/images/character/unknownInfantryWeapon.png"))
+                                    do: Routes.static_path(@socket, "/images/character/unknownVehicleWeapon.png"),
+                                    else: Routes.static_path(@socket, "/images/character/unknownInfantryWeapon.png"))
                                 <> "'"}
                             alt={Map.get(weapon, "name", "N/A")} class="weapon-image mx-auto d-block"/>
                     </div>
@@ -555,28 +562,3 @@
         <% end %>
     </tbody>
 </table>
-
-<%=SacaStats.Utils.import_flex_bootstrap_table(assigns)%>
-
-<script>
-    //initialize bootstrap table
-    $('#weaponTable').bootstrapTable();
-
-    //initialize weapon sorters
-    function timeSorter(a, b) {
-        var aa = getTimeInSeconds(a);
-        var bb = getTimeInSeconds(b);
-        return aa - bb;
-    }
-
-    function getTimeInSeconds(time) {
-        var div = document.createElement('div');
-        div.innerHTML = time.trim();
-
-        return +div.firstChild.innerHTML;
-    }
-</script>
-
-<script type="module" src={Routes.static_path(@conn, "/assets/dist/character/weapons-table.js")}></script>
-
-<script type="module" src={Routes.static_path(@conn, "/assets/dist/character/weapons.js")}></script>
