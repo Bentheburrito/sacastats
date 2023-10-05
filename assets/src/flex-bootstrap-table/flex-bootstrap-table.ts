@@ -37,13 +37,13 @@ export class FlexBootstrapTable {
 
   private initializeFlexTable = () => {
     this.initializeStickyHeaderWidths();
-    this.setMobileHeaderTexts(this.table.id);
+    this.setMobileHeaderTexts();
     this.addOnTHeadClick();
     this.addToolBarClick();
     this.addSearchEnter();
     this.addOnDocumentMouseUp();
-    this.addTableCustomEventListeners(this.table.id);
-    this.updateTableFormats(this.table.id);
+    this.addTableCustomEventListeners();
+    this.updateTableFormats();
     SacaStatsEventUtil.dispatchCustomEvent(this.table, new InitializedEvent());
   };
 
@@ -66,7 +66,7 @@ export class FlexBootstrapTable {
 
     //will need to update formats as reorders take longer
     setTimeout(() => {
-      this.updateTableFormats(this.table.id);
+      this.updateTableFormats();
     }, 10);
   };
   private handleTablePageChangeEvent = () => {
@@ -78,20 +78,17 @@ export class FlexBootstrapTable {
     );
   };
   private handleTablePostBodyEvent = () => {
-    this.updateTableFormats(this.table.id);
+    this.updateTableFormats();
   };
-  private addTableCustomEventListeners = (tableID: string) => {
-    $('#' + tableID).off('reorder-column.bs.table', this.handleTableColumnReorderEvent);
-    $('#' + tableID).on('reorder-column.bs.table', this.handleTableColumnReorderEvent);
-    $('#' + tableID).off('page-change.bs.table', this.handleTablePageChangeEvent);
-    $('#' + tableID).on('page-change.bs.table', this.handleTablePageChangeEvent);
-    $('#' + tableID).off('post-body.bs.table', this.handleTablePostBodyEvent);
-    $('#' + tableID).on('post-body.bs.table', this.handleTablePostBodyEvent);
-    SacaStatsEventUtil.addCustomEventListener(this.table, new AddDesktopHeaderOnlyEvent(),
-      (customEvent: Event) => {
-        this.setDesktopHeaderOnly((<CustomEvent>customEvent).detail[0] as string[]);
-      }
-    );
+  private addTableCustomEventListeners = () => {
+    $('#' + this.table.id).off('reorder-column.bs.table', this.handleTableColumnReorderEvent);
+    $('#' + this.table.id).on('reorder-column.bs.table', this.handleTableColumnReorderEvent);
+    $('#' + this.table.id).off('page-change.bs.table', this.handleTablePageChangeEvent);
+    $('#' + this.table.id).on('page-change.bs.table', this.handleTablePageChangeEvent);
+    $('#' + this.table.id).off('post-body.bs.table', this.handleTablePostBodyEvent);
+    $('#' + this.table.id).on('post-body.bs.table', this.handleTablePostBodyEvent);
+    SacaStatsEventUtil.removeCustomEventListener(this.table, new AddDesktopHeaderOnlyEvent(), this.setDesktopHeaderOnly);
+    SacaStatsEventUtil.addCustomEventListener(this.table, new AddDesktopHeaderOnlyEvent(), this.setDesktopHeaderOnly);
   };
 
   private tableSearchEnterEventHandler = (event: Event) => {
@@ -228,24 +225,24 @@ export class FlexBootstrapTable {
     document.querySelector('.sticky-header')?.addEventListener('mousedown', this.tableHeaderMouseDownEventHandler);
   };
 
-  private updateTableFormats = (tableID: string) => {
+  private updateTableFormats = () => {
     this.isPageFormatted = false;
     addAnimationToProgressBars(undefined);
     addFormatsToPage();
-    this.setMobileHeaderTexts(tableID);
+    this.setMobileHeaderTexts();
     this.flexBootstrapTableFilter.showHideClearFilterButtons();
     this.setStickyHeaderWidths();
     this.setFlexTableVisibility();
     SacaStatsEventUtil.dispatchCustomEvent(this.table, new FormatsUpdatedEvent());
     setTimeout(() => {
-      this.makeSureTableRecievedStyles(tableID);
+      this.makeSureTableRecievedStyles();
     }, 10);
   };
 
-  private makeSureTableRecievedStyles = (tableID: string) => {
+  private makeSureTableRecievedStyles = () => {
     setTimeout(() => {
       if (!this.didTableRecieveStyleUpdate()) {
-        this.updateTableFormats(tableID);
+        this.updateTableFormats();
       }
     }, 10);
   };
@@ -279,15 +276,15 @@ export class FlexBootstrapTable {
     }
   };
 
-  private setMobileHeaderTexts = (tableID: string) => {
+  private setMobileHeaderTexts = () => {
     //append each header text to the front of the corresponding data element and hide it
-    $('#' + tableID)
+    $('#' + this.table.id)
       .find('.table-responsive-stack-thead')
       .each((i, element) => element.remove());
-    $('#' + tableID)
+    $('#' + this.table.id)
       .find('th')
       .each((i, header) => {
-        let tds = '#' + tableID + ' td:nth-child(' + (i + 1) + ')';
+        let tds = '#' + this.table.id + ' td:nth-child(' + (i + 1) + ')';
         let tdsExist = document.querySelector(tds) != undefined ? true : false;
         if (tdsExist) {
           $(tds).prepend(
@@ -327,9 +324,10 @@ export class FlexBootstrapTable {
     );
   };
 
-  private setDesktopHeaderOnly(desktopHeaderOnly: string[]) {
+  private setDesktopHeaderOnly = (customEvent: Event) => {
+    let desktopHeaderOnly = (customEvent as CustomEvent).detail[0] as string[];
     this.desktopHeaderOnly = desktopHeaderOnly;
-    this.setMobileHeaderTexts(this.table.id);
+    this.setMobileHeaderTexts();
   }
 
   private didTableRecieveStyleUpdate = () => {

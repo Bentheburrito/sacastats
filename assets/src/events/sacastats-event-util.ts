@@ -92,8 +92,10 @@ export class SacaStatsEventUtil {
             if (!SacaStatsEventUtil.hasCustomEventListener(element, customEvent)) {
                 element.removeEventListener(customEvent.get(), callback as EventListenerOrEventListenerObject, false);
                 SacaStatsEventUtil.removeFromElementEventMap(element, customEvent);
-                return;
             }
+
+            //no need to throw an error if event is already gone
+            return;
         }
 
         SacaStatsEventUtil.logAddRemoveErrorWithElement(element, customEvent, false);
