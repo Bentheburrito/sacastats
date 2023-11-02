@@ -16,30 +16,30 @@ function swapToLightPlusOnMobile() {
   let img = document.getElementById('create-new-plus-img') as HTMLImageElement;
   let isDesktop = window.innerWidth >= 768;
   if (isDesktop && img.src != '/images/outfit/plus-sign.png') {
-    img.src = '/images/outfit/plus-sign.png';
+    //img.src = '/images/outfit/plus-sign.png'; //commented out for dark mode
   } else if (img.src != '/images/outfit/plus-sign-light.png') {
     img.src = '/images/outfit/plus-sign-light.png';
   }
 }
 
 function handleHover() {
-  let img = document.getElementById('create-new-plus-img') as HTMLImageElement;
-  let isDesktop = window.innerWidth >= 768;
-  $('#create-new-poll-div').hover(
-    function () {
-      img.src = '/images/outfit/plus-sign-light.png';
-    },
-    function () {
-      if (isDesktop) {
-        img.src = '/images/outfit/plus-sign.png';
-      }
-    },
-  );
+  //commented out for dark mode
+  // let img = document.getElementById('create-new-plus-img') as HTMLImageElement;
+  // let isDesktop = window.innerWidth >= 768;
+  // $('#create-new-poll-div').hover(
+  //   function () {
+  //     img.src = '/images/outfit/plus-sign-light.png';
+  //   },
+  //   function () {
+  //     if (isDesktop) {
+  //       img.src = '/images/outfit/plus-sign.png';
+  //     }
+  //   },
+  // );
 }
 
 function createNewPoll() {
   $('#create-new-poll-div').on('click', () => {
-    showLoadingScreen();
     location.href = document.URL + '/create';
   });
 }

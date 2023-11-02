@@ -1,5 +1,3 @@
-import { show as showLoadingScreen } from './../loading-screen.js';
-
 let contextMenuID = '#character-card-context-menu';
 let selectedCharacterName: string;
 let selectedCard: HTMLElement | undefined;
@@ -40,7 +38,6 @@ function swapURL(event: Event, characterName: string, newTab: boolean) {
     const tab = window.open('about:blank')!;
     tab.location = document.URL + '/' + characterName;
   } else {
-    showLoadingScreen();
     location.href = document.URL + '/' + characterName;
   }
 }

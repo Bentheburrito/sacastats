@@ -43,13 +43,13 @@ export function waitForOpenThenRunFunction(functionToRun: Function) {
 }
 
 function handleAnchorClickEvent(event: Event) {
-  let target = event.target as HTMLAnchorElement;
-  if (target.classList.contains('nav-link')) {
-    event.preventDefault();
-    let url = target.href;
-    show();
-    window.location.href = url;
-  }
+  // let target = event.target as HTMLAnchorElement;
+  // if (target.classList.contains('nav-link')) {
+  //   event.preventDefault();
+  //   let url = target.href;
+  //   show();
+  //   window.location.href = url;
+  // }
 }
 
 export function addLoadingScreenToAnchorLinkEvents() {

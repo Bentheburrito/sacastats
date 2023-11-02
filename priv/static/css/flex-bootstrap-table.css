@@ -10,6 +10,11 @@
     background-color: rgba(194, 194, 194, 0.9);
 }
 
+.table,
+.table-striped>tbody>tr:nth-of-type(odd):not(:hover) {
+    color: whitesmoke;
+}
+
 @media screen and (max-width: 767px) {
 
     /*for boostrap xs*/
@@ -50,7 +55,7 @@
 
 .dropdown-item:hover,
 input:not(input[type=text]):not(input[type=search]):hover {
-    cursor: pointer;
+    cursor: url('/images/arrow-select.cur'), auto;
 }
 
 .dropdown-item {
@@ -72,16 +77,26 @@ input:not(input[type=text]):not(input[type=search]):hover {
     }
 
     .table th:first-child {
-        background-color: #ffffff;
+        background-color: rgb(23, 23, 23);
     }
 
     .table tr:nth-child(odd) td:first-child {
-        background-color: #eeeeee;
+        background-color: rgb(43, 43, 43);
     }
 
     .table tr:nth-child(even) td:first-child {
-        background-color: #ffffff;
+        background-color: rgb(23, 23, 23);
     }
+}
+
+.table-striped>tbody>tr:nth-of-type(odd) {
+    background-color: rgb(43, 43, 43);
+}
+
+.fix-sticky table thead {
+    cursor: url('/images/arrow-select.cur'), auto;
+    background-color: rgb(23, 23, 23) !important;
+    color: whitesmoke;
 }
 
 .search-input {

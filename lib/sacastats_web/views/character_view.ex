@@ -25,7 +25,7 @@ defmodule SacaStatsWeb.CharacterView do
     session_duration = prettify_duration(session.login.timestamp, session.logout.timestamp)
 
     ~H"""
-    <div class="poll-item text-dark">
+    <div class="poll-item">
       <%= login_time %> → <%= logout_time %>
       <br>
       <%= session_duration %>
