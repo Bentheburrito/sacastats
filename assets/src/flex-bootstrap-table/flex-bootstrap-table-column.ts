@@ -1,4 +1,6 @@
 import * as FlexBootstrapTableEvents from '../events/flex-bootstrap-table-events.js';
+import { ColumnsChangedEvent, ColumnSortChangedEvent } from '../events/flex-bootstrap-table-events.js';
+import { SacaStatsEventUtil } from '../events/sacastats-event-util.js';
 
 import {
   IPersistentColumn,
@@ -526,8 +528,8 @@ function addEventHandlers() {
   document.getElementById(table.id + '-column-sort-dropdown-menu')?.addEventListener('click', handleColumnOrderSorted);
 
   //add event listeners for custom column change events
-  $(table).on(FlexBootstrapTableEvents.COLUMNS_CHANGED_EVENT, handleColumnChangedEvent);
-  $(table).on(FlexBootstrapTableEvents.COLUMN_SORT_CHANGED_EVENT, handleSortChangedEvent);
+  SacaStatsEventUtil.addCustomEventListener(table, new ColumnsChangedEvent(), handleColumnChangedEvent);
+  SacaStatsEventUtil.addCustomEventListener(table, new ColumnSortChangedEvent(), handleSortChangedEvent);
 }
 
 function setMoveArrowsOffsets(topOffset: number) {
@@ -609,24 +611,24 @@ function handleSortableColumnClick(event: Event) {
 function checkIfAColumnDifferent() {
   //if there is a different column visible or they are in a new order
   let columns = findSortedVisibleFields();
-  if (JSON.stringify(columns) !== JSON.stringify(previousColumns)) {
+  if (JSON.stringify(columns) !== JSON.stringify(previousColumns) && columns.length != 0) {
     //update previous columns
     previousColumns = columns;
 
     //trigger custom event
-    $(table).trigger(FlexBootstrapTableEvents.COLUMNS_CHANGED_EVENT, JSON.stringify(columns));
+    SacaStatsEventUtil.dispatchCustomEvent(table, new ColumnsChangedEvent(JSON.stringify(columns)));
   }
 }
 
 function checkIfASortDifferent() {
   //if there is a different column sorted or the sort is different
   let sorted = getSortedField();
-  if (JSON.stringify(sorted) !== JSON.stringify(previousSorted)) {
+  if (JSON.stringify(sorted) !== JSON.stringify(previousSorted) && sorted.fieldText != "") {
     //update previous sorted
     previousSorted = sorted;
 
     //trigger custom event
-    $(table).trigger(FlexBootstrapTableEvents.COLUMN_SORT_CHANGED_EVENT, sorted);
+    SacaStatsEventUtil.dispatchCustomEvent(table, new ColumnSortChangedEvent(sorted));
   }
 }
 

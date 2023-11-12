@@ -211,16 +211,16 @@ export class InfantryModel extends PlanetsideModel {
       loader.load(
         this.getWeaponFile(),
         (gltf: GLTF) => onLoad(gltf, modelPosition, true),
-        () => {},
-        () => {},
+        () => { },
+        () => { },
       );
     }
 
     loader.load(
       this.getBaseFile(),
       (gltf: GLTF) => onLoad(gltf, modelPosition, false),
-      () => {},
-      () => {},
+      () => { },
+      () => { },
     );
 
     //****  IMPORTANT: NSO MAXES DO NOT HAVE ARMOR MODELS, SO DON'T TRY TO RENDER THEM  ****/
@@ -228,16 +228,16 @@ export class InfantryModel extends PlanetsideModel {
       loader.load(
         this.getArmorFile(),
         (gltf: GLTF) => onLoad(gltf, modelPosition, true),
-        () => {},
-        () => {},
+        () => { },
+        () => { },
       );
     }
 
     loader.load(
       this.getHeadFile(),
       (gltf: GLTF) => onLoad(gltf, modelPosition, false),
-      () => {},
-      () => {},
+      () => { },
+      () => { },
     );
 
     //when all the pieces are loaded, update and render the canvas
@@ -245,6 +245,7 @@ export class InfantryModel extends PlanetsideModel {
       this.createRenderer();
       this.update();
       this.render();
+      this.initializeCameraAndRenderSettings();
     };
 
     //scene.add(new CameraHelper(camera)); //shows light patterns

@@ -6,6 +6,8 @@ import {
   FilterMap,
   TableFilter,
 } from '../models/flex-bootstrap-table/flex-bootstrap-table-filter.js';
+import { SacaStatsEventUtil } from '../events/sacastats-event-util.js';
+import { AddCustomFilterFunctionsEvent, AddCustomSearchFunctionEvent, FilteredEvent } from '../events/flex-bootstrap-table-events.js';
 
 export class FlexBootstrapTableFilter {
   private originalTableData: ITableData[];
@@ -166,16 +168,16 @@ export class FlexBootstrapTableFilter {
   };
 
   private addCustomListeners = () => {
-    document
-      .getElementById(this.tableID.substring(1))
-      ?.addEventListener(flexBootstrapTableEvents.ADD_CUSTOM_FILTER_FUNCTIONS_EVENT, (customEvent: Event) => {
+    SacaStatsEventUtil.addCustomEventListener(document.getElementById(this.tableID.substring(1))!, new AddCustomFilterFunctionsEvent(),
+      (customEvent: Event) => {
         this.setCustomFilterFunctions((<CustomEvent>customEvent).detail[0] as CustomFilterFunction[]);
-      });
-    document
-      .getElementById(this.tableID.substring(1))
-      ?.addEventListener(flexBootstrapTableEvents.ADD_CUSTOM_SEARCH_FUNCTION_EVENT, (customEvent: Event) => {
+      }
+    );
+    SacaStatsEventUtil.addCustomEventListener(document.getElementById(this.tableID.substring(1))!, new AddCustomSearchFunctionEvent(),
+      (customEvent: Event) => {
         this.addCustomSearch((<CustomEvent>customEvent).detail[0] as Function);
-      });
+      }
+    );
   };
 
   private addFilterListeners = () => {
@@ -557,7 +559,7 @@ export class FlexBootstrapTableFilter {
     if (this.previousTableData !== newTableData) {
       $(this.getTableID()).bootstrapTable('load', newTableData);
       this.previousTableData = newTableData;
-      $(this.getTableID()).trigger(flexBootstrapTableEvents.filteredEvent);
+      SacaStatsEventUtil.dispatchCustomEvent(document.getElementById(this.tableID.substring(1))!, new FilteredEvent());
     }
   };
 
